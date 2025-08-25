@@ -1,6 +1,6 @@
 # Aliyah-Ibidun-portfolio-
 My student portfolio 
-👩🏽‍💻 Ibidun Aliyah Ibiwunmi
+👩🏽‍💻 Aliyah Ibidun Ibiwunmi 
 
 📍 Lagos State, Nigeria
 📧 aliyahibidun@gmail.com | 📱 +234 816 159 2613
