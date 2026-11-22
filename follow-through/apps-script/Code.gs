@@ -44,7 +44,7 @@ const TIPS_NAME = 'Tips & Resources';
 const TIP_HEADERS = ['ID', 'Saved', 'Topic', 'Title', 'Key points', 'Link', 'Saved from', 'Screenshot', 'In digest'];
 const FOLDER_NAME = 'Follow-Through captures';
 const DOCS_FOLDER = 'Follow-Through';
-const SCHEMA = '4';
+const SCHEMA = '5';
 
 /* ---------- one-time setup ---------- */
 function setup() {
@@ -281,8 +281,15 @@ function doc_(p) {
   if (created || mode === 'replace' || mode === 'append') {
     if (p.title && doc.getName() !== p.title) doc.setName(p.title);
     const body = doc.getBody();
-    if (mode === 'replace' || created) body.clear();
+    if (mode === 'replace' || created) {
+      body.appendParagraph('');           // Docs can't clear a body whose last element is a list item or table
+      body.clear();
+    }
     renderMarkdown_(body, String(p.body || ''));
+    if (mode === 'replace' || created) {
+      const first = body.getChild(0);       // clear() leaves one empty paragraph at the top
+      if (body.getNumChildren() > 1 && first.getType() === DocumentApp.ElementType.PARAGRAPH && !first.asParagraph().getText()) first.removeFromParent();
+    }
     doc.saveAndClose();
   }
   return { ok: true, key: p.key, url: doc.getUrl(), created: created };
@@ -439,33 +446,54 @@ function models_() {
 function gemini_(parts, opts) {
   opts = opts || {};
   const m = models_();
-  let lastErr = 'no_model';
+  const props = PropertiesService.getScriptProperties();
+  // Google Search grounding isn't on the free tier for newer models; once refused, skip it for a day.
+  const tried = [];
   for (const model of m.models) {
-    for (const search of (opts.search ? [true, false] : [false])) {
-      const body = { contents: [{ role: 'user', parts: parts }], generationConfig: { temperature: opts.temperature || 0.4, maxOutputTokens: opts.maxTokens || 8192 } };
-      if (search) body.tools = [{ google_search: {} }];
-      else if (opts.json) body.generationConfig.responseMimeType = 'application/json';
-      const res = UrlFetchApp.fetch(GEMINI + 'models/' + model + ':generateContent?key=' + encodeURIComponent(m.key), {
-        method: 'post', contentType: 'application/json', payload: JSON.stringify(body), muteHttpExceptions: true,
-      });
-      const code = res.getResponseCode();
-      if (code === 200) {
-        const j = JSON.parse(res.getContentText());
-        const text = ((j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [])
-          .map(x => x.text || '').join('').trim();
-        if (text) {
-          PropertiesService.getScriptProperties().setProperty('GEMINI_MODEL', model);
-          return { text: text, model: model, searched: search };
+    const searchOff = Date.now() < Number(props.getProperty('NO_SEARCH_UNTIL') || 0);
+    const modes = opts.search && !searchOff ? [true, false] : [false];
+    let skipModel = false;
+    for (const search of modes) {
+      if (skipModel) break;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const body = { contents: [{ role: 'user', parts: parts }], generationConfig: { temperature: opts.temperature || 0.4, maxOutputTokens: opts.maxTokens || 8192 } };
+        if (search) body.tools = [{ google_search: {} }];
+        else if (opts.json) body.generationConfig.responseMimeType = 'application/json';
+        const res = UrlFetchApp.fetch(GEMINI + 'models/' + model + ':generateContent?key=' + encodeURIComponent(m.key), {
+          method: 'post', contentType: 'application/json', payload: JSON.stringify(body), muteHttpExceptions: true,
+        });
+        const code = res.getResponseCode();
+        const txt = res.getContentText();
+        if (code === 200) {
+          const j = JSON.parse(txt);
+          const text = ((j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [])
+            .map(x => x.text || '').join('').trim();
+          if (text) { props.setProperty('GEMINI_MODEL', model); return { text: text, model: model, searched: search }; }
+          tried.push(model + (search ? '+search' : '') + ': empty answer');
+          break;
         }
-        lastErr = 'empty_answer';
-        continue;
+        const msg = ((JSON.parse(txt || '{}').error || {}).message || txt).slice(0, 160);
+        tried.push(model + (search ? '+search' : '') + ': ' + code + ' ' + msg);
+        if (search) {
+          // Search refused (quota, tier or unsupported): remember, and retry this model without it.
+          if (code === 429 || code === 400 || code === 403) props.setProperty('NO_SEARCH_UNTIL', String(Date.now() + 864e5));
+          break;
+        }
+        if (code === 429) {
+          // Per-minute limit: wait once and retry; a daily or zero quota moves on to the next model.
+          const perMinute = /per.?minute|PerMinute|retry in|retryDelay/i.test(txt) && !/PerDay|per.?day|limit: 0/i.test(txt);
+          if (perMinute && attempt === 0) { Utilities.sleep(15000); continue; }
+          skipModel = true; break;
+        }
+        if (code === 404 || code === 400 || code === 403 || code >= 500) { skipModel = true; break; }
+        skipModel = true; break;
       }
-      lastErr = code + ' ' + res.getContentText().slice(0, 200);
-      if (code === 429 || code === 404 || code === 503 || code === 500) break;   // next model
-      // 400/403 with search on: retry the same model without search
     }
   }
-  throw new Error('gemini_failed: ' + lastErr);
+  const quota = tried.every(t => / 429 /.test(t));
+  throw new Error(quota
+    ? 'Gemini free quota is used up for now (every model said "quota exceeded"). It resets daily; try again later. ' + tried.slice(-2).join(' | ')
+    : 'Gemini failed: ' + tried.slice(-3).join(' | '));
 }
 
 function parseJson_(text) {
@@ -509,7 +537,7 @@ function process_(p) {
   const all = rows_(sheet_(), {}).rows.filter(r => r['Status'] === 'New' && (!p.id || r['ID'] === p.id));
   const cache = CacheService.getScriptCache();
   const done = [];
-  for (const r of all.slice(0, p.id ? 1 : 4)) {
+  for (const r of all.slice(0, p.id ? 1 : 3)) {
     if (cache.get('proc:' + r['ID'])) continue;
     cache.put('proc:' + r['ID'], '1', 300);
     try { done.push(sortOne_(r)); }
