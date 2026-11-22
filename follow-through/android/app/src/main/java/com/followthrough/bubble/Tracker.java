@@ -126,8 +126,18 @@ final class Tracker {
         });
     }
 
+    /** Same as call(), but blocking: for background jobs only. */
+    static String callBlocking(Context c, String json, int timeoutMs) {
+        String[] conn = connection(c);
+        if (conn == null) return "{\"ok\":false,\"error\":\"not_connected\"}";
+        try { return http(conn[0], json, timeoutMs); }
+        catch (Exception e) { return "{\"ok\":false,\"error\":\"network\"}"; }
+    }
+
     /** After a capture: sort new rows straight away (needs the Gemini key in the sheet). */
     static void sortNow(Context c, Done cb) {
+        final Context ctx = c.getApplicationContext();
+        Nag.markActive(ctx);
         call(c, "{\"action\":\"process\"}", res -> {
             try {
                 JSONObject j = new JSONObject(res);
@@ -142,6 +152,7 @@ final class Tracker {
                     if (!x.optString("deadline").isEmpty()) sb.append(" (due ").append(x.optString("deadline")).append(")");
                 }
                 if (cb != null) cb.done(sb.length() > 0, sb.length() > 0 ? "Sorted ✓ " + sb : "");
+                Nag.refreshAsync(ctx);
             } catch (Exception e) { if (cb != null) cb.done(false, ""); }
         });
     }

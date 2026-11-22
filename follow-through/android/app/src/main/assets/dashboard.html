@@ -93,6 +93,15 @@ svg text{fill:var(--muted);font-size:10px;font-family:var(--f-b)}
 .spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:s .8s linear infinite;vertical-align:-2px}
 @keyframes s{to{transform:rotate(360deg)}}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:.88rem;z-index:40;max-width:calc(100% - 32px)}
+.views{display:flex;gap:6px;margin-top:14px;background:var(--sunk);padding:4px;border-radius:14px}
+.views button{flex:1;border:0;background:transparent;border-radius:11px;padding:8px;font-weight:600;font-size:.88rem;color:var(--muted)}
+.views button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.month{font-family:var(--f-d);font-size:.95rem;margin:14px 0 6px;color:var(--muted)}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:110px 1fr 28px;gap:8px;align-items:center;font-size:.82rem}
+.bar .track{height:12px;background:var(--sunk);border-radius:6px;overflow:hidden}
+.bar .fill{height:100%;border-radius:6px}
+.bar b{text-align:right;font-variant-numeric:tabular-nums}
 .fab{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:10}
 </style>
 </head>
@@ -104,6 +113,8 @@ svg text{fill:var(--muted);font-size:10px;font-family:var(--f-b)}
     <button class="icon" id="settings" aria-label="Settings">⚙</button>
   </div>
   <div class="sub" id="today"></div>
+  <div class="views" role="tablist"><button data-view="home" aria-pressed="true">Today</button><button data-view="history" aria-pressed="false">Applied history</button></div>
+  <div id="v-home">
   <div class="hello" id="hello">Loading your tracker…</div>
   <div id="banners"></div>
   <div class="tiles" id="tiles"></div>
@@ -129,6 +140,9 @@ svg text{fill:var(--muted);font-size:10px;font-family:var(--f-b)}
     <div class="list" id="all"></div>
   </section>
 
+  </div>
+  <div id="v-history" hidden></div>
+  <div id="v-cv">
   <section>
     <div class="sh"><h2>My CV</h2><small>used for every tailored CV</small></div>
     <div class="card cv">
@@ -144,6 +158,7 @@ svg text{fill:var(--muted);font-size:10px;font-family:var(--f-b)}
       <div class="result" id="cv-result" hidden></div>
     </div>
   </section>
+  </div>
 </div>
 
 <div class="scrim" id="scrim" hidden></div>
@@ -179,7 +194,7 @@ const fmt = s => { const d = parse(s); return d ? d.toLocaleDateString('en-GB',{
 let toastT; const toast = m => { const t=$('#toast'); t.textContent=m; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,2800); };
 
 /* ---------- state ---------- */
-let D = null, tab = 'opps', query = '', sorting = false;
+let D = null, tab = 'opps', query = '', sorting = false, view = 'home';
 try { const c = localStorage.getItem('ft-dash'); if (c) D = JSON.parse(c); } catch(e){}
 
 async function load(quiet){
@@ -188,6 +203,7 @@ async function load(quiet){
   $('#refresh').textContent = '↻';
   if (!j.ok){ banner('err', j.error === 'not_connected' ? 'Connect your Google Sheet in Settings to see your tracker.' : 'Couldn\'t reach your sheet. Showing the last saved copy.', j.error === 'not_connected' ? 'Settings' : 'Retry'); render(); return; }
   D = j; try { localStorage.setItem('ft-dash', JSON.stringify(j)); } catch(e){}
+  if (window.Android && Android.saveDashboard) Android.saveDashboard(JSON.stringify(j));
   if (j.today){ TODAY = parse(j.today); }
   render();
   autoSort();
@@ -265,6 +281,7 @@ function render(){
 
   charts(rows, tips);
   listing(rows, tips);
+  if (view === 'history') history(rows);
 }
 function itemRow(r, tone, why){
   const cat = r.Category === 'Event' ? 'c-plum' : '';
@@ -308,7 +325,7 @@ function charts(rows, tips){
   const max = Math.max(1, ...weeks.map(w=>w.o+w.t));
   const BW = 320, BH = 70, bw = BW/8;
   $('#weeks').innerHTML = `<svg viewBox="0 0 ${BW} ${BH+16}" width="100%" height="${BH+16}" role="img" aria-label="Saved per week">
-    ${weeks.map((w,i) => { const ho = w.o/max*BH, ht = w.t/max*BH; return `
+    ${weeks.map((w,i) => { const ho = w.o/max*(BH-14), ht = w.t/max*(BH-14); return `
       <rect x="${i*bw+6}" y="${BH-ho}" width="${bw-12}" height="${Math.max(ho,0)}" rx="4" fill="${css('--accent')}"/>
       <rect x="${i*bw+6}" y="${BH-ho-ht}" width="${bw-12}" height="${Math.max(ht,0)}" rx="4" fill="${css('--sun')}"/>
       ${w.o+w.t?`<text x="${i*bw+bw/2}" y="${BH-ho-ht-3}" text-anchor="middle">${w.o+w.t}</text>`:''}
@@ -342,6 +359,62 @@ function listing(rows, tips){
     : `<div class="empty">${query ? 'No matches.' : 'Nothing here yet.'}</div>`;
 }
 
+/* ---------- applied history ---------- */
+const GOOD = ['Accepted','Shortlisted','Interview'];
+const DECIDED = ['Accepted','Shortlisted','Interview','Rejected','No response'];
+const applied = r => !!r['Applied on'] || r.Status === 'Submitted' || (r.Status === 'Closed' && DECIDED.indexOf(r.Outcome) >= 0);
+const appliedDate = r => r['Applied on'] || String(r.Updated||'').slice(0,10) || String(r.Captured||'').slice(0,10);
+function outcomeOf(r){ return r.Outcome && DECIDED.indexOf(r.Outcome) >= 0 ? r.Outcome : (r.Status === 'Submitted' ? 'Waiting' : (r.Outcome || 'Waiting')); }
+const OUT_TONE = { Accepted:'ok', Shortlisted:'sky', Interview:'sky', Rejected:'rose', 'No response':'', Waiting:'sun' };
+function history(rows){
+  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const list = rows.filter(applied).sort((a,b) => appliedDate(b).localeCompare(appliedDate(a)));
+  const missed = rows.filter(r => (active(r) && r.Deadline && days(r.Deadline) < 0) || r.Outcome === 'Missed the deadline');
+  const count = k => list.filter(r => outcomeOf(r) === k).length;
+  const good = list.filter(r => GOOD.indexOf(outcomeOf(r)) >= 0).length;
+  const decided = list.filter(r => DECIDED.indexOf(outcomeOf(r)) >= 0).length;
+  const rate = decided ? Math.round(good / decided * 100) + '%' : '–';
+  const outs = [['Accepted','--accent'],['Shortlisted','--sky'],['Interview','--sky'],['Rejected','--rose'],['No response','--muted'],['Waiting','--sun']];
+  const max = Math.max(1, ...outs.map(([k]) => count(k)));
+  // per month, last 6 months
+  const months = []; for (let i = 5; i >= 0; i--){ const d = new Date(TODAY.getFullYear(), TODAY.getMonth()-i, 1); months.push({ key: iso(d).slice(0,7), label: d.toLocaleDateString('en-GB',{month:'short'}), n:0 }); }
+  list.forEach(r => { const m = months.find(x => x.key === appliedDate(r).slice(0,7)); if (m) m.n++; });
+  const mmax = Math.max(1, ...months.map(m => m.n)), BW = 320, BH = 70, bw = BW/6;
+  const groups = {}; list.forEach(r => { const k = appliedDate(r).slice(0,7); (groups[k] = groups[k] || []).push(r); });
+  $('#v-history').innerHTML = `
+    <div class="tiles">
+      <div class="tile t1"><b>${list.length}</b><span>applied</span></div>
+      <div class="tile t3"><b>${good}</b><span>accepted or shortlisted</span></div>
+      <div class="tile t2"><b>${count('Rejected')}</b><span>rejected</span></div>
+      <div class="tile t4"><b>${rate}</b><span>success rate</span></div>
+    </div>
+    ${missed.length ? `<div class="banner err"><span>${missed.length} deadline${missed.length>1?'s':''} passed without an application. Close ${missed.length>1?'them':'it'} out so your history stays honest.</span></div>` : ''}
+    <section>
+      <div class="sh"><h2>Results</h2><small>${count('Waiting')} still waiting</small></div>
+      <div class="card"><div class="bars">${outs.filter(([k]) => k !== 'Interview' || count(k)).map(([k,v]) => `<div class="bar"><span>${k}</span><div class="track"><div class="fill" style="width:${count(k)/max*100}%;background:${css(v)}"></div></div><b>${count(k)}</b></div>`).join('')}</div></div>
+    </section>
+    <section>
+      <div class="sh"><h2>Applications per month</h2></div>
+      <div class="card"><svg viewBox="0 0 ${BW} ${BH+16}" width="100%" height="${BH+16}" role="img" aria-label="Applications per month">
+        ${months.map((m,i) => { const h = m.n/mmax*(BH-14); return `<rect x="${i*bw+10}" y="${BH-h}" width="${bw-20}" height="${h}" rx="5" fill="${css('--accent')}"/>${m.n?`<text x="${i*bw+bw/2}" y="${BH-h-3}" text-anchor="middle">${m.n}</text>`:''}<text x="${i*bw+bw/2}" y="${BH+13}" text-anchor="middle">${m.label}</text>`; }).join('')}
+      </svg></div>
+    </section>
+    <section>
+      <div class="sh"><h2>Everything you applied to</h2><button class="btn small" id="copy-history">Copy list</button></div>
+      ${list.length ? Object.keys(groups).map(k => `<div class="month">${new Date(+k.slice(0,4), +k.slice(5,7)-1, 1).toLocaleDateString('en-GB',{month:'long',year:'numeric'})}</div>
+        <div class="list">${groups[k].map(r => { const o = outcomeOf(r); return `<div class="item" data-open="${esc(r.ID)}"><span class="dot d-${OUT_TONE[o]||'sky'}"></span>
+          <div class="main"><div class="t">${esc(r.Title)}</div><div class="m">${esc([r.Organisation, r.Type, 'applied ' + fmt(appliedDate(r))].filter(Boolean).join(' · '))}</div></div>
+          <span class="chip ${OUT_TONE[o]?'c-'+OUT_TONE[o]:''}">${esc(o)}</span></div>`; }).join('')}</div>`).join('')
+        : `<div class="empty">When you mark something Submitted, it lands here with its result. Your first one is waiting. 👀</div>`}
+    </section>`;
+  const cb = $('#copy-history');
+  if (cb) cb.onclick = () => {
+    const text = list.map(r => `• ${r.Title}${r.Organisation?' – '+r.Organisation:''} (${r.Type||'Application'}), applied ${fmt(appliedDate(r))} ${appliedDate(r).slice(0,4)}: ${outcomeOf(r)}`).join('\n');
+    if (window.Android && Android.copy) { Android.copy(text); toast('Copied. Paste it into an essay or your notes.'); }
+    else navigator.clipboard.writeText(text).then(() => toast('Copied.'), () => toast('Couldn\'t copy.'));
+  };
+}
+
 /* ---------- detail sheet ---------- */
 const sheet = $('#sheet'), scrim = $('#scrim');
 let current = null;
@@ -370,6 +443,11 @@ function openItem(id){
         <div class="note" style="margin-bottom:6px">Status</div>
         <div class="seg">${st.map(s => `<button data-status="${s}" aria-pressed="${r.Status===s}">${s}</button>`).join('')}</div>
       </div>
+      ${r.Status==='Submitted' || r.Status==='Closed' ? `<div>
+        <div class="note" style="margin-bottom:6px">${r.Status==='Submitted'?'Heard back?':'Result'}</div>
+        <div class="seg">${['Accepted','Shortlisted','Interview','Rejected','No response','Missed the deadline','Decided not to apply'].map(o => `<button data-outcome="${o}" aria-pressed="${r.Outcome===o}">${o}</button>`).join('')}</div>
+        ${r['Applied on']?`<div class="note" style="margin-top:6px">Applied ${esc(fmt(r['Applied on']))}</div>`:''}
+      </div>`:''}
       <dl class="kv">
         ${r.Organisation?`<dt>From</dt><dd>${esc(r.Organisation)}</dd>`:''}
         ${r['What it offers']?`<dt>Offers</dt><dd>${esc(r['What it offers'])}</dd>`:''}
@@ -417,8 +495,22 @@ async function setFields(id, fields, msg){
 
 /* ---------- events ---------- */
 document.addEventListener('click', async e => {
-  const t = e.target.closest('[data-open],[data-tip],[data-tab],[data-close],[data-url],[data-status],[data-snooze],[data-ai],[data-banner]');
+  const t = e.target.closest('[data-open],[data-tip],[data-tab],[data-close],[data-url],[data-status],[data-snooze],[data-ai],[data-banner],[data-view],[data-outcome]');
   if (!t) return;
+  if (t.dataset.view){
+    view = t.dataset.view;
+    document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === view));
+    $('#v-home').hidden = view !== 'home'; $('#v-cv').hidden = view !== 'home'; $('#v-history').hidden = view !== 'history';
+    window.scrollTo(0,0); return render();
+  }
+  if (t.dataset.outcome && current){
+    const o = t.dataset.outcome, f = { Outcome: o };
+    f.Status = (o === 'Shortlisted' || o === 'Interview') ? 'Submitted' : 'Closed';
+    if (f.Status === 'Closed') f['Remind on'] = '';
+    if (!current['Applied on'] && DECIDED.indexOf(o) >= 0) f['Applied on'] = iso(TODAY);
+    active_();
+    return setFields(current.ID, f, o==='Accepted' ? 'Congratulations! 🎉 Saved to your history.' : o==='Rejected' ? 'Noted. Their loss. On to the next one.' : 'Saved to your history.');
+  }
   if (t.dataset.open) return openItem(t.dataset.open);
   if (t.dataset.tip) return openTip(t.dataset.tip);
   if (t.dataset.tab){ tab = t.dataset.tab; return render(); }
@@ -432,12 +524,13 @@ document.addEventListener('click', async e => {
   }
   if (t.dataset.status && current){
     const s = t.dataset.status, f = { Status: s };
-    if (s === 'Submitted') f['Remind on'] = addDays(14);
+    if (s === 'Submitted'){ f['Remind on'] = addDays(14); if (!current['Applied on']) f['Applied on'] = iso(TODAY); }
+    active_();
     return setFields(current.ID, f, s==='Preparing' ? 'Preparing. Tap “Write my essays” or “Tailor my CV” when ready.' : s==='Submitted' ? 'Submitted! I\'ll remind you to check for a response in 2 weeks.' : 'Updated.');
   }
-  if (t.dataset.snooze && current){ const n = +t.dataset.snooze; return setFields(current.ID, { 'Remind on': addDays(n) }, n===1?'Back tomorrow.':`Back in ${n} days.`); }
+  if (t.dataset.snooze && current){ const n = +t.dataset.snooze; active_(); return setFields(current.ID, { 'Remind on': addDays(n) }, n===1?'Back tomorrow.':`Back in ${n} days.`); }
   if (t.dataset.ai && current){
-    const id = current.ID, kind = t.dataset.ai;
+    const id = current.ID, kind = t.dataset.ai; active_();
     sheet.querySelectorAll('[data-ai]').forEach(b => b.disabled = true);
     $('#ai-status').innerHTML = `<span class="spin"></span> ${kind==='essay'?'Writing your essays':'Tailoring your CV'}… keep this open.`;
     const j = await call({ action: kind, id });
@@ -465,7 +558,7 @@ $('#cv-file').addEventListener('change', e => {
     const base64 = String(rd.result).split(',')[1];
     const j = await call({ action:'uploadCv', name:f.name, mime:f.type, base64 });
     e.target.value = '';
-    if (j.ok){ $('#cv-status').textContent = 'Done. Your Master CV is updated. Open it to check.'; D.docs = D.docs||{}; D.docs['master-cv'] = j.url; toast('CV uploaded.'); }
+    if (j.ok){ active_(); $('#cv-status').textContent = 'Done. Your Master CV is updated. Open it to check.'; D.docs = D.docs||{}; D.docs['master-cv'] = j.url; toast('CV uploaded.'); }
     else $('#cv-status').textContent = j.error === 'no_key' ? 'Add your Gemini key in Settings first.' : 'Didn\'t work: ' + String(j.error).slice(0,140);
   };
   rd.readAsDataURL(f);
@@ -476,10 +569,11 @@ $('#cv-add-btn').onclick = async () => {
   const j = await call({ action:'cvAdd', text });
   b.disabled = false; b.textContent = 'Add to my CV';
   const out = $('#cv-result'); out.hidden = false;
-  if (j.ok){ out.textContent = 'Added ✓\n' + j.changes; $('#cv-add').value = ''; }
+  if (j.ok){ active_(); out.textContent = 'Added ✓\n' + j.changes; $('#cv-add').value = ''; }
   else out.textContent = j.error === 'no_key' ? 'Add your Gemini key in Settings first.' : 'Didn\'t work: ' + String(j.error).slice(0,140);
 };
 window.__onResume = () => load(true);
+function active_(){ if (window.Android && Android.markActive) Android.markActive(); }
 
 /* ---------- preview data (only when opened outside the app) ---------- */
 function demo(req){
@@ -489,7 +583,9 @@ function demo(req){
     {ID:'a',Title:'Example: Engineering Scholarship',Organisation:'Example Foundation',Category:'Opportunity',Type:'Scholarship',Status:'Preparing',Deadline:d(2),'Remind on':d(0),Requirements:'Essay: "Why engineering?" (500 words)\nCV\nTranscript',Captured:d(-3)},
     {ID:'b',Title:'Example: Robotics internship',Organisation:'Example Labs',Category:'Opportunity',Type:'Internship',Status:'Saved',Deadline:d(12),'Remind on':d(5),Requirements:'CV',Captured:d(-9)},
     {ID:'c',Title:'Example: AI for Africa webinar',Organisation:'Example Hub',Category:'Event',Type:'Event',Status:'Saved',Deadline:d(1),Captured:d(-1)},
-    {ID:'d',Title:'Example: Hackathon',Category:'Opportunity',Status:'Submitted',Deadline:d(-2),'Remind on':d(0),Captured:d(-20)},
+    {ID:'d',Title:'Example: Hackathon',Organisation:'Example Org',Type:'Hackathon',Category:'Opportunity',Status:'Submitted',Deadline:d(-2),'Remind on':d(0),Captured:d(-20),'Applied on':d(-3)},
+    {ID:'f',Title:'Example: Summer school',Organisation:'Example Uni',Type:'Programme',Category:'Opportunity',Status:'Closed',Outcome:'Accepted',Captured:d(-60),'Applied on':d(-45)},
+    {ID:'g',Title:'Example: Fellowship',Organisation:'Example Trust',Type:'Fellowship',Category:'Opportunity',Status:'Closed',Outcome:'Rejected',Captured:d(-80),'Applied on':d(-70)},
     {ID:'e',Status:'New',Captured:d(0)}],
     tips:[{ID:'t',Title:'Example: Write CV bullets as results',Topic:'CV & resume','Key points':'• Start with a verb\n• Add a number',Saved:d(-2)}]};
 }

@@ -5,4 +5,5 @@
     <string name="service_label">Follow-Through bubble</string>
     <string name="service_summary">Floating bubble that saves opportunities to your tracker</string>
     <string name="service_desc">Shows a small floating bubble. When you tap it, Follow-Through reads the text on your screen, the page link and a screenshot, and sends them to your own Google Sheet so the opportunity can be tracked. Nothing is read until you tap the bubble, and password fields are always skipped.</string>
+    <string name="widget_desc">Your deadlines, streak and nudges</string>
 </resources>

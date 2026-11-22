@@ -55,6 +55,7 @@ public class BubbleService extends AccessibilityService {
         wm = (WindowManager) getSystemService(WINDOW_SERVICE);
         addBubble();
         Tracker.flushQueue(this, null);
+        Nag.schedule(this);
     }
 
     @Override public void onAccessibilityEvent(AccessibilityEvent event) { /* only reads on tap */ }

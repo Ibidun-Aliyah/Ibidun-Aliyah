@@ -34,15 +34,17 @@ const SHEET_NAME = 'Tracker';
 const HEADERS = [
   'ID', 'Captured', 'Status', 'Title', 'Organisation', 'Type', 'Deadline', 'Remind on',
   'Link', 'Requirements', 'What it offers', 'Saved from', 'Screen text', 'Screenshot',
-  'Notes', 'Outcome', 'Updated', 'Category', 'Essay doc', 'CV doc'
+  'Notes', 'Outcome', 'Updated', 'Category', 'Essay doc', 'CV doc', 'Applied on'
 ];
 const STATUSES = ['New', 'Saved', 'Preparing', 'Submitted', 'Closed'];
+const OUTCOMES = ['Accepted', 'Shortlisted', 'Interview', 'Rejected', 'No response', 'Missed the deadline', 'Decided not to apply', 'Not an opportunity'];
+const DATE_COLS = ['Deadline', 'Remind on', 'Applied on'];
 const CATEGORIES = ['Opportunity', 'Event', 'Tip', 'Other'];
 const TIPS_NAME = 'Tips & Resources';
 const TIP_HEADERS = ['ID', 'Saved', 'Topic', 'Title', 'Key points', 'Link', 'Saved from', 'Screenshot', 'In digest'];
 const FOLDER_NAME = 'Follow-Through captures';
 const DOCS_FOLDER = 'Follow-Through';
-const SCHEMA = '3';
+const SCHEMA = '4';
 
 /* ---------- one-time setup ---------- */
 function setup() {
@@ -61,6 +63,7 @@ function setup() {
   sh.getRange(2, col_('Status'), rows, 1).setDataValidation(
     SpreadsheetApp.newDataValidation().requireValueInList(STATUSES, true).build());
   sh.getRange(2, col_('Deadline'), rows, 2).setNumberFormat('yyyy-mm-dd');
+  sh.getRange(2, col_('Applied on'), rows, 1).setNumberFormat('yyyy-mm-dd');
   sh.getRange(2, col_('Screen text'), rows, 1).setWrap(false);
 
   // Deadline colours: red within 3 days, amber within 7 (only while not submitted/closed).
@@ -205,7 +208,7 @@ function rows_(sh, p) {
     const o = {};
     head.forEach((h, i) => {
       const v = r[i];
-      o[h] = v instanceof Date ? Utilities.formatDate(v, tz, (h === 'Deadline' || h === 'Remind on') ? 'yyyy-MM-dd' : "yyyy-MM-dd'T'HH:mm") : v;
+      o[h] = v instanceof Date ? Utilities.formatDate(v, tz, DATE_COLS.indexOf(h) >= 0 ? 'yyyy-MM-dd' : "yyyy-MM-dd'T'HH:mm") : v;
     });
     return o;
   });
@@ -226,7 +229,7 @@ function updateRow_(sh, headers, p) {
     const c = headers.indexOf(h);
     if (c < 0 || h === 'ID') return;
     let v = fields[h];
-    if ((h === 'Deadline' || h === 'Remind on') && /^\d{4}-\d{2}-\d{2}$/.test(v)) {
+    if (DATE_COLS.indexOf(h) >= 0 && /^\d{4}-\d{2}-\d{2}$/.test(v)) {
       const [y, m, d] = v.split('-').map(Number); v = new Date(y, m - 1, d);
     }
     if (Array.isArray(v)) v = v.join('\n');

@@ -33,6 +33,11 @@ public class MainActivity extends Activity {
         if (Tracker.connection(this) == null) {
             startActivity(new Intent(this, SettingsActivity.class));
         }
+        Nag.schedule(this);
+        if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED
+                && android.os.Build.VERSION.SDK_INT >= 33) {
+            requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1);
+        }
         web = new WebView(this);
         web.setBackgroundColor(Color.TRANSPARENT);
         WebSettings ws = web.getSettings();
@@ -109,6 +114,20 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void openUrl(String url) {
             if (url != null && (url.startsWith("https://") || url.startsWith("http://"))) runOnUiThread(() -> openExternal(url));
+        }
+
+        @JavascriptInterface
+        public void saveDashboard(String json) { Nag.saveDashboard(MainActivity.this, json); }
+
+        @JavascriptInterface
+        public void markActive() { Nag.markActive(MainActivity.this); }
+
+        @JavascriptInterface
+        public void copy(String text) {
+            runOnUiThread(() -> {
+                android.content.ClipboardManager cm = getSystemService(android.content.ClipboardManager.class);
+                cm.setPrimaryClip(android.content.ClipData.newPlainText("Applied history", text));
+            });
         }
 
         @JavascriptInterface

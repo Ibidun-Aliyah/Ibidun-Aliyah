@@ -53,6 +53,19 @@ Captures are sorted seconds after you save them; the twice-daily Claude check th
 After updating the script, run `authorize` once in the editor (it now also needs permission to reach Gemini),
 then deploy a new version.
 
+## Applied history
+The dashboard's **Applied history** tab lists everything you've applied to by month, with results (Accepted,
+Shortlisted, Interview, Rejected, No response, Waiting), your success rate, applications per month, and a
+**Copy list** button for essays and your portfolio. Marking something Submitted records the date; tap a result
+when you hear back.
+
+## The nagging (on purpose)
+Add the **Follow-Through widget** to your home screen (long-press the home screen → Widgets). It shows your streak 🔥,
+the most urgent thing in a nagging voice, and your next deadlines; it turns amber, then red, as deadlines get close.
+The app also checks every hour (08:00–22:00) and sends notifications that escalate until you act: a morning summary,
+repeat nudges every 3 hours (2 when something closes today), a streak warning after 7 pm, and a poke when you haven't
+saved anything for 3 days. Notifications have **Tomorrow** and **I applied ✓** buttons.
+
 ## What it does with each capture
 | Kind | Where it goes |
 | --- | --- |
