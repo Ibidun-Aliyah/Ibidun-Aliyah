@@ -95,6 +95,17 @@ function setup() {
   Logger.log('Setup done. Your sheet: ' + ss.getUrl());
 }
 
+/**
+ * Run this once from the editor (pick "authorize" next to ▷ Run) so Google asks for
+ * every permission the tracker needs: Sheets, Drive and Docs. It changes nothing.
+ */
+function authorize() {
+  DocumentApp.getActiveDocument();
+  DriveApp.getRootFolder();
+  SpreadsheetApp.getActiveSpreadsheet();
+  Logger.log('All set: the tracker can now create Google Docs.');
+}
+
 /** The tracker spreadsheet: the one this script is attached to, or one it creates in your Drive. */
 function book_() {
   try { const a = SpreadsheetApp.getActiveSpreadsheet(); if (a) return a; } catch (e) {}
