@@ -42,6 +42,25 @@ The tracker page's **Connect phone** button walks through the same steps with a 
 Send Claude your Web app link and it sets up the twice-daily task that fills in new captures and pushes your
 reminders.
 
+## What it does with each capture
+| Kind | Where it goes |
+| --- | --- |
+| **Opportunity** (scholarship, internship, job, fellowship…) | Tracker tab, with deadline, requirements and a reminder |
+| **Event** (webinar, workshop, conference…) | Tracker tab, Category "Event", reminded 2 days before |
+| **Tip / resource** (CV tips, career advice…) | Tips & Resources tab, summarised in the Sunday digest |
+
+**Essays and CVs:** set an opportunity's Status to **Preparing**. On the next run Claude writes two Google Docs in
+the *Follow-Through* Drive folder: essay angles plus first drafts, and a CV tailored from your **Master CV** with a
+"what I changed and why" note. Their links appear in the *Essay doc* and *CV doc* columns. Write `redo essay` or
+`redo cv` in Notes to get a fresh version.
+
+**Weekly digest:** every Sunday evening the *Follow-Through Weekly Digest* doc gets a new section with your saved tips
+condensed into takeaways, what's due in the next two weeks, and where your applications stand.
+
+## Updating the script
+Paste the new `Code.gs`, save, then **Deploy → Manage deployments → ✎ → Version: New version → Deploy**. This keeps
+the same web app link. ("New deployment" makes a new link, and the phone app would stop saving.)
+
 ## Using it
 - **Tap the bubble**: saves what's on screen. It turns ✓ green when it's in the sheet.
 - **Drag** it anywhere; it tucks into the edge. **Hold** it to hide it for an hour.
