@@ -168,10 +168,23 @@ public class BubbleService extends AccessibilityService {
         if (busy) return;
         busy = true;
         bubble.setVisibility(View.INVISIBLE);        // keep the bubble out of the screenshot
-        main.postDelayed(this::readScreen, 150);
+        main.postDelayed(() -> readScreen(null, null), 150);
     }
 
-    private void readScreen() {
+    /**
+     * Called after "Share → Save to Follow-Through": apps like Instagram only share a link,
+     * so once the share sheet has closed, capture the post that's back on screen as well.
+     */
+    void captureAfterShare(String sharedText, String sharedUrl) {
+        main.postDelayed(() -> {
+            if (busy) return;
+            busy = true;
+            if (bubble != null) bubble.setVisibility(View.INVISIBLE);
+            main.postDelayed(() -> readScreen(sharedText, sharedUrl), 150);
+        }, 900);
+    }
+
+    private void readScreen(String sharedText, String sharedUrl) {
         AccessibilityNodeInfo root = getRootInActiveWindow();
         String pkg = root != null && root.getPackageName() != null ? root.getPackageName().toString() : "";
         Set<String> lines = new LinkedHashSet<>();
@@ -183,7 +196,8 @@ public class BubbleService extends AccessibilityService {
             if (text.length() > 20000) break;
             text.append(l).append('\n');
         }
-        String url = link[0];
+        String url = sharedUrl != null ? sharedUrl : link[0];
+        if (sharedText != null && !sharedText.isEmpty()) text.insert(0, "Shared: " + sharedText + "\n\n");
         if (url == null) {
             Matcher m = URL.matcher(text);
             if (m.find()) url = m.group();

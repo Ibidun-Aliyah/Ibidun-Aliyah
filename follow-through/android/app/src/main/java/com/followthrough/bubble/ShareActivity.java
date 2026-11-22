@@ -30,6 +30,13 @@ public class ShareActivity extends Activity {
                         (decoder, info, src) -> decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE));
             } catch (Exception ignored) {}
         }
+        // Link-only share (Instagram, X, LinkedIn…): let the bubble screenshot the post once we close.
+        if (shot == null && BubbleService.instance != null) {
+            BubbleService.instance.captureAfterShare(body, url);
+            Toast.makeText(this, "Saving with a screenshot…", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
         String from = getReferrer() != null ? getReferrer().getHost() : null;
         Toast.makeText(this, "Saving…", Toast.LENGTH_SHORT).show();
         Tracker.capture(this, from != null ? from : "Shared", url, body, shot, null,
