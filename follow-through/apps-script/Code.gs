@@ -44,7 +44,7 @@ const TIPS_NAME = 'Tips & Resources';
 const TIP_HEADERS = ['ID', 'Saved', 'Topic', 'Title', 'Key points', 'Link', 'Saved from', 'Screenshot', 'In digest'];
 const FOLDER_NAME = 'Follow-Through captures';
 const DOCS_FOLDER = 'Follow-Through';
-const SCHEMA = '5';
+const SCHEMA = '6';
 
 /* ---------- one-time setup ---------- */
 function setup() {
@@ -449,7 +449,9 @@ function gemini_(parts, opts) {
   const props = PropertiesService.getScriptProperties();
   // Google Search grounding isn't on the free tier for newer models; once refused, skip it for a day.
   const tried = [];
-  for (const model of m.models) {
+  // fast: sorting and CV import — lite models first (quicker, much higher free quota), thinking turned down.
+  const order = opts.fast ? m.models.filter(x => /lite/.test(x)).concat(m.models.filter(x => !/lite/.test(x))) : m.models;
+  for (const model of order) {
     const searchOff = Date.now() < Number(props.getProperty('NO_SEARCH_UNTIL') || 0);
     const modes = opts.search && !searchOff ? [true, false] : [false];
     let skipModel = false;
@@ -459,6 +461,8 @@ function gemini_(parts, opts) {
         const body = { contents: [{ role: 'user', parts: parts }], generationConfig: { temperature: opts.temperature || 0.4, maxOutputTokens: opts.maxTokens || 8192 } };
         if (search) body.tools = [{ google_search: {} }];
         else if (opts.json) body.generationConfig.responseMimeType = 'application/json';
+        const think = opts.fast && props.getProperty('NO_THINKCFG:' + model) !== '1' ? thinkingConfig_(model) : null;
+        if (think) body.generationConfig.thinkingConfig = think;
         const res = UrlFetchApp.fetch(GEMINI + 'models/' + model + ':generateContent?key=' + encodeURIComponent(m.key), {
           method: 'post', contentType: 'application/json', payload: JSON.stringify(body), muteHttpExceptions: true,
         });
@@ -473,6 +477,12 @@ function gemini_(parts, opts) {
           break;
         }
         const msg = ((JSON.parse(txt || '{}').error || {}).message || txt).slice(0, 160);
+        if (code === 400 && think && /think/i.test(txt)) {
+          // This model doesn't take that thinking setting: remember and retry plainly.
+          props.setProperty('NO_THINKCFG:' + model, '1');
+          tried.push(model + ': thinking setting not supported, retrying');
+          attempt--; continue;
+        }
         tried.push(model + (search ? '+search' : '') + ': ' + code + ' ' + msg);
         if (search) {
           // Search refused (quota, tier or unsupported): remember, and retry this model without it.
@@ -494,6 +504,14 @@ function gemini_(parts, opts) {
   throw new Error(quota
     ? 'Gemini free quota is used up for now (every model said "quota exceeded"). It resets daily; try again later. ' + tried.slice(-2).join(' | ')
     : 'Gemini failed: ' + tried.slice(-3).join(' | '));
+}
+
+/** Ask the model to think as little as it allows (2.5 uses a token budget, 3.x a level). */
+function thinkingConfig_(model) {
+  const v = parseFloat((model.match(/gemini-(\d+(?:\.\d+)?)/) || [])[1] || '0');
+  if (!v) return null;
+  if (v < 3) return { thinkingBudget: /lite/.test(model) ? 0 : 0 };
+  return { thinkingLevel: 'low' };
 }
 
 function parseJson_(text) {
@@ -535,9 +553,10 @@ function shotPart_(row) {
 function process_(p) {
   if (!PropertiesService.getScriptProperties().getProperty('GEMINI_KEY')) return { ok: false, error: 'no_key' };
   const all = rows_(sheet_(), {}).rows.filter(r => r['Status'] === 'New' && (!p.id || r['ID'] === p.id));
+  all.sort((x, y) => String(y['Captured']).localeCompare(String(x['Captured'])));   // newest first
   const cache = CacheService.getScriptCache();
   const done = [];
-  for (const r of all.slice(0, p.id ? 1 : 3)) {
+  for (const r of all.slice(0, 1)) {
     if (cache.get('proc:' + r['ID'])) continue;
     cache.put('proc:' + r['ID'], '1', 300);
     try { done.push(sortOne_(r)); }
@@ -579,7 +598,7 @@ ${String(r['Screen text'] || '').slice(0, 8000)}`;
   const parts = [{ text: prompt }];
   const shot = shotPart_(r);
   if (shot) parts.push(shot);
-  const ans = gemini_(parts, { search: true, json: true, temperature: 0.2 });
+  const ans = gemini_(parts, { search: true, json: true, temperature: 0.2, fast: true });
   const j = parseJson_(ans.text);
   if (!j || !j.category) throw new Error('could_not_read_answer');
 
@@ -717,7 +736,7 @@ function uploadCv_(p) {
 (Profile, Education, Experience/Leadership, Projects, Skills, Awards, and any others it has) with "- " bullets and **bold**
 for roles and institutions. Keep EVERY fact exactly as written: no additions, no removals, no rewording beyond fixing
 obvious typos and layout. Output only the markdown.` });
-  const ans = gemini_(parts, { temperature: 0.1 });
+  const ans = gemini_(parts, { temperature: 0.1, fast: true });
   const d = withLock_(() => doc_({ key: 'master-cv', title: 'Master CV', body: ans.text, mode: 'replace' }));
   return { ok: true, url: d.url, original: original.getUrl() };
 }
@@ -749,7 +768,7 @@ NEW: ${update}
 
 MY CV:
 ${cv.slice(0, 12000)}`;
-  const ans = gemini_([{ text: prompt }], { temperature: 0.2 });
+  const ans = gemini_([{ text: prompt }], { temperature: 0.2, fast: true });
   const split = ans.text.split('===CHANGES===');
   if (split.length < 2 || split[0].trim().length < 200) return { ok: false, error: 'Could not update the CV this time. Try again.' };
   const d = withLock_(() => doc_({ key: 'master-cv', title: 'Master CV', body: split[0].trim(), mode: 'replace' }));
