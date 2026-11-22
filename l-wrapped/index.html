@@ -133,7 +133,7 @@ textarea#emails:focus{border-color:var(--ink);outline:none}
 .paused{position:absolute;top:calc(env(safe-area-inset-top,0px) + 74px);left:0;right:0;text-align:center;font:700 11px var(--mono);letter-spacing:.2em;opacity:.7;z-index:6;pointer-events:none}
 .zone{position:absolute;top:70px;bottom:0;z-index:1;cursor:pointer;border:0;padding:0;margin:0;background:transparent;-webkit-tap-highlight-color:transparent;touch-action:pan-y}
 .zone.prev{left:0;width:30%}.zone.next{right:0;width:70%}
-.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;justify-content:safe center;padding:calc(env(safe-area-inset-top,0px) + 84px) max(24px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 56px) max(24px,env(safe-area-inset-left,0px));z-index:2;pointer-events:none}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;justify-content:safe center;padding:calc(env(safe-area-inset-top,0px) + 84px) max(24px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 100px) max(24px,env(safe-area-inset-left,0px));z-index:2;pointer-events:none}
 .slide.scroll{justify-content:flex-start;overflow-y:auto;pointer-events:auto;z-index:3}
 .slide > div{max-width:560px;width:100%;margin:0 auto;min-width:0}
 .slide .interactive{pointer-events:auto}
@@ -249,7 +249,7 @@ textarea#emails:focus{border-color:var(--ink);outline:none}
 .composer textarea{width:100%;min-height:200px;border-radius:12px;border:0;padding:12px 14px;font:500 14px/1.5 var(--body);background:#fff4e8;color:var(--ink);resize:vertical;user-select:text;-webkit-user-select:text}
 .small{font-size:13px;opacity:.85;max-width:44ch;margin:0}
 /* share sheet */
-.sheet{position:absolute;inset:0;z-index:20;background:rgba(15,8,11,.82);display:grid;place-items:center;padding:calc(env(safe-area-inset-top,0px) + 20px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 20px) max(16px,env(safe-area-inset-left,0px));color:#fff4e8;--fg:#fff4e8;--bg:var(--ink)}
+.sheet{position:absolute;inset:0;z-index:20;background:rgba(15,8,11,.94);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);display:grid;place-items:center;padding:calc(env(safe-area-inset-top,0px) + 20px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 20px) max(16px,env(safe-area-inset-left,0px));color:#fff4e8;--fg:#fff4e8;--bg:var(--ink)}
 .sheet-panel{display:grid;gap:14px;justify-items:center;max-width:420px;width:100%;max-height:100%;overflow-y:auto}
 .sheet img{max-height:58vh;width:auto}
 .toast{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 60px);transform:translateX(-50%);background:#fff4e8;color:var(--ink);padding:10px 16px;border-radius:999px;font:700 14px var(--body);z-index:30;box-shadow:0 10px 30px -10px rgba(0,0,0,.5)}
@@ -292,9 +292,12 @@ textarea#emails:focus{border-color:var(--ink);outline:none}
 .builds summary{cursor:pointer;font-size:14px}
 .builds[open] summary{margin-bottom:10px}
 .projlist{display:grid;gap:10px;margin-bottom:10px}
-.proj{display:grid;grid-template-columns:1fr 1.3fr auto auto;grid-template-areas:"n d s x";gap:6px;align-items:center}
-@media (max-width:560px){.proj{grid-template-columns:1fr auto auto;grid-template-areas:"n s x" "d d d"}}
-.proj .pname{grid-area:n}.proj .pdesc{grid-area:d}.proj .pstat{grid-area:s}.proj .prm{grid-area:x}
+.proj{display:grid;grid-template-columns:1fr auto auto;grid-template-areas:"n s x" "d d d" "u u u";gap:6px;align-items:center;padding-bottom:10px;border-bottom:1px solid #e3d7c4}
+.proj .pname{grid-area:n}.proj .pdesc{grid-area:d}.proj .purl{grid-area:u}.proj .pstat{grid-area:s}.proj .prm{grid-area:x}
+.plink{display:inline-flex;margin-top:6px;font:700 13px var(--mono);color:var(--fg);text-decoration:underline;text-underline-offset:3px;pointer-events:auto;overflow-wrap:anywhere}
+.cardshare{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 42px);z-index:4;border:0;border-radius:999px;padding:10px 18px;background:var(--fg);color:var(--bg);font:700 14px var(--body);cursor:pointer;display:inline-flex;gap:8px;align-items:center;box-shadow:0 10px 24px -12px rgba(0,0,0,.5);white-space:nowrap}
+.sheet .send{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.sheet .send a,.sheet .send button{border:0;border-radius:999px;padding:9px 14px;font:700 14px var(--body);cursor:pointer;background:rgba(255,244,232,.14);color:#fff4e8;text-decoration:none}
 .proj input,.proj select{border:2px solid #d9cdbb;border-radius:10px;background:#fffaf2;padding:8px 10px;color:var(--ink);min-width:0;font-size:14px;width:100%}
 .proj input:focus,.proj select:focus{border-color:var(--ink);outline:none}
 .prm{border:0;background:transparent;cursor:pointer;font-size:18px;line-height:1;color:#6d5960;padding:6px}
@@ -314,7 +317,7 @@ canvas.confetti{position:absolute;inset:0;width:100%;height:100%;z-index:5;point
       <li><span><b>Search your inbox</b> for rejections, interviews and offers from this year.
         <span class="search"><code id="q">"unfortunately" OR "other candidates" OR "regret to inform" OR "not to move forward" after:2026/01/01</code><button class="mini" id="copyq" type="button">Copy</button></span></span></li>
       <li><span><b>Copy each email</b> into the box with <b>---</b> on its own line between emails, or drop .eml files on it.</span></li>
-      <li><span><b>Deleted them all?</b> Use quick mode and just type your numbers.</span></li>
+      <li><span><b>Deleted them all?</b> No wahala. Tap <b>Just my numbers</b> and type them in.</span></li>
     </ol>
     <div class="privacy">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffd23f" stroke-width="2" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
@@ -323,10 +326,10 @@ canvas.confetti{position:absolute;inset:0;width:100%;height:100%;z-index:5;point
     <div class="invite"><span>Know someone collecting Ls this year? Send it to them.</span><div class="links"><a id="i-wa" target="_blank" rel="noopener">WhatsApp</a><a id="i-x" target="_blank" rel="noopener">X</a><a id="i-li" target="_blank" rel="noopener">LinkedIn</a><button type="button" id="i-copy">Copy link</button></div></div>
   </section>
 
-  <form class="card" id="form" autocomplete="off">
+  <form class="card" id="form" autocomplete="off" novalidate>
     <div class="tabs" role="tablist" aria-label="How do you want to make your Wrapped?">
       <button type="button" role="tab" id="tab-emails" aria-selected="true" aria-controls="mode-emails">Paste emails<small>full story</small></button>
-      <button type="button" role="tab" id="tab-quick" aria-selected="false" aria-controls="mode-quick">Quick mode<small>30 seconds</small></button>
+      <button type="button" role="tab" id="tab-quick" aria-selected="false" aria-controls="mode-quick">Just my numbers<small>30 seconds</small></button>
     </div>
 
     <div id="mode-emails" role="tabpanel" aria-labelledby="tab-emails">
@@ -378,7 +381,6 @@ From: ...
       <div class="projlist" id="projlist"></div>
       <button type="button" class="ghost" id="addproj">+ Add a project</button>
     </details>
-    <label class="check"><input type="checkbox" id="naija" checked><span><b>Naija mode:</b> add this year's Nigerian slang to your Wrapped. Omo, e go sweet.</span></label>
     <div class="orbrow" aria-live="polite"><span class="orb" id="orb" aria-hidden="true"></span><div><b id="orbname">Your colours</b><span id="orbtxt">Your Wrapped gets its own colours from your numbers. Add some Ls to see them.</span></div></div>
     <button class="go" id="go" type="submit" disabled>Wrap my Ls <span aria-hidden="true">→</span></button>
     <div class="err" id="err"></div>
@@ -400,11 +402,13 @@ From: ...
   <div class="slide" id="slide" aria-live="polite"></div>
   <canvas class="confetti" id="confetti"></canvas>
   <div class="tapnote" id="tapnote">Tap for next · hold to pause</div>
+  <button class="cardshare" id="cardshare" type="button" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v13M7 8l5-5 5 5M5 14v6h14v-6"/></svg>Share this card</button>
   <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-label="Share this slide">
     <div class="sheet-panel">
       <img id="sheetimg" alt="Share card for this slide">
       <div class="fmt" id="sheetfmt"></div>
-      <div class="actions"><button class="btn" id="sheetsave" type="button">Save image</button><button class="btn alt" id="sheetclose" type="button">Done</button></div>
+      <div class="actions"><button class="btn" id="sheetsave" type="button">Save image</button><button class="btn alt" id="sheetnative" type="button" hidden>Share…</button><button class="btn alt" id="sheetclose" type="button">Done</button></div>
+      <div class="send"><a id="sh-wa" target="_blank" rel="noopener">WhatsApp</a><a id="sh-x" target="_blank" rel="noopener">X</a><a id="sh-li" target="_blank" rel="noopener">LinkedIn</a><button type="button" id="sh-copy">Copy caption</button></div>
       <p class="small">If Save doesn't work here, press and hold (or right-click) the image to save it.</p>
     </div>
   </div>
@@ -789,7 +793,7 @@ function statsFromEmails(text, total, hide){
   const hb = Ls.filter(e => e.heartbreak);
   S.heart = hb.length; S.heartCo = hb[0] ? co(hb[0].company) : null;
   S.bingoHits = new Set(S.cliches.map(c => c.label));
-  S.projects = readProjects(); S.naija = $('#naija').checked;
+  S.projects = readProjects(); S.naija = true;
   return S;
 }
 
@@ -805,7 +809,7 @@ function statsFromQuick(){
   S.cliches = S.picked.map(label => ({ label, n: null }));
   S.bingoHits = new Set(S.picked);
   S.kinds = []; S.bot = null; S.Lwords = null; S.unf = 0; S.peakDay = -1; S.weekendL = 0;
-  S.projects = readProjects(); S.naija = $('#naija').checked;
+  S.projects = readProjects(); S.naija = true;
   return S;
 }
 
@@ -885,7 +889,7 @@ function posts(S){
     ``,
     `I'm sharing this because this feed mostly shows wins, and that can make everyone else feel like they're failing. They're not. A no just means you tried.`,
     ``,
-    S.nProj ? `\nI also built ${plural(S.nProj, 'project')} this year: ${S.projects.map(p => p.name).join(', ')}. The Ls didn't stop the building.` : null,
+    S.nProj ? `\nI also built ${plural(S.nProj, 'project')} this year. The Ls didn't stop the building:\n${S.projects.map(p => `• ${p.name}${p.desc ? ': ' + p.desc : ''}${p.url ? ` (try it: ${p.url})` : ''}`).join('\n')}` : null,
     ``,
     `If you collected Ls this year too, you're in very good company.${S.naija ? ' No gree for anybody.' : ''}`,
     ``,
@@ -902,8 +906,8 @@ function posts(S){
     S.heart ? `💔 Ls after the interview: ${S.heart}` : null,
     `⚖️ L-to-W ratio: ${nL}:${S.nO}`,
     `🧠 L personality: ${S.persona.name}`,
-    S.nProj ? `🛠️ Projects built: ${S.nProj}` : null,
-    `🎧 Soundtrack: "${TRACKS[S.track].title}"`,
+    S.nProj ? `🛠️ Projects built: ${S.nProj}${S.projects.some(p => p.url) ? `\n${S.projects.filter(p => p.url).map(p => `   ↳ ${p.name}: ${p.url}`).join('\n')}` : ''}` : null,
+    `🎧 Song of my year: ${songName(SONGS[S.track])}`,
     ``,
     S.naija ? `Still applying. No dulling. We move.` : `Still applying. Still delusional. Still here.`,
     ``,
@@ -917,7 +921,7 @@ function posts(S){
     `Nobody posts the ratio. We post the W. But the W only exists because of the Ls before it.`,
     ``,
     `Every rejection taught me something about how I apply, how I interview, and how much I actually want this.`,
-    S.nProj ? `\nAnd in between the Ls, I built ${S.projects.map(p => p.name).join(', ')}.` : null,
+    S.nProj ? `\nAnd in between the Ls, I built ${S.projects.map(p => p.url ? `${p.name} (${p.url})` : p.name).join(', ')}. Go and test them.` : null,
     ``,
     `To everyone collecting Ls right now: keep shooting. The no's are part of the story.${S.naija ? ' We move.' : ''}`,
     ``,
@@ -1003,8 +1007,20 @@ const TRACKS = {
   close: { title: 'So Close (Voice Note)', genre: 'Slow jam', bpm: 84, kick: [0, 10], clap: [8], hat: [2, 6, 10, 14], hatVol: .035, bass: [0, 8], bassWave: 'triangle', bassCut: 700, prog: [[57, 60, 64], [53, 57, 60], [48, 52, 55], [52, 55, 59]], root: [45, 41, 48, 40], pad: 'triangle', padVol: .05, lead: [0, 2, 4, 6, 8, 10, 12, 14], leadWave: 'triangle', leadOct: 12, leadVol: .03, leadDur: .3, echo: true },
   ghost: { title: 'Seen, No Reply', genre: 'Ambient', bpm: 92, kick: [0], clap: [], hat: [], bass: [0], bassWave: 'sine', bassCut: 400, prog: [[57, 60, 64], [50, 53, 57], [52, 55, 59], [57, 60, 64]], root: [45, 38, 40, 45], pad: 'triangle', padVol: .045, lead: [0, 6, 11], leadWave: 'triangle', leadOct: 24, leadVol: .04, leadDur: .4, echo: true },
   testimony: { title: 'Testimony', genre: 'Afrobeats', bpm: 108, kick: [0, 7, 8, 13], clap: [4, 12], rim: [3, 10], shaker: true, hat: [], bass: [0, 3, 6, 8, 11, 14], bassWave: 'triangle', bassCut: 800, bassVol: .25, prog: [[60, 64, 67], [65, 69, 72], [67, 71, 74], [64, 67, 71]], root: [48, 53, 55, 52], pad: 'sawtooth', padVol: .025, padCut: 1800, lead: [2, 5, 10, 13], stab: true, leadOct: 12, leadVol: .025 },
-  build: { title: 'Build Mode', genre: 'House', bpm: 118, kick: [0, 4, 8, 12], clap: [4, 12], hat: [2, 6, 10, 14], hatVol: .08, bass: [0, 2, 4, 6, 8, 10, 12, 14], bassOct: { 2: 12, 6: 12, 10: 12, 14: 12 }, prog: [[62, 65, 69], [58, 62, 65], [60, 64, 67], [57, 60, 64]], root: [50, 46, 48, 45], pad: 'triangle', lead: [0, 3, 6, 9, 12], leadOct: 24, leadVol: .022 },
+  build: { title: 'Builder Beat', genre: 'House', bpm: 118, kick: [0, 4, 8, 12], clap: [4, 12], hat: [2, 6, 10, 14], hatVol: .08, bass: [0, 2, 4, 6, 8, 10, 12, 14], bassOct: { 2: 12, 6: 12, 10: 12, 14: 12 }, prog: [[62, 65, 69], [58, 62, 65], [60, 64, 67], [57, 60, 64]], root: [50, 46, 48, 45], pad: 'triangle', lead: [0, 3, 6, 9, 12], leadOct: 24, leadVol: .022 },
 };
+// Real songs each result points to. Edit this list to swap in your own picks.
+const SONGS = {
+  motion: { artist: 'Asake', title: 'Terminator', year: 2023 },
+  fra: { artist: 'Rema', title: 'Calm Down', year: 2022 },
+  close: { artist: 'Burna Boy', title: 'Last Last', year: 2022 },
+  ghost: { artist: 'Davido ft. Musa Keys', title: 'Unavailable', year: 2023 },
+  testimony: { artist: 'Kizz Daniel ft. Tekno', title: 'Buga', year: 2022 },
+  build: { artist: 'Asake', title: 'Lonely At The Top', year: 2023 },
+  still: { artist: 'Ayra Starr', title: 'Rush', year: 2022 },
+};
+const songLinks = sg => { const q = encodeURIComponent(`${sg.artist.replace(/ ft\..*$/, '')} ${sg.title}`); return { spotify: 'https://open.spotify.com/search/' + q, apple: 'https://music.apple.com/search?term=' + q, youtube: 'https://www.youtube.com/results?search_query=' + q }; };
+const songName = sg => `${sg.title} by ${sg.artist}`;
 const Sound = (() => {
   let ctx, master, noise, delay, timer, step = 0, next = 0, on = false, muted = false, tr = TRACKS.still, arp = 0;
   const hz = m => 440 * Math.pow(2, (m - 69) / 12);
@@ -1103,17 +1119,19 @@ const projlist = $('#projlist'); let projN = 0;
 function addProjRow(){
   if (projlist.children.length >= 6) return;
   const k = projN++;
-  projlist.insertAdjacentHTML('beforeend', `<div class="proj"><input class="pname" id="pn${k}" maxlength="40" placeholder="Project name" aria-label="Project name"><input class="pdesc" id="pd${k}" maxlength="70" placeholder="What it does (optional)" aria-label="What it does"><select class="pstat" id="ps${k}" aria-label="Project status"><option value="shipped">Shipped</option><option value="building">Still building</option><option value="retired">Retired</option></select><button type="button" class="prm" aria-label="Remove project">✕</button></div>`);
+  projlist.insertAdjacentHTML('beforeend', `<div class="proj"><input class="pname" id="pn${k}" maxlength="40" placeholder="Project name" aria-label="Project name"><input class="pdesc" id="pd${k}" maxlength="70" placeholder="What it does (optional)" aria-label="What it does"><input class="purl" id="pu${k}" type="text" inputmode="url" autocapitalize="off" spellcheck="false" maxlength="200" placeholder="Link so people can try it (optional)" aria-label="Project link"><select class="pstat" id="ps${k}" aria-label="Project status"><option value="shipped">Shipped</option><option value="building">Still building</option><option value="retired">Retired</option></select><button type="button" class="prm" aria-label="Remove project">✕</button></div>`);
   const row = projlist.lastElementChild;
   row.querySelector('.prm').addEventListener('click', () => { row.remove(); $('#addproj').hidden = false; refreshGo(); });
   row.querySelectorAll('input,select').forEach(i => i.addEventListener('input', refreshGo));
   row.querySelector('.pname').focus();
   $('#addproj').hidden = projlist.children.length >= 6;
 }
-function readProjects(){ return [...document.querySelectorAll('#projlist .proj')].map(r => ({ name: r.querySelector('.pname').value.trim(), desc: r.querySelector('.pdesc').value.trim(), status: r.querySelector('.pstat').value })).filter(p => p.name); }
+function cleanUrl(v){ v = (v || '').trim(); if (!v) return ''; if (!/^https?:\/\//i.test(v)) v = 'https://' + v; try { const u = new URL(v); return /^https?:$/.test(u.protocol) && u.hostname.includes('.') ? u.href : ''; } catch { return ''; } }
+const shortUrl = u => u.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '');
+function readProjects(){ return [...document.querySelectorAll('#projlist .proj')].map(r => ({ name: r.querySelector('.pname').value.trim(), desc: r.querySelector('.pdesc').value.trim(), url: cleanUrl(r.querySelector('.purl').value), status: r.querySelector('.pstat').value })).filter(p => p.name); }
 $('#addproj').addEventListener('click', addProjRow);
 $('#builds').addEventListener('toggle', () => { if ($('#builds').open && !projlist.children.length) addProjRow(); });
-$('#naija').addEventListener('change', refreshGo);
+
 
 function updateLive(){
   const S = statsFromEmails(ta.value, $('#total').value, false);
@@ -1131,7 +1149,7 @@ function updateOrb(S){
   P.colors.forEach((c, i) => orb.style.setProperty('--o' + (i + 1), c));
   form.style.setProperty('--gobg', P.bold.bg); form.style.setProperty('--gofg', P.bold.fg);
   $('#orbname').textContent = auraTitle(S);
-  $('#orbtxt').textContent = `${S.persona.name} · your song: ${TRACKS[S.track].title}`;
+  $('#orbtxt').textContent = `${S.persona.name} · your song: ${songName(SONGS[S.track])}`;
 }
 ta.addEventListener('input', () => { clearTimeout(liveTimer); liveTimer = setTimeout(updateLive, 200); });
 $('#total').addEventListener('input', updateLive);
@@ -1200,7 +1218,7 @@ $('#form').addEventListener('submit', e => {
   } else {
     S = statsFromEmails(ta.value, $('#total').value, $('#hide').checked);
     if (!S.emailsFound) { err.textContent = 'We couldn\'t find any emails. Paste at least one, with --- between each.'; return; }
-    if (!S.responses) { err.textContent = 'We found text, but none of it reads like an application email. Check that you pasted the email bodies, or try quick mode.'; return; }
+    if (!S.responses) { err.textContent = 'We found text, but none of it reads like an application email. Check that you pasted the email bodies, or tap Just my numbers.'; return; }
     S.name = $('#name').value.trim();
   }
   err.textContent = '';
@@ -1223,6 +1241,7 @@ function buildSlides(S){
     card: { eyebrow: `My ${yr} L Wrapped`, big: 'LinkedIn saw my wins.', line: 'This is everything else.' } });
 
   add({ t: 't-legal', dur: null, h: () => `<p class="eyebrow rise">Quick question</p><p class="say rise">How many Ls do you think you took in ${yr}?</p><div class="guess interactive">${guessBuckets(nL).map((b, i) => `<button type="button" class="rise" data-i="${i}">${b.label}</button>`).join('')}</div><p class="verdict" id="verdict" aria-live="polite"></p>`,
+    card: { eyebrow: `Guess my ${yr} L count`, big: `How many Ls did I take this year?`, line: `Guess, then go and get your own L Wrapped.` },
     after(el){ const bs = guessBuckets(nL); el.querySelectorAll('.guess button').forEach(btn => btn.addEventListener('click', () => {
       if (state.guessed) return; state.guessed = true; const g = bs[+btn.dataset.i], right = nL >= g.a && nL <= g.z; state.guess = g.label;
       el.querySelectorAll('.guess button').forEach((b, i) => b.classList.add(nL >= bs[i].a && nL <= bs[i].z ? 'right' : 'wrong'));
@@ -1239,10 +1258,10 @@ function buildSlides(S){
   add({ t: 't-violet', h: () => `<p class="eyebrow rise">Your inbox, broken down</p><p class="say rise">${bdLine}</p><div class="split rise">${segs.map(s => `<span style="width:${s[1] / sum * 100}%;background:${s[2]}"></span>`).join('')}</div><div class="legend rise">${segs.map(s => `<div><span class="sw" style="background:${s[2]}"></span><b>${s[1]}</b><i>${s[0]}</i></div>`).join('')}</div>`,
     card: { eyebrow: 'My inbox, broken down', big: bdLine, rows: segs.slice(0, 4).map(s => [s[1], s[0]]) } });
 
-  const TR = TRACKS[S.track];
+  const TR = TRACKS[S.track], SG = SONGS[S.track], SL = songLinks(SG);
   const why = { motion: N(`${S.total} applications. Na pure motion, executions only. We move.`, `${S.total} applications. That's not job hunting, that's pure motion.`), fra: N(`${nL} Ls. You almost fra this year alone. (Fra: to go completely crazy.)`, `${nL} Ls. Only something this loud could match it.`), close: N('For every final round that almost happened. E remain small.', 'For every final round that almost happened.'), ghost: N(`For the ${S.ghosted} applications that left you on seen. E choke.`, `For the ${S.ghosted} applications that never wrote back.`), testimony: N('After all the Ls, the W landed. Testimony time!', 'After all the Ls, the W landed. This one is a celebration.'), build: N(`For the ${S.nProj} projects you built while the Ls rolled in. Builder on motion.`, `For the ${S.nProj} projects you built while the Ls rolled in.`), still: N('Steady Ls, steady applying. No dulling.', 'Steady Ls, steady applying. This one is for the grind.') }[S.track];
-  add({ t: 't-ink', dur: 8000, h: () => `<p class="eyebrow rise">Your ${yr} soundtrack</p><div class="eq rise">${'<i></i>'.repeat(10)}</div><p class="big rise"><span class="acc">${esc(TR.title)}</span></p><p class="meta rise" style="margin-bottom:14px">${TR.genre} · ${TR.bpm} BPM · made from your results</p><p class="say rise">${esc(why)}</p><p class="sub rise">${Sound.on && !Sound.muted ? 'It\'s been playing this whole time. Different results get a different song.' : 'Tap the speaker up top to hear it. Different results get a different song.'}</p>`,
-    card: { eyebrow: `My ${yr} L Wrapped soundtrack`, big: TR.title, line: why } });
+  add({ t: 't-ink', dur: 8000, h: () => `<p class="eyebrow rise">Your ${yr} song</p><div class="eq rise">${'<i></i>'.repeat(10)}</div><p class="big rise"><span class="acc">${esc(SG.title)}</span></p><p class="say rise" style="margin-top:-6px">${esc(SG.artist)} · ${SG.year}</p><p class="sub rise" style="margin-bottom:16px">${esc(why)}</p><div class="actions interactive rise" style="justify-content:flex-start"><a class="btn" href="${SL.spotify}" target="_blank" rel="noopener">Spotify</a><a class="btn alt" href="${SL.apple}" target="_blank" rel="noopener">Apple Music</a><a class="btn alt" href="${SL.youtube}" target="_blank" rel="noopener">YouTube</a></div><p class="meta rise" style="margin-top:16px">Different results get a different song. The beat playing now is our own ${TR.genre.toLowerCase()} vibe.</p>`,
+    card: { eyebrow: `My ${yr} song of the year`, big: SG.title, line: `${SG.artist}. ${why}` } });
 
   if (S.kinds.length > 1) add({ t: 't-pink', h: () => `<p class="eyebrow rise">Your top genres</p><p class="say rise">You didn't just get rejected from jobs. You diversified.</p><ol class="toplist">${S.kinds.slice(0, 5).map(([k, n], i) => `<li class="rise"><span class="n">${i + 1}</span><span class="p">${esc(k)}</span><span class="c">${n} email${n === 1 ? '' : 's'}</span></li>`).join('')}</ol>`,
     card: { eyebrow: 'My top rejection genres', big: S.kinds[0][0], line: 'I didn\'t just get rejected from jobs. I diversified.', rows: S.kinds.slice(0, 4).map(([k, n]) => [n, k]) } });
@@ -1251,6 +1270,7 @@ function buildSlides(S){
   if (counted.length >= 3) {
     const opts = counted.slice(0, 3).map(c => c.label).sort(() => Math.random() - .5);
     add({ t: 't-pink', dur: null, h: () => `<p class="eyebrow rise">Guess the phrase</p><p class="say rise">Which line did recruiters send you the most?</p><div class="guess interactive">${opts.map(o => `<button type="button" class="rise" data-o="${esc(o)}">“${esc(o)}”</button>`).join('')}</div><p class="verdict" id="verdict" aria-live="polite"></p>`,
+      card: { eyebrow: 'Guess the phrase', big: 'Which line did recruiters send me the most?', line: opts.map(o => `“${o}”`).join(' · ') },
       after(el){ el.querySelectorAll('.guess button').forEach(btn => btn.addEventListener('click', () => {
         if (state.guessed2) return; state.guessed2 = true; const right = btn.dataset.o === counted[0].label;
         el.querySelectorAll('.guess button').forEach(b => b.classList.add(b.dataset.o === counted[0].label ? 'right' : 'wrong'));
@@ -1310,8 +1330,8 @@ function buildSlides(S){
 
   if (S.nProj) {
     const pr = S.projects, STAT = { shipped: 'Shipped', building: 'Still building', retired: 'Retired' };
-    add({ t: 't-moss', dur: 9000, confetti: S.shipped ? 900 : 0, h: () => `<p class="eyebrow rise">Meanwhile, you were building</p><p class="say rise">${N('Ls dey land, you dey build. No dulling.', 'The Ls kept landing. You kept building.')}</p><ul class="projs">${pr.map(p => `<li class="rise"><div><b>${esc(p.name)}</b>${p.desc ? `<span>${esc(p.desc)}</span>` : ''}</div><em class="st-${p.status}">${STAT[p.status]}</em></li>`).join('')}</ul><p class="sub rise">${nL ? `That's ${plural(pr.length, 'project')} next to ${plural(nL, 'L')}. Rejection didn't stop the shipping.` : 'Rejection or not, you shipped.'}</p>`,
-      card: { eyebrow: `What I built in ${yr}`, big: `${plural(pr.length, 'project')}${S.shipped ? `, ${S.shipped} shipped` : ''}`, line: N('Ls dey land, I dey build.', 'The Ls kept landing. I kept building.'), rows: pr.slice(0, 4).map(p => [STAT[p.status].split(' ')[0], p.name]) } });
+    add({ t: 't-moss', dur: 9000, confetti: S.shipped ? 900 : 0, h: () => `<p class="eyebrow rise">Meanwhile, you were building</p><p class="say rise">${N('Ls dey land, you dey build. No dulling.', 'The Ls kept landing. You kept building.')}</p><ul class="projs">${pr.map(p => `<li class="rise"><div><b>${esc(p.name)}</b>${p.desc ? `<span>${esc(p.desc)}</span>` : ''}${p.url ? `<br><a class="plink interactive" href="${esc(p.url)}" target="_blank" rel="noopener">Try it: ${esc(shortUrl(p.url))} ↗</a>` : ''}</div><em class="st-${p.status}">${STAT[p.status]}</em></li>`).join('')}</ul><p class="sub rise">${nL ? `That's ${plural(pr.length, 'project')} next to ${plural(nL, 'L')}. Rejection didn't stop the shipping.` : 'Rejection or not, you shipped.'}</p>`,
+      card: { eyebrow: `What I built in ${yr}`, big: `${plural(pr.length, 'project')}${S.shipped ? `, ${S.shipped} shipped` : ''}`, line: N('Ls dey land, I dey build.', 'The Ls kept landing. I kept building.'), rows: pr.slice(0, 4).map(p => [STAT[p.status].split(' ')[0], p.url ? `${p.name} · ${shortUrl(p.url)}` : p.name]) } });
   }
 
   // L-to-W ratio
@@ -1485,12 +1505,18 @@ async function openSheet(){
   const draw = async () => { sheetCard = await renderCard({ theme: s.t, ...spec }, sheetFmt); $('#sheetimg').src = sheetCard.url; };
   $('#sheetfmt').onclick = e => { const b = e.target.closest('button'); if (!b) return; sheetFmt = b.dataset.f; $('#sheetfmt').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); draw(); };
   $('#sheetsave').onclick = () => sheetCard && saveImage(sheetCard, `l-wrapped-${S.year}-slide-${cur}.png`);
+  const cap = `${spec.eyebrow}: ${spec.big}${spec.line ? '\n' + spec.line : ''}\n\nGet your own L Wrapped: ${appUrl()}\n#LWrapped`;
+  const l = shareLinks(cap); $('#sh-wa').href = l.wa; $('#sh-x').href = l.x; $('#sh-li').href = l.li;
+  $('#sh-copy').onclick = async () => toast(await copyText(cap) ? 'Caption copied. Attach the image.' : 'Copy was blocked here');
+  const nat = $('#sheetnative'); nat.hidden = !navigator.share;
+  nat.onclick = async () => { try { const f = new File([sheetCard.blob], 'l-wrapped.png', { type: 'image/png' }); if (navigator.canShare && navigator.canShare({ files: [f] })) await navigator.share({ files: [f], text: cap }); else await navigator.share({ text: cap }); } catch {} };
   await draw();
   $('#sheetclose').focus({ preventScroll: true });
 }
 function closeSheet(){ $('#sheet').hidden = true; pause(false, 'sheet'); }
 $('#sheetclose').addEventListener('click', closeSheet);
 $('#share').addEventListener('click', openSheet);
+$('#cardshare').addEventListener('click', openSheet);
 
 /* ================= story engine ================= */
 const T = { dur: 0, elapsed: 0, last: 0, raf: 0, holds: new Set() };
@@ -1545,6 +1571,7 @@ function show(i){
   $('#tapnote').hidden = !!(s.final || s.gate || s.dur === null);
   $('#next').hidden = !!s.final; $('#prev').hidden = !!s.final;
   $('#share').hidden = !(s.card || s.final);
+  $('#cardshare').hidden = !s.card || !!s.final || !!s.gate;
   animateCounts(slideEl);
   if (s.hit) fxTimers.push(setTimeout(() => { Sound.hit(); if (!REDUCED) { story.classList.remove('shake'); void story.offsetWidth; story.classList.add('shake'); } }, s.hit));
   if (s.confetti) fxTimers.push(setTimeout(() => Confetti.burst([...PAL.colors, PAL.soft.bg, '#fff4e8']), s.confetti));
