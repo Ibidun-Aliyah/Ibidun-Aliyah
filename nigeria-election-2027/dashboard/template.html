@@ -66,14 +66,27 @@ header { display: grid; gap: 10px; }
 .bar span { display: block; height: 100%; }
 
 /* Map */
-.map-grid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 4px; max-width: 640px; }
-.tile { aspect-ratio: 1.15; max-width: 100%; border-radius: 4px; display: grid; align-content: center; justify-items: center;
-  font-size: 0.7rem; line-height: 1.15; cursor: default; position: relative; border: 1px solid transparent; }
-.tile:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
-.tile b { font-family: var(--f-mono); font-weight: 500; font-size: 0.72rem; }
-.tile .pct { font-variant-numeric: tabular-nums; opacity: 0.9; }
-@media (max-width: 480px) { .tile .pct { display: none; } .tile b { font-size: 0.62rem; } }
-.map-layout { display: grid; grid-template-columns: minmax(0, 640px) minmax(0, 1fr); gap: 24px; align-items: start; }
+#map svg { width: 100%; height: auto; display: block; }
+#map path { stroke: var(--surface); stroke-width: 1; stroke-linejoin: round; cursor: pointer; transition: opacity .15s; }
+#map path:hover, #map path:focus-visible { stroke: var(--ink); stroke-width: 1.5; outline: none; }
+#map path.sel { stroke: var(--ink); stroke-width: 2.5; }
+#map .zone-dim path:not(.inzone) { opacity: 0.25; }
+#map text.lbl { font-family: var(--f-mono); font-size: 9px; pointer-events: none; text-anchor: middle; paint-order: stroke; stroke-width: 2.5px; }
+@media (max-width: 480px) { #map text.lbl { display: none; } }
+.detail { border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: grid; gap: 10px; align-content: start; }
+.detail-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.drow { display: grid; grid-template-columns: 74px minmax(0, 1fr) 46px; gap: 8px; align-items: center; font-size: 0.85rem; }
+.dtrack { position: relative; height: 12px; background: var(--line-2); border-radius: 3px; }
+.dtrack .fill { position: absolute; inset: 0 auto 0 0; border-radius: 3px; }
+.dtrack .prev { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); }
+.dtrack .q25 { position: absolute; top: 0; bottom: 0; left: 25%; width: 1px; background: var(--ink-3); }
+.zones { display: flex; flex-wrap: wrap; gap: 6px; }
+.zones button { font: inherit; font-size: 0.75rem; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); border-radius: 999px; padding: 3px 10px; cursor: pointer; }
+.zones button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.zones button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.rule-wide { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 24px; border-top: 1px solid var(--line-2); padding-top: 14px; }
+@media (max-width: 820px) { .rule-wide { grid-template-columns: 1fr; } }
+.map-layout { display: grid; grid-template-columns: minmax(0, 620px) minmax(0, 1fr); gap: 24px; align-items: start; }
 @media (max-width: 900px) { .map-layout { grid-template-columns: 1fr; } }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.8rem; color: var(--ink-2); }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
@@ -153,17 +166,23 @@ details summary { cursor: pointer; font-weight: 600; }
   <section class="panel" aria-labelledby="h-map">
     <div class="panel-head">
       <div><h2 id="h-map">State by state</h2>
-        <p class="muted small">36 states and the FCT, laid out roughly where they sit on the map. Hover or tap a state for details.</p></div>
+        <p class="muted small">Hover over a state for a quick look; click or tap it to see the full breakdown.</p></div>
       <div class="seg" role="group" aria-label="Colour the map by" id="mapmode"></div>
     </div>
+    <div class="zones" role="group" aria-label="Highlight a zone" id="zones"></div>
     <div class="map-layout">
       <div style="display:grid; gap:10px; min-width:0">
-        <div class="map-grid" id="map" role="list"></div>
+        <div id="map"></div>
         <div id="maplegend"></div>
       </div>
+      <div class="detail" id="detail" aria-live="polite"></div>
+    </div>
+    <div class="rule-wide">
       <div class="rule">
         <h3>The 25% rule (Section 134)</h3>
         <p class="muted small">To win in the first round, a candidate needs the most votes <em>and</em> at least 25% of the vote in 24 of the 36 states. Otherwise the top candidate faces a runoff. Bars show the average number of states where each candidate clears 25%; the black line marks 24.</p>
+      </div>
+      <div class="rule">
         <div id="rulebars" class="rule"></div>
         <p class="muted small" id="runoff-note"></p>
       </div>
@@ -302,33 +321,36 @@ $("cands").innerHTML = MAIN.map(c => {
     </dl></article>`;
 }).join("");
 
-/* ---------- tile map ---------- */
-const LAYOUT = {
-  "Sokoto":[0,1],"Zamfara":[0,2],"Katsina":[0,3],"Kano":[0,4],"Jigawa":[0,5],"Yobe":[0,6],"Borno":[0,7],
-  "Kebbi":[1,1],"Niger":[1,2],"Kaduna":[1,3],"Bauchi":[1,4],"Gombe":[1,5],"Adamawa":[1,6],
-  "Kwara":[2,1],"FCT":[2,2],"Nasarawa":[2,3],"Plateau":[2,4],"Taraba":[2,5],
-  "Oyo":[3,0],"Osun":[3,1],"Ekiti":[3,2],"Kogi":[3,3],"Benue":[3,4],
-  "Ogun":[4,0],"Ondo":[4,1],"Edo":[4,2],"Enugu":[4,3],"Ebonyi":[4,4],
-  "Lagos":[5,0],"Delta":[5,1],"Anambra":[5,2],"Imo":[5,3],"Abia":[5,4],"Cross River":[5,5],
-  "Bayelsa":[6,1],"Rivers":[6,2],"Akwa Ibom":[6,3]
-};
+/* ---------- interactive map ---------- */
 const ABBR = { "Akwa Ibom": "AKW", "Cross River": "CRS", "Bayelsa": "BAY", "Benue": "BEN", "Borno": "BOR", "Kaduna": "KAD", "Kano": "KAN", "Katsina": "KAT", "Kebbi": "KEB", "Kogi": "KOG", "Kwara": "KWA", "Abia": "ABI", "Adamawa": "ADA", "Anambra": "ANA", "Bauchi": "BAU", "Ebonyi": "EBO", "Ekiti": "EKI", "Enugu": "ENU", "Nasarawa": "NAS", "Niger": "NIG", "Ogun": "OGU", "Ondo": "OND", "Osun": "OSU", "Oyo": "OYO", "Plateau": "PLA", "Rivers": "RIV", "Sokoto": "SOK", "Taraba": "TAR", "Yobe": "YOB", "Zamfara": "ZAM", "Lagos": "LAG", "Jigawa": "JIG", "Imo": "IMO", "Gombe": "GOM", "Edo": "EDO", "Delta": "DEL", "FCT": "FCT" };
 const S = Object.fromEntries(F.states.map(s => [s.state, s]));
+const H23 = st => { const h = DATA.history_2023[st], t = (h.APC + h.PDP + h.LP + h.NNPP) / 0.975;
+  return { tinubu: h.APC / t, atiku: h.PDP / t, obi: (h.LP + h.NNPP) / t }; };
 const w23 = st => { const h = DATA.history_2023[st]; return { APC: "tinubu", PDP: "atiku", LP: "obi", NNPP: "kwankwaso" }[Object.keys(h).reduce((a, b) => h[a] > h[b] ? a : b)]; };
-let mapMode = "winner";
+const ZONE_NAMES = { NC: "North Central", NE: "North East", NW: "North West", SE: "South East", SS: "South South", SW: "South West" };
+let mapMode = "winner", zoneSel = null;
+const closest = F.states.filter(s => s.state !== "FCT").reduce((a, b) => (a.win_prob[leaderOf(a)] < b.win_prob[leaderOf(b)] ? a : b));
+let selected = closest.state;
 const MODES = [["winner", "Projected winner"], ["p25-tinubu", "Tinubu ≥25%"], ["p25-atiku", "Atiku ≥25%"], ["p25-obi", "Obi ≥25%"]];
 $("mapmode").innerHTML = MODES.map(([k, l]) => `<button type="button" data-k="${k}" aria-pressed="${k === mapMode}">${l}</button>`).join("");
 $("mapmode").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   mapMode = b.dataset.k;
   [...$("mapmode").children].forEach(x => x.setAttribute("aria-pressed", x.dataset.k === mapMode));
-  drawMap();
+  paintMap();
+});
+$("zones").innerHTML = [["", "All zones"], ...Object.entries(ZONE_NAMES)].map(([k, l]) => `<button type="button" data-z="${k}" aria-pressed="${k === ""}">${l}</button>`).join("");
+$("zones").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  zoneSel = b.dataset.z || null;
+  [...$("zones").children].forEach(x => x.setAttribute("aria-pressed", (x.dataset.z || null) === zoneSel));
+  paintMap();
 });
 function leaderOf(s) { return ALL.reduce((a, b) => s.win_prob[a] > s.win_prob[b] ? a : b); }
 function tileStyle(s) {
   if (mapMode === "winner") {
     const w = leaderOf(s), p = s.win_prob[w];
-    const mix = Math.round(25 + 75 * Math.min(1, (p - 0.34) / 0.6));
+    const mix = Math.round(25 + 75 * Math.min(1, Math.max(0, (p - 0.34) / 0.6)));
     return { bg: `color-mix(in oklab, ${col(w)} ${mix}%, var(--surface))`, fg: mix > 60 ? "#fff" : "var(--ink)", label: `${pct(p)}` };
   }
   const c = mapMode.split("-")[1], p = s.p25[c];
@@ -338,32 +360,70 @@ function tileStyle(s) {
 function stateTip(s) {
   const rows = ALL.filter(c => s.share[c] > 0.015).sort((a, b) => s.share[b] - s.share[a]).map(c =>
     `<div class="t-row"><span><span class="swatch" style="display:inline-block;width:9px;height:9px;background:${col(c)};margin-right:6px"></span>${NAMES[c]}</span><span>${pct(s.share[c], 1)} · win ${pct(s.win_prob[c])}</span></div>`).join("");
-  const p25 = MAIN.map(c => `${NAMES[c]} ${pct(s.p25[c])}`).join(" · ");
-  const prev = w23(s.state);
-  return `<div style="font-weight:600;margin-bottom:6px">${s.state} <span class="muted" style="font-weight:400">· ${s.zone}</span></div>${rows}
-    <div class="muted" style="margin-top:6px">Chance of ≥25%: ${p25}</div>
-    <div class="muted">Won in 2023 by ${prev[0].toUpperCase() + prev.slice(1)}</div>`;
+  return `<div style="font-weight:600;margin-bottom:6px">${s.state} <span class="muted" style="font-weight:400">· ${ZONE_NAMES[s.zone]}</span></div>${rows}
+    <div class="muted" style="margin-top:6px">Click for the full breakdown</div>`;
 }
-function drawMap() {
-  const map = $("map"); map.innerHTML = "";
-  for (const [st, [r, c]] of Object.entries(LAYOUT)) {
-    const s = S[st], t = tileStyle(s);
-    const d = document.createElement("div");
-    d.className = "tile"; d.tabIndex = 0; d.setAttribute("role", "listitem");
-    d.style.gridRow = r + 1; d.style.gridColumn = c + 1; d.style.background = t.bg; d.style.color = t.fg;
-    d.setAttribute("aria-label", `${st}: ${mapMode === "winner" ? NAMES[leaderOf(s)] + " favoured, " + t.label : t.label + " chance of 25%"}`);
-    d.innerHTML = `<b>${ABBR[st]}</b><span class="pct">${t.label}</span>`;
-    d.addEventListener("pointermove", e => showTip(stateTip(s), e.clientX, e.clientY));
-    d.addEventListener("pointerleave", hideTip);
-    d.addEventListener("focus", () => { const r = d.getBoundingClientRect(); showTip(stateTip(s), r.right, r.top); });
-    d.addEventListener("blur", hideTip);
-    map.appendChild(d);
+const MAP = DATA.map, paths = {}, labels = {};
+(function buildMap() {
+  const svg = el("svg", { viewBox: `0 0 ${MAP.width} ${MAP.height}`, role: "group", "aria-label": "Map of Nigeria's 36 states and the FCT" });
+  $("map").appendChild(svg);
+  const g = el("g", {}, svg), gl = el("g", {}, svg);
+  for (const [st, geo] of Object.entries(MAP.states)) {
+    const p = el("path", { d: geo.d, tabindex: 0, role: "button" }, g);
+    p.addEventListener("pointermove", e => showTip(stateTip(S[st]), e.clientX, e.clientY));
+    p.addEventListener("pointerleave", hideTip);
+    p.addEventListener("click", () => { hideTip(); select(st); });
+    p.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(st); } });
+    paths[st] = p;
+    const t = el("text", { x: geo.label[0], y: geo.label[1] + 3, class: "lbl" }, gl);
+    t.textContent = ABBR[st];
+    labels[st] = t;
   }
+})();
+function paintMap() {
+  const g = paths.Lagos.parentNode;
+  g.classList.toggle("zone-dim", !!zoneSel);
+  for (const [st, p] of Object.entries(paths)) {
+    const s = S[st], t = tileStyle(s);
+    p.setAttribute("fill", t.bg);
+    p.classList.toggle("sel", st === selected);
+    p.classList.toggle("inzone", !zoneSel || s.zone === zoneSel);
+    p.setAttribute("aria-label", `${st}: ${mapMode === "winner" ? NAMES[leaderOf(s)] + " favoured, " + t.label : t.label + " chance of 25%"}`);
+    labels[st].style.fill = t.fg; labels[st].style.stroke = "transparent";
+    labels[st].style.opacity = !zoneSel || s.zone === zoneSel ? 1 : 0.3;
+  }
+  // keep the selected outline on top
+  if (paths[selected]) paths[selected].parentNode.appendChild(paths[selected]);
   $("maplegend").innerHTML = mapMode === "winner"
-    ? `<div class="legend">${MAIN.concat(["makinde"]).map(c => `<span><i style="background:${col(c)}"></i>${NAMES[c]}</span>`).join("")}<span>Darker = more certain. Number = chance the leader carries the state.</span></div>`
+    ? `<div class="legend">${MAIN.concat(["makinde"]).map(c => `<span><i style="background:${col(c)}"></i>${NAMES[c]}</span>`).join("")}<span>Darker = more certain.</span></div>`
     : `<div class="ramp"><span>0%</span><span style="background:linear-gradient(90deg, color-mix(in oklab, ${col(mapMode.split("-")[1])} 8%, var(--surface)), ${col(mapMode.split("-")[1])})"></span><span>100% chance of clearing 25%</span></div>`;
+  if (zoneSel) {
+    const zs = F.states.filter(s => s.zone === zoneSel);
+    const tally = Object.fromEntries(MAIN.map(c => [c, zs.filter(s => leaderOf(s) === c).length]));
+    $("maplegend").innerHTML += `<p class="muted small" style="margin-top:6px">${ZONE_NAMES[zoneSel]}: ${MAIN.map(c => `${NAMES[c]} favoured in ${tally[c]}`).join(", ")} of ${zs.length} states.</p>`;
+  }
 }
-drawMap();
+function select(st) {
+  selected = st; paintMap();
+  const s = S[st], prev = H23(st), w = leaderOf(s), pw = w23(st);
+  const rows = MAIN.map(c => `<div class="drow"><span>${NAMES[c]}</span>
+      <div class="dtrack"><div class="fill" style="width:${Math.min(100, s.share[c] * 100)}%;background:${col(c)}"></div>
+        <div class="q25"></div><div class="prev" style="left:${Math.min(99.5, prev[c] * 100)}%" title="2023: ${pct(prev[c], 1)}"></div></div>
+      <span class="num mono" style="text-align:right">${pct(s.share[c])}</span></div>`).join("");
+  const others = s.share.makinde + s.share.onor + s.share.others;
+  const swing = c => { const d = (s.share[c] - prev[c]) * 100; return `${d >= 0 ? "+" : "−"}${Math.abs(d).toFixed(0)}`; };
+  $("detail").innerHTML = `
+    <div class="detail-head"><h3>${st}${st === "FCT" ? "" : " State"}</h3><span class="eyebrow">${ZONE_NAMES[s.zone]}</span></div>
+    <p><span class="swatch" style="display:inline-block;width:10px;height:10px;background:${col(w)};margin-right:6px"></span><strong>${NAMES[w]}</strong> favoured · carries the state in ${pct(s.win_prob[w])} of simulations</p>
+    <div style="display:grid;gap:8px">${rows}</div>
+    <p class="muted small">Bars: expected 2027 vote share. Black tick: 2023 result (Obi's tick adds Kwankwaso's NNPP vote). Grey line: the 25% mark.${others > 0.05 ? ` Others, including Makinde and Onor: ${pct(others)}.` : ""}</p>
+    <dl class="kv">
+      ${MAIN.map(c => `<dt>${NAMES[c]}: chance of ≥25%</dt><dd>${pct(s.p25[c])}</dd>`).join("")}
+      <dt>Change since 2023 (points)</dt><dd>${MAIN.map(c => `${NAMES[c][0]} ${swing(c)}`).join(" · ")}</dd>
+      <dt>Won in 2023 by</dt><dd>${pw[0].toUpperCase() + pw.slice(1)}</dd>
+    </dl>`;
+}
+select(selected);
 
 /* ---------- 25% rule bars ---------- */
 const need = DATA.whatif.config.STATES_NEEDED_25PCT;

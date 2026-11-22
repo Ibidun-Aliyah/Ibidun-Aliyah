@@ -63,6 +63,7 @@ def main():
         "forecast": summary,
         "history_2023": {s: hist_2023.loc[s].to_dict() for s in hist_2023.index},
         "whatif": whatif,
+        "map": json.loads((ROOT / "data" / "nigeria_map.json").read_text()),
     }
     (ROOT / "outputs").mkdir(exist_ok=True)
     (ROOT / "outputs" / "forecast.json").write_text(json.dumps(out, indent=1, default=float))

@@ -29,7 +29,9 @@ data/  ──► features.py ──► model.py (ridge regression) ──► sim
    from the ballot (his nomination was voided by a court on 5 Nov 2026; appeal pending).
    Each run applies the constitutional rule (most votes + 25% in 24 of 36 states) and a
    runoff when nobody meets it.
-6. **Dashboard** (`dashboard/`): summary, tile map of all states, the 25% rule, vote-share
+6. **Dashboard** (`dashboard/`): summary, an interactive map of Nigeria (hover for numbers,
+   click a state for its 2027-vs-2023 breakdown, filter by geopolitical zone, colour by
+   projected winner or by each candidate's chance of 25%), the 25% rule, vote-share
    distributions, the model's learned weights, and a what-if lab that re-runs the
    simulation in the browser.
 
@@ -42,6 +44,10 @@ python src/main.py          # trains, simulates, writes outputs/forecast.json an
 
 Change the assumptions in `src/config.py` (Atiku ballot risk, economic penalty, governor
 defection weight, uncertainty) and run again.
+
+State borders come from Natural Earth (public domain), simplified into SVG paths by
+`tools/build_map.py` and saved in `data/nigeria_map.json`. You only need to re-run that
+script to rebuild the map with a different level of detail.
 
 ## Model quality and limits
 
