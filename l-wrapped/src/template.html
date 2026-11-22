@@ -271,6 +271,28 @@ textarea#emails:focus{border-color:var(--ink);outline:none}
 .invite .links{display:flex;flex-wrap:wrap;gap:8px}
 .invite a,.invite button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:7px 14px;font:600 13px var(--body);color:var(--paper);text-decoration:none;cursor:pointer}
 .invite a:hover,.invite button:hover{border-color:var(--paper)}
+.eq{display:flex;gap:5px;align-items:flex-end;height:48px;margin-bottom:18px}
+.eq i{width:9px;height:100%;background:var(--acc);border-radius:3px;transform-origin:bottom;animation:eq .8s ease-in-out infinite alternate}
+.eq i:nth-child(2n){animation-duration:.55s}.eq i:nth-child(3n){animation-duration:1.1s}.eq i:nth-child(4n){animation-duration:.7s;animation-delay:-.3s}.eq i:nth-child(5n){animation-delay:-.5s}
+@keyframes eq{from{transform:scaleY(.15)}to{transform:scaleY(1)}}
+.projs{list-style:none;margin:14px 0 18px;padding:0;display:grid;gap:10px}
+.projs li{display:flex;gap:12px;align-items:center;justify-content:space-between;background:color-mix(in srgb,var(--fg) 12%,transparent);border-radius:14px;padding:12px 14px;min-width:0}
+.projs li div{min-width:0}
+.projs b{display:block;font:800 clamp(18px,4.8vw,24px)/1.1 var(--display);overflow-wrap:anywhere}
+.projs span{font-size:14px;opacity:.85}
+.projs em{font:700 11px var(--mono);font-style:normal;letter-spacing:.08em;text-transform:uppercase;padding:5px 9px;border-radius:999px;background:var(--acc);color:var(--bg);white-space:nowrap}
+.projs em.st-building,.projs em.st-retired{background:transparent;color:var(--fg);box-shadow:inset 0 0 0 1.5px var(--fg)}
+.projs em.st-retired{opacity:.65}
+.builds{margin-top:20px;border:2px dashed #d9cdbb;border-radius:14px;padding:12px 14px}
+.builds summary{cursor:pointer;font-size:14px}
+.builds[open] summary{margin-bottom:10px}
+.projlist{display:grid;gap:10px;margin-bottom:10px}
+.proj{display:grid;grid-template-columns:1fr 1.3fr auto auto;grid-template-areas:"n d s x";gap:6px;align-items:center}
+@media (max-width:560px){.proj{grid-template-columns:1fr auto auto;grid-template-areas:"n s x" "d d d"}}
+.proj .pname{grid-area:n}.proj .pdesc{grid-area:d}.proj .pstat{grid-area:s}.proj .prm{grid-area:x}
+.proj input,.proj select{border:2px solid #d9cdbb;border-radius:10px;background:#fffaf2;padding:8px 10px;color:var(--ink);min-width:0;font-size:14px;width:100%}
+.proj input:focus,.proj select:focus{border-color:var(--ink);outline:none}
+.prm{border:0;background:transparent;cursor:pointer;font-size:18px;line-height:1;color:#6d5960;padding:6px}
 canvas.confetti{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
 @media (max-height:700px){.huge{font-size:clamp(110px,30vw,180px)}.months{height:140px}.aura{width:min(100%,200px)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition:none!important}.aura,.orb,.fluid i{animation:none}}
@@ -346,6 +368,12 @@ From: ...
       <div class="chips" id="q-phrases"></div>
     </div>
 
+    <details class="builds" id="builds">
+      <summary><b>Built something this year?</b> Add your projects. The Ls don't cancel what you shipped.</summary>
+      <div class="projlist" id="projlist"></div>
+      <button type="button" class="ghost" id="addproj">+ Add a project</button>
+    </details>
+    <label class="check"><input type="checkbox" id="naija" checked><span><b>Naija mode:</b> add this year's Nigerian slang to your Wrapped. Omo, e go sweet.</span></label>
     <div class="orbrow" aria-live="polite"><span class="orb" id="orb" aria-hidden="true"></span><div><b id="orbname">Your colours</b><span id="orbtxt">Your Wrapped gets its own colours from your numbers. Add some Ls to see them.</span></div></div>
     <button class="go" id="go" type="submit" disabled>Wrap my Ls <span aria-hidden="true">→</span></button>
     <div class="err" id="err"></div>
@@ -449,6 +477,7 @@ function statsFromEmails(text, total, hide){
   const hb = Ls.filter(e => e.heartbreak);
   S.heart = hb.length; S.heartCo = hb[0] ? co(hb[0].company) : null;
   S.bingoHits = new Set(S.cliches.map(c => c.label));
+  S.projects = readProjects(); S.naija = $('#naija').checked;
   return S;
 }
 
@@ -464,6 +493,7 @@ function statsFromQuick(){
   S.cliches = S.picked.map(label => ({ label, n: null }));
   S.bingoHits = new Set(S.picked);
   S.kinds = []; S.bot = null; S.Lwords = null; S.unf = 0; S.peakDay = -1; S.weekendL = 0;
+  S.projects = readProjects(); S.naija = $('#naija').checked;
   return S;
 }
 
@@ -471,17 +501,22 @@ function enrich(S){
   const nL = S.nL;
   S.tier = nL >= 50 ? 4 : nL >= 30 ? 3 : nL >= 15 ? 2 : nL >= 5 ? 1 : 0;
   // personalities, in priority order
+  const N = (ng, en) => S.naija ? ng : en;
+  const projects = S.projects || [], nProj = projects.length;
+  S.nProj = nProj; S.shipped = projects.filter(p => p.status === 'shipped').length;
   const P = [];
-  if (S.nO) P.push({ key: 'plot', name: 'The Plot Twist', theme: 't-legal', icon: 'star', line: `Took ${plural(nL, 'L')} and still walked out with ${S.nO === 1 ? 'a W' : S.nO + ' Ws'}. The rejections were just the trailer.` });
-  if (S.heart >= 3 || (nL >= 4 && S.heart / nL >= 0.35)) P.push({ key: 'final', name: 'Final Round Regular', theme: 't-pink', icon: 'heart', line: `You made it into the room ${plural(S.heart, 'time')}. You're close, and it shows.` });
-  if (S.ghosted && S.ghosted >= nL) P.push({ key: 'ghost', name: 'Ghost Whisperer', theme: 't-violet', icon: 'ghost', line: `${S.ghosted} applications never got a reply at all. At least a rejection is closure.` });
-  if (S.bot != null && nL >= 4 && S.bot / nL >= 0.5) P.push({ key: 'algo', name: "The Algorithm's Nemesis", theme: 't-paper', icon: 'robot', line: `${Math.round(S.bot / nL * 100)}% of your Ls came from a no-reply inbox. Software keeps saying no. A human hasn't had a proper look yet.` });
+  if ((S.total || 0) >= 50) P.push({ key: 'motion', name: N('Pure Motion', 'The Relentless'), theme: 't-red', icon: 'flame', line: N(`${S.total} applications. Na pure motion. Executions only, no long talk.`, `${S.total} applications. You don't shoot your shot. You empty the clip.`) });
+  if (S.nO) P.push({ key: 'plot', name: 'The Plot Twist', theme: 't-legal', icon: 'star', line: N(`${plural(nL, 'L')}, then the W landed. Testimony! The Ls were just the trailer.`, `Took ${plural(nL, 'L')} and still walked out with ${S.nO === 1 ? 'a W' : S.nO + ' Ws'}. The rejections were just the trailer.`) });
+  if (S.heart >= 3 || (nL >= 4 && S.heart / nL >= 0.35)) P.push({ key: 'final', name: 'Final Round Regular', theme: 't-pink', icon: 'heart', line: N(`You made it into the room ${plural(S.heart, 'time')}. E remain small. You're very close.`, `You made it into the room ${plural(S.heart, 'time')}. You're close, and it shows.`) });
+  if (nProj >= 2) P.push({ key: 'builder', name: 'The Builder', theme: 't-moss', icon: 'code', line: N(`${nProj} projects while the Ls were landing. Rejection no stop the building.`, `${nProj} projects built while the Ls kept landing. Rejection never stopped the building.`) });
+  if (S.ghosted && S.ghosted >= nL) P.push({ key: 'ghost', name: 'Ghost Whisperer', theme: 't-violet', icon: 'ghost', line: N(`${S.ghosted} applications: seen, no reply. E choke. At least rejection na closure.`, `${S.ghosted} applications never got a reply at all. At least a rejection is closure.`) });
+  if (S.bot != null && nL >= 4 && S.bot / nL >= 0.5) P.push({ key: 'algo', name: "The Algorithm's Nemesis", theme: 't-paper', icon: 'robot', line: N(`${Math.round(S.bot / nL * 100)}% of your Ls na robot send am. No human don look your CV well yet.`, `${Math.round(S.bot / nL * 100)}% of your Ls came from a no-reply inbox. Software keeps saying no. A human hasn't had a proper look yet.`) });
   if (S.repeat) P.push({ key: 'loyal', name: 'The Loyal One', theme: 't-violet', icon: 'loop', line: `${S.repeat.name || 'One company'} turned you down ${S.repeat.n} times and you kept coming back. That's commitment.` });
-  if (S.total >= 60 || nL >= 40) P.push({ key: 'relentless', name: 'The Relentless', theme: 't-red', icon: 'flame', line: `${S.total ? S.total + ' applications' : nL + ' Ls'}. You don't shoot your shot. You empty the clip.` });
-  if (nL >= 25) P.push({ key: 'conn', name: 'Rejection Connoisseur', theme: 't-moss', icon: 'crown', line: `${nL} Ls. You can tell a template rejection from a personal one by the first line.` });
-  if (nL >= 1 && nL <= 4) P.push({ key: 'fresh', name: 'Fresh Recruit', theme: 't-paper', icon: 'seed', line: `${plural(nL, 'L')} so far. Everyone's L count starts somewhere. Yours just started.` });
+  if (nL >= 30) P.push({ key: 'fra', name: N('Almost Fra', 'Rejection Connoisseur'), theme: 't-moss', icon: 'crown', line: N(`${nL} Ls. You almost fra this year alone, but you held it down.`, `${nL} Ls. You can tell a template rejection from a personal one by the first line.`) });
+  if (nL >= 1 && nL <= 4) P.push({ key: 'fresh', name: 'Fresh Recruit', theme: 't-paper', icon: 'seed', line: N(`${plural(nL, 'L')} so far. Lock in. Everybody start from somewhere.`, `${plural(nL, 'L')} so far. Everyone's L count starts somewhere. Yours just started.`) });
   if (nL === 0) P.push({ key: 'untouched', name: 'Untouched', theme: 't-paper', icon: 'seed', line: `Zero Ls detected. Either you're winning or you haven't started shooting yet.` });
-  P.push({ key: 'collector', name: 'Professional L Collector', theme: 't-red', icon: 'stack', line: `Every L is a rep, and you got ${nL} of them in. That's what shooting your shot looks like.` });
+  P.push({ key: 'collector', name: 'Professional L Collector', theme: 't-red', icon: 'stack', line: N(`Every L is a rep, and you got ${nL} in. No dulling.`, `Every L is a rep, and you got ${nL} of them in. That's what shooting your shot looks like.`) });
+  S.track = (S.total || 0) >= 50 ? 'motion' : S.nO ? 'testimony' : (S.heart >= 3 || (nL >= 4 && S.heart / nL >= .35)) ? 'close' : (S.ghosted >= 10 && S.ghosted >= nL) ? 'ghost' : nL >= 30 ? 'fra' : nProj >= 2 ? 'build' : 'still';
   S.persona = P[0]; S.rising = P.find(p => p !== P[0] && p.key !== 'collector') || null;
 
   // aura
@@ -493,6 +528,7 @@ function enrich(S){
     ['Main Character', '#7b61ff', S.nI * 2.5, 'you kept landing in the interview room'],
     ['Algorithm-Proof', '#4fb3ff', (S.bot || 0) * 1.1, 'software said no and you ignored it'],
     ['Unbothered', '#2bb37f', S.tier * 3 + 1, 'the Ls roll right off you'],
+    ['Builder', '#14b8a6', (S.projects || []).length * 6, 'you kept shipping anyway'],
   ].filter(a => a[2] > 0).sort((a, b) => b[2] - a[2]).slice(0, 3);
   while (A.length < 3) A.push(['Unbothered', '#2bb37f', 0, 'the Ls roll right off you'].slice());
   S.aura = A;
@@ -537,10 +573,12 @@ function posts(S){
     ``,
     `I'm sharing this because this feed mostly shows wins, and that can make everyone else feel like they're failing. They're not. A no just means you tried.`,
     ``,
-    `If you collected Ls this year too, you're in very good company.`,
+    S.nProj ? `\nI also built ${plural(S.nProj, 'project')} this year: ${S.projects.map(p => p.name).join(', ')}. The Ls didn't stop the building.` : null,
+    ``,
+    `If you collected Ls this year too, you're in very good company.${S.naija ? ' No gree for anybody.' : ''}`,
     ``,
     `#LWrapped`,
-  ].join('\n');
+  ].filter(l => l !== null).join('\n');
   const funny = [
     `My ${yr} L Wrapped just dropped 📦`,
     ``,
@@ -552,8 +590,10 @@ function posts(S){
     S.heart ? `💔 Ls after the interview: ${S.heart}` : null,
     `⚖️ L-to-W ratio: ${nL}:${S.nO}`,
     `🧠 L personality: ${S.persona.name}`,
+    S.nProj ? `🛠️ Projects built: ${S.nProj}` : null,
+    `🎧 Soundtrack: "${TRACKS[S.track].title}"`,
     ``,
-    `Still applying. Still delusional. Still here.`,
+    S.naija ? `Still applying. No dulling. We move.` : `Still applying. Still delusional. Still here.`,
     ``,
     `#LWrapped`,
   ].filter(l => l !== null).join('\n');
@@ -565,11 +605,12 @@ function posts(S){
     `Nobody posts the ratio. We post the W. But the W only exists because of the Ls before it.`,
     ``,
     `Every rejection taught me something about how I apply, how I interview, and how much I actually want this.`,
+    S.nProj ? `\nAnd in between the Ls, I built ${S.projects.map(p => p.name).join(', ')}.` : null,
     ``,
-    `To everyone collecting Ls right now: keep shooting. The no's are part of the story.`,
+    `To everyone collecting Ls right now: keep shooting. The no's are part of the story.${S.naija ? ' We move.' : ''}`,
     ``,
     `#LWrapped`,
-  ].join('\n');
+  ].filter(l => l !== null).join('\n');
   const x = `My ${yr} L Wrapped: ${plural(nL, 'rejection')}${S.ghosted ? `, ${S.ghosted} ghosted` : ''}${S.nO ? `, ${plural(S.nO, 'offer')}` : ''}.\nL-to-W ratio ${nL}:${S.nO}. Personality: ${S.persona.name}.\nLinkedIn shows the wins. This is the rest. #LWrapped`;
   return { vulnerable, funny, motivational, x };
 }
@@ -584,6 +625,7 @@ const ICONS = {
   flame: '<path d="M32 4c4 12 18 18 18 34a18 18 0 0 1-36 0c0-8 4-13 8-17 0 7 3 10 6 10-2-11 2-20 4-27z"/>',
   crown: '<path d="M8 20l12 12 12-20 12 20 12-12-6 30H14z"/><rect x="14" y="54" width="36" height="5" rx="2"/>',
   seed: '<path d="M32 58V30"/><path d="M32 34C32 20 20 14 8 14c0 14 10 20 24 20zM32 30c0-12 10-18 24-18 0 12-10 18-24 18z"/><rect x="29" y="28" width="6" height="30" rx="3"/>',
+  code: '<path d="M22 18L8 32l14 14M42 18l14 14-14 14" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M36 12L28 52" fill="none" stroke="var(--acc)" stroke-width="6" stroke-linecap="round"/>',
   stack: '<rect x="10" y="40" width="44" height="12" rx="3"/><rect x="14" y="26" width="36" height="12" rx="3"/><rect x="18" y="12" width="28" height="12" rx="3"/>',
 };
 const iconSvg = k => `<svg viewBox="0 0 64 64" fill="currentColor" aria-hidden="true">${ICONS[k] || ICONS.stack}</svg>`;
@@ -641,11 +683,18 @@ const shareLinks = text => ({ wa: 'https://wa.me/?text=' + encodeURIComponent(te
 async function copyText(t){ try { await navigator.clipboard.writeText(t); return true; } catch { return false; } }
 
 /* ================= sound (generated in-browser) ================= */
+// One original track per kind of year. The results pick which one plays.
+const TRACKS = {
+  still: { title: 'Still Applying', genre: 'Pop', bpm: 116, kick: [0, 4, 8, 10, 12], clap: [4, 12], hat: [1, 3, 5, 7, 9, 11, 13, 15], bass: [0, 3, 6, 8, 11, 14], bassOct: { 14: 12 }, prog: [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]], root: [45, 41, 48, 43], pad: 'triangle', lead: [2, 7, 10] },
+  motion: { title: 'Motion (Executions Mix)', genre: 'Amapiano', bpm: 113, kick: [0, 8], clap: [4, 12], rim: [3, 7, 11], hat: [2, 6, 10, 14], hatVol: .08, shaker: true, bass: [0, 3, 6, 10, 13], bassType: 'log', bassOct: { 6: 12, 13: 7 }, prog: [[60, 64, 67, 71], [57, 60, 64, 67], [62, 65, 69, 72], [55, 59, 62, 65]], root: [48, 45, 50, 43], pad: 'sine', padVol: .04, lead: [3, 7, 11, 15], stab: true, leadOct: 12, leadVol: .022 },
+  fra: { title: 'Almost Fra', genre: 'Trap', bpm: 140, kick: [0, 7, 10], clap: [8], hat: [0, 2, 4, 6, 8, 10, 12, 13, 14, 15], roll: [13, 14, 15], hatVol: .05, bass: [0, 7, 10], bassType: '808', prog: [[57, 60, 64], [56, 60, 63], [53, 57, 60], [52, 56, 59]], root: [45, 44, 41, 40], pad: 'sawtooth', padVol: .025, padCut: 900, lead: [0, 3, 6], leadOct: 24, leadVol: .02 },
+  close: { title: 'So Close (Voice Note)', genre: 'Slow jam', bpm: 84, kick: [0, 10], clap: [8], hat: [2, 6, 10, 14], hatVol: .035, bass: [0, 8], bassWave: 'triangle', bassCut: 700, prog: [[57, 60, 64], [53, 57, 60], [48, 52, 55], [52, 55, 59]], root: [45, 41, 48, 40], pad: 'triangle', padVol: .05, lead: [0, 2, 4, 6, 8, 10, 12, 14], leadWave: 'triangle', leadOct: 12, leadVol: .03, leadDur: .3, echo: true },
+  ghost: { title: 'Seen, No Reply', genre: 'Ambient', bpm: 92, kick: [0], clap: [], hat: [], bass: [0], bassWave: 'sine', bassCut: 400, prog: [[57, 60, 64], [50, 53, 57], [52, 55, 59], [57, 60, 64]], root: [45, 38, 40, 45], pad: 'triangle', padVol: .045, lead: [0, 6, 11], leadWave: 'triangle', leadOct: 24, leadVol: .04, leadDur: .4, echo: true },
+  testimony: { title: 'Testimony', genre: 'Afrobeats', bpm: 108, kick: [0, 7, 8, 13], clap: [4, 12], rim: [3, 10], shaker: true, hat: [], bass: [0, 3, 6, 8, 11, 14], bassWave: 'triangle', bassCut: 800, bassVol: .25, prog: [[60, 64, 67], [65, 69, 72], [67, 71, 74], [64, 67, 71]], root: [48, 53, 55, 52], pad: 'sawtooth', padVol: .025, padCut: 1800, lead: [2, 5, 10, 13], stab: true, leadOct: 12, leadVol: .025 },
+  build: { title: 'Build Mode', genre: 'House', bpm: 118, kick: [0, 4, 8, 12], clap: [4, 12], hat: [2, 6, 10, 14], hatVol: .08, bass: [0, 2, 4, 6, 8, 10, 12, 14], bassOct: { 2: 12, 6: 12, 10: 12, 14: 12 }, prog: [[62, 65, 69], [58, 62, 65], [60, 64, 67], [57, 60, 64]], root: [50, 46, 48, 45], pad: 'triangle', lead: [0, 3, 6, 9, 12], leadOct: 24, leadVol: .022 },
+};
 const Sound = (() => {
-  let ctx, master, noise, timer, step = 0, next = 0, on = false, muted = false;
-  const spb = 60 / 116 / 4;
-  const prog = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]];
-  const root = [45, 41, 48, 43];
+  let ctx, master, noise, delay, timer, step = 0, next = 0, on = false, muted = false, tr = TRACKS.still, arp = 0;
   const hz = m => 440 * Math.pow(2, (m - 69) / 12);
   const VOL = .5;
   function init(){
@@ -653,25 +702,39 @@ const Sound = (() => {
     master = ctx.createGain(); master.gain.value = 0;
     const comp = ctx.createDynamicsCompressor(); master.connect(comp).connect(ctx.destination);
     noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = noise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    delay = ctx.createDelay(1); delay.delayTime.value = .33; const fb = ctx.createGain(); fb.gain.value = .35; const wet = ctx.createGain(); wet.gain.value = .45;
+    delay.connect(fb).connect(delay); delay.connect(wet).connect(master);
   }
   function env(g, t, a, peak, d){ g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(.0001, t + a + d); }
   function kick(t, big){ const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(big ? 110 : 150, t); o.frequency.exponentialRampToValueAtTime(38, t + (big ? .35 : .14)); env(g, t, .003, big ? 1.4 : .9, big ? 1.1 : .32); o.connect(g).connect(master); o.start(t); o.stop(t + 1.3); }
   function nz(t, type, f, peak, d){ const s = ctx.createBufferSource(); s.buffer = noise; const fl = ctx.createBiquadFilter(); fl.type = type; fl.frequency.value = f; const g = ctx.createGain(); env(g, t, .002, peak, d); s.connect(fl).connect(g).connect(master); s.start(t); s.stop(t + d + .05); }
-  function tone(t, m, type, peak, d, cut){ const o = ctx.createOscillator(), fl = ctx.createBiquadFilter(), g = ctx.createGain(); o.type = type; o.frequency.value = hz(m); fl.type = 'lowpass'; fl.frequency.value = cut; env(g, t, .01, peak, d); o.connect(fl).connect(g).connect(master); o.start(t); o.stop(t + d + .1); }
+  function tone(t, m, type, peak, d, cut, echo){ const o = ctx.createOscillator(), fl = ctx.createBiquadFilter(), g = ctx.createGain(); o.type = type; o.frequency.value = hz(m); fl.type = 'lowpass'; fl.frequency.value = cut; env(g, t, .01, peak, d); o.connect(fl).connect(g).connect(master); if (echo) g.connect(delay); o.start(t); o.stop(t + d + .1); }
+  function bass(t, m){
+    if (tr.bassType) { const log = tr.bassType === 'log', o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(hz(m + (log ? 12 : 5)), t); o.frequency.exponentialRampToValueAtTime(hz(m), t + (log ? .06 : .12)); env(g, t, .005, log ? .6 : .75, log ? .32 : .6); o.connect(g).connect(master); o.start(t); o.stop(t + .9); }
+    else tone(t, m, tr.bassWave || 'sawtooth', tr.bassVol || .2, .16, tr.bassCut || 520);
+  }
   function schedule(){
+    const spb = 60 / tr.bpm / 4;
     while (next < ctx.currentTime + .12) {
-      const s = step % 16, bar = Math.floor(step / 16) % 4, t = next;
-      if (s % 4 === 0 || s === 10) kick(t);
-      if (s === 4 || s === 12) { nz(t, 'bandpass', 1700, .32, .16); nz(t + .012, 'bandpass', 1300, .18, .12); }
-      if (s % 2 === 1) nz(t, 'highpass', 7500, s % 4 === 3 ? .09 : .05, .035);
-      if ([0, 3, 6, 8, 11, 14].includes(s)) tone(t, root[bar] + (s === 14 ? 12 : 0), 'sawtooth', .2, .16, 520);
-      if (s === 0) prog[bar].forEach(m => tone(t, m + 12, 'triangle', .045, spb * 15, 2200));
-      if (s === 2 || s === 7 || s === 10) tone(t, prog[bar][(s / 3 | 0) % 3] + 24, 'square', .025, .09, 3200);
+      const s = step % 16, bar = Math.floor(step / 16) % 4, t = next, ch = tr.prog[bar];
+      if (tr.kick.includes(s)) kick(t);
+      if (tr.clap.includes(s)) { nz(t, 'bandpass', 1700, .3, .16); nz(t + .012, 'bandpass', 1300, .16, .12); }
+      if (tr.rim && tr.rim.includes(s)) nz(t, 'bandpass', 3200, .12, .04);
+      if (tr.hat.includes(s)) nz(t, 'highpass', 7500, tr.hatVol || .06, .035);
+      if (tr.roll && tr.roll.includes(s)) nz(t + spb / 2, 'highpass', 8000, .05, .03);
+      if (tr.shaker) nz(t, 'bandpass', 6000, s % 4 === 2 ? .05 : .025, .045);
+      if (tr.bass.includes(s)) bass(t, tr.root[bar] + ((tr.bassOct || {})[s] || 0));
+      if (s === 0 && tr.pad) ch.forEach(m => tone(t, m + 12, tr.pad, tr.padVol || .045, spb * 15, tr.padCut || 2200, tr.echo));
+      if (tr.lead && tr.lead.includes(s)) {
+        if (tr.stab) ch.forEach(m => tone(t, m + (tr.leadOct || 12), 'triangle', tr.leadVol || .03, .12, 2600));
+        else { tone(t, ch[arp % ch.length] + (tr.leadOct || 24), tr.leadWave || 'square', tr.leadVol || .025, tr.leadDur || .1, 3200, tr.echo); arp++; }
+      }
       next += spb; step++;
     }
   }
   return {
-    start(){ try { if (!ctx) init(); ctx.resume(); } catch { return; } if (on) return; on = true; next = ctx.currentTime + .06; master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(muted ? 0 : VOL, ctx.currentTime, .4); timer = setInterval(schedule, 25); },
+    setTrack(k){ tr = TRACKS[k] || TRACKS.still; step = 0; arp = 0; if (ctx) next = Math.max(next, ctx.currentTime + .05); },
+    start(k){ if (k) this.setTrack(k); try { if (!ctx) init(); ctx.resume(); } catch { return; } if (on) return; on = true; next = ctx.currentTime + .06; master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(muted ? 0 : VOL, ctx.currentTime, .4); timer = setInterval(schedule, 25); },
     stop(){ if (!on) return; on = false; clearInterval(timer); master.gain.setTargetAtTime(0, ctx.currentTime, .15); },
     hit(){ if (!on || muted) return; const t = ctx.currentTime; kick(t, true); nz(t, 'lowpass', 2600, .55, .7); },
     toggle(){ muted = !muted; if (ctx) master.gain.setTargetAtTime(muted || !on ? 0 : VOL, ctx.currentTime, .1); return muted; },
@@ -724,6 +787,21 @@ function refreshGo(){
   else updateLive();
 }
 document.querySelectorAll('#mode-quick input').forEach(i => i.addEventListener('input', refreshGo));
+const projlist = $('#projlist'); let projN = 0;
+function addProjRow(){
+  if (projlist.children.length >= 6) return;
+  const k = projN++;
+  projlist.insertAdjacentHTML('beforeend', `<div class="proj"><input class="pname" id="pn${k}" maxlength="40" placeholder="Project name" aria-label="Project name"><input class="pdesc" id="pd${k}" maxlength="70" placeholder="What it does (optional)" aria-label="What it does"><select class="pstat" id="ps${k}" aria-label="Project status"><option value="shipped">Shipped</option><option value="building">Still building</option><option value="retired">Retired</option></select><button type="button" class="prm" aria-label="Remove project">✕</button></div>`);
+  const row = projlist.lastElementChild;
+  row.querySelector('.prm').addEventListener('click', () => { row.remove(); $('#addproj').hidden = false; refreshGo(); });
+  row.querySelectorAll('input,select').forEach(i => i.addEventListener('input', refreshGo));
+  row.querySelector('.pname').focus();
+  $('#addproj').hidden = projlist.children.length >= 6;
+}
+function readProjects(){ return [...document.querySelectorAll('#projlist .proj')].map(r => ({ name: r.querySelector('.pname').value.trim(), desc: r.querySelector('.pdesc').value.trim(), status: r.querySelector('.pstat').value })).filter(p => p.name); }
+$('#addproj').addEventListener('click', addProjRow);
+$('#builds').addEventListener('toggle', () => { if ($('#builds').open && !projlist.children.length) addProjRow(); });
+$('#naija').addEventListener('change', refreshGo);
 
 function updateLive(){
   const S = statsFromEmails(ta.value, $('#total').value, false);
@@ -741,7 +819,7 @@ function updateOrb(S){
   P.colors.forEach((c, i) => orb.style.setProperty('--o' + (i + 1), c));
   form.style.setProperty('--gobg', P.bold.bg); form.style.setProperty('--gofg', P.bold.fg);
   $('#orbname').textContent = auraTitle(S);
-  $('#orbtxt').textContent = `${S.persona.name} · your story will use these colours`;
+  $('#orbtxt').textContent = `${S.persona.name} · your song: ${TRACKS[S.track].title}`;
 }
 ta.addEventListener('input', () => { clearTimeout(liveTimer); liveTimer = setTimeout(updateLive, 200); });
 $('#total').addEventListener('input', updateLive);
@@ -798,8 +876,9 @@ const guessBuckets = n => { const b = n < 8 ? [[0, 2], [3, 5], [6, 9], [10, 9999
 function buildSlides(S){
   const L = [], yr = S.year, nL = S.nL, who = S.name ? esc(S.name) : '';
   const add = s => L.push(Object.assign({ dur: 6500 }, s));
+  const N = (ng, en) => S.naija ? ng : en;
 
-  add({ t: 't-ink', dur: null, gate: true, h: () => `<p class="eyebrow rise">${who ? who + ', your' : 'Your'} ${yr} L Wrapped is ready</p><p class="big rise">LinkedIn saw your <span class="acc">wins.</span></p><p class="say rise">This is everything else.</p><div class="actions interactive rise" style="justify-content:flex-start;margin-top:18px"><button class="btn" id="start-sound" type="button">Play with sound</button><button class="btn alt" id="start-quiet" type="button">Play muted</button></div>`,
+  add({ t: 't-ink', dur: null, gate: true, h: () => `<p class="eyebrow rise">${who ? who + ', your' : 'Your'} ${yr} L Wrapped is ready</p><p class="big rise">LinkedIn saw your <span class="acc">wins.</span></p><p class="say rise">This is everything else.</p><div class="actions interactive rise" style="justify-content:flex-start;margin-top:18px"><button class="btn" id="start-sound" type="button">Play with sound</button><button class="btn alt" id="start-quiet" type="button">Play muted</button></div><p class="sub rise" style="margin-top:14px;font-size:15px">Your results picked your soundtrack. Sound on for the full experience.</p>`,
     card: { eyebrow: `My ${yr} L Wrapped`, big: 'LinkedIn saw my wins.', line: 'This is everything else.' } });
 
   add({ t: 't-legal', dur: null, h: () => `<p class="eyebrow rise">Quick question</p><p class="say rise">How many Ls do you think you took in ${yr}?</p><div class="guess interactive">${guessBuckets(nL).map((b, i) => `<button type="button" class="rise" data-i="${i}">${b.label}</button>`).join('')}</div><p class="verdict" id="verdict" aria-live="polite"></p>`,
@@ -810,7 +889,7 @@ function buildSlides(S){
       setTimeout(() => { if (slides[cur] && slides[cur].after === this.after) show(cur + 1); }, 1500);
     })); } });
 
-  add({ t: 't-red', hit: 1000, h: () => `<p class="eyebrow rise">Total Ls taken${state.guess ? ` · you guessed ${esc(state.guess)}` : ''}</p><p class="huge rise">${count(nL)}</p><div class="stamp">REJECTED</div><p class="say rise">${nL === 0 ? 'Not a single one. Suspicious.' : nL < 5 ? 'A light year. Barely a bruise.' : nL < 15 ? 'Respectable. You were busy.' : nL < 30 ? 'That\'s a lot of "unfortunately".' : 'At this point you could write these emails yourself.'}</p>`,
+  add({ t: 't-red', hit: 1000, h: () => `<p class="eyebrow rise">Total Ls taken${state.guess ? ` · you guessed ${esc(state.guess)}` : ''}</p><p class="huge rise">${count(nL)}</p><div class="stamp">REJECTED</div><p class="say rise">${nL === 0 ? N('Zero Ls? Who dey breet?! Abeg share the secret.', 'Not a single one. Suspicious.') : nL < 5 ? N('Small Ls. Light work. No dulling.', 'A light year. Barely a bruise.') : nL < 15 ? N('Omo. You were really outside this year.', 'Respectable. You were busy.') : nL < 30 ? N('Omo. That\'s a lot of "unfortunately". God abeg.', 'That\'s a lot of "unfortunately".') : N('You almost fra this year alone. Any other person for don fra.', 'At this point you could write these emails yourself.')}</p>`,
     card: { eyebrow: `Total Ls taken in ${yr}`, big: String(nL), line: nL === 1 ? 'rejection. And I\'m still here.' : 'rejections. And I\'m still here.', stamp: 'REJECTED' } });
 
   const segs = [['Ls', nL, PAL.night.bg], ['Interviews', S.nI, PAL.pop.bg], ['Offers', S.nO, '#fff4e8'], ['Still pending', S.nP, PAL.soft.bg], ['Ghosted', S.ghosted, 'color-mix(in srgb,var(--fg) 35%,transparent)']].filter(s => s[1]);
@@ -818,6 +897,11 @@ function buildSlides(S){
   const bdLine = S.total ? `Out of ${S.total} applications, ${Math.round(nL / S.total * 100)}% ended in an L${S.ghosted ? ` and ${Math.round(S.ghosted / S.total * 100)}% ended in silence` : ''}.` : `Of everything that came back, ${Math.round(nL / Math.max(S.responses, 1) * 100)}% was a no.`;
   add({ t: 't-violet', h: () => `<p class="eyebrow rise">Your inbox, broken down</p><p class="say rise">${bdLine}</p><div class="split rise">${segs.map(s => `<span style="width:${s[1] / sum * 100}%;background:${s[2]}"></span>`).join('')}</div><div class="legend rise">${segs.map(s => `<div><span class="sw" style="background:${s[2]}"></span><b>${s[1]}</b><i>${s[0]}</i></div>`).join('')}</div>`,
     card: { eyebrow: 'My inbox, broken down', big: bdLine, rows: segs.slice(0, 4).map(s => [s[1], s[0]]) } });
+
+  const TR = TRACKS[S.track];
+  const why = { motion: N(`${S.total} applications. Na pure motion, executions only. We move.`, `${S.total} applications. That's not job hunting, that's pure motion.`), fra: N(`${nL} Ls. You almost fra this year alone. (Fra: to go completely crazy.)`, `${nL} Ls. Only something this loud could match it.`), close: N('For every final round that almost happened. E remain small.', 'For every final round that almost happened.'), ghost: N(`For the ${S.ghosted} applications that left you on seen. E choke.`, `For the ${S.ghosted} applications that never wrote back.`), testimony: N('After all the Ls, the W landed. Testimony time!', 'After all the Ls, the W landed. This one is a celebration.'), build: N(`For the ${S.nProj} projects you built while the Ls rolled in. Builder on motion.`, `For the ${S.nProj} projects you built while the Ls rolled in.`), still: N('Steady Ls, steady applying. No dulling.', 'Steady Ls, steady applying. This one is for the grind.') }[S.track];
+  add({ t: 't-ink', dur: 8000, h: () => `<p class="eyebrow rise">Your ${yr} soundtrack</p><div class="eq rise">${'<i></i>'.repeat(10)}</div><p class="big rise"><span class="acc">${esc(TR.title)}</span></p><p class="meta rise" style="margin-bottom:14px">${TR.genre} · ${TR.bpm} BPM · made from your results</p><p class="say rise">${esc(why)}</p><p class="sub rise">${Sound.on && !Sound.muted ? 'It\'s been playing this whole time. Different results get a different song.' : 'Tap the speaker up top to hear it. Different results get a different song.'}</p>`,
+    card: { eyebrow: `My ${yr} L Wrapped soundtrack`, big: TR.title, line: why } });
 
   if (S.kinds.length > 1) add({ t: 't-pink', h: () => `<p class="eyebrow rise">Your top genres</p><p class="say rise">You didn't just get rejected from jobs. You diversified.</p><ol class="toplist">${S.kinds.slice(0, 5).map(([k, n], i) => `<li class="rise"><span class="n">${i + 1}</span><span class="p">${esc(k)}</span><span class="c">${n} email${n === 1 ? '' : 's'}</span></li>`).join('')}</ol>`,
     card: { eyebrow: 'My top rejection genres', big: S.kinds[0][0], line: 'I didn\'t just get rejected from jobs. I diversified.', rows: S.kinds.slice(0, 4).map(([k, n]) => [n, k]) } });
@@ -880,20 +964,26 @@ function buildSlides(S){
     add({ t: 't-red', h: () => `<p class="eyebrow rise">Time spent reading rejections</p><p class="huge rise">${count(v)}</p><p class="say rise">${sec ? 'seconds' : v === 1 ? 'minute' : 'minutes'} of “we regret to inform you”.</p><p class="sub rise">${S.Lwords.toLocaleString()} words of no. ${S.readMins >= 10 ? 'That\'s a whole lunch break.' : 'Short, but it adds up.'}</p>`,
       card: { eyebrow: 'Time spent reading rejections', big: `${v} ${sec ? 'sec' : 'min'}`, line: `${S.Lwords.toLocaleString()} words of no.` } });
   }
-  if (S.ghosted) add({ t: 't-ink', h: () => `<p class="eyebrow rise">Left on read</p><p class="huge rise">${count(S.ghosted)}</p><p class="say rise">${S.ghosted === 1 ? 'application got' : 'applications got'} no reply at all.</p><p class="sub rise">Not even a template. Each one is an L you never got to read.</p>`,
+  if (S.ghosted) add({ t: 't-ink', h: () => `<p class="eyebrow rise">Left on read</p><p class="huge rise">${count(S.ghosted)}</p><p class="say rise">${S.ghosted === 1 ? 'application got' : 'applications got'} no reply at all.</p><p class="sub rise">${N('Seen, no reply. E choke. Each one is an L you never got to read.', 'Not even a template. Each one is an L you never got to read.')}</p>`,
     card: { eyebrow: 'Left on read', big: String(S.ghosted), line: S.ghosted === 1 ? 'application never got a reply.' : 'applications never got a reply.' } });
 
+  if (S.nProj) {
+    const pr = S.projects, STAT = { shipped: 'Shipped', building: 'Still building', retired: 'Retired' };
+    add({ t: 't-moss', dur: 9000, confetti: S.shipped ? 900 : 0, h: () => `<p class="eyebrow rise">Meanwhile, you were building</p><p class="say rise">${N('Ls dey land, you dey build. No dulling.', 'The Ls kept landing. You kept building.')}</p><ul class="projs">${pr.map(p => `<li class="rise"><div><b>${esc(p.name)}</b>${p.desc ? `<span>${esc(p.desc)}</span>` : ''}</div><em class="st-${p.status}">${STAT[p.status]}</em></li>`).join('')}</ul><p class="sub rise">${nL ? `That's ${plural(pr.length, 'project')} next to ${plural(nL, 'L')}. Rejection didn't stop the shipping.` : 'Rejection or not, you shipped.'}</p>`,
+      card: { eyebrow: `What I built in ${yr}`, big: `${plural(pr.length, 'project')}${S.shipped ? `, ${S.shipped} shipped` : ''}`, line: N('Ls dey land, I dey build.', 'The Ls kept landing. I kept building.'), rows: pr.slice(0, 4).map(p => [STAT[p.status].split(' ')[0], p.name]) } });
+  }
+
   // L-to-W ratio
-  add({ t: S.nO ? 't-legal' : 't-ink', confetti: S.nO ? 900 : 0, hit: S.nO ? 700 : 0, h: () => `<p class="eyebrow rise">Your L-to-W ratio</p><p class="huge rise" style="font-size:clamp(110px,30vw,220px)">${nL}<span class="acc">:</span>${S.nO}</p>${S.nO ? `<p class="say rise">It took ${plural(nL, 'L')} to get ${S.nO === 1 ? '1 W' : S.nO + ' Ws'}.</p><p class="sub rise">Nobody posts the ratio. They post the W. But the W only exists because of the Ls before it.</p>` : `<p class="say rise">W loading…</p><div class="loadbar rise"><i></i></div><p class="sub rise">${plural(nL, 'rep')} in. You're still in the game, and that's the part that counts.</p>`}`,
+  add({ t: S.nO ? 't-legal' : 't-ink', confetti: S.nO ? 900 : 0, hit: S.nO ? 700 : 0, h: () => `<p class="eyebrow rise">Your L-to-W ratio</p><p class="huge rise" style="font-size:clamp(110px,30vw,220px)">${nL}<span class="acc">:</span>${S.nO}</p>${S.nO ? `<p class="say rise">It took ${plural(nL, 'L')} to get ${S.nO === 1 ? '1 W' : S.nO + ' Ws'}.</p><p class="sub rise">Nobody posts the ratio. They post the W. But the W only exists because of the Ls before it.</p>` : `<p class="say rise">${N('W loading… We move.', 'W loading…')}</p><div class="loadbar rise"><i></i></div><p class="sub rise">${N(`${plural(nL, 'rep')} in. No gree for anybody. You're still in the game.`, `${plural(nL, 'rep')} in. You're still in the game, and that's the part that counts.`)}</p>`}`,
     card: { eyebrow: 'My L-to-W ratio', big: `${nL}:${S.nO}`, line: S.nO ? `It took ${plural(nL, 'L')} to get ${S.nO === 1 ? '1 W' : S.nO + ' Ws'}.` : 'W loading…' } });
 
   // highlight reel vs real reel
-  const realRows = [[nL, 'rejections'], S.ghosted ? [S.ghosted, 'ghosted'] : null, S.heart ? [S.heart, 'Ls after the interview'] : null, S.nI ? [S.nI, 'interviews'] : null, S.readMins && S.readMins >= 1 ? [Math.round(S.readMins), 'minutes reading “unfortunately”'] : null].filter(Boolean).slice(0, 4);
+  const realRows = [[nL, 'rejections'], S.ghosted ? [S.ghosted, 'ghosted'] : null, S.heart ? [S.heart, 'Ls after the interview'] : null, S.nProj ? [S.nProj, 'projects built anyway'] : null, S.nI ? [S.nI, 'interviews'] : null, S.readMins && S.readMins >= 1 ? [Math.round(S.readMins), 'minutes reading “unfortunately”'] : null].filter(Boolean).slice(0, 4);
   const postText = S.nO ? 'Thrilled to announce I\'m starting a new chapter! 🎉 So grateful for this opportunity. Hard work pays off!' : 'Excited to share that I\'m open to new opportunities! 🚀 Big things coming. #OpenToWork';
   add({ t: 't-paper', dur: 9000, h: () => `<p class="eyebrow rise">Highlight reel vs real reel</p><div class="reel"><div class="post rise"><span class="tag">What they saw</span><div class="ph"><span class="av"></span><div><b>${who || 'You'}</b><small>1d · Edited</small></div></div><p>${postText}</p><div class="react">♥ 👏 💡 248 · 31 comments</div></div><div class="real rise"><span class="tag">What actually happened</span><ul>${realRows.map(([v, l]) => `<li><b>${v}</b><span>${esc(l)}</span></li>`).join('')}</ul></div></div><p class="say rise">Social media is the highlight reel. This is the real reel.</p>`,
     card: { eyebrow: 'Highlight reel vs real reel', big: S.nO ? `1 post. ${plural(nL, 'L')}.` : `0 posts. ${plural(nL, 'L')}.`, line: 'Social media is the highlight reel. This is the real reel.', rows: realRows.map(([v, l]) => [v, l]) } });
 
-  add({ t: 't-paper', h: () => `<p class="eyebrow rise">Thick skin rating</p><p class="big rise"><span class="acc">${TIERS[S.tier]}</span></p><div class="tier rise">${TIERS.map((_, i) => `<span class="${i <= S.tier ? 'lit' : ''}"></span>`).join('')}</div><div class="tiernames rise">${TIERS.map(t => `<span>${t}</span>`).join('')}</div><p class="sub rise" style="margin-top:18px">${S.tier >= 3 ? 'Rejection bounces off you now.' : S.tier >= 1 ? 'You\'re building armour one email at a time.' : 'Still soft. Give it a few more applications.'}</p>`,
+  add({ t: 't-paper', h: () => `<p class="eyebrow rise">Thick skin rating</p><p class="big rise"><span class="acc">${TIERS[S.tier]}</span></p><div class="tier rise">${TIERS.map((_, i) => `<span class="${i <= S.tier ? 'lit' : ''}"></span>`).join('')}</div><div class="tiernames rise">${TIERS.map(t => `<span>${t}</span>`).join('')}</div><p class="sub rise" style="margin-top:18px">${S.tier >= 3 ? N('Rejection no fit touch you again.', 'Rejection bounces off you now.') : S.tier >= 1 ? 'You\'re building armour one email at a time.' : 'Still soft. Give it a few more applications.'}</p>`,
     card: { eyebrow: 'My thick skin rating', big: TIERS[S.tier], line: `${TIERS.slice(0, S.tier + 1).join(' → ')}` } });
 
   const [a1, a2, a3] = S.aura;
@@ -905,7 +995,7 @@ function buildSlides(S){
   add({ t: p.theme, dur: 8000, confetti: 1000, hit: 500, h: () => `<p class="eyebrow rise">Your ${yr} L personality</p><div class="badge">${iconSvg(p.icon)}</div><p class="big rise"><span class="acc">${esc(p.name)}</span></p><p class="say rise">${esc(p.line)}</p>${S.rising ? `<p class="rising rise">Rising sign: ${esc(S.rising.name)}</p>` : ''}`,
     card: { eyebrow: `My ${yr} L personality`, big: p.name, line: p.line, theme: p.theme, icon: p.icon } });
 
-  add({ t: 't-ink', dur: 9000, confetti: 1400, h: () => `<p class="eyebrow rise">The beauty of no</p><p class="big">${words('Every no is proof you tried.')}</p><p class="say rise">Most people never apply. You did${S.total ? `, ${S.total} times` : ''}.</p><p class="sub rise">${nL ? `${plural(nL, 'no', 'no\'s')}, and you kept going anyway. ` : ''}Here's to the Ls of ${yr}, and to applying again in ${yr + 1}.</p>`,
+  add({ t: 't-ink', dur: 9000, confetti: 1400, h: () => `<p class="eyebrow rise">The beauty of no</p><p class="big">${words('Every no is proof you tried.')}</p><p class="say rise">Most people never apply. You did${S.total ? `, ${S.total} times` : ''}.</p><p class="sub rise">${nL ? `${plural(nL, 'no', 'no\'s')}, and you kept going anyway. ` : ''}${N(`Here's to the Ls of ${yr}. No gree for anybody in ${yr + 1}.`, `Here's to the Ls of ${yr}, and to applying again in ${yr + 1}.`)}</p>`,
     card: { eyebrow: 'The beauty of no', big: 'Every no is proof I tried.', line: `${plural(nL, 'L')} in ${yr}. Still applying.` } });
 
   add({ t: 't-red', dur: null, final: true, h: finalHTML });
@@ -917,7 +1007,7 @@ let fmt = 'post', tone = 'vulnerable', POSTS = null;
 const FORMATS = { story: [1080, 1920, 'Story'], post: [1080, 1350, 'Post'], square: [1080, 1080, 'Square'] };
 const fmtButtons = cur => Object.entries(FORMATS).map(([k, v]) => `<button type="button" data-f="${k}" aria-pressed="${k === cur}">${v[2]}</button>`).join('');
 function summarySpec(){
-  const rows = [[S.nI, 'Interviews'], [S.nO, 'Offers'], S.ghosted ? [S.ghosted, 'Ghosted'] : [S.heart, 'So-close Ls'], S.peakMonth >= 0 ? [MONTH_NAMES[S.peakMonth].slice(0, 3), 'Worst month'] : [TIERS[S.tier], 'Skin']];
+  const rows = [[S.nI, 'Interviews'], [S.nO, 'Offers'], S.ghosted ? [S.ghosted, 'Ghosted'] : [S.heart, 'So-close Ls'], S.nProj ? [S.nProj, 'Projects built'] : S.peakMonth >= 0 ? [MONTH_NAMES[S.peakMonth].slice(0, 3), 'Worst month'] : [TIERS[S.tier], 'Skin']];
   return { eyebrow: `My ${S.year} in Ls${S.name ? ' · ' + S.name : ''}`, big: `${S.nL} Ls`, line: `L-to-W ratio ${S.nL}:${S.nO} · ${S.persona.name}${S.cliches[0] ? ` · top phrase “${S.cliches[0].label}”` : ''}`, rows, bg: 'aura', stamp: 'STILL APPLYING' };
 }
 function finalHTML(){
@@ -959,7 +1049,7 @@ async function wireFinal(){
 const THEMES = { 't-red': ['#e8392b', '#fff4e8', '#1d0f14'], 't-legal': ['#ffd23f', '#1d0f14', '#e8392b'], 't-violet': ['#6b4eff', '#f5f0ff', '#ffd23f'], 't-pink': ['#ff9ecf', '#1d0f14', '#6b4eff'], 't-moss': ['#0f5c45', '#e9ffe0', '#ffd23f'], 't-ink': ['#1d0f14', '#fff4e8', '#ff9ecf'], 't-paper': ['#f6efe3', '#1d0f14', '#e8392b'] };
 let fontsReady = null;
 function loadFonts(){ return fontsReady || (fontsReady = Promise.all(['800 100px "Bricolage Grotesque"', '600 40px "Bricolage Grotesque"', '700 30px "JetBrains Mono"', '500 30px "Instrument Sans"'].map(f => document.fonts.load(f))).catch(() => {})); }
-function iconImage(key, color){ return new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="${color}" style="--acc:${color}">${(ICONS[key] || '').replace(/var\(--acc\)/g, '#00000055')}</svg>`); }); }
+function iconImage(key, color){ return new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="${color}" style="--acc:${color}">${(ICONS[key] || '').replace(/var\(--acc\)/g, '#00000055').replace(/currentColor/g, color)}</svg>`); }); }
 async function renderCard(spec, format){
   await loadFonts();
   const [W, H] = FORMATS[format] || FORMATS.post;
@@ -1119,7 +1209,7 @@ function show(i){
   if (s.confetti) fxTimers.push(setTimeout(() => Confetti.burst([...PAL.colors, PAL.soft.bg, '#fff4e8']), s.confetti));
   if (s.after) s.after(slideEl);
   if (s.gate) {
-    const begin = withSound => { if (withSound) Sound.start(); else if (!Sound.muted) { Sound.toggle(); Sound.start(); } syncMute(); show(1); };
+    const begin = withSound => { if (withSound) Sound.start(S && S.track); else if (!Sound.muted) { Sound.toggle(); Sound.start(S && S.track); } syncMute(); show(1); };
     $('#start-sound').onclick = () => begin(true); $('#start-quiet').onclick = () => begin(false);
     $('#start-sound').focus({ preventScroll: true });
   }
@@ -1135,7 +1225,7 @@ function applyTheme(t){
 }
 story.addEventListener('pointermove', e => { if (REDUCED) return; story.style.setProperty('--px', (e.clientX / innerWidth - .5).toFixed(3)); story.style.setProperty('--py', (e.clientY / innerHeight - .5).toFixed(3)); });
 function syncMute(){ const m = Sound.muted || !Sound.on; $('#wave').toggleAttribute('hidden', m); $('#cross').toggleAttribute('hidden', !m); $('#mute').setAttribute('aria-label', m ? 'Turn music on' : 'Mute music'); }
-$('#mute').addEventListener('click', () => { if (!Sound.on) { if (Sound.muted) Sound.toggle(); Sound.start(); } else Sound.toggle(); syncMute(); });
+$('#mute').addEventListener('click', () => { if (!Sound.on) { if (Sound.muted) Sound.toggle(); Sound.start(S && S.track); } else Sound.toggle(); syncMute(); });
 $('#close').addEventListener('click', closeStory);
 
 // tap / hold / swipe
