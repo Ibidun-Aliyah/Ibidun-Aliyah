@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Follow-Through" android:textSize="28sp" android:textStyle="bold"
+            android:textColor="@color/accent" />
+        <TextView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Tap the floating bubble on any post, page or email to save the opportunity to your Google Sheet. Claude fills in the details and reminds you." />
+
+        <!-- Step 1 -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="1 · Connect your Google Sheet" android:textSize="18sp" android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Paste the connection code from your sheet's Apps Script (the web app link ending in ?token=…)." />
+        <EditText
+            android:id="@+id/code"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/field_bg"
+            android:hint="https://script.google.com/macros/s/…/exec?token=…"
+            android:inputType="textUri" android:minLines="2" android:gravity="top" />
+        <Button
+            android:id="@+id/connect"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Save &amp; test" />
+        <TextView
+            android:id="@+id/connStatus"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" />
+
+        <!-- Step 2 -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="2 · Turn on the bubble" android:textSize="18sp" android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Android asks for Accessibility access so the bubble can float over other apps and read the screen when you tap it. It reads nothing until you tap, and skips password fields.\n\nIf the switch is greyed out: open App info → ⋮ menu → “Allow restricted settings”, then try again." />
+        <TextView
+            android:id="@+id/bubbleStatus"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:textStyle="bold" />
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="8dp">
+            <Button
+                android:id="@+id/accessibility"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Open settings" />
+            <Button
+                android:id="@+id/appInfo"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="App info" />
+        </LinearLayout>
+        <Button
+            android:id="@+id/show"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Show bubble now" />
+
+        <!-- Step 3 -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="How to use it" android:textSize="18sp" android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="• Tap the bubble: saves what's on screen (text, link, screenshot).\n• Drag it: move it anywhere; it tucks into the edge.\n• Hold it: hides it for an hour.\n• No bubble? Use Share → “Save to Follow-Through” from any app." />
+        <TextView
+            android:id="@+id/queue"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="12dp" />
+        <Button
+            android:id="@+id/flush"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Send waiting captures" />
+    </LinearLayout>
+</ScrollView>

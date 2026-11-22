@@ -1,0 +1,215 @@
+package com.followthrough.bubble;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Base64;
+
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+/**
+ * Talks to the Google Sheet (through the Apps Script web app).
+ * Captures that can't be sent right away are kept in a small queue on the
+ * phone and sent the next time there's a connection.
+ */
+final class Tracker {
+    interface Done { void done(boolean ok, String message); }
+
+    private static final ExecutorService IO = Executors.newSingleThreadExecutor();
+    private static final Handler MAIN = new Handler(Looper.getMainLooper());
+    private static final String PREFS = "follow_through";
+
+    private Tracker() {}
+
+    /* ---------- connection code: "<web app URL>?token=<token>" ---------- */
+
+    static SharedPreferences prefs(Context c) {
+        return c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+    }
+
+    /** Returns {url, token} or null when the code is not valid. */
+    static String[] parseCode(String code) {
+        if (code == null) return null;
+        code = code.trim();
+        try {
+            Uri u = Uri.parse(code);
+            String token = u.getQueryParameter("token");
+            if (!"https".equals(u.getScheme()) || token == null || token.isEmpty()) return null;
+            String base = code.substring(0, code.indexOf('?'));
+            return new String[]{base, token};
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    static String[] connection(Context c) {
+        return parseCode(prefs(c).getString("code", null));
+    }
+
+    /* ---------- capture ---------- */
+
+    static void capture(Context c, String app, String url, String screenText, Bitmap shot, String note, Done cb) {
+        final Context ctx = c.getApplicationContext();
+        IO.execute(() -> {
+            JSONObject body = new JSONObject();
+            try {
+                body.put("action", "capture");
+                body.put("app", app == null ? "" : app);
+                body.put("url", url == null ? "" : url);
+                body.put("screenText", screenText == null ? "" : screenText);
+                body.put("note", note == null ? "" : note);
+                if (shot != null) body.put("imageBase64", jpegBase64(shot));
+            } catch (Exception ignored) {}
+
+            boolean ok = send(ctx, body);
+            if (!ok) enqueue(ctx, body);
+            else flushQueueNow(ctx);
+            String msg = ok ? "Saved to your tracker" :
+                    (connection(ctx) == null ? "Saved on your phone. Connect your sheet in the app to send it."
+                            : "No connection. Saved on your phone and will send later.");
+            MAIN.post(() -> cb.done(ok, msg));
+        });
+    }
+
+    static void ping(Context c, Done cb) {
+        final Context ctx = c.getApplicationContext();
+        IO.execute(() -> {
+            String[] conn = connection(ctx);
+            String msg; boolean ok = false;
+            if (conn == null) msg = "That connection code doesn't look right. It should start with https:// and end with ?token=…";
+            else {
+                try {
+                    String res = http(conn[0] + "?action=ping&token=" + Uri.encode(conn[1]), null);
+                    JSONObject j = new JSONObject(res);
+                    ok = j.optBoolean("ok");
+                    msg = ok ? "Connected to “" + j.optString("sheet") + "”"
+                            : ("bad_token".equals(j.optString("error")) ? "The sheet rejected the token. Copy the connection code again." : "Sheet error: " + j.optString("error"));
+                } catch (Exception e) {
+                    msg = "Couldn't reach the sheet. Check the code and your internet connection.";
+                }
+            }
+            final boolean fOk = ok; final String fMsg = msg;
+            MAIN.post(() -> cb.done(fOk, fMsg));
+        });
+    }
+
+    /* ---------- queue ---------- */
+
+    static int queued(Context c) {
+        File[] f = queueDir(c).listFiles();
+        return f == null ? 0 : f.length;
+    }
+
+    static void flushQueue(Context c, Done cb) {
+        final Context ctx = c.getApplicationContext();
+        IO.execute(() -> {
+            int left = flushQueueNow(ctx);
+            if (cb != null) MAIN.post(() -> cb.done(left == 0, left == 0 ? "All captures sent" : left + " still waiting"));
+        });
+    }
+
+    private static int flushQueueNow(Context c) {
+        File[] files = queueDir(c).listFiles();
+        if (files == null) return 0;
+        Arrays.sort(files);
+        int left = 0;
+        for (File f : files) {
+            try {
+                JSONObject body = new JSONObject(new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8));
+                if (send(c, body)) f.delete(); else left++;
+            } catch (Exception e) { left++; }
+        }
+        return left;
+    }
+
+    private static void enqueue(Context c, JSONObject body) {
+        try (FileOutputStream out = new FileOutputStream(new File(queueDir(c), System.currentTimeMillis() + ".json"))) {
+            out.write(body.toString().getBytes(StandardCharsets.UTF_8));
+        } catch (Exception ignored) {}
+    }
+
+    private static File queueDir(Context c) {
+        File d = new File(c.getFilesDir(), "queue");
+        if (!d.exists()) d.mkdirs();
+        return d;
+    }
+
+    /* ---------- network ---------- */
+
+    private static boolean send(Context c, JSONObject body) {
+        String[] conn = connection(c);
+        if (conn == null) return false;
+        try {
+            body.put("token", conn[1]);
+            String res = http(conn[0], body.toString());
+            return new JSONObject(res).optBoolean("ok");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Apps Script answers a POST with a redirect to the result page, so the
+     * redirect is followed by hand with a GET.
+     */
+    private static String http(String url, String postJson) throws Exception {
+        HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+        con.setConnectTimeout(15000);
+        con.setReadTimeout(30000);
+        con.setInstanceFollowRedirects(postJson == null);
+        if (postJson != null) {
+            con.setRequestMethod("POST");
+            con.setDoOutput(true);
+            con.setRequestProperty("Content-Type", "application/json");
+            try (OutputStream os = con.getOutputStream()) {
+                os.write(postJson.getBytes(StandardCharsets.UTF_8));
+            }
+        }
+        int code = con.getResponseCode();
+        if (code >= 300 && code < 400) {
+            String loc = con.getHeaderField("Location");
+            con.disconnect();
+            return http(loc, null);
+        }
+        try (InputStream in = code >= 400 ? con.getErrorStream() : con.getInputStream()) {
+            ByteArrayOutputStream buf = new ByteArrayOutputStream();
+            byte[] b = new byte[8192];
+            int n;
+            while (in != null && (n = in.read(b)) > 0) buf.write(b, 0, n);
+            return buf.toString("UTF-8");
+        } finally {
+            con.disconnect();
+        }
+    }
+
+    /* ---------- images ---------- */
+
+    static String jpegBase64(Bitmap src) {
+        Bitmap b = src;
+        int max = 1400;
+        int w = src.getWidth(), h = src.getHeight();
+        if (Math.max(w, h) > max) {
+            float s = (float) max / Math.max(w, h);
+            b = Bitmap.createScaledBitmap(src, Math.round(w * s), Math.round(h * s), true);
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        b.compress(Bitmap.CompressFormat.JPEG, 72, out);
+        return Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP);
+    }
+}
