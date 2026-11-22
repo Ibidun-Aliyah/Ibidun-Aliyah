@@ -1,0 +1,869 @@
+<title>L Wrapped</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Your year in rejections, wrapped. Paste your rejection emails and get a shareable report. Nothing leaves your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: intake form on an ink ground, then a full-screen tap-through story of color-blocked slides, ending in a share card. Single deliberate look (no light/dark switch). */
+:root{
+  --ink:#1d0f14; --ink-2:#2b1a21; --paper:#f6efe3; --stamp:#e8392b;
+  --legal:#ffd23f; --violet:#6b4eff; --pink:#ff9ecf; --moss:#0f5c45;
+  --muted:#b9a7ad; --line:#4a3239;
+  --display:"Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+  --body:"Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--ink);color:var(--paper);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--legal);outline-offset:3px}
+
+/* ---------- intake ---------- */
+.intake{max-width:1120px;margin:0 auto;padding-block:40px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:1fr 1.15fr;gap:48px;align-items:start}
+@media (max-width:860px){.intake{grid-template-columns:1fr;gap:32px;padding-block:24px 48px}}
+.intro{min-width:0;position:sticky;top:32px}
+@media (max-width:860px){.intro{position:static}}
+.brand{display:flex;align-items:center;gap:12px;font:700 13px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.brand .mark{width:40px;height:40px;border-radius:10px;background:var(--stamp);display:grid;place-items:center;font:800 28px/1 var(--display);color:var(--paper)}
+h1{font:800 clamp(52px,8vw,96px)/.9 var(--display);letter-spacing:-.035em;margin:24px 0 16px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--stamp);display:inline-block;transform:rotate(-3deg)}
+.lede{font-size:19px;color:#e7dccf;max-width:34ch;margin:0 0 28px}
+.how{list-style:none;margin:0 0 28px;padding:0;display:grid;gap:14px;counter-reset:s}
+.how li{display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start;color:#e7dccf}
+.how li::before{counter-increment:s;content:counter(s);width:32px;height:32px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font:700 13px var(--mono);color:var(--legal)}
+.how b{color:var(--paper)}
+.search{margin-top:8px;display:flex;gap:8px;align-items:stretch;min-width:0}
+.search code{flex:1;min-width:0;background:var(--ink-2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:500 12px/1.5 var(--mono);color:var(--legal);overflow-x:auto;white-space:nowrap}
+.mini{border:1px solid var(--line);background:transparent;border-radius:8px;padding:0 12px;font:600 13px var(--body);cursor:pointer;color:var(--paper)}
+.mini:hover{border-color:var(--paper)}
+.privacy{display:flex;gap:12px;align-items:flex-start;border:1.5px dashed var(--line);border-radius:14px;padding:14px 16px;font-size:14px;color:#e7dccf}
+.privacy svg{flex:none;margin-top:2px}
+
+.card{min-width:0;background:var(--paper);color:var(--ink);border-radius:20px;padding:28px;box-shadow:0 30px 60px -30px rgba(0,0,0,.6)}
+@media (max-width:480px){.card{padding:20px;border-radius:16px}}
+.card label,.lbl{display:block;font:700 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#6d5960;margin-bottom:8px}
+.dropzone{position:relative}
+textarea#emails{width:100%;min-height:340px;resize:vertical;border:2px solid #d9cdbb;border-radius:12px;background:#fffaf2;padding:14px 16px;font:500 13px/1.6 var(--mono);color:var(--ink)}
+textarea#emails:focus{border-color:var(--ink);outline:none}
+.dropzone.drag textarea{border-color:var(--stamp);background:#fff0ea}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.ghost{border:1.5px solid #cbbda9;background:transparent;border-radius:999px;padding:8px 14px;font:600 14px var(--body);cursor:pointer;color:var(--ink)}
+.ghost:hover{border-color:var(--ink)}
+.hint{font-size:13px;color:#6d5960}
+.live{margin-top:14px;border-radius:12px;background:#efe5d4;padding:12px 14px;font-size:14px;display:flex;gap:8px 14px;flex-wrap:wrap;align-items:center;min-height:48px}
+.live .pill{display:inline-flex;align-items:center;gap:6px;font:700 12px var(--mono);letter-spacing:.04em;padding:4px 10px;border-radius:999px;background:var(--paper)}
+.dot{width:8px;height:8px;border-radius:50%}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
+@media (max-width:480px){.fields{grid-template-columns:1fr}}
+.fields input{width:100%;border:2px solid #d9cdbb;border-radius:10px;background:#fffaf2;padding:10px 12px;color:var(--ink)}
+.fields input:focus{border-color:var(--ink);outline:none}
+.fields small{display:block;margin-top:6px;font-size:12px;color:#6d5960}
+.go{margin-top:22px;width:100%;border:0;border-radius:14px;background:var(--stamp);color:var(--paper);padding:18px;font:800 22px var(--display);letter-spacing:-.01em;cursor:pointer;display:flex;justify-content:center;gap:10px;align-items:center;transition:transform .15s}
+.go:hover{transform:translateY(-2px)}
+.go:disabled{background:#b8a9a0;cursor:not-allowed;transform:none}
+.err{color:var(--stamp);font-size:14px;margin-top:10px;min-height:1em}
+
+/* ---------- story ---------- */
+.story{position:fixed;inset:0;z-index:50;overflow:hidden;background:var(--bg);color:var(--fg);transition:background .5s,color .5s;user-select:none;-webkit-user-select:none}
+.story::before{content:"L";position:absolute;right:-8vh;bottom:-28vh;font:800 120vh/1 var(--display);color:var(--fg);opacity:.07;transform:rotate(-8deg);pointer-events:none}
+.t-red{--bg:var(--stamp);--fg:#fff4e8;--acc:var(--ink)}
+.t-legal{--bg:var(--legal);--fg:var(--ink);--acc:var(--stamp)}
+.t-violet{--bg:var(--violet);--fg:#f5f0ff;--acc:var(--legal)}
+.t-pink{--bg:var(--pink);--fg:var(--ink);--acc:var(--violet)}
+.t-moss{--bg:var(--moss);--fg:#e9ffe0;--acc:var(--legal)}
+.t-ink{--bg:var(--ink);--fg:#fff4e8;--acc:var(--pink)}
+.t-paper{--bg:var(--paper);--fg:var(--ink);--acc:var(--stamp)}
+.bars{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));display:flex;gap:4px;z-index:3}
+.bars span{flex:1;height:4px;border-radius:2px;background:color-mix(in srgb,var(--fg) 28%,transparent);overflow:hidden}
+.bars span i{display:block;height:100%;width:0;background:var(--fg)}
+.bars span.done i{width:100%}
+.bars span.on i{width:100%;transition:width .4s}
+.topbar{position:absolute;top:calc(env(safe-area-inset-top,0px) + 26px);left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));display:flex;justify-content:space-between;align-items:center;z-index:3;font:700 12px var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.x{border:0;background:color-mix(in srgb,var(--fg) 14%,transparent);color:var(--fg);width:36px;height:36px;border-radius:50%;cursor:pointer;font:600 18px/1 var(--body)}
+.zone{position:absolute;top:70px;bottom:0;z-index:1;cursor:pointer;border:0;padding:0;margin:0;background:transparent;-webkit-tap-highlight-color:transparent}
+.zone.prev{left:0;width:30%}.zone.next{right:0;width:70%}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 84px) max(24px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 56px) max(24px,env(safe-area-inset-left,0px));z-index:2;pointer-events:none}
+.slide > div{max-width:560px;width:100%;margin:0 auto;min-width:0}
+.slide .interactive{pointer-events:auto}
+.tapnote{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);left:0;right:0;text-align:center;font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;opacity:.6;z-index:2;pointer-events:none}
+.eyebrow{font:700 13px var(--mono);letter-spacing:.16em;text-transform:uppercase;opacity:.8;margin:0 0 14px}
+.big{font:800 clamp(56px,13vw,112px)/.88 var(--display);letter-spacing:-.04em;margin:0 0 18px;text-wrap:balance}
+.huge{font:800 clamp(140px,40vw,260px)/.8 var(--display);letter-spacing:-.06em;margin:0;font-variant-numeric:tabular-nums}
+.say{font:600 clamp(24px,5.6vw,36px)/1.12 var(--display);letter-spacing:-.015em;margin:0 0 14px;text-wrap:balance}
+.sub{font-size:clamp(16px,3.8vw,19px);opacity:.88;margin:0;max-width:40ch}
+.acc{color:var(--acc)}
+.stamp{display:inline-block;border:5px solid currentColor;color:var(--acc);padding:4px 14px;border-radius:8px;font:800 clamp(28px,7vw,44px)/1 var(--mono);letter-spacing:.06em;transform:rotate(-11deg);margin:10px 0 22px;opacity:0}
+.on-screen .stamp{animation:slam .5s .55s cubic-bezier(.2,1.6,.4,1) forwards}
+@keyframes slam{0%{opacity:0;transform:rotate(-11deg) scale(2.4)}100%{opacity:.95;transform:rotate(-11deg) scale(1)}}
+.rise{opacity:0;transform:translateY(18px)}
+.on-screen .rise{animation:rise .6s cubic-bezier(.2,.8,.2,1) forwards}
+.on-screen .rise:nth-child(2){animation-delay:.12s}.on-screen .rise:nth-child(3){animation-delay:.24s}.on-screen .rise:nth-child(4){animation-delay:.36s}.on-screen .rise:nth-child(5){animation-delay:.48s}.on-screen .rise:nth-child(6){animation-delay:.6s}
+@keyframes rise{to{opacity:1;transform:none}}
+.toplist{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:14px}
+.toplist li{display:grid;grid-template-columns:52px 1fr auto;gap:14px;align-items:baseline;min-width:0}
+.toplist .n{font:800 44px/1 var(--display);color:var(--acc)}
+.toplist .p{font:600 clamp(19px,4.6vw,26px)/1.15 var(--display);min-width:0;overflow-wrap:anywhere}
+.toplist .c{font:700 13px var(--mono);opacity:.8;white-space:nowrap}
+.split{display:flex;height:64px;border-radius:12px;overflow:hidden;margin:18px 0 18px;background:color-mix(in srgb,var(--fg) 12%,transparent)}
+.split span{display:block;height:100%;transform-origin:left;transform:scaleX(0)}
+.on-screen .split span{animation:grow .9s .3s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes grow{to{transform:none}}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px}
+.legend div{display:flex;gap:10px;align-items:baseline;min-width:0}
+.legend b{font:800 34px/1 var(--display);font-variant-numeric:tabular-nums}
+.legend i{font-style:normal;font-size:15px;opacity:.85}
+.legend .sw{width:12px;height:12px;border-radius:3px;flex:none;align-self:center}
+.months{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;align-items:end;height:200px;margin:24px 0 10px}
+.months div{display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;min-width:0}
+.months span{width:100%;border-radius:6px 6px 2px 2px;background:color-mix(in srgb,var(--fg) 30%,transparent);transform-origin:bottom;transform:scaleY(0)}
+.months span.peak{background:var(--acc)}
+.on-screen .months span{animation:growy .8s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes growy{to{transform:none}}
+.months small{font:700 11px var(--mono);opacity:.75}
+.months em{font:700 12px var(--mono);font-style:normal}
+.quote{font:500 clamp(18px,4.4vw,23px)/1.4 var(--body);border-left:4px solid var(--acc);padding:4px 0 4px 18px;margin:18px 0;overflow-wrap:anywhere}
+.meta{font:700 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;opacity:.75}
+.tier{display:flex;gap:6px;margin:18px 0 8px}
+.tier span{flex:1;height:14px;border-radius:4px;background:color-mix(in srgb,var(--fg) 22%,transparent)}
+.tier span.lit{background:var(--acc)}
+.tiernames{display:flex;justify-content:space-between;font:700 10px var(--mono);letter-spacing:.06em;text-transform:uppercase;opacity:.75;gap:4px}
+.final{display:grid;gap:16px;justify-items:center;text-align:center}
+.final img{width:min(100%,340px);border-radius:14px;box-shadow:0 24px 50px -20px rgba(0,0,0,.55);-webkit-user-select:auto;user-select:auto;pointer-events:auto;-webkit-touch-callout:default}
+.actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.btn{border:0;border-radius:999px;padding:12px 18px;font:700 15px var(--body);cursor:pointer;background:var(--fg);color:var(--bg);text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.btn.alt{background:transparent;color:var(--fg);box-shadow:inset 0 0 0 2px var(--fg)}
+.small{font-size:13px;opacity:.8;max-width:42ch;margin:0}
+@media (max-height:700px){.huge{font-size:clamp(110px,30vw,180px)}.months{height:140px}.final img{width:min(100%,260px)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition:none!important}}
+</style>
+<!-- /head -->
+
+<main class="intake" id="intake">
+  <section class="intro">
+    <div class="brand"><span class="mark">L</span>L Wrapped · <span id="yr">2026</span></div>
+    <h1>Your year in <em>rejections</em>, wrapped.</h1>
+    <p class="lede">Paste the emails. We count the Ls, find your most-used rejection phrases, your worst month, and who ghosted you. Then you post it.</p>
+    <ol class="how">
+      <li><span><b>Search your inbox</b> for rejections, interviews and offers from this year.
+        <span class="search"><code id="q">"unfortunately" OR "other candidates" OR "regret to inform" OR "not to move forward" after:2026/01/01</code><button class="mini" id="copyq" type="button">Copy</button></span></span></li>
+      <li><span><b>Copy each email</b> and paste it in the box. Keep the sender, subject and date lines if you can. Put <b>---</b> on its own line between emails.</span></li>
+      <li><span><b>Or drop .eml files</b> exported from your mail app straight onto the box.</span></li>
+    </ol>
+    <div class="privacy">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffd23f" stroke-width="2" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      <span><b>Nothing leaves this page.</b> There is no server and no tracking. Your emails are read by code running in your own browser, and they disappear when you close the tab.</span>
+    </div>
+  </section>
+
+  <form class="card" id="form" autocomplete="off">
+    <label for="emails">Your emails</label>
+    <div class="dropzone" id="drop">
+      <textarea id="emails" spellcheck="false" placeholder="From: Brightloom Careers &lt;careers@brightloom.example&gt;
+Subject: Your application to Brightloom
+Date: Mar 14, 2026, 9:12 AM
+
+Hi Aliyah, thank you for applying... Unfortunately...
+---
+From: ...
+(paste the next one)"></textarea>
+    </div>
+    <div class="row">
+      <button type="button" class="ghost" id="sample">Try it with sample Ls</button>
+      <label class="ghost" for="files" style="margin:0;font:600 14px var(--body);letter-spacing:0;text-transform:none;color:var(--ink)">Add .eml / .txt files</label>
+      <input type="file" id="files" accept=".eml,.txt,message/rfc822,text/plain" multiple hidden>
+      <button type="button" class="ghost" id="clear">Clear</button>
+    </div>
+    <div class="live" id="live" aria-live="polite"><span class="hint">Paste something and we'll show what we detect here.</span></div>
+    <div class="fields">
+      <div><label for="name">Name on your card</label><input id="name" maxlength="28" placeholder="Optional"></div>
+      <div><label for="total">Total applications sent</label><input id="total" type="number" min="0" max="5000" inputmode="numeric" placeholder="Optional, e.g. 80"><small>Lets us count who never replied.</small></div>
+    </div>
+    <button class="go" id="go" type="submit" disabled>Wrap my Ls <span aria-hidden="true">→</span></button>
+    <div class="err" id="err"></div>
+  </form>
+</main>
+
+<section class="story t-red" id="story" hidden aria-roledescription="story" aria-live="polite">
+  <div class="bars" id="bars"></div>
+  <div class="topbar"><span>L Wrapped · <span id="yr2">2026</span></span><button class="x interactive" id="close" type="button" aria-label="Close and go back">✕</button></div>
+  <button class="zone prev" id="prev" type="button" aria-label="Previous"></button>
+  <button class="zone next" id="next" type="button" aria-label="Next"></button>
+  <div class="slide" id="slide"></div>
+  <div class="tapnote" id="tapnote">Tap to continue</div>
+</section>
+
+<script>
+(() => {
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const MONTHS = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const NOW_YEAR = new Date().getFullYear();
+
+/* ================= parsing ================= */
+function splitEmails(text){
+  text = text.replace(/\r\n?/g, '\n').trim();
+  if (!text) return [];
+  const SEP = /^\s*(?:-{3,}|={3,}|_{3,}|\*{3,})\s*$/m;
+  let parts;
+  if (SEP.test(text)) parts = text.split(new RegExp(SEP.source, 'm'));
+  else {
+    const lines = text.split('\n');
+    const isHdr = l => /^(from|subject|date|sent|to|cc)\s*:/i.test(l.trim());
+    const isStart = (l, i) => /^(from|subject)\s*:/i.test(l.trim()) && !(i > 0 && isHdr(lines[i-1]));
+    if (lines.filter(isStart).length >= 2) {
+      parts = []; let cur = [];
+      lines.forEach((l, i) => { if (isStart(l, i) && cur.join('').trim()) { parts.push(cur.join('\n')); cur = []; } cur.push(l); });
+      parts.push(cur.join('\n'));
+    } else parts = text.split(/\n[ \t]*\n[ \t]*\n+/);
+  }
+  return parts.map(p => p.trim()).filter(p => p.split(/\s+/).length >= 6);
+}
+
+function mkDate(y, mo, d, h, mi){
+  if (mo < 0 || mo > 11 || d < 1 || d > 31 || y < 1990 || y > 2100) return null;
+  const dt = new Date(y, mo, d, h == null ? 12 : h, mi || 0);
+  if (isNaN(dt)) return null;
+  dt.hasTime = h != null;
+  return dt;
+}
+function parseDate(s){
+  if (!s) return null;
+  s = s.replace(/\([^)]*\)/g, ' ');
+  let m, hh = null, mm = 0;
+  const tm = s.match(/\b(\d{1,2}):(\d{2})(?::\d{2})?\s*([AaPp]\.?[Mm]\.?)?/);
+  if (tm) { hh = +tm[1]; mm = +tm[2]; if (tm[3]) { const pm = /p/i.test(tm[3]); if (pm && hh < 12) hh += 12; if (!pm && hh === 12) hh = 0; } if (hh > 23) hh = null; }
+  if ((m = s.match(/\b(\d{4})-(\d{2})-(\d{2})/))) return mkDate(+m[1], +m[2]-1, +m[3], hh, mm);
+  const mon = '(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?';
+  if ((m = s.match(new RegExp('\\b' + mon + '\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b(?:,?\\s+(\\d{4}))?', 'i')))) return mkDate(m[3] ? +m[3] : NOW_YEAR, MONTHS.indexOf(m[1].toLowerCase()), +m[2], hh, mm);
+  if ((m = s.match(new RegExp('\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(?:of\\s+)?' + mon + ',?(?:\\s+(\\d{4}))?', 'i')))) return mkDate(m[3] ? +m[3] : NOW_YEAR, MONTHS.indexOf(m[2].toLowerCase()), +m[1], hh, mm);
+  if ((m = s.match(/\b(\d{1,2})[\/.](\d{1,2})[\/.](\d{4})\b/))) { let d = +m[1], mo = +m[2]; if (mo > 12 && d <= 12) [d, mo] = [mo, d]; return mkDate(+m[3], mo-1, d, hh, mm); }
+  return null;
+}
+
+function parseEmail(raw){
+  const lines = raw.split('\n');
+  const hdr = {};
+  const body = [];
+  lines.forEach((l, i) => {
+    const m = l.match(/^\s*(from|subject|date|sent|to|cc|reply-to)\s*:\s*(.*)$/i);
+    if (m && i < 14 && !hdr[m[1].toLowerCase()]) hdr[m[1].toLowerCase()] = m[2].trim();
+    else body.push(l);
+  });
+  let from = hdr.from || '';
+  if (!from) { const fl = lines.slice(0, 8).find(l => /<[^>\s]+@[^>\s]+>|^\S+@\S+\.\S+$/.test(l.trim())); if (fl) from = fl.trim(); }
+  let subject = hdr.subject || '';
+  if (!subject) { const first = lines.find(l => l.trim()); if (first && first.length < 140 && first.trim() !== from && !/^(hi|hello|dear)\b/i.test(first.trim())) subject = first.trim(); }
+  let date = parseDate(hdr.date || hdr.sent);
+  if (!date) for (const l of lines.slice(0, 10)) { if (/@/.test(l) && !/\d{1,2}:\d{2}/.test(l)) continue; const d = parseDate(l); if (d) { date = d; break; } }
+  const text = body.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  return { raw, from, subject, date, text, all: (subject + '\n' + text) };
+}
+
+/* ================= classification ================= */
+const REJ = [
+  /\bunfortunately\b/i, /regret(?:fully)? to (?:inform|let you know|advise|tell)/i,
+  /\b(?:not|n't|unable to)\b[^.\n]{0,45}\b(?:move|moving|proceed|proceeding|progress|progressing|advance|advancing)\b[^.\n]{0,25}\b(?:forward|further|with your|to the next)/i,
+  /(?:move|moving|proceed|proceeding|go|going|continue|continuing) (?:forward )?with (?:other|another|a different|candidates)/i,
+  /other (?:candidates|applicants) (?:whose|who|that)/i,
+  /(?:have|has|were|was) not been (?:selected|successful|shortlisted|chosen|accepted)/i,
+  /(?:were|was|are) not (?:selected|successful|shortlisted|chosen|able to offer)/i,
+  /(?:unable|not able) to (?:offer|extend|move|proceed|accept)/i,
+  /(?:position|role|vacancy) has (?:now )?been filled/i,
+  /decided to (?:pursue|go with) (?:other|another)/i, /declin(?:e|ed) your application/i,
+  /will not be (?:moving|proceeding|offering|inviting|progressing)/i, /not (?:to )?(?:invite you|shortlist you|offer you)/i,
+  /could not (?:offer|accept|admit|fund)/i, /not been (?:awarded|admitted)/i,
+];
+const OFFER = [
+  /pleased to (?:offer|extend|inform you that you(?:'ve| have) been (?:selected|accepted|admitted|awarded))/i,
+  /offer (?:letter|of employment|of admission)/i, /(?:would|'d) (?:like|love) to (?:extend|make|offer) (?:you )?(?:an )?offer/i,
+  /you(?:'ve| have) been (?:selected|accepted|admitted|awarded)/i, /delighted to (?:offer|welcome|inform you that you)/i,
+  /welcome (?:aboard|to the team|to the (?:cohort|program|programme|fellowship))/i, /(?:excited|thrilled) to offer/i,
+];
+const CONGRATS = /\bcongratulations\b/i;
+const INTERVIEW = [/\binterview/i, /next (?:round|stage|step)s?\b/i, /schedule (?:a |some )?(?:call|chat|time|meeting|conversation)/i, /phone screen/i, /\bassessment\b/i, /coding (?:challenge|test|exercise)/i, /calendly|book a (?:time|slot)/i, /\bshortlisted\b/i, /your availability/i];
+const ACK = [/received your application/i, /thank you for (?:applying|your application|submitting)/i, /application (?:has been |was )?(?:received|submitted)/i, /(?:we'll|we will) (?:review|be in touch|get back)/i, /under review/i];
+const HEARTBREAK = /\binterview|speaking with (?:us|our|the)|meeting with (?:us|our|the)|(?:took|taking) the time to (?:speak|meet|chat|talk)|(?:our|your) conversations?\b|final (?:round|stage)|onsite|on-site|getting to know you|take-home|case study you/i;
+const BOT = /no-?reply|do-?not-?reply|notifications?@|mailer|@[\w.-]*(?:greenhouse|lever\.co|workday|myworkday|ashbyhq|smartrecruiters|icims|jobvite|bamboohr|workable|recruitee|teamtailor|breezy|successfactors|taleo|oraclecloud)/i;
+const BOT_BODY = /do not reply|this (?:mailbox|inbox|email address) is not monitored|automated (?:message|email)|automatically generated/i;
+const WARM = /\b(impressed|enjoyed|genuinely|truly|really|pleasure|talented|strong|loved|appreciate|grateful|admire|excited|thoughtful|incredible|wonderful|exceptional|remarkable|hope)\b/gi;
+
+const CLICHES = [
+  ['after careful consideration', /after (?:careful|much|thorough|thoughtful|very careful) (?:consideration|review|deliberation|thought)/i],
+  ['unfortunately', /\bunfortunately\b/i],
+  ['we regret to inform you', /regret(?:fully)? to (?:inform|let you know|advise|tell)/i],
+  ['other candidates', /other (?:candidates|applicants)/i],
+  ['a highly competitive pool', /\bcompetitive\b|(?:large|high|significant) (?:number|volume) of (?:qualified |strong |talented )?(?:applicants|applications|candidates)|overwhelming (?:response|number)/i],
+  ["we'll keep your CV on file", /keep (?:your )?(?:resume|cv|résumé|application|details|information|profile) on (?:file|record)|talent (?:pool|community|network)/i],
+  ['apply again in the future', /encourage you to (?:re-?apply|apply (?:again|for|to))|future (?:opportunities|openings|roles|positions|cohorts)/i],
+  ['we wish you the best', /wish(?:ing)? you (?:the |all the )?(?:very )?(?:best|success|luck)/i],
+  ['this was a difficult decision', /(?:difficult|tough|hard|not an easy|challenging) decision/i],
+  ['we were impressed', /(?:were|was|are) (?:really |very |truly |genuinely )?impressed/i],
+  ['at this time', /at this (?:time|point|stage)/i],
+  ['not the right fit', /not (?:the right |a (?:strong |good |close )?)?(?:fit|match)\b/i],
+  ['thank you for your interest', /thank you for (?:your )?interest/i],
+  ['the position has been filled', /(?:position|role) has (?:now )?been filled/i],
+];
+
+const KINDS = [
+  ['Internships', /\bintern(?:ship)?s?\b/i],
+  ['Fellowships', /\bfellowship/i],
+  ['Scholarships', /\bscholarship|bursary/i],
+  ['Grants & funding', /\bgrant\b|\bfunding\b/i],
+  ['Admissions', /\badmission|graduate (?:program|school)|master'?s program|phd program/i],
+  ['Programs & accelerators', /accelerator|bootcamp|\bcohort\b|residency|incubator|\bprogram(?:me)?\b/i],
+  ['Talks & conferences', /\bspeaker\b|talk proposal|call for (?:papers|proposals|speakers)|\bcfp\b|\babstract\b/i],
+];
+
+const GENERIC_DOMAIN = /^(?:gmail|googlemail|yahoo|outlook|hotmail|live|icloud|me|aol|proton|protonmail|greenhouse|greenhouse-mail|lever|hire|workday|myworkday|myworkdayjobs|ashbyhq|ashby|smartrecruiters|icims|jobvite|bamboohr|linkedin|indeed|workable|recruitee|teamtailor|breezy|breezyhr|jazzhr|applytojob|successfactors|taleo|oraclecloud|mail|email|notifications?|careers?|jobs|talent|recruiting|example)$/i;
+const NOT_NAMES = /^(?:we|thank|thanks|unfortunately|the|our|your|dear|hi|hello|this|position|role|team|after|please|regards|best|it|i|you|application|applying|interest|us|a|an)$/i;
+const LABEL_WORDS = /\b(?:careers?|recruit(?:ing|ment|ers?)?|talent(?: acquisition)?|hiring|jobs?|hr|people(?: team| ops)?|team|admissions?|selection|programs?|no-?reply|notifications?|via [\w .]+|support)\b/gi;
+
+function tidyName(n){
+  if (!n) return '';
+  n = n.replace(/["'“”]/g, '').replace(/\s+/g, ' ').replace(/[.,:;!?\-–|]+$/, '').trim();
+  n = n.replace(/^(?:the)\s+/i, '');
+  const words = n.split(' ');
+  while (words.length && NOT_NAMES.test(words[words.length-1])) words.pop();
+  while (words.length && NOT_NAMES.test(words[0])) words.shift();
+  n = words.join(' ').trim();
+  if (!n || n.length < 2 || n.length > 42 || /@/.test(n)) return '';
+  return n;
+}
+function companyOf(e){
+  const from = e.from || '';
+  const nameMatch = from.replace(/<[^>]*>/, '').replace(/["']/g, '').trim();
+  const fromLabeled = nameMatch && LABEL_WORDS.test(nameMatch);
+  LABEL_WORDS.lastIndex = 0;
+  if (nameMatch && !/@/.test(nameMatch)) {
+    const at = nameMatch.match(/\b(?:at|from|@)\s+([A-Z][\w&'.\- ]{1,40})$/);
+    if (at) { const n = tidyName(at[1].replace(LABEL_WORDS, '')); if (n) return n; }
+    if (fromLabeled) { const n = tidyName(nameMatch.replace(LABEL_WORDS, '').replace(/\s[-|–]\s*$/, '')); if (n) return n; }
+  }
+  const N = "([A-Z][\\w&'.\\-]*(?:\\s(?:[A-Z][\\w&'.\\-]*|&|of|and|for|de|la)){0,4})";
+  const pats = [
+    new RegExp("[Ii]nterest in (?:joining |working (?:at|with|for) |(?:a |the )?(?:[\\w/&,'\\- ]{2,60}? )?(?:role|position|opportunity|internship|program(?:me)?|fellowship|scholarship|job) (?:at|with) )" + N),
+    new RegExp("(?:applying|applied|application) (?:to|at|with) (?:the )?" + N),
+    new RegExp(N + " (?:Recruiting|Recruitment|Talent(?: Acquisition)?|Hiring|Careers|People|HR|Admissions|Selection|Programs?) (?:Team|Committee|Office|Panel)"),
+    new RegExp("(?:everyone|all of us|team|us|role|position) at " + N),
+    new RegExp("joining " + N),
+  ];
+  const subjClean = (e.subject || '').replace(/^(?:(?:re|fwd?|fw)\s*:\s*)+/i, '');
+  for (const src of [subjClean, e.text]) for (const p of pats) { const m = (src || '').match(p); if (m) { const n = tidyName(m[1]); if (n && !/^(?:Unfortunately|Thank|We)/.test(n)) return n; } }
+  const subj = subjClean.match(/^([A-Z][\w&'.\- ]{1,36}?)\s*(?:[-|:–]|application|update)/i);
+  if (subj) { const n = tidyName(subj[1].replace(LABEL_WORDS, '')); if (n && !/^your\b/i.test(n)) return n; }
+  const dm = from.match(/@([\w.-]+)/);
+  if (dm) {
+    const labels = dm[1].toLowerCase().split('.').filter(Boolean);
+    if (labels.length >= 2) {
+      let core = labels[labels.length - 2];
+      if (/^(?:co|com|ac|org|gov|edu)$/.test(core) && labels.length >= 3) core = labels[labels.length - 3];
+      if (!GENERIC_DOMAIN.test(core)) return core.charAt(0).toUpperCase() + core.slice(1);
+    }
+  }
+  return '';
+}
+function roleOf(e){
+  const s = e.subject + '\n' + e.text;
+  const pats = [
+    /(?:for|to|in) (?:the |our |a |an )?(?:position of |role of )?([A-Z][\w/&,'().+\- ]{2,58}?) (?:position|role|opening|vacancy|internship|programme|program|fellowship|scholarship|opportunity)\b/,
+    /(?:application|applying|applied) for (?:the )?([\w/&'().+\- ]{3,58}?)(?: position| role| at |[.,\n])/i,
+  ];
+  for (const p of pats) { const m = s.match(p); if (m) { const r = m[1].replace(/^(?:the|a|an|our)\s+/i, '').trim(); if (r.length >= 3 && !/^(?:this|that|your|our)$/i.test(r)) return r; } }
+  return '';
+}
+function keySentence(text){
+  const sents = text.replace(/\s+/g, ' ').split(/(?<=[.!?])\s+/);
+  const hit = sents.find(s => REJ.some(r => r.test(s))) || sents.find(s => s.length > 40) || sents[0] || '';
+  const clean = hit.replace(/[\w.+-]+@[\w.-]+/g, '[email]').trim();
+  return clean.length > 220 ? clean.slice(0, 217).replace(/\s\S*$/, '') + '…' : clean;
+}
+const wc = s => (s.match(/\b[\w'’-]+\b/g) || []).length;
+
+function classify(e){
+  const t = e.all;
+  const rej = REJ.filter(r => r.test(t)).length;
+  const offerStrong = OFFER.filter(r => r.test(t)).length;
+  const interview = INTERVIEW.filter(r => r.test(t)).length;
+  const ack = ACK.filter(r => r.test(t)).length;
+  const offer = offerStrong + (CONGRATS.test(t) && !interview ? 1 : 0);
+  if (offer && (rej === 0 || (offerStrong >= 2 && rej <= 1))) return 'offer';
+  if (rej) return 'L';
+  if (interview) return 'interview';
+  if (ack) return 'pending';
+  return 'unknown';
+}
+
+function analyze(text, totalApplied){
+  const emails = splitEmails(text).map(parseEmail);
+  emails.forEach((e, i) => {
+    e.kind = classify(e);
+    e.company = companyOf(e);
+    e.role = roleOf(e);
+    e.words = wc(e.text);
+    e.bot = BOT.test(e.from) || BOT_BODY.test(e.text);
+    e.heartbreak = e.kind === 'L' && HEARTBREAK.test(e.all);
+    e.warm = (e.text.match(WARM) || []).length;
+    e.type = (KINDS.find(([, r]) => r.test(e.all)) || ['Jobs'])[0];
+    e.idx = i;
+  });
+  const by = k => emails.filter(e => e.kind === k);
+  const Ls = by('L'), interviews = by('interview'), offers = by('offer'), pending = by('pending'), unknown = by('unknown');
+  const responses = emails.length - unknown.length;
+  const total = +totalApplied || 0;
+  const ghosted = total > responses ? total - responses : 0;
+
+  const dated = emails.filter(e => e.date);
+  const yearCounts = {};
+  dated.forEach(e => yearCounts[e.date.getFullYear()] = (yearCounts[e.date.getFullYear()] || 0) + 1);
+  const year = +(Object.entries(yearCounts).sort((a, b) => b[1] - a[1])[0] || [NOW_YEAR])[0];
+
+  const datedL = Ls.filter(e => e.date);
+  const months = Array(12).fill(0); datedL.forEach(e => months[e.date.getMonth()]++);
+  const peakMonth = datedL.length >= 2 ? months.indexOf(Math.max(...months)) : -1;
+  const days = Array(7).fill(0); datedL.forEach(e => days[e.date.getDay()]++);
+  const peakDay = datedL.length >= 3 ? days.indexOf(Math.max(...days)) : -1;
+  const timed = datedL.filter(e => e.date.hasTime);
+  const oddHour = timed.slice().sort((a, b) => {
+    const score = d => { const h = d.date.getHours() + d.date.getMinutes()/60; return Math.min(Math.abs(h - 3), 24 - Math.abs(h - 3)); };
+    return score(a) - score(b);
+  })[0];
+  const weekendL = datedL.filter(e => [0, 6].includes(e.date.getDay())).length;
+
+  const cliches = CLICHES.map(([label, rx]) => ({ label, n: Ls.filter(e => rx.test(e.all)).length })).filter(c => c.n > 0).sort((a, b) => b.n - a.n);
+  const unfortunatelyCount = Ls.reduce((n, e) => n + (e.all.match(/\bunfortunately\b/gi) || []).length, 0);
+
+  const kinds = {}; emails.filter(e => e.kind !== 'unknown').forEach(e => kinds[e.type] = (kinds[e.type] || 0) + 1);
+  const kindList = Object.entries(kinds).sort((a, b) => b[1] - a[1]);
+
+  const companyCount = {}; const companyName = {};
+  Ls.forEach(e => { if (!e.company) return; const k = e.company.toLowerCase().replace(/[^a-z0-9]/g, '').replace(/(inc|ltd|llc|limited|plc)$/, ''); companyCount[k] = (companyCount[k] || 0) + 1; companyName[k] = e.company; });
+  const repeat = Object.entries(companyCount).filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).map(([k, n]) => ({ name: companyName[k], n }))[0] || null;
+
+  const coldest = Ls.filter(e => e.words >= 8).sort((a, b) => a.words - b.words)[0] || null;
+  const warmest = Ls.filter(e => e !== coldest).sort((a, b) => (b.warm - a.warm) || (b.words - a.words))[0] || null;
+  const longest = Ls.slice().sort((a, b) => b.words - a.words)[0] || null;
+
+  const words = emails.reduce((n, e) => n + e.words, 0);
+  const Lwords = Ls.reduce((n, e) => n + e.words, 0);
+  const botL = Ls.filter(e => e.bot).length;
+  const heartbreaks = Ls.filter(e => e.heartbreak);
+
+  const nL = Ls.length;
+  const TIERS = ['Paper', 'Leather', 'Kevlar', 'Titanium', 'Vibranium'];
+  const tier = nL >= 50 ? 4 : nL >= 30 ? 3 : nL >= 15 ? 2 : nL >= 5 ? 1 : 0;
+
+  let archetype;
+  if (offers.length) archetype = ['The Plot Twist', `Took ${nL} L${nL === 1 ? '' : 's'} and still walked out with ${offers.length === 1 ? 'a W' : offers.length + ' Ws'}. The rejections were just the trailer.`];
+  else if (heartbreaks.length >= 3 || (nL >= 4 && heartbreaks.length / nL >= 0.35)) archetype = ['Final Round Regular', `You made it into the room ${heartbreaks.length} times. You're close. You're very obviously close.`];
+  else if (ghosted && ghosted >= nL) archetype = ['Ghost Whisperer', `${ghosted} applications never got a reply at all. At least a rejection is closure.`];
+  else if (nL >= 4 && botL / nL >= 0.6) archetype = ["The Algorithm's Nemesis", `${Math.round(botL / nL * 100)}% of your Ls came from a no-reply inbox. Software keeps rejecting you. Humans haven't had a fair look yet.`];
+  else if (repeat) archetype = ['The Loyal One', `${repeat.name} turned you down ${repeat.n} times and you kept coming back. That's commitment.`];
+  else if (nL >= 25) archetype = ['Rejection Connoisseur', `${nL} Ls. You can tell a template rejection from a personal one by the first line.`];
+  else if (nL === 0) archetype = ['Untouched', `Zero Ls detected. Either you're winning or you pasted the wrong folder.`];
+  else archetype = ['Professional L Collector', `Every L is a rep, and you got ${nL} of them in. That's what shooting your shot looks like.`];
+
+  return { emails, Ls, interviews, offers, pending, unknown, responses, total, ghosted, year, months, peakMonth, days, peakDay, oddHour, weekendL, cliches, unfortunatelyCount, kindList, repeat, coldest, warmest, longest, words, Lwords, botL, heartbreaks, tier, TIERS, archetype };
+}
+
+/* ================= sample data (fictional companies, .example domains) ================= */
+const SAMPLE = `From: Brightloom Careers <no-reply@brightloom.example>
+Subject: Your application to Brightloom
+Date: Jan 19, 2026, 11:42 PM
+
+Hi there,
+Thank you for your interest in the Junior Robotics Engineer position at Brightloom. After careful consideration, we have decided to move forward with other candidates whose experience more closely matches our needs at this time.
+We will keep your CV on file and encourage you to apply for future opportunities.
+We wish you the best in your search.
+The Brightloom Talent Team
+---
+From: Quillstack Labs Recruiting <recruiting@quillstack.example>
+Subject: Update on your application
+Date: Feb 3, 2026, 3:07 AM
+
+Hello,
+We received a highly competitive pool of applicants for the Embedded Systems Intern role. Unfortunately, you have not been selected to proceed to the next stage.
+Best of luck.
+---
+From: Paperplane Health <talent@paperplane.example>
+Subject: Paperplane Health - Data Analyst Intern
+Date: Mar 10, 2026, 2:15 PM
+
+Hi Aliyah,
+Thank you so much for taking the time to speak with us during your interview last week. We genuinely enjoyed getting to know you and were really impressed by your project on urban mobility sensors.
+This was a difficult decision, but unfortunately we have decided to proceed with another candidate for the Data Analyst Intern position.
+We truly hope our paths cross again and wish you all the best.
+Warmly, Tola from Paperplane Health
+---
+From: Orbital Fern Fellowship <noreply@orbitalfern.example>
+Subject: Orbital Fern Fellowship 2026 decision
+Date: Mar 28, 2026, 9:00 AM
+
+Dear Applicant,
+We regret to inform you that your application to the Orbital Fern Fellowship has not been successful. We received an overwhelming number of applications this year.
+We encourage you to apply again for future cohorts.
+---
+From: Kettlekite Studio <jobs@kettlekite.example>
+Subject: Re: Hardware Prototyping Assistant
+Date: Apr 6, 2026, 7:51 AM
+
+Thanks for applying. The position has been filled.
+---
+From: Lumen Ridge Scholarship <admissions@lumenridge.example>
+Subject: Lumen Ridge STEM Scholarship
+Date: Apr 22, 2026, 1:30 PM
+
+Dear Aliyah,
+Thank you for your interest in the Lumen Ridge STEM Scholarship. After careful review, we are unable to offer you an award this cycle. The competition was exceptionally strong.
+We wish you success in your studies.
+---
+From: Brightloom Careers <no-reply@brightloom.example>
+Subject: Your application to Brightloom
+Date: May 5, 2026, 10:12 AM
+
+Thank you for your interest in the Automation Engineering Intern position at Brightloom. After careful consideration, we will not be moving forward with your application at this time. We will keep your CV on file.
+---
+From: Cobaltwing Robotics <careers@cobaltwing.example>
+Subject: Interview invitation - Robotics Software Intern
+Date: May 14, 2026, 4:40 PM
+
+Hi Aliyah,
+Thanks for applying to Cobaltwing Robotics! We'd love to schedule a call to talk about the Robotics Software Intern role. Please share your availability for next week, or book a time using the link below.
+---
+From: Cobaltwing Robotics <careers@cobaltwing.example>
+Subject: Cobaltwing Robotics - next steps
+Date: Jun 2, 2026, 6:05 PM
+
+Hi Aliyah,
+Thank you for completing the final round and for the time you spent with our team. Unfortunately, we have decided not to move forward. You were a strong candidate and this was not an easy decision.
+Best, the Cobaltwing team
+---
+From: Saltmarsh Accelerator <hello@saltmarsh.example>
+Subject: Saltmarsh Accelerator Cohort 7
+Date: Jun 2, 2026, 11:58 PM
+
+Hi,
+Unfortunately we are not able to offer you a place in Cohort 7 of the Saltmarsh Accelerator program. We wish you the best.
+---
+From: Tidewell Energy <noreply@tidewell.example>
+Subject: Your Tidewell Energy application
+Date: Jul 7, 2026, 2:22 AM
+
+Thank you for applying to Tidewell Energy. Unfortunately, we have decided to move forward with other candidates. Please do not reply to this email; this mailbox is not monitored.
+---
+From: Brightloom Careers <no-reply@brightloom.example>
+Subject: Your application to Brightloom
+Date: Aug 18, 2026, 9:30 AM
+
+Thank you for your interest in the Graduate Trainee position at Brightloom. Unfortunately, we will not be progressing your application. We wish you the best.
+---
+From: Marigold Systems <people@marigold.example>
+Subject: Marigold Systems - Hardware Intern
+Date: Sep 9, 2026, 1:10 PM
+
+Hi Aliyah,
+We were impressed by your background, but unfortunately the role is no longer a match for where the team is headed. We'll keep your details in our talent pool.
+---
+From: Northgate Dev Summit <speakers@northgate.example>
+Subject: Talk proposal decision
+Date: Sep 30, 2026, 8:15 PM
+
+Thank you for submitting a talk proposal to Northgate Dev Summit. We received a large number of strong proposals and regret to inform you that your talk was not selected this year.
+---
+From: Fernhill Institute <selection@fernhill.example>
+Subject: Fernhill AI Residency
+Date: Oct 21, 2026, 10:00 AM
+
+Dear Aliyah,
+Congratulations! We are delighted to offer you a place in the 2027 Fernhill AI Residency program. Your offer letter is attached. Welcome to the cohort!
+---
+From: Quillstack Labs Recruiting <recruiting@quillstack.example>
+Subject: Update on your application
+Date: Nov 4, 2026, 3:33 AM
+
+Unfortunately, after careful consideration we are unable to move forward with your application for the Firmware Engineer role at this time.`;
+
+/* ================= intake UI ================= */
+const ta = $('#emails'), live = $('#live'), go = $('#go'), err = $('#err');
+const COLORS = { L: '#e8392b', interview: '#6b4eff', offer: '#0f5c45', pending: '#c79a00', unknown: '#9c8a90' };
+let liveTimer;
+function updateLive(){
+  const a = analyze(ta.value, $('#total').value);
+  const n = a.emails.length;
+  go.disabled = n === 0;
+  if (!n) { live.innerHTML = '<span class="hint">Paste something and we\'ll show what we detect here.</span>'; return; }
+  const pill = (k, label, c) => c ? `<span class="pill"><span class="dot" style="background:${COLORS[k]}"></span>${c} ${label}</span>` : '';
+  live.innerHTML = `<b>${n} email${n === 1 ? '' : 's'} found</b>` + pill('L', a.Ls.length === 1 ? 'L' : 'Ls', a.Ls.length) + pill('interview', 'interview' + (a.interviews.length === 1 ? '' : 's'), a.interviews.length) + pill('offer', 'offer' + (a.offers.length === 1 ? '' : 's'), a.offers.length) + pill('pending', 'received', a.pending.length) + pill('unknown', 'unclear', a.unknown.length);
+}
+ta.addEventListener('input', () => { clearTimeout(liveTimer); liveTimer = setTimeout(updateLive, 200); });
+$('#total').addEventListener('input', updateLive);
+$('#sample').addEventListener('click', () => { ta.value = SAMPLE; $('#total').value = 34; if (!$('#name').value) $('#name').value = 'Sample'; updateLive(); ta.scrollTop = 0; });
+$('#clear').addEventListener('click', () => { ta.value = ''; updateLive(); ta.focus(); });
+$('#copyq').addEventListener('click', async () => {
+  const t = $('#q').textContent;
+  try { await navigator.clipboard.writeText(t); $('#copyq').textContent = 'Copied'; setTimeout(() => $('#copyq').textContent = 'Copy', 1500); }
+  catch { const r = document.createRange(); r.selectNodeContents($('#q')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+});
+const yearStr = String(NOW_YEAR);
+$('#yr').textContent = yearStr; $('#q').textContent = $('#q').textContent.replace('2026', yearStr);
+
+// .eml / .txt import
+function decodeQP(s){ return s.replace(/=\r?\n/g, '').replace(/=([0-9A-F]{2})/gi, (_, h) => String.fromCharCode(parseInt(h, 16))); }
+function utf8(bin){ try { return decodeURIComponent(escape(bin)); } catch { return bin; } }
+function stripHtml(h){ const d = new DOMParser().parseFromString(h, 'text/html'); d.querySelectorAll('style,script').forEach(n => n.remove()); return (d.body ? d.body.innerText || d.body.textContent : '').replace(/\n{3,}/g, '\n\n'); }
+function decodeHeader(v){ return v.replace(/=\?([^?]+)\?([BQ])\?([^?]*)\?=/gi, (_, cs, enc, txt) => { try { return utf8(enc.toUpperCase() === 'B' ? atob(txt) : decodeQP(txt.replace(/_/g, ' '))); } catch { return txt; } }); }
+function emlToText(src){
+  src = src.replace(/\r\n?/g, '\n');
+  const split = src.indexOf('\n\n');
+  if (split < 0) return src;
+  const head = src.slice(0, split).replace(/\n[ \t]+/g, ' '), rest = src.slice(split + 2);
+  const h = k => { const m = head.match(new RegExp('^' + k + ':\\s*(.*)$', 'im')); return m ? decodeHeader(m[1].trim()) : ''; };
+  if (!/^(from|subject|date|received|message-id):/im.test(head)) return src;
+  function partBody(headers, body){
+    const enc = (headers.match(/content-transfer-encoding:\s*([\w-]+)/i) || [])[1] || '';
+    let b = body;
+    if (/base64/i.test(enc)) { try { b = utf8(atob(b.replace(/\s+/g, ''))); } catch {} }
+    else if (/quoted-printable/i.test(enc)) b = utf8(decodeQP(b));
+    return /text\/html/i.test(headers) ? stripHtml(b) : b;
+  }
+  let text = '';
+  const boundary = (head.match(/boundary="?([^";\n]+)"?/i) || [])[1];
+  if (boundary) {
+    const parts = rest.split('--' + boundary).map(p => { const i = p.indexOf('\n\n'); return i < 0 ? null : { h: p.slice(0, i), b: p.slice(i + 2) }; }).filter(Boolean);
+    const flat = [];
+    parts.forEach(p => { const nb = (p.h.match(/boundary="?([^";\n]+)"?/i) || [])[1]; if (nb) p.b.split('--' + nb).forEach(q => { const i = q.indexOf('\n\n'); if (i >= 0) flat.push({ h: q.slice(0, i), b: q.slice(i + 2) }); }); else flat.push(p); });
+    const plain = flat.find(p => /text\/plain/i.test(p.h)) || flat.find(p => /text\/html/i.test(p.h));
+    text = plain ? partBody(plain.h, plain.b) : rest;
+  } else text = partBody(head, rest);
+  return `From: ${h('From')}\nSubject: ${h('Subject')}\nDate: ${h('Date')}\n\n${text.trim()}`;
+}
+async function addFiles(files){
+  const out = [];
+  for (const f of files) { if (f.size > 3e6) continue; try { out.push(emlToText(await f.text())); } catch {} }
+  if (!out.length) return;
+  ta.value = (ta.value.trim() ? ta.value.trim() + '\n---\n' : '') + out.join('\n---\n');
+  updateLive();
+}
+$('#files').addEventListener('change', e => { addFiles([...e.target.files]); e.target.value = ''; });
+const drop = $('#drop');
+['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { if ([...e.dataTransfer.types].includes('Files')) { e.preventDefault(); drop.classList.add('drag'); } }));
+['dragleave', 'drop'].forEach(t => drop.addEventListener(t, () => drop.classList.remove('drag')));
+drop.addEventListener('drop', e => { if (e.dataTransfer.files.length) { e.preventDefault(); addFiles([...e.dataTransfer.files]); } });
+
+$('#form').addEventListener('submit', e => {
+  e.preventDefault();
+  const a = analyze(ta.value, $('#total').value);
+  if (!a.emails.length) { err.textContent = 'We couldn\'t find any emails. Paste at least one, with --- between each.'; return; }
+  if (!a.responses) { err.textContent = 'We found text, but none of it reads like an application email. Check that you pasted the email bodies.'; return; }
+  err.textContent = '';
+  a.name = $('#name').value.trim();
+  startStory(a);
+});
+
+/* ================= story ================= */
+const story = $('#story'), slideEl = $('#slide'), barsEl = $('#bars');
+let slides = [], cur = 0, data = null, cardURL = '';
+const plural = (n, one, many) => `${n} ${n === 1 ? one : (many || one + 's')}`;
+const count = n => `<span class="count" data-n="${n}">${n}</span>`;
+
+function buildSlides(a){
+  const S = [];
+  const nL = a.Ls.length, yr = a.year;
+  S.push({ t: 't-ink', h: `<p class="eyebrow rise">${a.name ? esc(a.name) + ', it\'s' : 'It\'s'} that time</p><p class="big rise">${yr} was a year of <span class="acc">Ls.</span></p><p class="sub rise">You put yourself out there ${a.total ? a.total + ' times' : 'again and again'}. We read every reply. Let's look at the damage.</p>` });
+  S.push({ t: 't-red', h: `<p class="eyebrow rise">Total Ls taken</p><p class="huge rise">${count(nL)}</p><div class="stamp">REJECTED</div><p class="say rise">${nL === 0 ? 'Not a single one. Suspicious.' : nL < 5 ? 'A light year. Barely a bruise.' : nL < 15 ? 'Respectable. You were busy.' : nL < 30 ? 'That\'s a lot of "unfortunately".' : 'At this point you could write these emails yourself.'}</p>` });
+
+  const segs = [['L', 'Ls', nL, 'var(--ink)'], ['interview', 'Interviews', a.interviews.length, 'var(--legal)'], ['offer', 'Offers', a.offers.length, '#fff4e8'], ['pending', 'Still pending', a.pending.length, 'var(--pink)']];
+  if (a.ghosted) segs.push(['ghost', 'Ghosted', a.ghosted, 'color-mix(in srgb,var(--fg) 35%,transparent)']);
+  const sum = segs.reduce((n, s) => n + s[2], 0) || 1;
+  S.push({ t: 't-violet', h: `<p class="eyebrow rise">Your inbox, broken down</p><p class="say rise">${a.total ? `Out of ${a.total} applications, ${Math.round(nL / a.total * 100)}% ended in an L${a.ghosted ? ` and ${Math.round(a.ghosted / a.total * 100)}% ended in silence` : ''}.` : `Of everything that came back, ${Math.round(nL / Math.max(a.responses, 1) * 100)}% was a no.`}</p>
+    <div class="split rise">${segs.filter(s => s[2]).map(s => `<span style="width:${s[2] / sum * 100}%;background:${s[3]}"></span>`).join('')}</div>
+    <div class="legend rise">${segs.filter(s => s[2]).map(s => `<div><span class="sw" style="background:${s[3]}"></span><b>${s[2]}</b><i>${s[1]}</i></div>`).join('')}</div>` });
+
+  if (a.kindList.length > 1) {
+    S.push({ t: 't-pink', h: `<p class="eyebrow rise">Your top genres</p><p class="say rise">You didn't just get rejected from jobs. You diversified.</p><ol class="toplist">${a.kindList.slice(0, 5).map(([k, n], i) => `<li class="rise"><span class="n">${i + 1}</span><span class="p">${esc(k)}</span><span class="c">${n} email${n === 1 ? '' : 's'}</span></li>`).join('')}</ol>` });
+  }
+  if (a.cliches.length) {
+    S.push({ t: 't-legal', h: `<p class="eyebrow rise">Your top phrases of ${yr}</p><ol class="toplist">${a.cliches.slice(0, 5).map((c, i) => `<li class="rise"><span class="n">${i + 1}</span><span class="p">“${esc(c.label)}”</span><span class="c">${c.n}×</span></li>`).join('')}</ol>` });
+    const top = a.cliches[0];
+    S.push({ t: 't-ink', h: `<p class="eyebrow rise">Your #1 phrase</p><p class="big rise"><span class="acc">“${esc(top.label)}”</span></p><p class="sub rise">showed up in ${plural(top.n, 'rejection')}${nL ? `, ${Math.round(top.n / nL * 100)}% of your Ls` : ''}. ${a.unfortunatelyCount ? `You read the word “unfortunately” ${plural(a.unfortunatelyCount, 'time')} this year.` : ''}</p>` });
+  }
+  if (a.peakMonth >= 0) {
+    const max = Math.max(...a.months, 1);
+    S.push({ t: 't-moss', h: `<p class="eyebrow rise">Rejection season</p><p class="big rise"><span class="acc">${MONTH_NAMES[a.peakMonth]}</span></p><p class="sub rise">was your worst month, with ${plural(a.months[a.peakMonth], 'L')}.</p>
+      <div class="months rise">${a.months.map((m, i) => `<div><em>${m || ''}</em><span class="${i === a.peakMonth ? 'peak' : ''}" style="height:${Math.max(m / max * 100, m ? 6 : 2)}%;animation-delay:${.3 + i * .04}s"></span><small>${MONTH_NAMES[i][0]}</small></div>`).join('')}</div>` });
+  }
+  if (a.oddHour) {
+    const d = a.oddHour.date, h = d.getHours();
+    const time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    const late = h < 6 || h >= 22;
+    S.push({ t: 't-ink', h: `<p class="eyebrow rise">${late ? 'The late-night L' : 'Prime-time rejection'}</p><p class="huge rise" style="font-size:clamp(84px,22vw,150px)"><span class="acc">${esc(time)}</span></p><p class="say rise">${a.oddHour.company ? esc(a.oddHour.company) : 'Someone'} rejected you at ${esc(time)} on a ${DAYS[d.getDay()]}.</p><p class="sub rise">${late ? 'Who is sending these at that hour? A robot. It\'s always a robot.' : 'Right in the middle of your day. Rude.'}${a.peakDay >= 0 ? ` Your Ls hit hardest on ${DAYS[a.peakDay]}s.` : ''}</p>` });
+  } else if (a.peakDay >= 0) {
+    S.push({ t: 't-ink', h: `<p class="eyebrow rise">Your Ls have a favorite day</p><p class="big rise"><span class="acc">${DAYS[a.peakDay]}s</span></p><p class="sub rise">${plural(a.days[a.peakDay], 'rejection')} landed on a ${DAYS[a.peakDay]}.${a.weekendL ? ` ${a.weekendL} even arrived on a weekend.` : ''}</p>` });
+  }
+  if (nL >= 2 && a.botL) {
+    const pct = Math.round(a.botL / nL * 100);
+    S.push({ t: 't-paper', h: `<p class="eyebrow rise">Sent by a robot</p><p class="huge rise">${count(pct)}<span style="font-size:.4em">%</span></p><p class="say rise">of your Ls came from a no-reply inbox or an applicant tracking system.</p><p class="sub rise">You were rejected by software ${plural(a.botL, 'time')}. It never even said its name.</p>` });
+  }
+  if (a.heartbreaks.length) {
+    const hb = a.heartbreaks[0];
+    S.push({ t: 't-pink', h: `<p class="eyebrow rise">So close</p><p class="huge rise">${count(a.heartbreaks.length)}</p><p class="say rise">${a.heartbreaks.length === 1 ? 'time you made it to the interview and still took the L.' : 'times you made it to the interview and still took the L.'}</p><p class="sub rise">${hb.company ? `${esc(hb.company)} was the one that stung.` : 'Those ones sting.'} Getting the interview means the application worked.</p>` });
+  }
+  if (a.repeat) {
+    S.push({ t: 't-violet', h: `<p class="eyebrow rise">Your most loyal rejector</p><p class="big rise"><span class="acc">${esc(a.repeat.name)}</span></p><p class="say rise">said no ${plural(a.repeat.n, 'time')}.</p><p class="sub rise">You kept shooting. They kept missing.</p>` });
+  }
+  if (a.coldest) {
+    S.push({ t: 't-legal', h: `<p class="eyebrow rise">The coldest L</p><p class="say rise">${a.coldest.company ? esc(a.coldest.company) : 'One of them'} needed just ${a.coldest.words} words.</p><p class="quote rise">“${esc(keySentence(a.coldest.text))}”</p><p class="meta rise">${a.coldest.role ? esc(a.coldest.role) + ' · ' : ''}${a.coldest.date ? a.coldest.date.toLocaleDateString([], { month: 'short', day: 'numeric' }) : ''}</p>` });
+  }
+  if (a.warmest && a.warmest.warm >= 2) {
+    S.push({ t: 't-moss', h: `<p class="eyebrow rise">The kindest L</p><p class="say rise">${a.warmest.company ? esc(a.warmest.company) : 'Someone'} let you down gently.</p><p class="quote rise">“${esc(keySentence(a.warmest.text))}”</p><p class="sub rise">${a.warmest.words} words and ${plural(a.warmest.warm, 'kind word')}. We'll take it.</p>` });
+  }
+  const mins = a.Lwords / 230;
+  if (a.Lwords > 0) {
+    S.push({ t: 't-red', h: `<p class="eyebrow rise">Time spent reading rejections</p><p class="huge rise">${count(mins < 1 ? Math.round(mins * 60) : Math.round(mins))}</p><p class="say rise">${mins < 1 ? 'seconds' : (Math.round(mins) === 1 ? 'minute' : 'minutes')} of “we regret to inform you”.</p><p class="sub rise">${a.Lwords.toLocaleString()} words of no. ${mins >= 10 ? 'That\'s a whole lunch break.' : 'Short, but it adds up.'}</p>` });
+  }
+  if (a.ghosted) {
+    S.push({ t: 't-ink', h: `<p class="eyebrow rise">Left on read</p><p class="huge rise">${count(a.ghosted)}</p><p class="say rise">applications got no reply at all.</p><p class="sub rise">Not even a template. Each of these ${a.ghosted === 1 ? 'is' : 'is'} an L you never got to read.</p>` });
+  }
+  S.push({ t: 't-paper', h: `<p class="eyebrow rise">Thick skin rating</p><p class="big rise"><span class="acc">${a.TIERS[a.tier]}</span></p><div class="tier rise">${a.TIERS.map((_, i) => `<span class="${i <= a.tier ? 'lit' : ''}"></span>`).join('')}</div><div class="tiernames rise">${a.TIERS.map(t => `<span>${t}</span>`).join('')}</div><p class="sub rise" style="margin-top:18px">${a.tier >= 3 ? 'Rejection bounces off you now.' : a.tier >= 1 ? 'You\'re building armour one email at a time.' : 'Still soft. Give it a few more applications.'}</p>` });
+  S.push({ t: 't-violet', h: `<p class="eyebrow rise">Your ${yr} L personality</p><p class="big rise"><span class="acc">${esc(a.archetype[0])}</span></p><p class="say rise">${esc(a.archetype[1])}</p>` });
+  S.push({ t: 't-red', final: true, h: `<div class="final"><p class="eyebrow">Your L Wrapped</p><img id="cardimg" alt="Your L Wrapped summary card" class="interactive"><div class="actions interactive">
+      <button class="btn" id="dl" type="button">Save image</button>
+      <button class="btn alt" id="cap" type="button">Copy caption</button>
+      <a class="btn alt" id="tw" target="_blank" rel="noopener">Post on X</a>
+      <a class="btn alt" id="li" target="_blank" rel="noopener">Post on LinkedIn</a></div>
+      <p class="small" id="savehint">If Save doesn't start a download, press and hold (or right-click) the card to save it. Then attach it to your post.</p>
+      <button class="btn alt interactive" id="again" type="button">Start over</button></div>` });
+  return S;
+}
+
+function caption(a){
+  const parts = [`My ${a.year} L Wrapped: ${plural(a.Ls.length, 'rejection')}`];
+  if (a.interviews.length) parts.push(plural(a.interviews.length, 'interview'));
+  if (a.offers.length) parts.push(plural(a.offers.length, 'offer'));
+  if (a.ghosted) parts.push(`${a.ghosted} ghosted`);
+  let s = parts.join(', ') + '.';
+  if (a.cliches[0]) s += `\nTop phrase: “${a.cliches[0].label}” (${a.cliches[0].n}×).`;
+  if (a.peakMonth >= 0) s += `\nWorst month: ${MONTH_NAMES[a.peakMonth]}.`;
+  s += `\nL personality: ${a.archetype[0]}.\n\nStill applying. #LWrapped`;
+  return s;
+}
+
+function startStory(a){
+  data = a; slides = buildSlides(a); cur = 0; cardURL = '';
+  barsEl.innerHTML = slides.map(() => '<span><i></i></span>').join('');
+  $('#yr2').textContent = a.year;
+  story.hidden = false; document.body.style.overflow = 'hidden';
+  show(0);
+  makeCard(a).then(u => { cardURL = u; const img = $('#cardimg'); if (img) img.src = u; });
+}
+function closeStory(){ story.hidden = true; document.body.style.overflow = ''; }
+function animateCounts(root){
+  root.querySelectorAll('.count').forEach(el => {
+    const n = +el.dataset.n, t0 = performance.now(), dur = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1000;
+    const tick = t => { const p = dur ? Math.min((t - t0) / dur, 1) : 1; el.textContent = Math.round(n * (1 - Math.pow(1 - p, 3))).toLocaleString(); if (p < 1) requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+  });
+}
+function show(i){
+  cur = Math.max(0, Math.min(slides.length - 1, i));
+  const s = slides[cur];
+  story.className = 'story ' + s.t;
+  slideEl.classList.remove('on-screen');
+  slideEl.innerHTML = `<div>${s.h}</div>`;
+  void slideEl.offsetWidth;
+  slideEl.classList.add('on-screen');
+  [...barsEl.children].forEach((b, j) => { b.className = j < cur ? 'done' : j === cur ? 'on' : ''; });
+  $('#tapnote').hidden = !!s.final;
+  $('#next').hidden = !!s.final;
+  animateCounts(slideEl);
+  if (s.final) wireFinal();
+}
+function wireFinal(){
+  const a = data, text = caption(a);
+  if (cardURL) $('#cardimg').src = cardURL;
+  $('#tw').href = 'https://x.com/intent/post?text=' + encodeURIComponent(text);
+  $('#li').href = 'https://www.linkedin.com/feed/?shareActive=true&text=' + encodeURIComponent(text);
+  $('#dl').onclick = () => {
+    if (!cardURL) return;
+    const link = document.createElement('a'); link.href = cardURL; link.download = `l-wrapped-${a.year}.png`; document.body.appendChild(link); link.click(); link.remove();
+  };
+  $('#cap').onclick = async () => {
+    try { await navigator.clipboard.writeText(text); $('#cap').textContent = 'Caption copied'; }
+    catch { $('#cap').textContent = 'Copy blocked. Use the post buttons'; }
+    setTimeout(() => { const b = $('#cap'); if (b) b.textContent = 'Copy caption'; }, 2000);
+  };
+  $('#again').onclick = closeStory;
+}
+$('#next').addEventListener('click', () => show(cur + 1));
+$('#prev').addEventListener('click', () => show(cur - 1));
+$('#close').addEventListener('click', closeStory);
+document.addEventListener('keydown', e => {
+  if (story.hidden) return;
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(cur + 1); }
+  else if (e.key === 'ArrowLeft') show(cur - 1);
+  else if (e.key === 'Escape') closeStory();
+});
+let sx = null;
+story.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
+story.addEventListener('touchend', e => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 60) show(cur + (dx < 0 ? 1 : -1)); sx = null; });
+
+/* ================= share card (drawn on canvas, never uploaded) ================= */
+async function makeCard(a){
+  try { await Promise.all(['800 100px "Bricolage Grotesque"', '600 40px "Bricolage Grotesque"', '700 30px "JetBrains Mono"', '500 30px "Instrument Sans"'].map(f => document.fonts.load(f))); } catch {}
+  const W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  const D = '"Bricolage Grotesque", "Arial Narrow", sans-serif', M = '"JetBrains Mono", monospace', B = '"Instrument Sans", system-ui, sans-serif';
+  const ink = '#1d0f14', red = '#e8392b', cream = '#fff4e8', legal = '#ffd23f';
+  const rr = (X, Y, w, h, r) => { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath(); };
+  const fit = (txt, font, size, max) => { let s = size; do { x.font = font.replace('$', s); s -= 2; } while (x.measureText(txt).width > max && s > 16); };
+
+  x.fillStyle = red; x.fillRect(0, 0, W, H);
+  x.save(); x.globalAlpha = .1; x.fillStyle = ink; x.font = `800 1500px ${D}`; x.translate(560, 1440); x.rotate(-.14); x.fillText('L', 0, 0); x.restore();
+
+  x.fillStyle = cream; x.font = `700 30px ${M}`; x.fillText(`L WRAPPED · ${a.year}`, 72, 104);
+  if (a.name) { x.textAlign = 'right'; x.fillText(a.name.toUpperCase().slice(0, 22), W - 72, 104); x.textAlign = 'left'; }
+
+  x.font = `800 380px ${D}`; x.fillStyle = cream; x.fillText(String(a.Ls.length), 56, 450);
+  const numW = x.measureText(String(a.Ls.length)).width;
+  x.font = `600 52px ${D}`; x.fillText(a.Ls.length === 1 ? 'L taken' : 'Ls taken', 70, 528);
+
+  // stamp
+  x.save(); x.translate(Math.min(132 + numW + 170, W - 210), 300); x.rotate(-.2);
+  x.strokeStyle = ink; x.lineWidth = 9; rr(-170, -56, 340, 112, 14); x.stroke();
+  x.fillStyle = ink; x.font = `700 58px ${M}`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('STILL', 0, -18); x.font = `700 40px ${M}`; x.fillText('APPLYING', 0, 30);
+  x.restore(); x.textAlign = 'left'; x.textBaseline = 'alphabetic';
+
+  // stats panel
+  const stats = [[a.interviews.length, 'Interviews'], [a.offers.length, 'Offers'], a.ghosted ? [a.ghosted, 'Ghosted'] : [a.heartbreaks.length, 'Post-interview Ls'], a.peakMonth >= 0 ? [MONTH_NAMES[a.peakMonth].slice(0, 3), 'Worst month'] : [a.botL, 'Robot rejections']];
+  x.fillStyle = ink; rr(56, 590, W - 112, 300, 28); x.fill();
+  stats.forEach(([v, l], i) => {
+    const cx = 56 + (W - 112) / 4 * i + 34;
+    x.fillStyle = i === 1 && a.offers.length ? legal : cream; x.font = `800 ${String(v).length > 2 ? 92 : 112}px ${D}`; x.fillText(String(v), cx, 740);
+    x.fillStyle = '#c9b3b9'; x.font = `700 22px ${M}`; x.fillText(l.toUpperCase(), cx, 790, (W - 112) / 4 - 40);
+  });
+  if (a.cliches[0]) {
+    x.fillStyle = '#c9b3b9'; x.font = `700 22px ${M}`; x.fillText('TOP PHRASE', 90, 846);
+    x.fillStyle = legal; fit(`“${a.cliches[0].label}” ×${a.cliches[0].n}`, `600 $px ${D}`, 36, W - 360); x.fillText(`“${a.cliches[0].label}” ×${a.cliches[0].n}`, 270, 848);
+  }
+
+  // archetype
+  x.fillStyle = cream; x.font = `700 26px ${M}`; x.fillText('L PERSONALITY', 72, 970);
+  x.fillStyle = cream; fit(a.archetype[0], `800 $px ${D}`, 104, W - 144); x.fillText(a.archetype[0], 68, 1070);
+  x.fillStyle = cream; x.font = `500 31px ${B}`;
+  const words = a.archetype[1].split(' '); let line = '', y = 1130, lines = 0;
+  for (const w of words) { const t = line ? line + ' ' + w : w; if (x.measureText(t).width > W - 150 && line) { x.fillText(line, 72, y); y += 42; line = w; if (++lines >= 3) break; } else line = t; }
+  if (lines < 3 && line) x.fillText(line, 72, y);
+
+  x.fillStyle = ink; x.fillRect(0, H - 86, W, 86);
+  x.fillStyle = cream; x.font = `700 24px ${M}`; x.fillText(`${a.TIERS[a.tier].toUpperCase()}-SKINNED · #LWRAPPED`, 72, H - 34);
+  x.textAlign = 'right'; x.fillStyle = '#c9b3b9'; x.fillText('MADE PRIVATELY IN-BROWSER', W - 72, H - 34);
+  return c.toDataURL('image/png');
+}
+})();
+</script>
