@@ -41,6 +41,15 @@ public class MainActivity extends Activity {
             }
         } catch (Throwable e) { android.util.Log.e("FollowThrough", "permission", e); }
         showLastCrash();
+        buildWeb();
+    }
+
+    private int renderCrashes;
+
+    /** Creates the dashboard web view. Called again if its process dies, instead of crashing the app. */
+    @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
+    private void buildWeb() {
+        loaded = false;
         web = new WebView(this);
         web.setBackgroundColor(Color.TRANSPARENT);
         WebSettings ws = web.getSettings();
@@ -54,6 +63,21 @@ public class MainActivity extends Activity {
                 return true;
             }
             @Override public void onPageFinished(WebView v, String url) { loaded = true; }
+
+            @Override
+            public boolean onRenderProcessGone(WebView v, android.webkit.RenderProcessGoneDetail detail) {
+                // The dashboard's page process died (low memory or a WebView bug). Rebuild it, don't crash.
+                if (v == web) {
+                    android.view.ViewGroup parent = (android.view.ViewGroup) v.getParent();
+                    if (parent != null) parent.removeView(v);
+                    v.destroy();
+                    if (++renderCrashes <= 3) buildWeb();
+                    else showFallback();
+                } else {
+                    v.destroy();
+                }
+                return true;
+            }
         });
         web.setWebChromeClient(new WebChromeClient() {
             @Override
@@ -79,10 +103,35 @@ public class MainActivity extends Activity {
         web.loadUrl("file:///android_asset/dashboard.html");
     }
 
+    /** If the dashboard keeps failing to load, keep the app usable instead of closing. */
+    private void showFallback() {
+        android.widget.LinearLayout box = new android.widget.LinearLayout(this);
+        box.setOrientation(android.widget.LinearLayout.VERTICAL);
+        int pad = (int) (24 * getResources().getDisplayMetrics().density);
+        box.setPadding(pad, pad * 2, pad, pad);
+        android.widget.TextView t = new android.widget.TextView(this);
+        t.setText("The dashboard couldn't load on this phone right now. Your bubble, reminders and sheet still work.\n\nTry closing other apps, or update “Android System WebView” in the Play Store.");
+        t.setTextSize(16);
+        box.addView(t);
+        android.widget.Button sheet = new android.widget.Button(this);
+        sheet.setText("Open my tracker sheet");
+        sheet.setOnClickListener(v -> openExternal(Tracker.prefs(this).getString("sheetUrl", "https://sheets.google.com")));
+        box.addView(sheet);
+        android.widget.Button retry = new android.widget.Button(this);
+        retry.setText("Try again");
+        retry.setOnClickListener(v -> { renderCrashes = 0; buildWeb(); });
+        box.addView(retry);
+        android.widget.Button settings = new android.widget.Button(this);
+        settings.setText("Settings");
+        settings.setOnClickListener(v -> startActivity(new Intent(this, SettingsActivity.class)));
+        box.addView(settings);
+        setContentView(box);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
-        if (loaded) web.evaluateJavascript("window.__onResume && window.__onResume()", null);
+        if (loaded && web != null) web.evaluateJavascript("window.__onResume && window.__onResume()", null);
     }
 
     @Override
@@ -98,6 +147,7 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
+        if (web == null || web.getParent() == null) { super.onBackPressed(); return; }
         web.evaluateJavascript("(function(){var s=document.getElementById('sheet');if(s&&!s.hidden){document.getElementById('scrim').click();return 1}return 0})()",
                 v -> { if (!"1".equals(v)) MainActivity.super.onBackPressed(); });
     }
@@ -128,8 +178,9 @@ public class MainActivity extends Activity {
     private class Bridge {
         @JavascriptInterface
         public void request(String json, String id) {
-            Tracker.call(MainActivity.this, json, res ->
-                    web.evaluateJavascript("window.__fromApp(" + JSONObject.quote(id) + "," + JSONObject.quote(res) + ")", null));
+            Tracker.call(MainActivity.this, json, res -> {
+                if (web != null && web.getParent() != null) web.evaluateJavascript("window.__fromApp(" + JSONObject.quote(id) + "," + JSONObject.quote(res) + ")", null);
+            });
         }
 
         @JavascriptInterface
