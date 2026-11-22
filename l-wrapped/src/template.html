@@ -52,12 +52,12 @@ h1 em{font-style:normal;color:var(--stamp);display:inline-block;transform:rotate
 .lede{font-size:19px;color:#e7dccf;max-width:36ch;margin:0 0 16px}
 .manifesto{font:600 15px/1.5 var(--body);color:var(--legal);margin:0 0 28px;max-width:40ch}
 .how{list-style:none;margin:0 0 28px;padding:0;display:grid;gap:14px;counter-reset:s}
-.how li{display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start;color:#e7dccf}
+.how li{display:grid;grid-template-columns:32px minmax(0,1fr);gap:12px;align-items:start;color:#e7dccf}
 .how li::before{counter-increment:s;content:counter(s);width:32px;height:32px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font:700 13px var(--mono);color:var(--legal)}
 .how b{color:var(--paper)}
-.search{margin-top:8px;display:flex;gap:8px;align-items:stretch;min-width:0}
-.search code{flex:1;min-width:0;background:var(--ink-2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:500 12px/1.5 var(--mono);color:var(--legal);overflow-x:auto;white-space:nowrap}
-.mini{border:1px solid var(--line);background:transparent;border-radius:8px;padding:0 12px;font:600 13px var(--body);cursor:pointer;color:var(--paper)}
+.search{margin-top:10px;display:grid;gap:8px;justify-items:start;min-width:0}
+.search code{display:block;width:100%;min-width:0;background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:500 12.5px/1.7 var(--mono);color:var(--legal);white-space:pre-line;overflow-wrap:anywhere}
+.mini{border:1px solid var(--line);background:transparent;border-radius:8px;padding:7px 14px;font:600 13px var(--body);cursor:pointer;color:var(--paper)}
 .mini:hover{border-color:var(--paper)}
 .privacy{display:flex;gap:12px;align-items:flex-start;border:1.5px dashed var(--line);border-radius:14px;padding:14px 16px;font-size:14px;color:#e7dccf}
 .privacy svg{flex:none;margin-top:2px}
@@ -185,7 +185,7 @@ textarea#emails:focus{border-color:var(--ink);outline:none}
 .verdict{font:700 15px var(--mono);letter-spacing:.06em;margin-top:16px;min-height:1.4em}
 /* bingo */
 .bingo{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:16px 0 14px;max-width:min(100%,52vh)}
-.bingo div{aspect-ratio:1;max-width:100%;border-radius:10px;border:1.5px solid color-mix(in srgb,var(--fg) 40%,transparent);display:grid;place-items:center;text-align:center;padding:4px;font:600 clamp(9.5px,2.5vw,13px)/1.15 var(--body);position:relative;overflow:hidden;overflow-wrap:anywhere}
+.bingo div{aspect-ratio:1;max-width:100%;border-radius:10px;border:1.5px solid color-mix(in srgb,var(--fg) 40%,transparent);display:grid;place-items:center;text-align:center;padding:4px;font:600 clamp(9px,2.4vw,13px)/1.15 var(--body);position:relative;overflow:hidden;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:normal;word-break:normal}
 .bingo div.hit{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 .bingo div.hit::after{content:"";position:absolute;inset:18%;border:3px solid var(--acc);border-radius:50%;opacity:0;transform:scale(1.6)}
 .on-screen .bingo div.hit::after{animation:dab .35s forwards;animation-delay:inherit}
@@ -293,6 +293,7 @@ textarea#emails:focus{border-color:var(--ink);outline:none}
 .proj input:focus,.proj select:focus{border-color:var(--ink);outline:none}
 .prm{border:0;background:transparent;cursor:pointer;font-size:18px;line-height:1;color:#6d5960;padding:6px}
 canvas.confetti{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
+@media (max-width:360px){.slide{padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}.topbar>span:first-child{font-size:10px;letter-spacing:.1em}.legend b{font-size:28px}.toplist li{grid-template-columns:36px 1fr auto;gap:10px}.toplist .n{font-size:34px}}
 @media (max-height:700px){.huge{font-size:clamp(110px,30vw,180px)}.months{height:140px}.aura{width:min(100%,200px)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition:none!important}.aura,.orb,.fluid i{animation:none}}
 </style>
@@ -301,12 +302,12 @@ canvas.confetti{position:absolute;inset:0;width:100%;height:100%;z-index:5;point
 <main class="intake" id="intake">
   <section class="intro">
     <div class="brand"><span class="mark">L</span>L Wrapped · <span id="yr">2026</span></div>
-    <h1>Your year in <em>rejections</em>, wrapped.</h1>
+    <h1>Your year in <em>rejections,</em> wrapped.</h1>
     <p class="lede">LinkedIn shows the wins. This shows the rest: every no, every ghost, every final round that didn't land.</p>
     <p class="manifesto">Behind every "thrilled to announce" is a pile of Ls nobody posts. Post yours. Someone scrolling past everyone's wins today needs to see it.</p>
     <ol class="how">
       <li><span><b>Search your inbox</b> for rejections, interviews and offers from this year.
-        <span class="search"><code id="q">"unfortunately" OR "other candidates" OR "regret to inform" OR "not to move forward" after:2026/01/01</code><button class="mini" id="copyq" type="button">Copy</button></span></span></li>
+        <span class="search"><code id="q"></code><button class="mini" id="copyq" type="button">Copy search</button></span></span></li>
       <li><span><b>Copy each email</b> into the box with <b>---</b> on its own line between emails, or drop .eml files on it.</span></li>
       <li><span><b>Deleted them all?</b> No wahala. Tap <b>Just my numbers</b> and type them in.</span></li>
     </ol>
@@ -378,7 +379,7 @@ From: ...
   </form>
 </main>
 
-<section class="story" id="story" hidden aria-roledescription="story">
+<section class="story" id="story" lang="en" hidden aria-roledescription="story">
   <div class="fluid" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="bars" id="bars"></div>
   <div class="topbar"><span>L Wrapped · <span id="yr2">2026</span></span>
@@ -721,7 +722,10 @@ const ta = $('#emails'), live = $('#live'), go = $('#go'), err = $('#err');
 const COLORS = { L: '#e8392b', interview: '#6b4eff', offer: '#0f5c45', pending: '#c79a00', unknown: '#9c8a90' };
 let mode = 'emails', liveTimer;
 const yearStr = String(NOW_YEAR);
-$('#yr').textContent = yearStr; $('#q').textContent = $('#q').textContent.replace('2026', yearStr);
+$('#yr').textContent = yearStr;
+const SEARCH_TERMS = ['"unfortunately"', '"other candidates"', '"regret to inform"', '"not to move forward"'];
+const SEARCH_Q = `${SEARCH_TERMS.join(' OR ')} after:${yearStr}/01/01`;
+$('#q').textContent = SEARCH_TERMS.map((t, i) => (i ? 'OR ' : '') + t).join('\n') + `\nafter:${yearStr}/01/01`;
 $('#q-month').insertAdjacentHTML('beforeend', MONTH_NAMES.map((m, i) => `<option value="${i}">${m}</option>`).join(''));
 $('#q-phrases').innerHTML = CLICHES.map(([l], i) => `<label class="chip"><input type="checkbox" id="qp${i}" value="${esc(l)}"><span>“${esc(l)}”</span></label>`).join('');
 
@@ -784,7 +788,7 @@ $('#clear').addEventListener('click', () => { ta.value = ''; updateLive(); ta.fo
   $('#i-copy').addEventListener('click', async () => { const ok = await copyText(appUrl()); $('#i-copy').textContent = ok ? 'Link copied' : appUrl(); setTimeout(() => $('#i-copy').textContent = 'Copy link', 2000); });
 }
 $('#copyq').addEventListener('click', async () => {
-  try { await navigator.clipboard.writeText($('#q').textContent); $('#copyq').textContent = 'Copied'; setTimeout(() => $('#copyq').textContent = 'Copy', 1500); }
+  try { await navigator.clipboard.writeText(SEARCH_Q); $('#copyq').textContent = 'Copied'; setTimeout(() => $('#copyq').textContent = 'Copy search', 1500); }
   catch { const r = document.createRange(); r.selectNodeContents($('#q')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
 });
 
@@ -1160,6 +1164,7 @@ function show(i){
   old.removeAttribute('id'); old.removeAttribute('aria-live');
   old.parentNode.insertBefore(el, old);
   el.id = 'slide'; slideEl = el;
+  fitSlide(el);
   if (REDUCED || !old.firstChild) old.remove();
   else { old.classList.remove('entering', 'back'); if (back) old.classList.add('back'); void old.offsetWidth; old.classList.add('leaving'); setTimeout(() => old.remove(), 520); }
   [...barsEl.children].forEach((b, j) => { b.firstChild.style.width = j < cur ? '100%' : '0%'; });
@@ -1179,6 +1184,16 @@ function show(i){
   T.dur = s.dur || 0; T.elapsed = 0; T.last = performance.now();
   if (T.dur) T.raf = requestAnimationFrame(tick);
 }
+// Scale a slide's content down when it is taller than the screen (small phones, landscape).
+function fitSlide(el){
+  const inner = el && el.firstElementChild;
+  if (!inner || el.classList.contains('scroll')) return;
+  inner.style.zoom = '';
+  const cs = getComputedStyle(el), avail = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom), need = inner.scrollHeight;
+  if (need > avail && avail > 0) inner.style.zoom = Math.max(.5, (avail / need) * .98).toFixed(3);
+}
+let fitT; addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(() => fitSlide(slideEl), 120); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitSlide(slideEl));
 function applyTheme(t){
   const th = PAL[ROLE[t] || 'night'] || PAL.night, st = story.style;
   st.setProperty('--bg', th.bg); st.setProperty('--fg', th.fg); st.setProperty('--acc', th.acc);
