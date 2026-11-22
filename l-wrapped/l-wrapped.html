@@ -1,0 +1,1378 @@
+<title>L Wrapped</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="LinkedIn shows the wins. L Wrapped shows the rest. Paste your rejection emails and get your year in Ls, wrapped. Nothing leaves your browser.">
+<meta property="og:title" content="L Wrapped: your year in rejections">
+<meta property="og:description" content="LinkedIn shows the wins. This shows the rest. Get your year in Ls, wrapped, privately in your browser.">
+<meta property="og:image" content="og.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="L Wrapped: your year in rejections">
+<meta name="twitter:image" content="og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: intake (two modes) on an ink ground, then a full-screen auto-playing story of color-blocked slides with a soundtrack, ending in a share studio. Single deliberate look (no light/dark switch). */
+:root{
+  --ink:#1d0f14; --ink-2:#2b1a21; --paper:#f6efe3; --stamp:#e8392b;
+  --legal:#ffd23f; --violet:#6b4eff; --pink:#ff9ecf; --moss:#0f5c45;
+  --muted:#b9a7ad; --line:#4a3239;
+  --display:"Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+  --body:"Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--ink);color:var(--paper);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--legal);outline-offset:3px}
+
+/* ---------- intake ---------- */
+.intake{max-width:1120px;margin:0 auto;padding-block:40px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:1fr 1.15fr;gap:48px;align-items:start}
+@media (max-width:860px){.intake{grid-template-columns:1fr;gap:32px;padding-block:24px 48px}}
+.intro{min-width:0;position:sticky;top:32px}
+@media (max-width:860px){.intro{position:static}}
+.brand{display:flex;align-items:center;gap:12px;font:700 13px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.brand .mark{width:40px;height:40px;border-radius:10px;background:var(--stamp);display:grid;place-items:center;font:800 28px/1 var(--display);color:var(--paper)}
+h1{font:800 clamp(52px,8vw,96px)/.9 var(--display);letter-spacing:-.035em;margin:24px 0 16px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--stamp);display:inline-block;transform:rotate(-3deg)}
+.lede{font-size:19px;color:#e7dccf;max-width:36ch;margin:0 0 16px}
+.manifesto{font:600 15px/1.5 var(--body);color:var(--legal);margin:0 0 28px;max-width:40ch}
+.how{list-style:none;margin:0 0 28px;padding:0;display:grid;gap:14px;counter-reset:s}
+.how li{display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start;color:#e7dccf}
+.how li::before{counter-increment:s;content:counter(s);width:32px;height:32px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font:700 13px var(--mono);color:var(--legal)}
+.how b{color:var(--paper)}
+.search{margin-top:8px;display:flex;gap:8px;align-items:stretch;min-width:0}
+.search code{flex:1;min-width:0;background:var(--ink-2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:500 12px/1.5 var(--mono);color:var(--legal);overflow-x:auto;white-space:nowrap}
+.mini{border:1px solid var(--line);background:transparent;border-radius:8px;padding:0 12px;font:600 13px var(--body);cursor:pointer;color:var(--paper)}
+.mini:hover{border-color:var(--paper)}
+.privacy{display:flex;gap:12px;align-items:flex-start;border:1.5px dashed var(--line);border-radius:14px;padding:14px 16px;font-size:14px;color:#e7dccf}
+.privacy svg{flex:none;margin-top:2px}
+
+.card{min-width:0;background:var(--paper);color:var(--ink);border-radius:20px;padding:28px;box-shadow:0 30px 60px -30px rgba(0,0,0,.6)}
+@media (max-width:480px){.card{padding:18px;border-radius:16px}}
+.lbl,.card label.lbl{display:block;font:700 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#6d5960;margin-bottom:8px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#e8dcc8;border-radius:14px;padding:4px;margin-bottom:20px}
+.tabs button{border:0;border-radius:10px;padding:10px 8px;background:transparent;font:700 14px var(--body);cursor:pointer;color:#6d5960}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+.tabs small{display:block;font:500 11px var(--mono);letter-spacing:.04em;opacity:.8}
+.dropzone{position:relative}
+textarea#emails{width:100%;min-height:300px;resize:vertical;border:2px solid #d9cdbb;border-radius:12px;background:#fffaf2;padding:14px 16px;font:500 13px/1.6 var(--mono);color:var(--ink)}
+textarea#emails:focus{border-color:var(--ink);outline:none}
+.dropzone.drag textarea{border-color:var(--stamp);background:#fff0ea}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.ghost{border:1.5px solid #cbbda9;background:transparent;border-radius:999px;padding:8px 14px;font:600 14px var(--body);cursor:pointer;color:var(--ink)}
+.ghost:hover{border-color:var(--ink)}
+.hint{font-size:13px;color:#6d5960}
+.live{margin-top:14px;border-radius:12px;background:#efe5d4;padding:12px 14px;font-size:14px;display:flex;gap:8px 14px;flex-wrap:wrap;align-items:center;min-height:48px}
+.live .pill{display:inline-flex;align-items:center;gap:6px;font:700 12px var(--mono);letter-spacing:.04em;padding:4px 10px;border-radius:999px;background:var(--paper)}
+.dot{width:8px;height:8px;border-radius:50%}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
+@media (max-width:480px){.fields{grid-template-columns:1fr}}
+.fields input,.fields select{width:100%;border:2px solid #d9cdbb;border-radius:10px;background:#fffaf2;padding:10px 12px;color:var(--ink)}
+.fields input:focus,.fields select:focus{border-color:var(--ink);outline:none}
+.fields small{display:block;margin-top:6px;font-size:12px;color:#6d5960}
+.qgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:560px){.qgrid{grid-template-columns:1fr 1fr}}
+.qgrid label{display:block;font:700 11px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#6d5960;margin-bottom:6px;min-height:2.6em}
+.qgrid input,.qsel{width:100%;border:2px solid #d9cdbb;border-radius:10px;background:#fffaf2;padding:10px 12px;color:var(--ink);font:800 22px var(--display)}
+.qgrid input:focus,.qsel:focus{border-color:var(--ink);outline:none}
+.qsel{font:600 15px var(--body)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip span{display:inline-block;border:1.5px solid #cbbda9;border-radius:999px;padding:6px 12px;font:600 13px var(--body);cursor:pointer;user-select:none}
+.chip input:checked + span{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.chip input:focus-visible + span{outline:3px solid var(--stamp);outline-offset:2px}
+.check{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:14px;cursor:pointer}
+.check input{width:18px;height:18px;margin-top:2px;accent-color:var(--ink)}
+.go{margin-top:22px;width:100%;border:0;border-radius:14px;background:var(--stamp);color:var(--paper);padding:18px;font:800 22px var(--display);letter-spacing:-.01em;cursor:pointer;display:flex;justify-content:center;gap:10px;align-items:center;transition:transform .15s}
+.go:hover{transform:translateY(-2px)}
+.go:disabled{background:#b8a9a0;cursor:not-allowed;transform:none}
+.err{color:var(--stamp);font-size:14px;margin-top:10px;min-height:1em}
+
+/* ---------- story ---------- */
+.story{position:fixed;inset:0;z-index:50;overflow:hidden;overflow:clip;background:var(--bg);color:var(--fg);transition:background .5s,color .5s;user-select:none;-webkit-user-select:none}
+.story::before{content:"L";position:absolute;right:-8vh;bottom:-28vh;font:800 120vh/1 var(--display);color:var(--fg);opacity:.07;transform:rotate(-8deg);pointer-events:none;transition:transform 6s linear}
+.story.on-slide::before{transform:rotate(-4deg) scale(1.06)}
+.story.shake{animation:shake .45s cubic-bezier(.36,.07,.19,.97)}
+@keyframes shake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(4px,-2px)}30%,50%,70%{transform:translate(-7px,3px)}40%,60%{transform:translate(7px,-3px)}}
+.t-red{--bg:var(--stamp);--fg:#fff4e8;--acc:var(--ink)}
+.t-legal{--bg:var(--legal);--fg:var(--ink);--acc:var(--stamp)}
+.t-violet{--bg:var(--violet);--fg:#f5f0ff;--acc:var(--legal)}
+.t-pink{--bg:var(--pink);--fg:var(--ink);--acc:var(--violet)}
+.t-moss{--bg:var(--moss);--fg:#e9ffe0;--acc:var(--legal)}
+.t-ink{--bg:var(--ink);--fg:#fff4e8;--acc:var(--pink)}
+.t-paper{--bg:var(--paper);--fg:var(--ink);--acc:var(--stamp)}
+.bars{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));display:flex;gap:4px;z-index:6}
+.bars span{flex:1;height:4px;border-radius:2px;background:color-mix(in srgb,var(--fg) 28%,transparent);overflow:hidden}
+.bars span i{display:block;height:100%;width:0;background:var(--fg)}
+.bars span.done i{width:100%}
+.topbar{position:absolute;top:calc(env(safe-area-inset-top,0px) + 26px);left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));display:flex;justify-content:space-between;align-items:center;gap:8px;z-index:6;font:700 12px var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.topbar .tools{display:flex;gap:8px}
+.x{border:0;background:color-mix(in srgb,var(--fg) 14%,transparent);color:var(--fg);min-width:36px;height:36px;border-radius:18px;cursor:pointer;font:700 13px/1 var(--body);display:inline-grid;place-items:center;padding:0 10px;letter-spacing:0;text-transform:none}
+.x svg{display:block}
+.paused{position:absolute;top:calc(env(safe-area-inset-top,0px) + 74px);left:0;right:0;text-align:center;font:700 11px var(--mono);letter-spacing:.2em;opacity:.7;z-index:6;pointer-events:none}
+.zone{position:absolute;top:70px;bottom:0;z-index:1;cursor:pointer;border:0;padding:0;margin:0;background:transparent;-webkit-tap-highlight-color:transparent;touch-action:pan-y}
+.zone.prev{left:0;width:30%}.zone.next{right:0;width:70%}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;justify-content:safe center;padding:calc(env(safe-area-inset-top,0px) + 84px) max(24px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 56px) max(24px,env(safe-area-inset-left,0px));z-index:2;pointer-events:none}
+.slide.scroll{justify-content:flex-start;overflow-y:auto;pointer-events:auto;z-index:3}
+.slide > div{max-width:560px;width:100%;margin:0 auto;min-width:0}
+.slide .interactive{pointer-events:auto}
+.tapnote{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);left:0;right:0;text-align:center;font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;opacity:.6;z-index:2;pointer-events:none}
+.eyebrow{font:700 13px var(--mono);letter-spacing:.16em;text-transform:uppercase;opacity:.8;margin:0 0 14px}
+.big{font:800 clamp(52px,12.5vw,108px)/.9 var(--display);letter-spacing:-.04em;margin:0 0 18px;text-wrap:balance;overflow-wrap:anywhere}
+.huge{font:800 clamp(140px,40vw,260px)/.8 var(--display);letter-spacing:-.06em;margin:0;font-variant-numeric:tabular-nums}
+.say{font:600 clamp(23px,5.4vw,34px)/1.12 var(--display);letter-spacing:-.015em;margin:0 0 14px;text-wrap:balance}
+.sub{font-size:clamp(16px,3.8vw,19px);opacity:.9;margin:0;max-width:40ch}
+.acc{color:var(--acc)}
+.stamp{display:inline-block;border:5px solid currentColor;color:var(--acc);padding:4px 14px;border-radius:8px;font:800 clamp(28px,7vw,44px)/1 var(--mono);letter-spacing:.06em;transform:rotate(-11deg);margin:10px 0 22px;opacity:0}
+.on-screen .stamp{animation:slam .5s .55s cubic-bezier(.2,1.6,.4,1) forwards}
+@keyframes slam{0%{opacity:0;transform:rotate(-11deg) scale(2.4)}100%{opacity:.95;transform:rotate(-11deg) scale(1)}}
+.rise{opacity:0;transform:translateY(18px)}
+.on-screen .rise{animation:rise .6s cubic-bezier(.2,.8,.2,1) forwards}
+.on-screen .rise:nth-child(2){animation-delay:.12s}.on-screen .rise:nth-child(3){animation-delay:.24s}.on-screen .rise:nth-child(4){animation-delay:.36s}.on-screen .rise:nth-child(5){animation-delay:.48s}.on-screen .rise:nth-child(6){animation-delay:.6s}.on-screen .rise:nth-child(7){animation-delay:.72s}
+@keyframes rise{to{opacity:1;transform:none}}
+.words span{display:inline-block;opacity:0;transform:translateY(.4em) rotate(4deg)}
+.on-screen .words span{animation:rise .5s cubic-bezier(.2,.8,.2,1) forwards}
+.toplist{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:14px}
+.toplist li{display:grid;grid-template-columns:52px 1fr auto;gap:14px;align-items:baseline;min-width:0}
+.toplist .n{font:800 44px/1 var(--display);color:var(--acc)}
+.toplist .p{font:600 clamp(19px,4.6vw,26px)/1.15 var(--display);min-width:0;overflow-wrap:anywhere}
+.toplist .c{font:700 13px var(--mono);opacity:.8;white-space:nowrap}
+.split{display:flex;height:64px;border-radius:12px;overflow:hidden;margin:18px 0 18px;background:color-mix(in srgb,var(--fg) 12%,transparent)}
+.split span{display:block;height:100%;transform-origin:left;transform:scaleX(0)}
+.on-screen .split span{animation:grow .9s .3s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes grow{to{transform:none}}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px}
+.legend div{display:flex;gap:10px;align-items:baseline;min-width:0}
+.legend b{font:800 34px/1 var(--display);font-variant-numeric:tabular-nums}
+.legend i{font-style:normal;font-size:15px;opacity:.85}
+.legend .sw{width:12px;height:12px;border-radius:3px;flex:none;align-self:center}
+.months{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;align-items:end;height:200px;margin:24px 0 10px}
+.months div{display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;min-width:0}
+.months span{width:100%;border-radius:6px 6px 2px 2px;background:color-mix(in srgb,var(--fg) 30%,transparent);transform-origin:bottom;transform:scaleY(0)}
+.months span.peak{background:var(--acc)}
+.on-screen .months span{animation:growy .8s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes growy{to{transform:none}}
+.months small{font:700 11px var(--mono);opacity:.75}
+.months em{font:700 12px var(--mono);font-style:normal}
+.quote{font:500 clamp(18px,4.4vw,23px)/1.4 var(--body);border-left:4px solid var(--acc);padding:4px 0 4px 18px;margin:18px 0;overflow-wrap:anywhere}
+.meta{font:700 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;opacity:.75}
+.tier{display:flex;gap:6px;margin:18px 0 8px}
+.tier span{flex:1;height:14px;border-radius:4px;background:color-mix(in srgb,var(--fg) 22%,transparent)}
+.tier span.lit{background:var(--acc)}
+.tiernames{display:flex;justify-content:space-between;font:700 10px var(--mono);letter-spacing:.06em;text-transform:uppercase;opacity:.75;gap:4px}
+/* guess */
+.guess{display:grid;gap:10px;margin-top:22px}
+.guess button{border:2px solid var(--fg);background:transparent;color:var(--fg);border-radius:14px;padding:14px 18px;font:700 clamp(18px,4.4vw,22px) var(--display);text-align:left;cursor:pointer;transition:transform .15s,background .2s}
+.guess button:hover{transform:translateX(4px)}
+.guess button.right{background:var(--fg);color:var(--bg)}
+.guess button.wrong{opacity:.4}
+.verdict{font:700 15px var(--mono);letter-spacing:.06em;margin-top:16px;min-height:1.4em}
+/* bingo */
+.bingo{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:16px 0 14px;max-width:min(100%,52vh)}
+.bingo div{aspect-ratio:1;max-width:100%;border-radius:10px;border:1.5px solid color-mix(in srgb,var(--fg) 40%,transparent);display:grid;place-items:center;text-align:center;padding:4px;font:600 clamp(9.5px,2.5vw,13px)/1.15 var(--body);position:relative;overflow:hidden;overflow-wrap:anywhere}
+.bingo div.hit{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.bingo div.hit::after{content:"";position:absolute;inset:18%;border:3px solid var(--acc);border-radius:50%;opacity:0;transform:scale(1.6)}
+.on-screen .bingo div.hit::after{animation:dab .35s forwards;animation-delay:inherit}
+@keyframes dab{to{opacity:.45;transform:scale(1)}}
+.bingo div.free{background:var(--acc);color:var(--bg);border-color:var(--acc);font-weight:800}
+/* reel */
+.reel{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0 18px}
+@media (max-width:520px){.reel{grid-template-columns:1fr}}
+.post,.real{border-radius:16px;padding:14px;min-width:0;position:relative}
+.post{background:#fff;color:#1b1b1b;box-shadow:0 18px 30px -18px rgba(0,0,0,.5)}
+.post .ph{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.post .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--legal),var(--pink));flex:none}
+.post b{display:block;font:700 14px var(--body)}
+.post small{font-size:11px;color:#777}
+.post p{margin:0 0 10px;font-size:13.5px;line-height:1.4}
+.post .react{font-size:12px;color:#666;border-top:1px solid #eee;padding-top:8px}
+.real{background:var(--ink);color:#fff4e8}
+.real ul{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px}
+.real li{display:flex;gap:10px;align-items:baseline;font-size:14px}
+.real li b{font:800 26px/1 var(--display);color:var(--legal);min-width:2.2ch}
+.tag{display:inline-block;font:700 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:6px;margin-bottom:8px}
+.post .tag{background:#eef3f8;color:#3b5a78}
+.real .tag{background:var(--stamp);color:#fff4e8}
+/* ratio */
+.loadbar{height:14px;border-radius:7px;background:color-mix(in srgb,var(--fg) 20%,transparent);overflow:hidden;margin:6px 0 18px;max-width:360px}
+.loadbar i{display:block;height:100%;width:8%;background:var(--acc);border-radius:7px}
+.on-screen .loadbar i{animation:load 5s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes load{to{width:87%}}
+/* eras */
+.eras{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:14px}
+.eras li{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:baseline;border-top:1.5px solid color-mix(in srgb,var(--fg) 25%,transparent);padding-top:12px}
+.eras .when{font:700 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+.eras b{display:block;font:800 clamp(22px,5.6vw,32px)/1.05 var(--display);letter-spacing:-.02em}
+.eras span{font-size:14px;opacity:.85}
+/* aura */
+.aura{width:min(100%,300px);aspect-ratio:1;border-radius:50%;margin:6px 0 22px;filter:blur(2px);animation:spin 14s linear infinite;box-shadow:0 0 80px -10px var(--a1)}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* personality badge */
+.badge{width:120px;height:120px;border-radius:30px;display:grid;place-items:center;background:var(--acc);color:var(--bg);margin-bottom:18px;transform:rotate(-6deg)}
+.on-screen .badge{animation:pop .6s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:rotate(-30deg) scale(.2);opacity:0}}
+.badge svg{width:64px;height:64px}
+.rising{font:700 13px var(--mono);letter-spacing:.1em;text-transform:uppercase;margin-top:14px;opacity:.85}
+/* final */
+.final{display:grid;gap:14px;justify-items:center;text-align:center;padding-bottom:24px}
+.final img,.sheet img{max-width:100%;border-radius:14px;box-shadow:0 24px 50px -20px rgba(0,0,0,.55);-webkit-user-select:auto;user-select:auto;-webkit-touch-callout:default;display:block}
+.final img{width:auto;max-height:46vh}
+.fmt{display:inline-flex;gap:4px;background:color-mix(in srgb,var(--fg) 14%,transparent);padding:4px;border-radius:999px}
+.fmt button{border:0;border-radius:999px;padding:6px 12px;background:transparent;color:var(--fg);font:700 13px var(--body);cursor:pointer}
+.fmt button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.btn{border:0;border-radius:999px;padding:12px 18px;font:700 15px var(--body);cursor:pointer;background:var(--fg);color:var(--bg);text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.btn.alt{background:transparent;color:var(--fg);box-shadow:inset 0 0 0 2px var(--fg)}
+.composer{width:100%;text-align:left;background:color-mix(in srgb,var(--ink) 30%,transparent);border-radius:18px;padding:16px;display:grid;gap:12px}
+.composer h3{margin:0;font:800 24px/1.1 var(--display)}
+.composer textarea{width:100%;min-height:200px;border-radius:12px;border:0;padding:12px 14px;font:500 14px/1.5 var(--body);background:#fff4e8;color:var(--ink);resize:vertical;user-select:text;-webkit-user-select:text}
+.small{font-size:13px;opacity:.85;max-width:44ch;margin:0}
+/* share sheet */
+.sheet{position:absolute;inset:0;z-index:20;background:rgba(15,8,11,.82);display:grid;place-items:center;padding:calc(env(safe-area-inset-top,0px) + 20px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 20px) max(16px,env(safe-area-inset-left,0px));color:#fff4e8;--fg:#fff4e8;--bg:var(--ink)}
+.sheet-panel{display:grid;gap:14px;justify-items:center;max-width:420px;width:100%;max-height:100%;overflow-y:auto}
+.sheet img{max-height:58vh;width:auto}
+.toast{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 60px);transform:translateX(-50%);background:#fff4e8;color:var(--ink);padding:10px 16px;border-radius:999px;font:700 14px var(--body);z-index:30;box-shadow:0 10px 30px -10px rgba(0,0,0,.5)}
+canvas.confetti{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
+@media (max-height:700px){.huge{font-size:clamp(110px,30vw,180px)}.months{height:140px}.aura{width:min(100%,200px)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition:none!important}.aura{animation:none}}
+</style>
+<!-- /head -->
+
+<main class="intake" id="intake">
+  <section class="intro">
+    <div class="brand"><span class="mark">L</span>L Wrapped · <span id="yr">2026</span></div>
+    <h1>Your year in <em>rejections</em>, wrapped.</h1>
+    <p class="lede">LinkedIn shows the wins. This shows the rest: every no, every ghost, every final round that didn't land.</p>
+    <p class="manifesto">Behind every "thrilled to announce" is a pile of Ls nobody posts. Post yours. Someone scrolling past everyone's wins today needs to see it.</p>
+    <ol class="how">
+      <li><span><b>Search your inbox</b> for rejections, interviews and offers from this year.
+        <span class="search"><code id="q">"unfortunately" OR "other candidates" OR "regret to inform" OR "not to move forward" after:2026/01/01</code><button class="mini" id="copyq" type="button">Copy</button></span></span></li>
+      <li><span><b>Copy each email</b> into the box with <b>---</b> on its own line between emails, or drop .eml files on it.</span></li>
+      <li><span><b>Deleted them all?</b> Use quick mode and just type your numbers.</span></li>
+    </ol>
+    <div class="privacy">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffd23f" stroke-width="2" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      <span><b>Nothing leaves this page.</b> There is no server and no tracking. Your emails are read by code running in your own browser, and they disappear when you close the tab.</span>
+    </div>
+  </section>
+
+  <form class="card" id="form" autocomplete="off">
+    <div class="tabs" role="tablist" aria-label="How do you want to make your Wrapped?">
+      <button type="button" role="tab" id="tab-emails" aria-selected="true" aria-controls="mode-emails">Paste emails<small>full story</small></button>
+      <button type="button" role="tab" id="tab-quick" aria-selected="false" aria-controls="mode-quick">Quick mode<small>30 seconds</small></button>
+    </div>
+
+    <div id="mode-emails" role="tabpanel" aria-labelledby="tab-emails">
+      <label class="lbl" for="emails">Your emails</label>
+      <div class="dropzone" id="drop">
+        <textarea id="emails" spellcheck="false" placeholder="From: Brightloom Careers &lt;careers@brightloom.example&gt;
+Subject: Your application to Brightloom
+Date: Mar 14, 2026, 9:12 AM
+
+Hi Aliyah, thank you for applying... Unfortunately...
+---
+From: ...
+(paste the next one)"></textarea>
+      </div>
+      <div class="row">
+        <button type="button" class="ghost" id="sample">Try it with sample Ls</button>
+        <label class="ghost" for="files">Add .eml / .txt files</label>
+        <input type="file" id="files" accept=".eml,.txt,message/rfc822,text/plain" multiple hidden>
+        <button type="button" class="ghost" id="clear">Clear</button>
+      </div>
+      <div class="live" id="live" aria-live="polite"><span class="hint">Paste something and we'll show what we detect here.</span></div>
+      <div class="fields">
+        <div><label class="lbl" for="name">Name on your card</label><input id="name" maxlength="28" placeholder="Optional"></div>
+        <div><label class="lbl" for="total">Total applications sent</label><input id="total" type="number" min="0" max="5000" inputmode="numeric" placeholder="Optional, e.g. 80"><small>Lets us count who never replied.</small></div>
+      </div>
+      <label class="check"><input type="checkbox" id="hide" checked><span><b>Hide company names</b> in my Wrapped and share cards. Recommended before you post.</span></label>
+    </div>
+
+    <div id="mode-quick" role="tabpanel" aria-labelledby="tab-quick" hidden>
+      <p class="lbl">Your numbers for the year</p>
+      <div class="qgrid">
+        <div><label for="q-apps">Applications sent</label><input id="q-apps" type="number" min="0" max="5000" inputmode="numeric" placeholder="80"></div>
+        <div><label for="q-ls">Rejections (Ls)</label><input id="q-ls" type="number" min="0" max="5000" inputmode="numeric" placeholder="30"></div>
+        <div><label for="q-ghost">Ghosted (no reply)</label><input id="q-ghost" type="number" min="0" max="5000" inputmode="numeric" placeholder="auto"></div>
+        <div><label for="q-int">Interviews</label><input id="q-int" type="number" min="0" max="500" inputmode="numeric" placeholder="5"></div>
+        <div><label for="q-heart">Ls after an interview</label><input id="q-heart" type="number" min="0" max="500" inputmode="numeric" placeholder="3"></div>
+        <div><label for="q-off">Offers / acceptances</label><input id="q-off" type="number" min="0" max="100" inputmode="numeric" placeholder="0"></div>
+      </div>
+      <div class="fields">
+        <div><label class="lbl" for="q-name">Name on your card</label><input id="q-name" maxlength="28" placeholder="Optional"></div>
+        <div><label class="lbl" for="q-month">Worst month</label><select id="q-month" class="qsel"><option value="">Not sure</option></select></div>
+      </div>
+      <p class="lbl" style="margin-top:20px">Tap every line you got this year</p>
+      <div class="chips" id="q-phrases"></div>
+    </div>
+
+    <button class="go" id="go" type="submit" disabled>Wrap my Ls <span aria-hidden="true">→</span></button>
+    <div class="err" id="err"></div>
+  </form>
+</main>
+
+<section class="story t-ink" id="story" hidden aria-roledescription="story">
+  <div class="bars" id="bars"></div>
+  <div class="topbar"><span>L Wrapped · <span id="yr2">2026</span></span>
+    <span class="tools">
+      <button class="x" id="mute" type="button" aria-label="Mute music" title="Sound"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path id="wave" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/><path id="cross" d="M16 9l5 6M21 9l-5 6" hidden/></svg></button>
+      <button class="x" id="share" type="button" aria-label="Share this slide">Share</button>
+      <button class="x" id="close" type="button" aria-label="Close and go back"><svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
+    </span></div>
+  <div class="paused" id="paused" hidden>PAUSED</div>
+  <button class="zone prev" id="prev" type="button" aria-label="Previous slide"></button>
+  <button class="zone next" id="next" type="button" aria-label="Next slide"></button>
+  <div class="slide" id="slide" aria-live="polite"></div>
+  <canvas class="confetti" id="confetti"></canvas>
+  <div class="tapnote" id="tapnote">Tap for next · hold to pause</div>
+  <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-label="Share this slide">
+    <div class="sheet-panel">
+      <img id="sheetimg" alt="Share card for this slide">
+      <div class="fmt" id="sheetfmt"></div>
+      <div class="actions"><button class="btn" id="sheetsave" type="button">Save image</button><button class="btn alt" id="sheetclose" type="button">Done</button></div>
+      <p class="small">If Save doesn't work here, press and hold (or right-click) the image to save it.</p>
+    </div>
+  </div>
+  <div class="toast" id="toast" hidden></div>
+</section>
+
+<script>
+(() => {
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const MONTHS = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const NOW_YEAR = new Date().getFullYear();
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ================= parsing ================= */
+function splitEmails(text){
+  text = text.replace(/\r\n?/g, '\n').trim();
+  if (!text) return [];
+  const SEP = /^\s*(?:-{3,}|={3,}|_{3,}|\*{3,})\s*$/m;
+  let parts;
+  if (SEP.test(text)) parts = text.split(new RegExp(SEP.source, 'm'));
+  else {
+    const lines = text.split('\n');
+    const isHdr = l => /^(from|subject|date|sent|to|cc)\s*:/i.test(l.trim());
+    const isStart = (l, i) => /^(from|subject)\s*:/i.test(l.trim()) && !(i > 0 && isHdr(lines[i-1]));
+    if (lines.filter(isStart).length >= 2) {
+      parts = []; let cur = [];
+      lines.forEach((l, i) => { if (isStart(l, i) && cur.join('').trim()) { parts.push(cur.join('\n')); cur = []; } cur.push(l); });
+      parts.push(cur.join('\n'));
+    } else parts = text.split(/\n[ \t]*\n[ \t]*\n+/);
+  }
+  return parts.map(p => p.trim()).filter(p => p.split(/\s+/).length >= 6);
+}
+
+function mkDate(y, mo, d, h, mi){
+  if (mo < 0 || mo > 11 || d < 1 || d > 31 || y < 1990 || y > 2100) return null;
+  const dt = new Date(y, mo, d, h == null ? 12 : h, mi || 0);
+  if (isNaN(dt)) return null;
+  dt.hasTime = h != null;
+  return dt;
+}
+function parseDate(s){
+  if (!s) return null;
+  s = s.replace(/\([^)]*\)/g, ' ');
+  let m, hh = null, mm = 0;
+  const tm = s.match(/\b(\d{1,2}):(\d{2})(?::\d{2})?\s*([AaPp]\.?[Mm]\.?)?/);
+  if (tm) { hh = +tm[1]; mm = +tm[2]; if (tm[3]) { const pm = /p/i.test(tm[3]); if (pm && hh < 12) hh += 12; if (!pm && hh === 12) hh = 0; } if (hh > 23) hh = null; }
+  if ((m = s.match(/\b(\d{4})-(\d{2})-(\d{2})/))) return mkDate(+m[1], +m[2]-1, +m[3], hh, mm);
+  const mon = '(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?';
+  if ((m = s.match(new RegExp('\\b' + mon + '\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b(?:,?\\s+(\\d{4}))?', 'i')))) return mkDate(m[3] ? +m[3] : NOW_YEAR, MONTHS.indexOf(m[1].toLowerCase()), +m[2], hh, mm);
+  if ((m = s.match(new RegExp('\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(?:of\\s+)?' + mon + ',?(?:\\s+(\\d{4}))?', 'i')))) return mkDate(m[3] ? +m[3] : NOW_YEAR, MONTHS.indexOf(m[2].toLowerCase()), +m[1], hh, mm);
+  if ((m = s.match(/\b(\d{1,2})[\/.](\d{1,2})[\/.](\d{4})\b/))) { let d = +m[1], mo = +m[2]; if (mo > 12 && d <= 12) [d, mo] = [mo, d]; return mkDate(+m[3], mo-1, d, hh, mm); }
+  return null;
+}
+
+function parseEmail(raw){
+  const lines = raw.split('\n');
+  const hdr = {};
+  const body = [];
+  lines.forEach((l, i) => {
+    const m = l.match(/^\s*(from|subject|date|sent|to|cc|reply-to)\s*:\s*(.*)$/i);
+    if (m && i < 14 && !hdr[m[1].toLowerCase()]) hdr[m[1].toLowerCase()] = m[2].trim();
+    else body.push(l);
+  });
+  let from = hdr.from || '';
+  if (!from) { const fl = lines.slice(0, 8).find(l => /<[^>\s]+@[^>\s]+>|^\S+@\S+\.\S+$/.test(l.trim())); if (fl) from = fl.trim(); }
+  let subject = hdr.subject || '';
+  if (!subject) { const first = lines.find(l => l.trim()); if (first && first.length < 140 && first.trim() !== from && !/^(hi|hello|dear)\b/i.test(first.trim())) subject = first.trim(); }
+  let date = parseDate(hdr.date || hdr.sent);
+  if (!date) for (const l of lines.slice(0, 10)) { if (/@/.test(l) && !/\d{1,2}:\d{2}/.test(l)) continue; const d = parseDate(l); if (d) { date = d; break; } }
+  const text = body.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  return { raw, from, subject, date, text, all: (subject + '\n' + text) };
+}
+
+/* ================= classification ================= */
+const REJ = [
+  /\bunfortunately\b/i, /regret(?:fully)? to (?:inform|let you know|advise|tell)/i,
+  /\b(?:not|n't|unable to)\b[^.\n]{0,45}\b(?:move|moving|proceed|proceeding|progress|progressing|advance|advancing)\b[^.\n]{0,25}\b(?:forward|further|with your|to the next)/i,
+  /(?:move|moving|proceed|proceeding|go|going|continue|continuing) (?:forward )?with (?:other|another|a different|candidates)/i,
+  /other (?:candidates|applicants) (?:whose|who|that)/i,
+  /(?:have|has|were|was) not been (?:selected|successful|shortlisted|chosen|accepted)/i,
+  /(?:were|was|are) not (?:selected|successful|shortlisted|chosen|able to offer)/i,
+  /(?:unable|not able) to (?:offer|extend|move|proceed|accept)/i,
+  /(?:position|role|vacancy) has (?:now )?been filled/i,
+  /decided to (?:pursue|go with) (?:other|another)/i, /declin(?:e|ed) your application/i,
+  /will not be (?:moving|proceeding|offering|inviting|progressing)/i, /not (?:to )?(?:invite you|shortlist you|offer you)/i,
+  /could not (?:offer|accept|admit|fund)/i, /not been (?:awarded|admitted)/i,
+];
+const OFFER = [
+  /pleased to (?:offer|extend|inform you that you(?:'ve| have) been (?:selected|accepted|admitted|awarded))/i,
+  /offer (?:letter|of employment|of admission)/i, /(?:would|'d) (?:like|love) to (?:extend|make|offer) (?:you )?(?:an )?offer/i,
+  /you(?:'ve| have) been (?:selected|accepted|admitted|awarded)/i, /delighted to (?:offer|welcome|inform you that you)/i,
+  /welcome (?:aboard|to the team|to the (?:cohort|program|programme|fellowship))/i, /(?:excited|thrilled) to offer/i,
+];
+const CONGRATS = /\bcongratulations\b/i;
+const INTERVIEW = [/\binterview/i, /next (?:round|stage|step)s?\b/i, /schedule (?:a |some )?(?:call|chat|time|meeting|conversation)/i, /phone screen/i, /\bassessment\b/i, /coding (?:challenge|test|exercise)/i, /calendly|book a (?:time|slot)/i, /\bshortlisted\b/i, /your availability/i];
+const ACK = [/received your application/i, /thank you for (?:applying|your application|submitting)/i, /application (?:has been |was )?(?:received|submitted)/i, /(?:we'll|we will) (?:review|be in touch|get back)/i, /under review/i];
+const HEARTBREAK = /\binterview|speaking with (?:us|our|the)|meeting with (?:us|our|the)|(?:took|taking) the time to (?:speak|meet|chat|talk)|(?:our|your) conversations?\b|final (?:round|stage)|onsite|on-site|getting to know you|take-home|case study you/i;
+const BOT = /no-?reply|do-?not-?reply|notifications?@|mailer|@[\w.-]*(?:greenhouse|lever\.co|workday|myworkday|ashbyhq|smartrecruiters|icims|jobvite|bamboohr|workable|recruitee|teamtailor|breezy|successfactors|taleo|oraclecloud)/i;
+const BOT_BODY = /do not reply|this (?:mailbox|inbox|email address) is not monitored|automated (?:message|email)|automatically generated/i;
+const WARM = /\b(impressed|enjoyed|genuinely|truly|really|pleasure|talented|strong|loved|appreciate|grateful|admire|excited|thoughtful|incredible|wonderful|exceptional|remarkable|hope)\b/gi;
+
+const CLICHES = [
+  ['after careful consideration', /after (?:careful|much|thorough|thoughtful|very careful) (?:consideration|review|deliberation|thought)/i],
+  ['unfortunately', /\bunfortunately\b/i],
+  ['we regret to inform you', /regret(?:fully)? to (?:inform|let you know|advise|tell)/i],
+  ['other candidates', /other (?:candidates|applicants)/i],
+  ['a highly competitive pool', /\bcompetitive\b|(?:large|high|significant) (?:number|volume) of (?:qualified |strong |talented )?(?:applicants|applications|candidates)|overwhelming (?:response|number)/i],
+  ["we'll keep your CV on file", /keep (?:your )?(?:resume|cv|résumé|application|details|information|profile) on (?:file|record)|talent (?:pool|community|network)/i],
+  ['apply again in the future', /encourage you to (?:re-?apply|apply (?:again|for|to))|future (?:opportunities|openings|roles|positions|cohorts)/i],
+  ['we wish you the best', /wish(?:ing)? you (?:the |all the )?(?:very )?(?:best|success|luck)/i],
+  ['this was a difficult decision', /(?:difficult|tough|hard|not an easy|challenging) decision/i],
+  ['we were impressed', /(?:were|was|are) (?:really |very |truly |genuinely )?impressed/i],
+  ['at this time', /at this (?:time|point|stage)/i],
+  ['not the right fit', /not (?:the right |a (?:strong |good |close )?)?(?:fit|match)\b/i],
+  ['thank you for your interest', /thank you for (?:your )?interest/i],
+  ['the position has been filled', /(?:position|role) has (?:now )?been filled/i],
+];
+
+const KINDS = [
+  ['Internships', /\bintern(?:ship)?s?\b/i],
+  ['Fellowships', /\bfellowship/i],
+  ['Scholarships', /\bscholarship|bursary/i],
+  ['Grants & funding', /\bgrant\b|\bfunding\b/i],
+  ['Admissions', /\badmission|graduate (?:program|school)|master'?s program|phd program/i],
+  ['Programs & accelerators', /accelerator|bootcamp|\bcohort\b|residency|incubator|\bprogram(?:me)?\b/i],
+  ['Talks & conferences', /\bspeaker\b|talk proposal|call for (?:papers|proposals|speakers)|\bcfp\b|\babstract\b/i],
+];
+
+const GENERIC_DOMAIN = /^(?:gmail|googlemail|yahoo|outlook|hotmail|live|icloud|me|aol|proton|protonmail|greenhouse|greenhouse-mail|lever|hire|workday|myworkday|myworkdayjobs|ashbyhq|ashby|smartrecruiters|icims|jobvite|bamboohr|linkedin|indeed|workable|recruitee|teamtailor|breezy|breezyhr|jazzhr|applytojob|successfactors|taleo|oraclecloud|mail|email|notifications?|careers?|jobs|talent|recruiting|example)$/i;
+const NOT_NAMES = /^(?:we|thank|thanks|unfortunately|the|our|your|dear|hi|hello|this|position|role|team|after|please|regards|best|it|i|you|application|applying|interest|us|a|an)$/i;
+const LABEL_WORDS = /\b(?:careers?|recruit(?:ing|ment|ers?)?|talent(?: acquisition)?|hiring|jobs?|hr|people(?: team| ops)?|team|admissions?|selection|programs?|no-?reply|notifications?|via [\w .]+|support)\b/gi;
+
+function tidyName(n){
+  if (!n) return '';
+  n = n.replace(/["'“”]/g, '').replace(/\s+/g, ' ').replace(/[.,:;!?\-–|]+$/, '').trim();
+  n = n.replace(/^(?:the)\s+/i, '');
+  const words = n.split(' ');
+  while (words.length && NOT_NAMES.test(words[words.length-1])) words.pop();
+  while (words.length && NOT_NAMES.test(words[0])) words.shift();
+  n = words.join(' ').trim();
+  if (!n || n.length < 2 || n.length > 42 || /@/.test(n)) return '';
+  return n;
+}
+function companyOf(e){
+  const from = e.from || '';
+  const nameMatch = from.replace(/<[^>]*>/, '').replace(/["']/g, '').trim();
+  const fromLabeled = nameMatch && LABEL_WORDS.test(nameMatch);
+  LABEL_WORDS.lastIndex = 0;
+  if (nameMatch && !/@/.test(nameMatch)) {
+    const at = nameMatch.match(/\b(?:at|from|@)\s+([A-Z][\w&'.\- ]{1,40})$/);
+    if (at) { const n = tidyName(at[1].replace(LABEL_WORDS, '')); if (n) return n; }
+    if (fromLabeled) { const n = tidyName(nameMatch.replace(LABEL_WORDS, '').replace(/\s[-|–]\s*$/, '')); if (n) return n; }
+  }
+  const N = "([A-Z][\\w&'.\\-]*(?:\\s(?:[A-Z][\\w&'.\\-]*|&|of|and|for|de|la)){0,4})";
+  const pats = [
+    new RegExp("[Ii]nterest in (?:joining |working (?:at|with|for) |(?:a |the )?(?:[\\w/&,'\\- ]{2,60}? )?(?:role|position|opportunity|internship|program(?:me)?|fellowship|scholarship|job) (?:at|with) )" + N),
+    new RegExp("(?:applying|applied|application) (?:to|at|with) (?:the )?" + N),
+    new RegExp(N + " (?:Recruiting|Recruitment|Talent(?: Acquisition)?|Hiring|Careers|People|HR|Admissions|Selection|Programs?) (?:Team|Committee|Office|Panel)"),
+    new RegExp("(?:everyone|all of us|team|us|role|position) at " + N),
+    new RegExp("joining " + N),
+  ];
+  const subjClean = (e.subject || '').replace(/^(?:(?:re|fwd?|fw)\s*:\s*)+/i, '');
+  for (const src of [subjClean, e.text]) for (const p of pats) { const m = (src || '').match(p); if (m) { const n = tidyName(m[1]); if (n && !/^(?:Unfortunately|Thank|We)/.test(n)) return n; } }
+  const subj = subjClean.match(/^([A-Z][\w&'.\- ]{1,36}?)\s*(?:[-|:–]|application|update)/i);
+  if (subj) { const n = tidyName(subj[1].replace(LABEL_WORDS, '')); if (n && !/^your\b/i.test(n)) return n; }
+  const dm = from.match(/@([\w.-]+)/);
+  if (dm) {
+    const labels = dm[1].toLowerCase().split('.').filter(Boolean);
+    if (labels.length >= 2) {
+      let core = labels[labels.length - 2];
+      if (/^(?:co|com|ac|org|gov|edu)$/.test(core) && labels.length >= 3) core = labels[labels.length - 3];
+      if (!GENERIC_DOMAIN.test(core)) return core.charAt(0).toUpperCase() + core.slice(1);
+    }
+  }
+  return '';
+}
+function roleOf(e){
+  const s = e.subject + '\n' + e.text;
+  const pats = [
+    /(?:for|to|in) (?:the |our |a |an )?(?:position of |role of )?([A-Z][\w/&,'().+\- ]{2,58}?) (?:position|role|opening|vacancy|internship|programme|program|fellowship|scholarship|opportunity)\b/,
+    /(?:application|applying|applied) for (?:the )?([\w/&'().+\- ]{3,58}?)(?: position| role| at |[.,\n])/i,
+  ];
+  for (const p of pats) { const m = s.match(p); if (m) { const r = m[1].replace(/^(?:the|a|an|our)\s+/i, '').trim(); if (r.length >= 3 && !/^(?:this|that|your|our)$/i.test(r)) return r; } }
+  return '';
+}
+function keySentence(text){
+  const sents = text.replace(/\s+/g, ' ').split(/(?<=[.!?])\s+/);
+  const hit = sents.find(s => REJ.some(r => r.test(s))) || sents.find(s => s.length > 40) || sents[0] || '';
+  const clean = hit.replace(/[\w.+-]+@[\w.-]+/g, '[email]').trim();
+  return clean.length > 220 ? clean.slice(0, 217).replace(/\s\S*$/, '') + '…' : clean;
+}
+const wc = s => (s.match(/\b[\w'’-]+\b/g) || []).length;
+
+function classify(e){
+  const t = e.all;
+  const rej = REJ.filter(r => r.test(t)).length;
+  const offerStrong = OFFER.filter(r => r.test(t)).length;
+  const interview = INTERVIEW.filter(r => r.test(t)).length;
+  const ack = ACK.filter(r => r.test(t)).length;
+  const offer = offerStrong + (CONGRATS.test(t) && !interview ? 1 : 0);
+  if (offer && (rej === 0 || (offerStrong >= 2 && rej <= 1))) return 'offer';
+  if (rej) return 'L';
+  if (interview) return 'interview';
+  if (ack) return 'pending';
+  return 'unknown';
+}
+
+/* ================= sample data (fictional companies, .example domains) ================= */
+const SAMPLE = `From: Brightloom Careers <no-reply@brightloom.example>
+Subject: Your application to Brightloom
+Date: Jan 19, 2026, 11:42 PM
+
+Hi there,
+Thank you for your interest in the Junior Robotics Engineer position at Brightloom. After careful consideration, we have decided to move forward with other candidates whose experience more closely matches our needs at this time.
+We will keep your CV on file and encourage you to apply for future opportunities.
+We wish you the best in your search.
+The Brightloom Talent Team
+---
+From: Quillstack Labs Recruiting <recruiting@quillstack.example>
+Subject: Update on your application
+Date: Feb 3, 2026, 3:07 AM
+
+Hello,
+We received a highly competitive pool of applicants for the Embedded Systems Intern role. Unfortunately, you have not been selected to proceed to the next stage.
+Best of luck.
+---
+From: Paperplane Health <talent@paperplane.example>
+Subject: Paperplane Health - Data Analyst Intern
+Date: Mar 10, 2026, 2:15 PM
+
+Hi Aliyah,
+Thank you so much for taking the time to speak with us during your interview last week. We genuinely enjoyed getting to know you and were really impressed by your project on urban mobility sensors.
+This was a difficult decision, but unfortunately we have decided to proceed with another candidate for the Data Analyst Intern position.
+We truly hope our paths cross again and wish you all the best.
+Warmly, Tola from Paperplane Health
+---
+From: Orbital Fern Fellowship <noreply@orbitalfern.example>
+Subject: Orbital Fern Fellowship 2026 decision
+Date: Mar 28, 2026, 9:00 AM
+
+Dear Applicant,
+We regret to inform you that your application to the Orbital Fern Fellowship has not been successful. We received an overwhelming number of applications this year.
+We encourage you to apply again for future cohorts.
+---
+From: Kettlekite Studio <jobs@kettlekite.example>
+Subject: Re: Hardware Prototyping Assistant
+Date: Apr 6, 2026, 7:51 AM
+
+Thanks for applying. The position has been filled.
+---
+From: Lumen Ridge Scholarship <admissions@lumenridge.example>
+Subject: Lumen Ridge STEM Scholarship
+Date: Apr 22, 2026, 1:30 PM
+
+Dear Aliyah,
+Thank you for your interest in the Lumen Ridge STEM Scholarship. After careful review, we are unable to offer you an award this cycle. The competition was exceptionally strong.
+We wish you success in your studies.
+---
+From: Brightloom Careers <no-reply@brightloom.example>
+Subject: Your application to Brightloom
+Date: May 5, 2026, 10:12 AM
+
+Thank you for your interest in the Automation Engineering Intern position at Brightloom. After careful consideration, we will not be moving forward with your application at this time. We will keep your CV on file.
+---
+From: Cobaltwing Robotics <careers@cobaltwing.example>
+Subject: Interview invitation - Robotics Software Intern
+Date: May 14, 2026, 4:40 PM
+
+Hi Aliyah,
+Thanks for applying to Cobaltwing Robotics! We'd love to schedule a call to talk about the Robotics Software Intern role. Please share your availability for next week, or book a time using the link below.
+---
+From: Cobaltwing Robotics <careers@cobaltwing.example>
+Subject: Cobaltwing Robotics - next steps
+Date: Jun 2, 2026, 6:05 PM
+
+Hi Aliyah,
+Thank you for completing the final round and for the time you spent with our team. Unfortunately, we have decided not to move forward. You were a strong candidate and this was not an easy decision.
+Best, the Cobaltwing team
+---
+From: Saltmarsh Accelerator <hello@saltmarsh.example>
+Subject: Saltmarsh Accelerator Cohort 7
+Date: Jun 2, 2026, 11:58 PM
+
+Hi,
+Unfortunately we are not able to offer you a place in Cohort 7 of the Saltmarsh Accelerator program. We wish you the best.
+---
+From: Tidewell Energy <noreply@tidewell.example>
+Subject: Your Tidewell Energy application
+Date: Jul 7, 2026, 2:22 AM
+
+Thank you for applying to Tidewell Energy. Unfortunately, we have decided to move forward with other candidates. Please do not reply to this email; this mailbox is not monitored.
+---
+From: Brightloom Careers <no-reply@brightloom.example>
+Subject: Your application to Brightloom
+Date: Aug 18, 2026, 9:30 AM
+
+Thank you for your interest in the Graduate Trainee position at Brightloom. Unfortunately, we will not be progressing your application. We wish you the best.
+---
+From: Marigold Systems <people@marigold.example>
+Subject: Marigold Systems - Hardware Intern
+Date: Sep 9, 2026, 1:10 PM
+
+Hi Aliyah,
+We were impressed by your background, but unfortunately the role is no longer a match for where the team is headed. We'll keep your details in our talent pool.
+---
+From: Northgate Dev Summit <speakers@northgate.example>
+Subject: Talk proposal decision
+Date: Sep 30, 2026, 8:15 PM
+
+Thank you for submitting a talk proposal to Northgate Dev Summit. We received a large number of strong proposals and regret to inform you that your talk was not selected this year.
+---
+From: Fernhill Institute <selection@fernhill.example>
+Subject: Fernhill AI Residency
+Date: Oct 21, 2026, 10:00 AM
+
+Dear Aliyah,
+Congratulations! We are delighted to offer you a place in the 2027 Fernhill AI Residency program. Your offer letter is attached. Welcome to the cohort!
+---
+From: Quillstack Labs Recruiting <recruiting@quillstack.example>
+Subject: Update on your application
+Date: Nov 4, 2026, 3:33 AM
+
+Unfortunately, after careful consideration we are unable to move forward with your application for the Firmware Engineer role at this time.`;
+
+/* ================= stats ================= */
+const TIERS = ['Paper', 'Leather', 'Kevlar', 'Titanium', 'Vibranium'];
+const plural = (n, one, many) => `${n} ${n === 1 ? one : (many || one + 's')}`;
+
+function statsFromEmails(text, total, hide){
+  const emails = splitEmails(text).map(parseEmail);
+  emails.forEach(e => {
+    e.kind = classify(e); e.company = companyOf(e); e.role = roleOf(e); e.words = wc(e.text);
+    e.bot = BOT.test(e.from) || BOT_BODY.test(e.text);
+    e.heartbreak = e.kind === 'L' && HEARTBREAK.test(e.all);
+    e.warm = (e.text.match(WARM) || []).length;
+    e.type = (KINDS.find(([, r]) => r.test(e.all)) || ['Jobs'])[0];
+  });
+  const by = k => emails.filter(e => e.kind === k);
+  const Ls = by('L'), unknown = by('unknown');
+  const S = { mode: 'emails', hide, emailsFound: emails.length, nL: Ls.length, nI: by('interview').length, nO: by('offer').length, nP: by('pending').length, nUnknown: unknown.length };
+  S.responses = emails.length - unknown.length;
+  S.total = +total || 0;
+  S.ghosted = S.total > S.responses ? S.total - S.responses : 0;
+  S.companies = [...new Set(emails.map(e => e.company).filter(Boolean))];
+  const mask = s => { if (!hide || !s) return s; let o = s; S.companies.forEach(c => { o = o.replace(new RegExp(c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '[company]'); }); return o; };
+  const co = c => hide ? null : (c || null);
+
+  const dated = emails.filter(e => e.date);
+  const yc = {}; dated.forEach(e => yc[e.date.getFullYear()] = (yc[e.date.getFullYear()] || 0) + 1);
+  S.year = +(Object.entries(yc).sort((a, b) => b[1] - a[1])[0] || [NOW_YEAR])[0];
+  const datedL = Ls.filter(e => e.date);
+  if (datedL.length >= 2) {
+    S.months = Array(12).fill(0); datedL.forEach(e => S.months[e.date.getMonth()]++);
+    S.peakMonth = S.months.indexOf(Math.max(...S.months));
+    S.monthKinds = Array.from({ length: 12 }, () => ({ L: 0, I: 0, O: 0, H: 0 }));
+    dated.filter(e => e.date.getFullYear() === S.year).forEach(e => { const m = S.monthKinds[e.date.getMonth()]; if (e.kind === 'L') { m.L++; if (e.heartbreak) m.H++; } if (e.kind === 'interview') m.I++; if (e.kind === 'offer') m.O++; });
+  } else S.peakMonth = -1;
+  if (datedL.length >= 3) { S.days = Array(7).fill(0); datedL.forEach(e => S.days[e.date.getDay()]++); S.peakDay = S.days.indexOf(Math.max(...S.days)); } else S.peakDay = -1;
+  S.weekendL = datedL.filter(e => [0, 6].includes(e.date.getDay())).length;
+  const timed = datedL.filter(e => e.date.hasTime);
+  const odd = timed.slice().sort((a, b) => { const sc = d => { const h = d.date.getHours() + d.date.getMinutes() / 60; return Math.min(Math.abs(h - 3), 24 - Math.abs(h - 3)); }; return sc(a) - sc(b); })[0];
+  if (odd) S.oddHour = { date: odd.date, company: co(odd.company) };
+
+  S.cliches = CLICHES.map(([label, rx]) => ({ label, n: Ls.filter(e => rx.test(e.all)).length })).filter(c => c.n > 0).sort((a, b) => b.n - a.n);
+  S.unf = Ls.reduce((n, e) => n + (e.all.match(/\bunfortunately\b/gi) || []).length, 0);
+  const kinds = {}; emails.filter(e => e.kind !== 'unknown').forEach(e => kinds[e.type] = (kinds[e.type] || 0) + 1);
+  S.kinds = Object.entries(kinds).sort((a, b) => b[1] - a[1]);
+  const cc = {}, cn = {};
+  Ls.forEach(e => { if (!e.company) return; const k = e.company.toLowerCase().replace(/[^a-z0-9]/g, '').replace(/(inc|ltd|llc|limited|plc)$/, ''); cc[k] = (cc[k] || 0) + 1; cn[k] = e.company; });
+  const rep = Object.entries(cc).filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1])[0];
+  if (rep) S.repeat = { name: co(cn[rep[0]]), n: rep[1] };
+  const cold = Ls.filter(e => e.words >= 8).sort((a, b) => a.words - b.words)[0];
+  if (cold) S.coldest = { company: co(cold.company), words: cold.words, quote: mask(keySentence(cold.text)), role: hide ? '' : cold.role, date: cold.date };
+  const warm = Ls.filter(e => e !== cold).sort((a, b) => (b.warm - a.warm) || (b.words - a.words))[0];
+  if (warm && warm.warm >= 2) S.warmest = { company: co(warm.company), words: warm.words, warm: warm.warm, quote: mask(keySentence(warm.text)) };
+  S.Lwords = Ls.reduce((n, e) => n + e.words, 0);
+  S.bot = Ls.filter(e => e.bot).length;
+  const hb = Ls.filter(e => e.heartbreak);
+  S.heart = hb.length; S.heartCo = hb[0] ? co(hb[0].company) : null;
+  S.bingoHits = new Set(S.cliches.map(c => c.label));
+  return S;
+}
+
+function statsFromQuick(){
+  const v = id => { const x = $(id).value.trim(); return x === '' ? null : Math.max(0, Math.round(+x) || 0); };
+  const S = { mode: 'quick', hide: true, year: NOW_YEAR };
+  S.total = v('#q-apps') || 0; S.nL = v('#q-ls') || 0; S.nI = v('#q-int') || 0; S.nO = v('#q-off') || 0; S.heart = Math.min(v('#q-heart') || 0, S.nL); S.nP = 0;
+  const g = v('#q-ghost');
+  S.ghosted = g != null ? g : Math.max(0, S.total - S.nL - S.nO - Math.max(0, S.nI - S.heart));
+  S.responses = S.nL + S.nI + S.nO;
+  S.peakMonth = $('#q-month').value === '' ? -1 : +$('#q-month').value;
+  S.picked = [...document.querySelectorAll('#q-phrases input:checked')].map(i => i.value);
+  S.cliches = S.picked.map(label => ({ label, n: null }));
+  S.bingoHits = new Set(S.picked);
+  S.kinds = []; S.bot = null; S.Lwords = null; S.unf = 0; S.peakDay = -1; S.weekendL = 0;
+  return S;
+}
+
+function enrich(S){
+  const nL = S.nL;
+  S.tier = nL >= 50 ? 4 : nL >= 30 ? 3 : nL >= 15 ? 2 : nL >= 5 ? 1 : 0;
+  // personalities, in priority order
+  const P = [];
+  if (S.nO) P.push({ key: 'plot', name: 'The Plot Twist', theme: 't-legal', icon: 'star', line: `Took ${plural(nL, 'L')} and still walked out with ${S.nO === 1 ? 'a W' : S.nO + ' Ws'}. The rejections were just the trailer.` });
+  if (S.heart >= 3 || (nL >= 4 && S.heart / nL >= 0.35)) P.push({ key: 'final', name: 'Final Round Regular', theme: 't-pink', icon: 'heart', line: `You made it into the room ${plural(S.heart, 'time')}. You're close, and it shows.` });
+  if (S.ghosted && S.ghosted >= nL) P.push({ key: 'ghost', name: 'Ghost Whisperer', theme: 't-violet', icon: 'ghost', line: `${S.ghosted} applications never got a reply at all. At least a rejection is closure.` });
+  if (S.bot != null && nL >= 4 && S.bot / nL >= 0.5) P.push({ key: 'algo', name: "The Algorithm's Nemesis", theme: 't-paper', icon: 'robot', line: `${Math.round(S.bot / nL * 100)}% of your Ls came from a no-reply inbox. Software keeps saying no. A human hasn't had a proper look yet.` });
+  if (S.repeat) P.push({ key: 'loyal', name: 'The Loyal One', theme: 't-violet', icon: 'loop', line: `${S.repeat.name || 'One company'} turned you down ${S.repeat.n} times and you kept coming back. That's commitment.` });
+  if (S.total >= 60 || nL >= 40) P.push({ key: 'relentless', name: 'The Relentless', theme: 't-red', icon: 'flame', line: `${S.total ? S.total + ' applications' : nL + ' Ls'}. You don't shoot your shot. You empty the clip.` });
+  if (nL >= 25) P.push({ key: 'conn', name: 'Rejection Connoisseur', theme: 't-moss', icon: 'crown', line: `${nL} Ls. You can tell a template rejection from a personal one by the first line.` });
+  if (nL >= 1 && nL <= 4) P.push({ key: 'fresh', name: 'Fresh Recruit', theme: 't-paper', icon: 'seed', line: `${plural(nL, 'L')} so far. Everyone's L count starts somewhere. Yours just started.` });
+  if (nL === 0) P.push({ key: 'untouched', name: 'Untouched', theme: 't-paper', icon: 'seed', line: `Zero Ls detected. Either you're winning or you haven't started shooting yet.` });
+  P.push({ key: 'collector', name: 'Professional L Collector', theme: 't-red', icon: 'stack', line: `Every L is a rep, and you got ${nL} of them in. That's what shooting your shot looks like.` });
+  S.persona = P[0]; S.rising = P.find(p => p !== P[0] && p.key !== 'collector') || null;
+
+  // aura
+  const A = [
+    ['Relentless', '#e8392b', nL, 'you kept applying no matter what'],
+    ['Haunted', '#b9a6ff', S.ghosted * 0.8, 'silence followed you around'],
+    ['Tender', '#ff9ecf', S.heart * 3, 'you got close enough for it to hurt'],
+    ['Breakthrough', '#ffd23f', S.nO * 8, 'a W broke through anyway'],
+    ['Main Character', '#7b61ff', S.nI * 2.5, 'you kept landing in the interview room'],
+    ['Algorithm-Proof', '#4fb3ff', (S.bot || 0) * 1.1, 'software said no and you ignored it'],
+    ['Unbothered', '#2bb37f', S.tier * 3 + 1, 'the Ls roll right off you'],
+  ].filter(a => a[2] > 0).sort((a, b) => b[2] - a[2]).slice(0, 3);
+  while (A.length < 3) A.push(['Unbothered', '#2bb37f', 0, 'the Ls roll right off you'].slice());
+  S.aura = A;
+
+  // eras (needs dated emails)
+  if (S.monthKinds) {
+    const mk = S.monthKinds, max = Math.max(...mk.map(m => m.L), 1);
+    const active = mk.map((m, i) => (m.L + m.I + m.O) ? i : -1).filter(i => i >= 0);
+    if (active.length >= 2) {
+      const label = m => m.O ? 'Comeback Era' : m.H ? 'So-Close Era' : m.I ? 'Main Character Era' : m.L >= Math.max(2, max * .75) ? 'Character Development Era' : m.L ? 'Shooting My Shot Era' : 'Quiet Era';
+      const segs = [];
+      for (let i = active[0]; i <= active[active.length - 1]; i++) { const l = label(mk[i]); const last = segs[segs.length - 1]; if (last && last.name === l) last.to = i; else segs.push({ name: l, from: i, to: i }); }
+      const DESC = { 'Comeback Era': 'the W showed up', 'So-Close Era': 'made it to the room, got the L anyway', 'Main Character Era': 'interview invites rolling in', 'Character Development Era': 'the Ls arrived in bulk', 'Shooting My Shot Era': 'steady Ls, steady applying', 'Quiet Era': 'nobody wrote back' };
+      S.eras = segs.filter(s => s.name !== 'Quiet Era' || s.to - s.from >= 1).slice(-5).map(s => ({ ...s, desc: DESC[s.name] }));
+    }
+  }
+  // bingo: 14 clichés + ghosted + FREE
+  const cells = CLICHES.map(c => ({ label: c[0], hit: S.bingoHits.has(c[0]) }));
+  cells.splice(5, 0, { label: 'FREE: applied anyway', hit: true, free: true });
+  cells.push({ label: 'got ghosted', hit: S.ghosted > 0 });
+  S.bingo = cells;
+  const g = i => cells[i].hit, lines = [];
+  for (let r = 0; r < 4; r++) { lines.push([0, 1, 2, 3].map(c => r * 4 + c)); lines.push([0, 1, 2, 3].map(c => c * 4 + r)); }
+  lines.push([0, 5, 10, 15], [3, 6, 9, 12]);
+  S.bingoLines = lines.filter(l => l.every(g)).length;
+  S.bingoCount = cells.filter(c => c.hit && !c.free).length;
+  S.readMins = S.Lwords ? S.Lwords / 230 : null;
+  return S;
+}
+
+/* ================= posts ================= */
+function posts(S){
+  const yr = S.year, top = S.cliches[0], nL = S.nL;
+  const facts = [];
+  if (S.ghosted) facts.push(`${plural(S.ghosted, 'application')} that never got a reply`);
+  if (S.heart) facts.push(`${S.heart} that ended after the interview, which honestly stung the most`);
+  const vulnerable = [
+    `Here's what my LinkedIn didn't show this year.`,
+    ``,
+    `${plural(nL, 'rejection')}${facts.length ? '. ' + facts.join('. ') : ''}.`,
+    S.nO ? `\nAnd yes, ${S.nO === 1 ? 'one offer' : S.nO + ' offers'} at the end. But the post you saw took one day. The rejections took the rest of the year.` : `\nNo big announcement yet. Just a lot of trying.`,
+    ``,
+    `I'm sharing this because this feed mostly shows wins, and that can make everyone else feel like they're failing. They're not. A no just means you tried.`,
+    ``,
+    `If you collected Ls this year too, you're in very good company.`,
+    ``,
+    `#LWrapped`,
+  ].join('\n');
+  const funny = [
+    `My ${yr} L Wrapped just dropped 📦`,
+    ``,
+    `🏆 Total Ls: ${nL}`,
+    top ? `🎤 Top phrase: "${top.label}"${top.n ? ` (${top.n}×)` : ''}` : null,
+    S.peakMonth >= 0 ? `📅 Rejection season: ${MONTH_NAMES[S.peakMonth]}` : null,
+    S.ghosted ? `👻 Ghosted: ${S.ghosted}` : null,
+    S.bot ? `🤖 Rejected by robots: ${S.bot}` : null,
+    S.heart ? `💔 Ls after the interview: ${S.heart}` : null,
+    `⚖️ L-to-W ratio: ${nL}:${S.nO}`,
+    `🧠 L personality: ${S.persona.name}`,
+    ``,
+    `Still applying. Still delusional. Still here.`,
+    ``,
+    `#LWrapped`,
+  ].filter(l => l !== null).join('\n');
+  const motivational = [
+    `${plural(nL, 'rejection')} in ${yr}.${S.nO ? ` ${S.nO === 1 ? 'One yes' : S.nO + ' yeses'}.` : ''}`,
+    ``,
+    `My L-to-W ratio this year: ${nL}:${S.nO}.`,
+    ``,
+    `Nobody posts the ratio. We post the W. But the W only exists because of the Ls before it.`,
+    ``,
+    `Every rejection taught me something about how I apply, how I interview, and how much I actually want this.`,
+    ``,
+    `To everyone collecting Ls right now: keep shooting. The no's are part of the story.`,
+    ``,
+    `#LWrapped`,
+  ].join('\n');
+  const x = `My ${yr} L Wrapped: ${plural(nL, 'rejection')}${S.ghosted ? `, ${S.ghosted} ghosted` : ''}${S.nO ? `, ${plural(S.nO, 'offer')}` : ''}.\nL-to-W ratio ${nL}:${S.nO}. Personality: ${S.persona.name}.\nLinkedIn shows the wins. This is the rest. #LWrapped`;
+  return { vulnerable, funny, motivational, x };
+}
+
+/* ================= icons ================= */
+const ICONS = {
+  star: '<path d="M32 6l7.6 16.4L58 24.6 44.6 37.2 48 56 32 47 16 56l3.4-18.8L6 24.6l18.4-2.2z"/>',
+  heart: '<path d="M32 54S8 40 8 23a12 12 0 0 1 24-4 12 12 0 0 1 24 4c0 17-24 31-24 31z"/><path d="M32 19l-5 10 8 6-6 10" fill="none" stroke="var(--acc)" stroke-width="3.5" stroke-linejoin="round"/>',
+  ghost: '<path d="M14 58V28a18 18 0 0 1 36 0v30l-6-5-6 5-6-5-6 5-6-5z"/><circle cx="25" cy="28" r="3.5" fill="var(--acc)"/><circle cx="39" cy="28" r="3.5" fill="var(--acc)"/>',
+  robot: '<rect x="12" y="20" width="40" height="32" rx="8"/><rect x="30" y="8" width="4" height="12"/><circle cx="32" cy="8" r="4"/><circle cx="24" cy="34" r="4" fill="var(--acc)"/><circle cx="40" cy="34" r="4" fill="var(--acc)"/><rect x="24" y="43" width="16" height="3" rx="1.5" fill="var(--acc)"/>',
+  loop: '<path d="M32 10a22 22 0 1 0 21 15h-8a14 14 0 1 1-13-7v8l12-12L32 2z"/>',
+  flame: '<path d="M32 4c4 12 18 18 18 34a18 18 0 0 1-36 0c0-8 4-13 8-17 0 7 3 10 6 10-2-11 2-20 4-27z"/>',
+  crown: '<path d="M8 20l12 12 12-20 12 20 12-12-6 30H14z"/><rect x="14" y="54" width="36" height="5" rx="2"/>',
+  seed: '<path d="M32 58V30"/><path d="M32 34C32 20 20 14 8 14c0 14 10 20 24 20zM32 30c0-12 10-18 24-18 0 12-10 18-24 18z"/><rect x="29" y="28" width="6" height="30" rx="3"/>',
+  stack: '<rect x="10" y="40" width="44" height="12" rx="3"/><rect x="14" y="26" width="36" height="12" rx="3"/><rect x="18" y="12" width="28" height="12" rx="3"/>',
+};
+const iconSvg = k => `<svg viewBox="0 0 64 64" fill="currentColor" aria-hidden="true">${ICONS[k] || ICONS.stack}</svg>`;
+
+/* ================= sound (generated in-browser) ================= */
+const Sound = (() => {
+  let ctx, master, noise, timer, step = 0, next = 0, on = false, muted = false;
+  const spb = 60 / 116 / 4;
+  const prog = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]];
+  const root = [45, 41, 48, 43];
+  const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+  const VOL = .5;
+  function init(){
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain(); master.gain.value = 0;
+    const comp = ctx.createDynamicsCompressor(); master.connect(comp).connect(ctx.destination);
+    noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = noise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  function env(g, t, a, peak, d){ g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(.0001, t + a + d); }
+  function kick(t, big){ const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(big ? 110 : 150, t); o.frequency.exponentialRampToValueAtTime(38, t + (big ? .35 : .14)); env(g, t, .003, big ? 1.4 : .9, big ? 1.1 : .32); o.connect(g).connect(master); o.start(t); o.stop(t + 1.3); }
+  function nz(t, type, f, peak, d){ const s = ctx.createBufferSource(); s.buffer = noise; const fl = ctx.createBiquadFilter(); fl.type = type; fl.frequency.value = f; const g = ctx.createGain(); env(g, t, .002, peak, d); s.connect(fl).connect(g).connect(master); s.start(t); s.stop(t + d + .05); }
+  function tone(t, m, type, peak, d, cut){ const o = ctx.createOscillator(), fl = ctx.createBiquadFilter(), g = ctx.createGain(); o.type = type; o.frequency.value = hz(m); fl.type = 'lowpass'; fl.frequency.value = cut; env(g, t, .01, peak, d); o.connect(fl).connect(g).connect(master); o.start(t); o.stop(t + d + .1); }
+  function schedule(){
+    while (next < ctx.currentTime + .12) {
+      const s = step % 16, bar = Math.floor(step / 16) % 4, t = next;
+      if (s % 4 === 0 || s === 10) kick(t);
+      if (s === 4 || s === 12) { nz(t, 'bandpass', 1700, .32, .16); nz(t + .012, 'bandpass', 1300, .18, .12); }
+      if (s % 2 === 1) nz(t, 'highpass', 7500, s % 4 === 3 ? .09 : .05, .035);
+      if ([0, 3, 6, 8, 11, 14].includes(s)) tone(t, root[bar] + (s === 14 ? 12 : 0), 'sawtooth', .2, .16, 520);
+      if (s === 0) prog[bar].forEach(m => tone(t, m + 12, 'triangle', .045, spb * 15, 2200));
+      if (s === 2 || s === 7 || s === 10) tone(t, prog[bar][(s / 3 | 0) % 3] + 24, 'square', .025, .09, 3200);
+      next += spb; step++;
+    }
+  }
+  return {
+    start(){ try { if (!ctx) init(); ctx.resume(); } catch { return; } if (on) return; on = true; next = ctx.currentTime + .06; master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(muted ? 0 : VOL, ctx.currentTime, .4); timer = setInterval(schedule, 25); },
+    stop(){ if (!on) return; on = false; clearInterval(timer); master.gain.setTargetAtTime(0, ctx.currentTime, .15); },
+    hit(){ if (!on || muted) return; const t = ctx.currentTime; kick(t, true); nz(t, 'lowpass', 2600, .55, .7); },
+    toggle(){ muted = !muted; if (ctx) master.gain.setTargetAtTime(muted || !on ? 0 : VOL, ctx.currentTime, .1); return muted; },
+    get on(){ return on; }, get muted(){ return muted; },
+  };
+})();
+
+/* ================= confetti ================= */
+const Confetti = (() => {
+  const cv = $('#confetti'), cx = cv.getContext('2d'); let parts = [], raf = 0;
+  function burst(colors){
+    if (REDUCED) return;
+    const r = cv.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
+    cv.width = r.width * dpr; cv.height = r.height * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    for (let i = 0; i < 110; i++) parts.push({ x: Math.random() * r.width, y: -20 - Math.random() * r.height * .6, vx: (Math.random() - .5) * 2.4, vy: 2 + Math.random() * 3.5, r: Math.random() * 6, vr: (Math.random() - .5) * .2, s: 18 + Math.random() * 26, c: colors[i % colors.length], ch: Math.random() < .82 ? 'L' : 'W' });
+    if (!raf) loop();
+  }
+  function loop(){
+    const r = cv.getBoundingClientRect();
+    cx.clearRect(0, 0, r.width, r.height);
+    parts.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += .05; p.r += p.vr; cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r); cx.fillStyle = p.c; cx.font = `800 ${p.s}px "Bricolage Grotesque", sans-serif`; cx.fillText(p.ch, 0, 0); cx.restore(); });
+    parts = parts.filter(p => p.y < r.height + 40);
+    if (!parts.length) { cx.clearRect(0, 0, r.width, r.height); raf = 0; return; }
+    raf = parts.length ? requestAnimationFrame(loop) : 0;
+    if (!raf) cx.clearRect(0, 0, r.width, r.height);
+  }
+  function clear(){ parts = []; }
+  return { burst, clear };
+})();
+
+/* ================= intake UI ================= */
+const ta = $('#emails'), live = $('#live'), go = $('#go'), err = $('#err');
+const COLORS = { L: '#e8392b', interview: '#6b4eff', offer: '#0f5c45', pending: '#c79a00', unknown: '#9c8a90' };
+let mode = 'emails', liveTimer;
+const yearStr = String(NOW_YEAR);
+$('#yr').textContent = yearStr; $('#q').textContent = $('#q').textContent.replace('2026', yearStr);
+$('#q-month').insertAdjacentHTML('beforeend', MONTH_NAMES.map((m, i) => `<option value="${i}">${m}</option>`).join(''));
+$('#q-phrases').innerHTML = CLICHES.map(([l], i) => `<label class="chip"><input type="checkbox" id="qp${i}" value="${esc(l)}"><span>“${esc(l)}”</span></label>`).join('');
+
+function setMode(m){
+  mode = m;
+  $('#tab-emails').setAttribute('aria-selected', m === 'emails'); $('#tab-quick').setAttribute('aria-selected', m === 'quick');
+  $('#mode-emails').hidden = m !== 'emails'; $('#mode-quick').hidden = m !== 'quick';
+  err.textContent = ''; refreshGo();
+}
+$('#tab-emails').addEventListener('click', () => setMode('emails'));
+$('#tab-quick').addEventListener('click', () => setMode('quick'));
+function refreshGo(){
+  if (mode === 'quick') go.disabled = !($('#q-ls').value || $('#q-apps').value);
+  else updateLive();
+}
+document.querySelectorAll('#mode-quick input').forEach(i => i.addEventListener('input', refreshGo));
+
+function updateLive(){
+  const S = statsFromEmails(ta.value, $('#total').value, false);
+  const n = S.emailsFound;
+  if (mode === 'emails') go.disabled = n === 0;
+  if (!n) { live.innerHTML = '<span class="hint">Paste something and we\'ll show what we detect here.</span>'; return; }
+  const pill = (k, label, c) => c ? `<span class="pill"><span class="dot" style="background:${COLORS[k]}"></span>${c} ${label}</span>` : '';
+  live.innerHTML = `<b>${n} email${n === 1 ? '' : 's'} found</b>` + pill('L', S.nL === 1 ? 'L' : 'Ls', S.nL) + pill('interview', 'interview' + (S.nI === 1 ? '' : 's'), S.nI) + pill('offer', 'offer' + (S.nO === 1 ? '' : 's'), S.nO) + pill('pending', 'received', S.nP) + pill('unknown', 'unclear', S.nUnknown);
+}
+ta.addEventListener('input', () => { clearTimeout(liveTimer); liveTimer = setTimeout(updateLive, 200); });
+$('#total').addEventListener('input', updateLive);
+$('#sample').addEventListener('click', () => { ta.value = SAMPLE; $('#total').value = 34; if (!$('#name').value) $('#name').value = 'Sample'; updateLive(); ta.scrollTop = 0; });
+$('#clear').addEventListener('click', () => { ta.value = ''; updateLive(); ta.focus(); });
+$('#copyq').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText($('#q').textContent); $('#copyq').textContent = 'Copied'; setTimeout(() => $('#copyq').textContent = 'Copy', 1500); }
+  catch { const r = document.createRange(); r.selectNodeContents($('#q')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+});
+
+// .eml / .txt import
+function decodeQP(s){ return s.replace(/=\r?\n/g, '').replace(/=([0-9A-F]{2})/gi, (_, h) => String.fromCharCode(parseInt(h, 16))); }
+function utf8(bin){ try { return decodeURIComponent(escape(bin)); } catch { return bin; } }
+function stripHtml(h){ const d = new DOMParser().parseFromString(h, 'text/html'); d.querySelectorAll('style,script').forEach(n => n.remove()); return (d.body ? d.body.innerText || d.body.textContent : '').replace(/\n{3,}/g, '\n\n'); }
+function decodeHeader(v){ return v.replace(/=\?([^?]+)\?([BQ])\?([^?]*)\?=/gi, (_, cs, enc, txt) => { try { return utf8(enc.toUpperCase() === 'B' ? atob(txt) : decodeQP(txt.replace(/_/g, ' '))); } catch { return txt; } }); }
+function emlToText(src){
+  src = src.replace(/\r\n?/g, '\n');
+  const split = src.indexOf('\n\n');
+  if (split < 0) return src;
+  const head = src.slice(0, split).replace(/\n[ \t]+/g, ' '), rest = src.slice(split + 2);
+  const h = k => { const m = head.match(new RegExp('^' + k + ':\\s*(.*)$', 'im')); return m ? decodeHeader(m[1].trim()) : ''; };
+  if (!/^(from|subject|date|received|message-id):/im.test(head)) return src;
+  function partBody(headers, body){
+    const enc = (headers.match(/content-transfer-encoding:\s*([\w-]+)/i) || [])[1] || '';
+    let b = body;
+    if (/base64/i.test(enc)) { try { b = utf8(atob(b.replace(/\s+/g, ''))); } catch {} }
+    else if (/quoted-printable/i.test(enc)) b = utf8(decodeQP(b));
+    return /text\/html/i.test(headers) ? stripHtml(b) : b;
+  }
+  let text = '';
+  const boundary = (head.match(/boundary="?([^";\n]+)"?/i) || [])[1];
+  if (boundary) {
+    const parts = rest.split('--' + boundary).map(p => { const i = p.indexOf('\n\n'); return i < 0 ? null : { h: p.slice(0, i), b: p.slice(i + 2) }; }).filter(Boolean);
+    const flat = [];
+    parts.forEach(p => { const nb = (p.h.match(/boundary="?([^";\n]+)"?/i) || [])[1]; if (nb) p.b.split('--' + nb).forEach(q => { const i = q.indexOf('\n\n'); if (i >= 0) flat.push({ h: q.slice(0, i), b: q.slice(i + 2) }); }); else flat.push(p); });
+    const plain = flat.find(p => /text\/plain/i.test(p.h)) || flat.find(p => /text\/html/i.test(p.h));
+    text = plain ? partBody(plain.h, plain.b) : rest;
+  } else text = partBody(head, rest);
+  return `From: ${h('From')}\nSubject: ${h('Subject')}\nDate: ${h('Date')}\n\n${text.trim()}`;
+}
+async function addFiles(files){
+  const out = [];
+  for (const f of files) { if (f.size > 3e6) continue; try { out.push(emlToText(await f.text())); } catch {} }
+  if (!out.length) return;
+  ta.value = (ta.value.trim() ? ta.value.trim() + '\n---\n' : '') + out.join('\n---\n');
+  updateLive();
+}
+$('#files').addEventListener('change', e => { addFiles([...e.target.files]); e.target.value = ''; });
+const drop = $('#drop');
+['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { if ([...e.dataTransfer.types].includes('Files')) { e.preventDefault(); drop.classList.add('drag'); } }));
+['dragleave', 'drop'].forEach(t => drop.addEventListener(t, () => drop.classList.remove('drag')));
+drop.addEventListener('drop', e => { if (e.dataTransfer.files.length) { e.preventDefault(); addFiles([...e.dataTransfer.files]); } });
+
+$('#form').addEventListener('submit', e => {
+  e.preventDefault();
+  let S;
+  if (mode === 'quick') {
+    S = statsFromQuick();
+    if (!S.nL && !S.total) { err.textContent = 'Add at least your number of rejections or applications.'; return; }
+    S.name = $('#q-name').value.trim();
+  } else {
+    S = statsFromEmails(ta.value, $('#total').value, $('#hide').checked);
+    if (!S.emailsFound) { err.textContent = 'We couldn\'t find any emails. Paste at least one, with --- between each.'; return; }
+    if (!S.responses) { err.textContent = 'We found text, but none of it reads like an application email. Check that you pasted the email bodies, or try quick mode.'; return; }
+    S.name = $('#name').value.trim();
+  }
+  err.textContent = '';
+  startStory(enrich(S));
+});
+
+/* ================= slides ================= */
+const story = $('#story'), slideEl = $('#slide'), barsEl = $('#bars');
+let slides = [], cur = 0, S = null, state = {};
+const count = n => `<span class="count" data-n="${n}">${n}</span>`;
+const words = t => `<span class="words">${t.split(' ').map((w, i) => `<span style="animation-delay:${.15 + i * .07}s">${esc(w)}</span> `).join('')}</span>`;
+const guessBuckets = n => { const b = n < 8 ? [[0, 2], [3, 5], [6, 9], [10, 99999]] : n < 20 ? [[0, 4], [5, 14], [15, 29], [30, 99999]] : [[0, 9], [10, 24], [25, 49], [50, 99999]]; return b.map(([a, z]) => ({ a, z, label: z > 9999 ? `${a}+` : `${a}–${z}` })); };
+
+function buildSlides(S){
+  const L = [], yr = S.year, nL = S.nL, who = S.name ? esc(S.name) : '';
+  const add = s => L.push(Object.assign({ dur: 6500 }, s));
+
+  add({ t: 't-ink', dur: null, gate: true, h: () => `<p class="eyebrow rise">${who ? who + ', your' : 'Your'} ${yr} L Wrapped is ready</p><p class="big rise">LinkedIn saw your <span class="acc">wins.</span></p><p class="say rise">This is everything else.</p><div class="actions interactive rise" style="justify-content:flex-start;margin-top:18px"><button class="btn" id="start-sound" type="button">Play with sound</button><button class="btn alt" id="start-quiet" type="button">Play muted</button></div>`,
+    card: { eyebrow: `My ${yr} L Wrapped`, big: 'LinkedIn saw my wins.', line: 'This is everything else.' } });
+
+  add({ t: 't-legal', dur: null, h: () => `<p class="eyebrow rise">Quick question</p><p class="say rise">How many Ls do you think you took in ${yr}?</p><div class="guess interactive">${guessBuckets(nL).map((b, i) => `<button type="button" class="rise" data-i="${i}">${b.label}</button>`).join('')}</div><p class="verdict" id="verdict" aria-live="polite"></p>`,
+    after(el){ const bs = guessBuckets(nL); el.querySelectorAll('.guess button').forEach(btn => btn.addEventListener('click', () => {
+      if (state.guessed) return; state.guessed = true; const g = bs[+btn.dataset.i], right = nL >= g.a && nL <= g.z; state.guess = g.label;
+      el.querySelectorAll('.guess button').forEach((b, i) => b.classList.add(nL >= bs[i].a && nL <= bs[i].z ? 'right' : 'wrong'));
+      $('#verdict').textContent = right ? 'Called it. You know yourself.' : 'Not quite. Brace yourself.';
+      setTimeout(() => { if (slides[cur] && slides[cur].after === this.after) show(cur + 1); }, 1500);
+    })); } });
+
+  add({ t: 't-red', hit: 1000, h: () => `<p class="eyebrow rise">Total Ls taken${state.guess ? ` · you guessed ${esc(state.guess)}` : ''}</p><p class="huge rise">${count(nL)}</p><div class="stamp">REJECTED</div><p class="say rise">${nL === 0 ? 'Not a single one. Suspicious.' : nL < 5 ? 'A light year. Barely a bruise.' : nL < 15 ? 'Respectable. You were busy.' : nL < 30 ? 'That\'s a lot of "unfortunately".' : 'At this point you could write these emails yourself.'}</p>`,
+    card: { eyebrow: `Total Ls taken in ${yr}`, big: String(nL), line: nL === 1 ? 'rejection. And I\'m still here.' : 'rejections. And I\'m still here.', stamp: 'REJECTED' } });
+
+  const segs = [['Ls', nL, 'var(--ink)', '#1d0f14'], ['Interviews', S.nI, 'var(--legal)', '#ffd23f'], ['Offers', S.nO, '#fff4e8', '#fff4e8'], ['Still pending', S.nP, 'var(--pink)', '#ff9ecf'], ['Ghosted', S.ghosted, 'color-mix(in srgb,var(--fg) 35%,transparent)', '#b3a4ff']].filter(s => s[1]);
+  const sum = segs.reduce((n, s) => n + s[1], 0) || 1;
+  const bdLine = S.total ? `Out of ${S.total} applications, ${Math.round(nL / S.total * 100)}% ended in an L${S.ghosted ? ` and ${Math.round(S.ghosted / S.total * 100)}% ended in silence` : ''}.` : `Of everything that came back, ${Math.round(nL / Math.max(S.responses, 1) * 100)}% was a no.`;
+  add({ t: 't-violet', h: () => `<p class="eyebrow rise">Your inbox, broken down</p><p class="say rise">${bdLine}</p><div class="split rise">${segs.map(s => `<span style="width:${s[1] / sum * 100}%;background:${s[2]}"></span>`).join('')}</div><div class="legend rise">${segs.map(s => `<div><span class="sw" style="background:${s[2]}"></span><b>${s[1]}</b><i>${s[0]}</i></div>`).join('')}</div>`,
+    card: { eyebrow: 'My inbox, broken down', big: bdLine, rows: segs.slice(0, 4).map(s => [s[1], s[0]]) } });
+
+  if (S.kinds.length > 1) add({ t: 't-pink', h: () => `<p class="eyebrow rise">Your top genres</p><p class="say rise">You didn't just get rejected from jobs. You diversified.</p><ol class="toplist">${S.kinds.slice(0, 5).map(([k, n], i) => `<li class="rise"><span class="n">${i + 1}</span><span class="p">${esc(k)}</span><span class="c">${n} email${n === 1 ? '' : 's'}</span></li>`).join('')}</ol>`,
+    card: { eyebrow: 'My top rejection genres', big: S.kinds[0][0], line: 'I didn\'t just get rejected from jobs. I diversified.', rows: S.kinds.slice(0, 4).map(([k, n]) => [n, k]) } });
+
+  const counted = S.cliches.filter(c => c.n);
+  if (counted.length >= 3) {
+    const opts = counted.slice(0, 3).map(c => c.label).sort(() => Math.random() - .5);
+    add({ t: 't-pink', dur: null, h: () => `<p class="eyebrow rise">Guess the phrase</p><p class="say rise">Which line did recruiters send you the most?</p><div class="guess interactive">${opts.map(o => `<button type="button" class="rise" data-o="${esc(o)}">“${esc(o)}”</button>`).join('')}</div><p class="verdict" id="verdict" aria-live="polite"></p>`,
+      after(el){ el.querySelectorAll('.guess button').forEach(btn => btn.addEventListener('click', () => {
+        if (state.guessed2) return; state.guessed2 = true; const right = btn.dataset.o === counted[0].label;
+        el.querySelectorAll('.guess button').forEach(b => b.classList.add(b.dataset.o === counted[0].label ? 'right' : 'wrong'));
+        $('#verdict').textContent = right ? 'You\'ve read it so often you could recite it.' : 'Close. The winner is below.';
+        const me = slides[cur]; setTimeout(() => { if (slides[cur] === me) show(cur + 1); }, 1500);
+      })); } });
+  }
+  if (counted.length) {
+    add({ t: 't-legal', h: () => `<p class="eyebrow rise">Your top phrases of ${yr}</p><ol class="toplist">${counted.slice(0, 5).map((c, i) => `<li class="rise"><span class="n">${i + 1}</span><span class="p">“${esc(c.label)}”</span><span class="c">${c.n}×</span></li>`).join('')}</ol>`,
+      card: { eyebrow: `My top rejection phrases of ${yr}`, big: `“${counted[0].label}”`, rows: counted.slice(0, 4).map(c => [c.n + '×', c.label]) } });
+    const top = counted[0];
+    add({ t: 't-ink', hit: 600, h: () => `<p class="eyebrow rise">Your #1 phrase</p><p class="big"><span class="acc">${words('“' + top.label + '”')}</span></p><p class="sub rise">showed up in ${plural(top.n, 'rejection')}${nL ? `, ${Math.round(top.n / nL * 100)}% of your Ls` : ''}. ${S.unf ? `You read the word “unfortunately” ${plural(S.unf, 'time')} this year.` : ''}</p>`,
+      card: { eyebrow: 'My #1 rejection phrase', big: `“${top.label}”`, line: `${plural(top.n, 'time')} this year.` } });
+  }
+
+  if (S.bingoCount >= 2) add({ t: 't-moss', dur: 8000, confetti: S.bingoLines ? 1100 : 0, h: () => `<p class="eyebrow rise">Rejection bingo</p><p class="say rise">${S.bingoLines ? `BINGO! ${S.bingoLines > 1 ? S.bingoLines + ' lines.' : ''}` : `${S.bingoCount} of 15 squares.`} ${S.bingoLines ? 'You completed the rejection starter pack.' : 'No bingo yet. Next year, maybe.'}</p><div class="bingo">${S.bingo.map((c, i) => `<div class="${c.hit ? 'hit' : ''}${c.free ? ' free' : ''}" style="animation-delay:${.3 + i * .06}s">${esc(c.label)}</div>`).join('')}</div>`,
+    card: { eyebrow: `My ${yr} rejection bingo`, big: S.bingoLines ? 'BINGO!' : `${S.bingoCount}/15`, bingo: S.bingo } });
+
+  if (S.peakMonth >= 0) {
+    if (S.months) {
+      const max = Math.max(...S.months, 1);
+      add({ t: 't-moss', h: () => `<p class="eyebrow rise">Rejection season</p><p class="big rise"><span class="acc">${MONTH_NAMES[S.peakMonth]}</span></p><p class="sub rise">was your worst month, with ${plural(S.months[S.peakMonth], 'L')}.</p><div class="months rise">${S.months.map((m, i) => `<div><em>${m || ''}</em><span class="${i === S.peakMonth ? 'peak' : ''}" style="height:${Math.max(m / max * 100, m ? 6 : 2)}%;animation-delay:${.3 + i * .04}s"></span><small>${MONTH_NAMES[i][0]}</small></div>`).join('')}</div>`,
+        card: { eyebrow: 'My rejection season', big: MONTH_NAMES[S.peakMonth], line: `My worst month, with ${plural(S.months[S.peakMonth], 'L')}.` } });
+    } else add({ t: 't-moss', h: () => `<p class="eyebrow rise">Rejection season</p><p class="big rise"><span class="acc">${MONTH_NAMES[S.peakMonth]}</span></p><p class="sub rise">was the month the Ls came hardest. You got through it anyway.</p>`,
+      card: { eyebrow: 'My rejection season', big: MONTH_NAMES[S.peakMonth], line: 'The month the Ls came hardest.' } });
+  }
+
+  if (S.eras && S.eras.length >= 2) add({ t: 't-violet', dur: 8000, h: () => `<p class="eyebrow rise">Your ${yr}, in eras</p><ul class="eras">${S.eras.map(e => `<li class="rise"><span class="when">${MONTH_NAMES[e.from].slice(0, 3)}${e.to !== e.from ? '–' + MONTH_NAMES[e.to].slice(0, 3) : ''}</span><div><b>${e.name}</b><span>${e.desc}</span></div></li>`).join('')}</ul>`,
+    card: { eyebrow: `My ${yr}, in eras`, big: S.eras[S.eras.length - 1].name, rows: S.eras.slice(-4).map(e => [MONTH_NAMES[e.from].slice(0, 3), e.name.replace(' Era', '')]) } });
+
+  if (S.oddHour) {
+    const d = S.oddHour.date, h = d.getHours(), time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }), late = h < 6 || h >= 22;
+    add({ t: 't-ink', h: () => `<p class="eyebrow rise">${late ? 'The late-night L' : 'Prime-time rejection'}</p><p class="huge rise" style="font-size:clamp(84px,22vw,150px)"><span class="acc">${esc(time)}</span></p><p class="say rise">${S.oddHour.company ? esc(S.oddHour.company) : 'Someone'} rejected you at ${esc(time)} on a ${DAYS[d.getDay()]}.</p><p class="sub rise">${late ? 'Who sends these at that hour? A robot. It\'s always a robot.' : 'Right in the middle of your day. Rude.'}${S.peakDay >= 0 ? ` Your Ls hit hardest on ${DAYS[S.peakDay]}s.` : ''}</p>`,
+      card: { eyebrow: late ? 'My late-night L' : 'My prime-time rejection', big: time, line: `Rejected at ${time} on a ${DAYS[d.getDay()]}.` } });
+  }
+
+  if (S.bot && nL >= 2) {
+    const pct = Math.round(S.bot / nL * 100);
+    add({ t: 't-paper', h: () => `<p class="eyebrow rise">Sent by a robot</p><p class="huge rise">${count(pct)}<span style="font-size:.4em">%</span></p><p class="say rise">of your Ls came from a no-reply inbox or an applicant tracking system.</p><p class="sub rise">You were rejected by software ${plural(S.bot, 'time')}. It never even said its name.</p>`,
+      card: { eyebrow: 'Rejected by a robot', big: pct + '%', line: 'of my Ls came from a no-reply inbox.' } });
+  }
+  if (S.heart) add({ t: 't-pink', h: () => `<p class="eyebrow rise">So close</p><p class="huge rise">${count(S.heart)}</p><p class="say rise">${S.heart === 1 ? 'time you made it to the interview and still took the L.' : 'times you made it to the interview and still took the L.'}</p><p class="sub rise">${S.heartCo ? `${esc(S.heartCo)} was the one that stung.` : 'Those ones sting.'} But getting the interview means the application worked.</p>`,
+    card: { eyebrow: 'So close', big: String(S.heart), line: S.heart === 1 ? 'time I made it to the interview and still took the L.' : 'times I made it to the interview and still took the L.' } });
+  if (S.repeat) add({ t: 't-violet', h: () => `<p class="eyebrow rise">Your most loyal rejector</p><p class="big rise"><span class="acc">${S.repeat.name ? esc(S.repeat.name) : 'One company'}</span></p><p class="say rise">said no ${plural(S.repeat.n, 'time')}.</p><p class="sub rise">You kept shooting. They kept missing.</p>`,
+    card: { eyebrow: 'My most loyal rejector', big: S.repeat.name || 'One company', line: `said no ${plural(S.repeat.n, 'time')}. I kept applying.` } });
+  if (S.coldest) add({ t: 't-legal', dur: 8000, h: () => `<p class="eyebrow rise">The coldest L</p><p class="say rise">${S.coldest.company ? esc(S.coldest.company) : 'One company'} needed just ${S.coldest.words} words.</p><p class="quote rise">“${esc(S.coldest.quote)}”</p><p class="meta rise">${S.coldest.role ? esc(S.coldest.role) + ' · ' : ''}${S.coldest.date ? S.coldest.date.toLocaleDateString([], { month: 'short', day: 'numeric' }) : ''}</p>`,
+    card: { eyebrow: 'My coldest L', big: `${S.coldest.words} words.`, line: `“${S.coldest.quote}”` } });
+  if (S.warmest) add({ t: 't-moss', dur: 8000, h: () => `<p class="eyebrow rise">The kindest L</p><p class="say rise">${S.warmest.company ? esc(S.warmest.company) : 'Someone'} let you down gently.</p><p class="quote rise">“${esc(S.warmest.quote)}”</p><p class="sub rise">${S.warmest.words} words and ${plural(S.warmest.warm, 'kind word')}. We'll take it.</p>`,
+    card: { eyebrow: 'My kindest L', big: 'Let down gently.', line: `“${S.warmest.quote}”` } });
+  if (S.readMins) {
+    const sec = S.readMins < 1, v = sec ? Math.round(S.readMins * 60) : Math.round(S.readMins);
+    add({ t: 't-red', h: () => `<p class="eyebrow rise">Time spent reading rejections</p><p class="huge rise">${count(v)}</p><p class="say rise">${sec ? 'seconds' : v === 1 ? 'minute' : 'minutes'} of “we regret to inform you”.</p><p class="sub rise">${S.Lwords.toLocaleString()} words of no. ${S.readMins >= 10 ? 'That\'s a whole lunch break.' : 'Short, but it adds up.'}</p>`,
+      card: { eyebrow: 'Time spent reading rejections', big: `${v} ${sec ? 'sec' : 'min'}`, line: `${S.Lwords.toLocaleString()} words of no.` } });
+  }
+  if (S.ghosted) add({ t: 't-ink', h: () => `<p class="eyebrow rise">Left on read</p><p class="huge rise">${count(S.ghosted)}</p><p class="say rise">${S.ghosted === 1 ? 'application got' : 'applications got'} no reply at all.</p><p class="sub rise">Not even a template. Each one is an L you never got to read.</p>`,
+    card: { eyebrow: 'Left on read', big: String(S.ghosted), line: S.ghosted === 1 ? 'application never got a reply.' : 'applications never got a reply.' } });
+
+  // L-to-W ratio
+  add({ t: S.nO ? 't-legal' : 't-ink', confetti: S.nO ? 900 : 0, hit: S.nO ? 700 : 0, h: () => `<p class="eyebrow rise">Your L-to-W ratio</p><p class="huge rise" style="font-size:clamp(110px,30vw,220px)">${nL}<span class="acc">:</span>${S.nO}</p>${S.nO ? `<p class="say rise">It took ${plural(nL, 'L')} to get ${S.nO === 1 ? '1 W' : S.nO + ' Ws'}.</p><p class="sub rise">Nobody posts the ratio. They post the W. But the W only exists because of the Ls before it.</p>` : `<p class="say rise">W loading…</p><div class="loadbar rise"><i></i></div><p class="sub rise">${plural(nL, 'rep')} in. You're still in the game, and that's the part that counts.</p>`}`,
+    card: { eyebrow: 'My L-to-W ratio', big: `${nL}:${S.nO}`, line: S.nO ? `It took ${plural(nL, 'L')} to get ${S.nO === 1 ? '1 W' : S.nO + ' Ws'}.` : 'W loading…' } });
+
+  // highlight reel vs real reel
+  const realRows = [[nL, 'rejections'], S.ghosted ? [S.ghosted, 'ghosted'] : null, S.heart ? [S.heart, 'Ls after the interview'] : null, S.nI ? [S.nI, 'interviews'] : null, S.readMins && S.readMins >= 1 ? [Math.round(S.readMins), 'minutes reading “unfortunately”'] : null].filter(Boolean).slice(0, 4);
+  const postText = S.nO ? 'Thrilled to announce I\'m starting a new chapter! 🎉 So grateful for this opportunity. Hard work pays off!' : 'Excited to share that I\'m open to new opportunities! 🚀 Big things coming. #OpenToWork';
+  add({ t: 't-paper', dur: 9000, h: () => `<p class="eyebrow rise">Highlight reel vs real reel</p><div class="reel"><div class="post rise"><span class="tag">What they saw</span><div class="ph"><span class="av"></span><div><b>${who || 'You'}</b><small>1d · Edited</small></div></div><p>${postText}</p><div class="react">♥ 👏 💡 248 · 31 comments</div></div><div class="real rise"><span class="tag">What actually happened</span><ul>${realRows.map(([v, l]) => `<li><b>${v}</b><span>${esc(l)}</span></li>`).join('')}</ul></div></div><p class="say rise">Social media is the highlight reel. This is the real reel.</p>`,
+    card: { eyebrow: 'Highlight reel vs real reel', big: S.nO ? `1 post. ${plural(nL, 'L')}.` : `0 posts. ${plural(nL, 'L')}.`, line: 'Social media is the highlight reel. This is the real reel.', rows: realRows.map(([v, l]) => [v, l]) } });
+
+  add({ t: 't-paper', h: () => `<p class="eyebrow rise">Thick skin rating</p><p class="big rise"><span class="acc">${TIERS[S.tier]}</span></p><div class="tier rise">${TIERS.map((_, i) => `<span class="${i <= S.tier ? 'lit' : ''}"></span>`).join('')}</div><div class="tiernames rise">${TIERS.map(t => `<span>${t}</span>`).join('')}</div><p class="sub rise" style="margin-top:18px">${S.tier >= 3 ? 'Rejection bounces off you now.' : S.tier >= 1 ? 'You\'re building armour one email at a time.' : 'Still soft. Give it a few more applications.'}</p>`,
+    card: { eyebrow: 'My thick skin rating', big: TIERS[S.tier], line: `${TIERS.slice(0, S.tier + 1).join(' → ')}` } });
+
+  const [a1, a2, a3] = S.aura;
+  const auraName = a1[0] === a2[0] ? a1[0] : `${a1[0]} & ${a2[0]}`;
+  add({ t: 't-ink', dur: 8000, h: () => `<p class="eyebrow rise">Your L aura</p><div class="aura rise" style="--a1:${a1[1]};background:radial-gradient(circle at 30% 30%,${a1[1]},transparent 60%),radial-gradient(circle at 70% 40%,${a2[1]},transparent 60%),radial-gradient(circle at 45% 75%,${a3[1]},transparent 62%),#2b1a21"></div><p class="say rise">${esc(auraName)}${a3[0] !== a1[0] && a3[0] !== a2[0] ? `, with a hint of ${esc(a3[0])}` : ''}.</p><p class="sub rise">That means ${a1[3]}${a2[0] !== a1[0] ? `, and ${a2[3]}` : ''}.</p>`,
+    card: { eyebrow: 'My L aura', big: auraName, line: `${a1[3][0].toUpperCase() + a1[3].slice(1)}.`, bg: 'aura' } });
+
+  const p = S.persona;
+  add({ t: p.theme, dur: 8000, confetti: 1000, hit: 500, h: () => `<p class="eyebrow rise">Your ${yr} L personality</p><div class="badge">${iconSvg(p.icon)}</div><p class="big rise"><span class="acc">${esc(p.name)}</span></p><p class="say rise">${esc(p.line)}</p>${S.rising ? `<p class="rising rise">Rising sign: ${esc(S.rising.name)}</p>` : ''}`,
+    card: { eyebrow: `My ${yr} L personality`, big: p.name, line: p.line, theme: p.theme, icon: p.icon } });
+
+  add({ t: 't-ink', dur: 9000, confetti: 1400, h: () => `<p class="eyebrow rise">The beauty of no</p><p class="big">${words('Every no is proof you tried.')}</p><p class="say rise">Most people never apply. You did${S.total ? `, ${S.total} times` : ''}.</p><p class="sub rise">${nL ? `${plural(nL, 'no', 'no\'s')}, and you kept going anyway. ` : ''}Here's to the Ls of ${yr}, and to applying again in ${yr + 1}.</p>`,
+    card: { eyebrow: 'The beauty of no', big: 'Every no is proof I tried.', line: `${plural(nL, 'L')} in ${yr}. Still applying.` } });
+
+  add({ t: 't-red', dur: null, final: true, h: finalHTML });
+  return L;
+}
+
+/* ================= final slide ================= */
+let fmt = 'post', tone = 'vulnerable', POSTS = null;
+const FORMATS = { story: [1080, 1920, 'Story'], post: [1080, 1350, 'Post'], square: [1080, 1080, 'Square'] };
+const fmtButtons = cur => Object.entries(FORMATS).map(([k, v]) => `<button type="button" data-f="${k}" aria-pressed="${k === cur}">${v[2]}</button>`).join('');
+function summarySpec(){
+  const rows = [[S.nI, 'Interviews'], [S.nO, 'Offers'], S.ghosted ? [S.ghosted, 'Ghosted'] : [S.heart, 'So-close Ls'], S.peakMonth >= 0 ? [MONTH_NAMES[S.peakMonth].slice(0, 3), 'Worst month'] : [TIERS[S.tier], 'Skin']];
+  return { eyebrow: `My ${S.year} in Ls${S.name ? ' · ' + S.name : ''}`, big: `${S.nL} Ls`, line: `L-to-W ratio ${S.nL}:${S.nO} · ${S.persona.name}${S.cliches[0] ? ` · top phrase “${S.cliches[0].label}”` : ''}`, rows, bg: 'aura', stamp: 'STILL APPLYING' };
+}
+function finalHTML(){
+  return `<div class="final"><p class="eyebrow">Your L Wrapped</p><img id="cardimg" alt="Your L Wrapped summary card"><div class="fmt" id="finalfmt">${fmtButtons(fmt)}</div>
+  <div class="actions"><button class="btn" id="dl" type="button">Save image</button><button class="btn alt" id="replay" type="button">Watch again</button></div>
+  <div class="composer"><h3>Write my post</h3><div class="fmt" id="tones"><button type="button" data-t="vulnerable" aria-pressed="${tone === 'vulnerable'}">Honest</button><button type="button" data-t="funny" aria-pressed="${tone === 'funny'}">Funny</button><button type="button" data-t="motivational" aria-pressed="${tone === 'motivational'}">Motivating</button></div>
+  <label class="small" for="posttext">Edit it however you like. Then attach your image.</label><textarea id="posttext" spellcheck="true"></textarea>
+  <div class="actions" style="justify-content:flex-start"><button class="btn" id="copypost" type="button">Copy post</button><a class="btn alt" id="li" target="_blank" rel="noopener">Post on LinkedIn</a><a class="btn alt" id="tw" target="_blank" rel="noopener">Post on X</a></div></div>
+  <p class="small">Saving doesn't work here? Press and hold (or right-click) the card to save it.</p>
+  <button class="btn alt" id="again" type="button">Start over</button></div>`;
+}
+async function wireFinal(){
+  const img = $('#cardimg');
+  const renderSummary = async () => { const r = await renderCard(summarySpec(), fmt); if ($('#cardimg')) $('#cardimg').src = r.url; state.summary = r; };
+  renderSummary();
+  $('#finalfmt').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; fmt = b.dataset.f; $('#finalfmt').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); renderSummary(); });
+  const ptext = $('#posttext');
+  const setTone = t => { tone = t; ptext.value = POSTS[t]; $('#tones').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x.dataset.t === t)); links(); };
+  const links = () => { $('#li').href = 'https://www.linkedin.com/feed/?shareActive=true&text=' + encodeURIComponent(ptext.value); $('#tw').href = 'https://x.com/intent/post?text=' + encodeURIComponent(ptext.value.length <= 270 ? ptext.value : POSTS.x); };
+  $('#tones').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setTone(b.dataset.t); });
+  ptext.addEventListener('input', links);
+  setTone(tone);
+  $('#copypost').onclick = async () => { try { await navigator.clipboard.writeText(ptext.value); toast('Post copied'); } catch { ptext.select(); toast('Selected. Copy it with your keyboard'); } };
+  $('#dl').onclick = () => state.summary && saveImage(state.summary, `l-wrapped-${S.year}-${fmt}.png`);
+  $('#replay').onclick = () => { state = {}; slides = buildSlides(S); show(1); };
+  $('#again').onclick = closeStory;
+}
+
+/* ================= share cards (drawn on canvas, never uploaded) ================= */
+const THEMES = { 't-red': ['#e8392b', '#fff4e8', '#1d0f14'], 't-legal': ['#ffd23f', '#1d0f14', '#e8392b'], 't-violet': ['#6b4eff', '#f5f0ff', '#ffd23f'], 't-pink': ['#ff9ecf', '#1d0f14', '#6b4eff'], 't-moss': ['#0f5c45', '#e9ffe0', '#ffd23f'], 't-ink': ['#1d0f14', '#fff4e8', '#ff9ecf'], 't-paper': ['#f6efe3', '#1d0f14', '#e8392b'] };
+let fontsReady = null;
+function loadFonts(){ return fontsReady || (fontsReady = Promise.all(['800 100px "Bricolage Grotesque"', '600 40px "Bricolage Grotesque"', '700 30px "JetBrains Mono"', '500 30px "Instrument Sans"'].map(f => document.fonts.load(f))).catch(() => {})); }
+function iconImage(key, color){ return new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="${color}" style="--acc:${color}">${(ICONS[key] || '').replace(/var\(--acc\)/g, '#00000055')}</svg>`); }); }
+async function renderCard(spec, format){
+  await loadFonts();
+  const [W, H] = FORMATS[format] || FORMATS.post;
+  const theme = spec.theme || (slides[cur] && slides[cur].t) || 't-red';
+  let [bg, fg, acc] = THEMES[theme] || THEMES['t-red'];
+  const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+  const D = '"Bricolage Grotesque", "Arial Narrow", sans-serif', M = '"JetBrains Mono", monospace', B = '"Instrument Sans", system-ui, sans-serif';
+  const rr = (X, Y, w, h, r) => { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath(); };
+  const wrap = (txt, font, maxW) => { x.font = font; const out = []; let line = ''; for (const w of String(txt).split(/\s+/)) { const t = line ? line + ' ' + w : w; if (x.measureText(t).width > maxW && line) { out.push(line); line = w; } else line = t; } if (line) out.push(line); return out; };
+  const PAD = 72, CW = W - PAD * 2;
+
+  if (spec.bg === 'aura') {
+    bg = '#1d0f14'; fg = '#fff4e8'; acc = S.aura[0][1];
+    x.fillStyle = bg; x.fillRect(0, 0, W, H);
+    S.aura.forEach((a, i) => { const [cx, cy] = [[.25, .2], [.85, .45], [.35, .85]][i]; const g = x.createRadialGradient(W * cx, H * cy, 0, W * cx, H * cy, Math.max(W, H) * .55); g.addColorStop(0, a[1] + 'dd'); g.addColorStop(1, a[1] + '00'); x.fillStyle = g; x.fillRect(0, 0, W, H); });
+    x.fillStyle = 'rgba(29,15,20,.35)'; x.fillRect(0, 0, W, H);
+  } else { x.fillStyle = bg; x.fillRect(0, 0, W, H); }
+  x.save(); x.globalAlpha = spec.bg === 'aura' ? .05 : .08; x.fillStyle = fg; x.font = `800 ${Math.min(W, H) * 1.1}px ${D}`; x.translate(W * .42, H - 40); x.rotate(-.12); x.fillText('L', 0, 0); x.restore();
+
+  // header
+  x.fillStyle = fg; x.font = `700 28px ${M}`; x.textBaseline = 'alphabetic';
+  x.fillText(`L WRAPPED · ${S.year}`, PAD, 100);
+  x.fillStyle = acc; rr(W - PAD - 52, 62, 52, 52, 12); x.fill(); x.fillStyle = bg === '#1d0f14' && spec.bg === 'aura' ? '#1d0f14' : bg; x.font = `800 40px ${D}`; x.textAlign = 'center'; x.fillText('L', W - PAD - 26, 102); x.textAlign = 'left';
+
+  // measure content
+  const eyeF = `700 30px ${M}`;
+  const eyeLines = wrap(spec.eyebrow.toUpperCase(), eyeF, CW);
+  let bigSize = Math.min(240, W * .22), bigLines;
+  const maxBigH = spec.bingo ? H * .14 : spec.rows ? H * .28 : H * .4;
+  do { bigLines = wrap(spec.big, `800 ${bigSize}px ${D}`, CW); bigSize -= 6; } while ((bigLines.length * bigSize * .95 > maxBigH || bigLines.some(l => x.measureText(l).width > CW)) && bigSize > 48);
+  bigSize += 6;
+  const lineF = `500 ${W > 1000 ? 40 : 34}px ${B}`;
+  const lineLines = spec.line ? wrap(spec.line, lineF, CW).slice(0, spec.rows || spec.bingo ? 3 : 6) : [];
+  const rowsH = spec.rows ? Math.ceil(spec.rows.length / 2) * 150 + 30 : 0;
+  const gridSize = spec.bingo ? Math.min(CW, H - 420 - eyeLines.length * 40 - bigLines.length * bigSize) : 0;
+  const total = eyeLines.length * 42 + 20 + bigLines.length * bigSize * .95 + (lineLines.length ? 24 + lineLines.length * 52 : 0) + (rowsH ? 40 + rowsH : 0) + (gridSize ? 30 + gridSize : 0);
+  let y = Math.max(170, (H - 90 - total) / 2 + 40);
+
+  x.fillStyle = fg; x.globalAlpha = .85; eyeLines.forEach(l => { x.font = eyeF; x.fillText(l, PAD, y + 30); y += 42; }); x.globalAlpha = 1; y += 20;
+  x.fillStyle = spec.bg === 'aura' ? fg : fg; x.font = `800 ${bigSize}px ${D}`;
+  bigLines.forEach(l => { y += bigSize * .82; x.fillText(l, PAD - 4, y); y += bigSize * .13; });
+  if (spec.stamp) {
+    x.font = `700 44px ${M}`; const sw = Math.max(240, x.measureText(spec.stamp).width + 50); x.save(); x.translate(W - PAD - sw / 2 + 10, Math.min(y - bigSize * 1.05, H - 300)); x.rotate(-.16); x.strokeStyle = acc; x.lineWidth = 8;
+    rr(-sw / 2, -42, sw, 84, 12); x.stroke(); x.fillStyle = acc; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(spec.stamp, 0, 2); x.restore(); x.textAlign = 'left'; x.textBaseline = 'alphabetic';
+  }
+  if (lineLines.length) { y += 24; x.font = lineF; x.fillStyle = fg; lineLines.forEach(l => { y += 44; x.fillText(l, PAD, y); y += 8; }); }
+  if (spec.rows) {
+    y += 40; const colW = CW / 2;
+    x.fillStyle = spec.bg === 'aura' || bg === '#1d0f14' ? 'rgba(255,244,232,.1)' : 'rgba(29,15,20,.9)'; rr(PAD, y, CW, rowsH, 26); x.fill();
+    const tc = spec.bg === 'aura' || bg === '#1d0f14' ? '#fff4e8' : '#fff4e8';
+    spec.rows.forEach(([v, l], i) => { const cx = PAD + 36 + (i % 2) * colW, cy = y + 30 + Math.floor(i / 2) * 150; x.fillStyle = i === 1 && spec.bg === 'aura' && S.nO ? '#ffd23f' : tc; let fs = 84; x.font = `800 ${fs}px ${D}`; while (x.measureText(String(v)).width > colW - 60 && fs > 30) { fs -= 4; x.font = `800 ${fs}px ${D}`; } x.fillText(String(v), cx, cy + 78); x.globalAlpha = .75; x.font = `700 22px ${M}`; x.fillText(String(l).toUpperCase().slice(0, 30), cx, cy + 112, colW - 60); x.globalAlpha = 1; });
+    y += rowsH;
+  }
+  if (spec.bingo) {
+    y += 30; const g = gridSize, cell = (g - 3 * 10) / 4;
+    spec.bingo.forEach((cl, i) => { const cx = PAD + (i % 4) * (cell + 10), cy = y + Math.floor(i / 4) * (cell + 10);
+      x.fillStyle = cl.free ? acc : cl.hit ? fg : 'rgba(255,255,255,.08)'; rr(cx, cy, cell, cell, 16); x.fill();
+      if (!cl.hit) { x.strokeStyle = fg; x.globalAlpha = .35; x.lineWidth = 2; x.stroke(); x.globalAlpha = 1; }
+      x.fillStyle = cl.hit ? bg : fg; const fs = Math.max(16, cell * .12); const ls = wrap(cl.label, `600 ${fs}px ${B}`, cell - 20).slice(0, 4); x.textAlign = 'center'; ls.forEach((l, j) => x.fillText(l, cx + cell / 2, cy + cell / 2 - (ls.length - 1) * fs * .6 + j * fs * 1.2 + fs * .35)); x.textAlign = 'left';
+      if (cl.hit && !cl.free) { x.strokeStyle = acc; x.lineWidth = 5; x.beginPath(); x.arc(cx + cell / 2, cy + cell / 2, cell * .36, 0, Math.PI * 2); x.stroke(); } });
+  }
+  if (spec.icon) { const ic = await iconImage(spec.icon, acc); if (ic) { x.save(); x.translate(W - PAD - 150, 150); x.rotate(-.1); x.drawImage(ic, 0, 0, 150, 150); x.restore(); } }
+
+  // footer
+  x.fillStyle = 'rgba(29,15,20,.92)'; x.fillRect(0, H - 90, W, 90);
+  x.fillStyle = '#fff4e8'; x.font = `700 24px ${M}`; x.fillText('#LWRAPPED', PAD, H - 36);
+  x.textAlign = 'right'; x.globalAlpha = .75; x.fillText('LINKEDIN SHOWS THE WINS. THIS IS THE REST.', W - PAD, H - 36, W - PAD * 2 - 220); x.globalAlpha = 1; x.textAlign = 'left';
+  const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+  return { blob, url: URL.createObjectURL(blob) };
+}
+
+let dlCap = null;
+try { window.claude?.use?.('downloads').then(d => { dlCap = d; }).catch(() => {}); } catch {}
+async function saveImage(r, filename){
+  if (dlCap) {
+    try { await dlCap.save({ filename, data: r.blob }); toast('Saved'); return; }
+    catch (e) { if (e && e.code === 'declined') return; }
+  }
+  try { const a = document.createElement('a'); a.href = r.url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); toast('Downloading…'); }
+  catch { toast('Press and hold the image to save it'); }
+}
+let toastT;
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 1800); }
+
+/* ================= share sheet ================= */
+let sheetFmt = 'story', sheetCard = null;
+async function openSheet(){
+  const s = slides[cur]; const spec = s.final ? summarySpec() : s.card; if (!spec) return;
+  pause(true, 'sheet');
+  $('#sheet').hidden = false; $('#sheetfmt').innerHTML = fmtButtons(sheetFmt);
+  const draw = async () => { sheetCard = await renderCard({ theme: s.t, ...spec }, sheetFmt); $('#sheetimg').src = sheetCard.url; };
+  $('#sheetfmt').onclick = e => { const b = e.target.closest('button'); if (!b) return; sheetFmt = b.dataset.f; $('#sheetfmt').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); draw(); };
+  $('#sheetsave').onclick = () => sheetCard && saveImage(sheetCard, `l-wrapped-${S.year}-slide-${cur}.png`);
+  await draw();
+  $('#sheetclose').focus({ preventScroll: true });
+}
+function closeSheet(){ $('#sheet').hidden = true; pause(false, 'sheet'); }
+$('#sheetclose').addEventListener('click', closeSheet);
+$('#share').addEventListener('click', openSheet);
+
+/* ================= story engine ================= */
+const T = { dur: 0, elapsed: 0, last: 0, raf: 0, holds: new Set() };
+function tick(now){
+  if (!T.dur) return;
+  if (!T.holds.size) T.elapsed += now - T.last;
+  T.last = now;
+  const p = Math.min(T.elapsed / T.dur, 1);
+  const bar = barsEl.children[cur]; if (bar) bar.firstChild.style.width = (p * 100) + '%';
+  if (p >= 1) { show(cur + 1); return; }
+  T.raf = requestAnimationFrame(tick);
+}
+function pause(on, why){ if (on) T.holds.add(why); else T.holds.delete(why); $('#paused').hidden = !T.holds.has('hold'); }
+function startStory(stats){
+  S = stats; POSTS = posts(S); state = {}; fmt = 'post'; tone = 'vulnerable';
+  slides = buildSlides(S);
+  barsEl.innerHTML = slides.map(() => '<span><i></i></span>').join('');
+  $('#yr2').textContent = S.year;
+  story.hidden = false; document.body.style.overflow = 'hidden';
+  show(0);
+  loadFonts();
+}
+function closeStory(){ cancelAnimationFrame(T.raf); T.dur = 0; Sound.stop(); Confetti.clear(); $('#sheet').hidden = true; T.holds.clear(); story.hidden = true; document.body.style.overflow = ''; }
+function animateCounts(root){
+  root.querySelectorAll('.count').forEach(el => {
+    const n = +el.dataset.n, t0 = performance.now(), dur = REDUCED ? 0 : 1000;
+    const step = t => { const p = dur ? Math.min((t - t0) / dur, 1) : 1; el.textContent = Math.round(n * (1 - Math.pow(1 - p, 3))).toLocaleString(); if (p < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+}
+let fxTimers = [];
+function show(i){
+  if (i < 0) i = 0;
+  if (i >= slides.length) i = slides.length - 1;
+  if (i > 0 && slides[0].gate && cur === 0 && !Sound.on && !state.started) state.started = true;
+  cancelAnimationFrame(T.raf); fxTimers.forEach(clearTimeout); fxTimers = []; Confetti.clear();
+  cur = i;
+  story.scrollTop = 0; story.scrollLeft = 0;
+  const s = slides[cur];
+  story.className = 'story ' + s.t;
+  slideEl.className = 'slide' + (s.final ? ' scroll' : '');
+  slideEl.innerHTML = `<div>${typeof s.h === 'function' ? s.h() : s.h}</div>`;
+  void slideEl.offsetWidth;
+  slideEl.classList.add('on-screen'); story.classList.add('on-slide');
+  [...barsEl.children].forEach((b, j) => { b.firstChild.style.width = j < cur ? '100%' : '0%'; });
+  $('#tapnote').hidden = !!(s.final || s.gate || s.dur === null);
+  $('#next').hidden = !!s.final; $('#prev').hidden = !!s.final;
+  $('#share').hidden = !(s.card || s.final);
+  animateCounts(slideEl);
+  if (s.hit) fxTimers.push(setTimeout(() => { Sound.hit(); if (!REDUCED) { story.classList.remove('shake'); void story.offsetWidth; story.classList.add('shake'); } }, s.hit));
+  if (s.confetti) fxTimers.push(setTimeout(() => Confetti.burst(['#ffd23f', '#ff9ecf', '#e8392b', '#fff4e8', '#7b61ff']), s.confetti));
+  if (s.after) s.after(slideEl);
+  if (s.gate) {
+    const begin = withSound => { if (withSound) Sound.start(); else if (!Sound.muted) { Sound.toggle(); Sound.start(); } syncMute(); show(1); };
+    $('#start-sound').onclick = () => begin(true); $('#start-quiet').onclick = () => begin(false);
+    $('#start-sound').focus({ preventScroll: true });
+  }
+  if (s.final) { wireFinal(); slideEl.scrollTop = 0; }
+  T.dur = s.dur || 0; T.elapsed = 0; T.last = performance.now();
+  if (T.dur) T.raf = requestAnimationFrame(tick);
+}
+function syncMute(){ const m = Sound.muted || !Sound.on; $('#wave').toggleAttribute('hidden', m); $('#cross').toggleAttribute('hidden', !m); $('#mute').setAttribute('aria-label', m ? 'Turn music on' : 'Mute music'); }
+$('#mute').addEventListener('click', () => { if (!Sound.on) { if (Sound.muted) Sound.toggle(); Sound.start(); } else Sound.toggle(); syncMute(); });
+$('#close').addEventListener('click', closeStory);
+
+// tap / hold / swipe
+let down = null, holdT;
+['prev', 'next'].forEach(id => {
+  const z = $('#' + id);
+  z.addEventListener('pointerdown', e => { down = { x: e.clientX, t: performance.now(), held: false }; holdT = setTimeout(() => { if (down) { down.held = true; pause(true, 'hold'); } }, 230); });
+  z.addEventListener('pointerup', e => {
+    clearTimeout(holdT); if (!down) return;
+    const dx = e.clientX - down.x, held = down.held; down = null;
+    if (held) { pause(false, 'hold'); return; }
+    if (Math.abs(dx) > 60) show(cur + (dx < 0 ? 1 : -1));
+    else show(cur + (id === 'next' ? 1 : -1));
+  });
+  z.addEventListener('pointercancel', () => { clearTimeout(holdT); if (down && down.held) pause(false, 'hold'); down = null; });
+  z.addEventListener('click', e => e.preventDefault());
+  z.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); show(cur + (id === 'next' ? 1 : -1)); } });
+});
+document.addEventListener('keydown', e => {
+  if (story.hidden) return;
+  if (!$('#sheet').hidden) { if (e.key === 'Escape') closeSheet(); return; }
+  const typing = /^(TEXTAREA|INPUT)$/.test(document.activeElement.tagName);
+  if (typing) return;
+  if (e.key === 'ArrowRight') { e.preventDefault(); show(cur + 1); }
+  else if (e.key === 'ArrowLeft') show(cur - 1);
+  else if (e.key === ' ') { e.preventDefault(); pause(!T.holds.has('hold'), 'hold'); }
+  else if (e.key === 'Escape') closeStory();
+});
+document.addEventListener('visibilitychange', () => pause(document.hidden, 'hidden'));
+})();
+</script>
