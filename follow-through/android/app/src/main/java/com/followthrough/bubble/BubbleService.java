@@ -55,7 +55,7 @@ public class BubbleService extends AccessibilityService {
         wm = (WindowManager) getSystemService(WINDOW_SERVICE);
         addBubble();
         Tracker.flushQueue(this, null);
-        Nag.schedule(this);
+        try { Nag.schedule(this); } catch (Throwable e) { android.util.Log.e("FollowThrough", "schedule", e); }
     }
 
     @Override public void onAccessibilityEvent(AccessibilityEvent event) { /* only reads on tap */ }

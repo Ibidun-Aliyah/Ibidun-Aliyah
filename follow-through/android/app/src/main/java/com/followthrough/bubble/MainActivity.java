@@ -33,11 +33,14 @@ public class MainActivity extends Activity {
         if (Tracker.connection(this) == null) {
             startActivity(new Intent(this, SettingsActivity.class));
         }
-        Nag.schedule(this);
-        if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED
-                && android.os.Build.VERSION.SDK_INT >= 33) {
-            requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1);
-        }
+        try { Nag.schedule(this); } catch (Throwable e) { android.util.Log.e("FollowThrough", "schedule", e); }
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= 33 && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                    != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1);
+            }
+        } catch (Throwable e) { android.util.Log.e("FollowThrough", "permission", e); }
+        showLastCrash();
         web = new WebView(this);
         web.setBackgroundColor(Color.TRANSPARENT);
         WebSettings ws = web.getSettings();
@@ -97,6 +100,24 @@ public class MainActivity extends Activity {
     public void onBackPressed() {
         web.evaluateJavascript("(function(){var s=document.getElementById('sheet');if(s&&!s.hidden){document.getElementById('scrim').click();return 1}return 0})()",
                 v -> { if (!"1".equals(v)) MainActivity.super.onBackPressed(); });
+    }
+
+    /** If the app crashed last time, show what went wrong with a Copy button. */
+    private void showLastCrash() {
+        android.content.SharedPreferences p = getSharedPreferences("crash", MODE_PRIVATE);
+        final String last = p.getString("last", null);
+        if (last == null) return;
+        p.edit().remove("last").apply();
+        new android.app.AlertDialog.Builder(this)
+                .setTitle("Follow-Through crashed last time")
+                .setMessage("Copy this and send it to Claude so it can be fixed:\n\n" + last.substring(0, Math.min(last.length(), 1500)))
+                .setPositiveButton("Copy", (d, w) -> {
+                    getSystemService(android.content.ClipboardManager.class)
+                            .setPrimaryClip(android.content.ClipData.newPlainText("crash", last));
+                    android.widget.Toast.makeText(this, "Copied", android.widget.Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Close", null)
+                .show();
     }
 
     private void openExternal(String url) {

@@ -9,10 +9,12 @@ public class WidgetProvider extends AppWidgetProvider {
     @Override
     public void onUpdate(Context c, AppWidgetManager m, int[] ids) {
         m.updateAppWidget(ids, Nag.widgetViews(c));
-        Nag.schedule(c);
+        try { Nag.schedule(c); } catch (Throwable e) { android.util.Log.e("FollowThrough", "schedule", e); }
         Nag.refreshAsync(c);
     }
 
     @Override
-    public void onEnabled(Context c) { Nag.schedule(c); }
+    public void onEnabled(Context c) {
+        try { Nag.schedule(c); } catch (Throwable e) { android.util.Log.e("FollowThrough", "schedule", e); }
+    }
 }
