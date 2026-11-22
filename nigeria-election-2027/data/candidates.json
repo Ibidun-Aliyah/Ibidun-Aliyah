@@ -1,0 +1,31 @@
+{
+  "_note": "Candidate tickets per election. home_zone / home_state are geopolitical zone and state of origin. religion: M = Muslim, C = Christian.",
+  "2019": [
+    {"id": "buhari", "name": "Muhammadu Buhari", "party": "APC", "religion": "M", "home_state": "Katsina", "home_zone": "NW",
+     "mate": "Yemi Osinbajo", "mate_religion": "C", "mate_state": "Ogun", "mate_zone": "SW", "incumbent": 1, "result_col": "apc"},
+    {"id": "atiku", "name": "Atiku Abubakar", "party": "PDP", "religion": "M", "home_state": "Adamawa", "home_zone": "NE",
+     "mate": "Peter Obi", "mate_religion": "C", "mate_state": "Anambra", "mate_zone": "SE", "incumbent": 0, "result_col": "pdp"}
+  ],
+  "2023": [
+    {"id": "tinubu", "name": "Bola Tinubu", "party": "APC", "religion": "M", "home_state": "Lagos", "home_zone": "SW",
+     "mate": "Kashim Shettima", "mate_religion": "M", "mate_state": "Borno", "mate_zone": "NE", "incumbent": 1, "result_col": "APC"},
+    {"id": "atiku", "name": "Atiku Abubakar", "party": "PDP", "religion": "M", "home_state": "Adamawa", "home_zone": "NE",
+     "mate": "Ifeanyi Okowa", "mate_religion": "C", "mate_state": "Delta", "mate_zone": "SS", "incumbent": 0, "result_col": "PDP"},
+    {"id": "obi", "name": "Peter Obi", "party": "LP", "religion": "C", "home_state": "Anambra", "home_zone": "SE",
+     "mate": "Yusuf Datti Baba-Ahmed", "mate_religion": "M", "mate_state": "Kaduna", "mate_zone": "NW", "incumbent": 0, "result_col": "LP"},
+    {"id": "kwankwaso", "name": "Rabiu Kwankwaso", "party": "NNPP", "religion": "M", "home_state": "Kano", "home_zone": "NW",
+     "mate": "Isaac Idahosa", "mate_religion": "C", "mate_state": "Edo", "mate_zone": "SS", "incumbent": 0, "result_col": "NNPP"}
+  ],
+  "2027": [
+    {"id": "tinubu", "name": "Bola Tinubu", "party": "APC", "religion": "M", "home_state": "Lagos", "home_zone": "SW",
+     "mate": "Kashim Shettima", "mate_religion": "M", "mate_state": "Borno", "mate_zone": "NE", "incumbent": 1,
+     "base_2023": ["APC"], "color": "#2a78c6"},
+    {"id": "atiku", "name": "Atiku Abubakar", "party": "ADC", "religion": "M", "home_state": "Adamawa", "home_zone": "NE",
+     "mate": "Rotimi Amaechi", "mate_religion": "C", "mate_state": "Rivers", "mate_zone": "SS", "incumbent": 0,
+     "base_2023": ["PDP"], "color": "#c2410c"},
+    {"id": "obi", "name": "Peter Obi", "party": "NDC", "religion": "C", "home_state": "Anambra", "home_zone": "SE",
+     "mate": "Rabiu Kwankwaso", "mate_religion": "M", "mate_state": "Kano", "mate_zone": "NW", "incumbent": 0,
+     "base_2023": ["LP", "NNPP"], "color": "#15803d"}
+  ],
+  "_minor_2027": "Minor 2027 candidates (Seyi Makinde/APM, Sandy Onor/PDP and 13 others) are modelled as fixed regional shares in src/config.py, not by the regression."
+}
