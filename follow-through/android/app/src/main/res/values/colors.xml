@@ -4,4 +4,5 @@
     <color name="mark">#F3B33D</color>
     <color name="ok">#2C7A4B</color>
     <color name="bad">#C2412B</color>
+    <color name="muted">#6B7B73</color>
 </resources>

@@ -18,6 +18,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:label="Settings" />
+
         <!-- "Share → Follow-Through" from any app: a second, no-bubble way to capture. -->
         <activity
             android:name=".ShareActivity"

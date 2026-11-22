@@ -1,82 +1,119 @@
 package com.followthrough.bubble;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
+import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
-/** Setup screen: connect the sheet, turn on the bubble, see what's waiting to send. */
+import org.json.JSONObject;
+
+/**
+ * Home screen: the live dashboard (assets/dashboard.html) showing what's in your sheet.
+ * The page talks to your sheet through the small bridge below.
+ */
 public class MainActivity extends Activity {
-    private EditText code;
-    private TextView connStatus, bubbleStatus, queue;
+    private static final int PICK_FILE = 7;
+    private WebView web;
+    private ValueCallback<Uri[]> fileCallback;
+    private boolean loaded;
 
+    @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override
     protected void onCreate(Bundle saved) {
         super.onCreate(saved);
-        setContentView(R.layout.activity_main);
-        code = findViewById(R.id.code);
-        connStatus = findViewById(R.id.connStatus);
-        bubbleStatus = findViewById(R.id.bubbleStatus);
-        queue = findViewById(R.id.queue);
-
-        code.setText(Tracker.prefs(this).getString("code", ""));
-
-        ((Button) findViewById(R.id.connect)).setOnClickListener(v -> {
-            String c = code.getText().toString().trim();
-            Tracker.prefs(this).edit().putString("code", c).apply();
-            connStatus.setText("Testing…");
-            Tracker.ping(this, (ok, msg) -> {
-                connStatus.setText((ok ? "✓ " : "✕ ") + msg);
-                connStatus.setTextColor(getColor(ok ? R.color.ok : R.color.bad));
-                if (ok) Tracker.flushQueue(this, (o, m) -> refresh());
-                refresh();
-            });
+        if (Tracker.connection(this) == null) {
+            startActivity(new Intent(this, SettingsActivity.class));
+        }
+        web = new WebView(this);
+        web.setBackgroundColor(Color.TRANSPARENT);
+        WebSettings ws = web.getSettings();
+        ws.setJavaScriptEnabled(true);
+        ws.setDomStorageEnabled(true);
+        ws.setAllowFileAccess(true);
+        web.addJavascriptInterface(new Bridge(), "Android");
+        web.setWebViewClient(new WebViewClient() {
+            @Override public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) {
+                openExternal(r.getUrl().toString());
+                return true;
+            }
+            @Override public void onPageFinished(WebView v, String url) { loaded = true; }
         });
-        findViewById(R.id.accessibility).setOnClickListener(v ->
-                startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)));
-        findViewById(R.id.appInfo).setOnClickListener(v ->
-                startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                        Uri.fromParts("package", getPackageName(), null))));
-        findViewById(R.id.show).setOnClickListener(v -> {
-            if (BubbleService.instance != null) BubbleService.instance.showNow();
-            refresh();
+        web.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onShowFileChooser(WebView v, ValueCallback<Uri[]> cb, FileChooserParams params) {
+                if (fileCallback != null) fileCallback.onReceiveValue(null);
+                fileCallback = cb;
+                Intent pick = new Intent(Intent.ACTION_GET_CONTENT);
+                pick.addCategory(Intent.CATEGORY_OPENABLE);
+                pick.setType("*/*");
+                pick.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
+                        "application/pdf", "image/*", "text/plain",
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+                try {
+                    startActivityForResult(Intent.createChooser(pick, "Choose your CV"), PICK_FILE);
+                } catch (Exception e) {
+                    fileCallback = null;
+                    return false;
+                }
+                return true;
+            }
         });
-        findViewById(R.id.openSheet).setOnClickListener(v -> {
-            String u = Tracker.prefs(this).getString("sheetUrl", "");
-            if (!u.isEmpty()) startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(u)));
-        });
-        findViewById(R.id.flush).setOnClickListener(v -> {
-            queue.setText("Sending…");
-            Tracker.flushQueue(this, (ok, msg) -> { refresh(); queue.setText(msg); });
-        });
+        setContentView(web);
+        web.loadUrl("file:///android_asset/dashboard.html");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        refresh();
+        if (loaded) web.evaluateJavascript("window.__onResume && window.__onResume()", null);
     }
 
-    private void refresh() {
-        boolean on = bubbleEnabled();
-        bubbleStatus.setText(on ? "✓ Bubble is on" : "Bubble is off. Tap “Open settings”, find Follow-Through bubble under Downloaded apps and switch it on.");
-        bubbleStatus.setTextColor(getColor(on ? R.color.ok : R.color.bad));
-        findViewById(R.id.show).setEnabled(on);
-        findViewById(R.id.openSheet).setVisibility(
-                Tracker.prefs(this).getString("sheetUrl", "").isEmpty() ? android.view.View.GONE : android.view.View.VISIBLE);
-        int n = Tracker.queued(this);
-        queue.setText(n == 0 ? "Nothing waiting to send." : n + (n == 1 ? " capture is" : " captures are") + " waiting to send.");
-        findViewById(R.id.flush).setEnabled(n > 0);
+    @Override
+    protected void onActivityResult(int req, int res, Intent data) {
+        if (req == PICK_FILE && fileCallback != null) {
+            Uri[] result = (res == RESULT_OK && data != null && data.getData() != null) ? new Uri[]{data.getData()} : null;
+            fileCallback.onReceiveValue(result);
+            fileCallback = null;
+            return;
+        }
+        super.onActivityResult(req, res, data);
     }
 
-    private boolean bubbleEnabled() {
-        String enabled = Settings.Secure.getString(getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
-        String me = new ComponentName(this, BubbleService.class).flattenToString();
-        return enabled != null && enabled.contains(me);
+    @Override
+    public void onBackPressed() {
+        web.evaluateJavascript("(function(){var s=document.getElementById('sheet');if(s&&!s.hidden){document.getElementById('scrim').click();return 1}return 0})()",
+                v -> { if (!"1".equals(v)) MainActivity.super.onBackPressed(); });
+    }
+
+    private void openExternal(String url) {
+        try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))); } catch (Exception ignored) {}
+    }
+
+    /** Methods the dashboard page can call as window.Android.* */
+    private class Bridge {
+        @JavascriptInterface
+        public void request(String json, String id) {
+            Tracker.call(MainActivity.this, json, res ->
+                    web.evaluateJavascript("window.__fromApp(" + JSONObject.quote(id) + "," + JSONObject.quote(res) + ")", null));
+        }
+
+        @JavascriptInterface
+        public void openUrl(String url) {
+            if (url != null && (url.startsWith("https://") || url.startsWith("http://"))) runOnUiThread(() -> openExternal(url));
+        }
+
+        @JavascriptInterface
+        public void openSettings() {
+            runOnUiThread(() -> startActivity(new Intent(MainActivity.this, SettingsActivity.class)));
+        }
     }
 }

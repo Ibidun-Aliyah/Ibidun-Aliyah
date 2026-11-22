@@ -42,6 +42,17 @@ The tracker page's **Connect phone** button walks through the same steps with a 
 Send Claude your Web app link and it sets up the twice-daily task that fills in new captures and pushes your
 reminders.
 
+## The app
+Opening Follow-Through shows your **dashboard**, live from the sheet: what needs you today, your pipeline, the
+next 30 days of deadlines, what you've saved each week, every opportunity/event/tip, and **My CV** (upload your
+current CV, or describe something new and it's added). Tap any item to change its status, snooze it, or get
+**essays** and a **tailored CV** written in under a minute. ⚙ opens Settings (sheet link, Gemini key, bubble).
+
+**Instant sorting** uses a free Gemini API key (aistudio.google.com/apikey), stored only in your own Apps Script.
+Captures are sorted seconds after you save them; the twice-daily Claude check then confirms deadlines online.
+After updating the script, run `authorize` once in the editor (it now also needs permission to reach Gemini),
+then deploy a new version.
+
 ## What it does with each capture
 | Kind | Where it goes |
 | --- | --- |

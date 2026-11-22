@@ -24,11 +24,18 @@ actions send JSON: `curl -sL -H 'Content-Type: application/json' -d '{"action":"
   (create only if missing). Body is simple markdown: `#`/`##`/`###` headings, `- ` bullets, `1. ` numbers, `**bold**`, `---`.
 - GET `readDoc&key=KEY` → `{text, url}` or `{error:"no_doc"}`. GET `docs` → all doc links.
 
-First call `ping`. If `schema` isn't "2", the script is out of date: do only steps 1 (without the `tip` action: mark
+First call `ping`. If `schema` is missing or below 2, the script is out of date: do only steps 1 (without the `tip` action: mark
 tips Closed with Outcome "Tip") and 4, and add the line "Update your tracker script to turn on tips, essays and CV
 tailoring (tracker page → Connect phone)." to the final message.
 
-### 1. Sort and fill in new captures (Status = New)
+### 1. Confirm what Gemini sorted, then sort anything left
+Gemini sorts captures the moment they're saved. Your job is to check its work:
+- For Saved/Preparing rows whose Notes contain "not yet confirmed online" or "No deadline found yet": search the web for
+  the official page, confirm or correct Title, Organisation, Link, Deadline (with year), Requirements and What it offers,
+  update Remind on if the deadline changed (rules below), and replace that phrase in Notes with
+  "Deadline confirmed online: <source site>" (or "Couldn't confirm a deadline online").
+- Rows still New were not sorted (no key, or it failed). Sort them as follows.
+
 For each New row, read Screen text, Link, Saved from, and look at the screenshot. Decide the Category:
 - **Tip**: advice or a resource to learn from (CV/resume tips, interview advice, scholarship-hunting tips, study or
   career advice, tools, courses). Call `tip` with Topic (one of: CV & resume, Interviews, Applications & essays,
@@ -94,7 +101,7 @@ Resources tab: ID, Saved, Topic, Title, Key points, Link, In digest). POST actio
 "mode":"append"}` writes a Google Doc (simple markdown: `#` headings, `- ` bullets, `**bold**`, `---`) and
 `{"action":"tipUpdate","id":...,"fields":{"In digest":"YYYY-MM-DD"}}` edits a tip.
 
-1. `ping`. If `schema` isn't "2", reply only: "Weekly digest is off until you update your tracker script (tracker
+1. `ping`. If `schema` is missing or below 2, reply only: "Weekly digest is off until you update your tracker script (tracker
    page → Connect phone)." and stop.
 2. Get `tips` and the full tracker `list`.
 3. Append to the doc key `digest` (title "Follow-Through Weekly Digest", mode `append`):

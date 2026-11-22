@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Follow-Through</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F1F4F0; --card:#FFFFFF; --sunk:#E6ECE7; --ink:#13231C; --muted:#5D6D65; --line:#DBE3DD;
+  --accent:#1E6A4E; --accent-ink:#FFFFFF; --accent-soft:#D9EEE4;
+  --sun:#F3B33D; --sun-soft:#FCEFD2; --rose:#D9604A; --rose-soft:#F9E1DB; --sky:#4A7FB5; --sky-soft:#DDE9F5;
+  --plum:#8A5BB0; --plum-soft:#EDE2F5;
+  --f-d:"Bricolage Grotesque","Inter",system-ui,sans-serif; --f-b:"Inter",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0F1512; --card:#17201C; --sunk:#1F2A25; --ink:#E5EEE9; --muted:#98A9A0; --line:#2A3731;
+  --accent:#62C79A; --accent-ink:#08140F; --accent-soft:#1C3A2D;
+  --sun:#E9B44C; --sun-soft:#3A2F15; --rose:#F08068; --rose-soft:#3D221C; --sky:#7FAEDD; --sky-soft:#1B2B3B;
+  --plum:#B993DA; --plum-soft:#2E2338; color-scheme:dark}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-b)}
+h1,h2,h3,h4{font-family:var(--f-d);margin:0;letter-spacing:-.01em}
+button,input,textarea,select{font:inherit;color:inherit}
+[hidden]{display:none!important}
+.wrap{max-width:720px;margin:0 auto;padding:max(14px,env(safe-area-inset-top)) 16px 90px}
+.top{display:flex;align-items:center;gap:8px}
+.top h1{font-size:1.55rem;font-weight:800;margin-right:auto}
+.top h1 span{color:var(--accent)}
+.icon{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;font-size:1.1rem;cursor:pointer}
+.sub{color:var(--muted);font-size:.85rem;margin-top:2px}
+.hello{margin:18px 0 4px;font-size:1.35rem;font-weight:800;line-height:1.25}
+.hello em{font-style:normal;background:linear-gradient(transparent 60%,var(--sun-soft) 60%)}
+.banner{margin-top:12px;padding:12px 14px;border-radius:14px;font-size:.88rem;display:flex;gap:10px;align-items:center}
+.banner.warn{background:var(--sun-soft)} .banner.info{background:var(--sky-soft)} .banner.err{background:var(--rose-soft)}
+.banner button{margin-left:auto}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:9px 14px;font-weight:600;font-size:.88rem;cursor:pointer;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.small{padding:6px 10px;font-size:.8rem;border-radius:10px}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.btn[disabled]{opacity:.55}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:16px}
+.tile{border-radius:16px;padding:12px;min-width:0}
+.tile b{display:block;font-family:var(--f-d);font-size:1.6rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile span{font-size:.74rem;color:var(--muted)}
+.t1{background:var(--accent-soft)} .t2{background:var(--rose-soft)} .t3{background:var(--sky-soft)} .t4{background:var(--plum-soft)}
+@media (max-width:420px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+section{margin-top:26px}
+.sh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
+.sh h2{font-size:1.1rem}
+.sh small{color:var(--muted);font-size:.78rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px}
+.list{display:flex;flex-direction:column;gap:8px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:flex;gap:12px;align-items:center;cursor:pointer}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--line)}
+.d-rose{background:var(--rose)} .d-sun{background:var(--sun)} .d-ok{background:var(--accent)} .d-sky{background:var(--sky)} .d-plum{background:var(--plum)}
+.item .main{flex:1;min-width:0}
+.item .t{font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.item .m{font-size:.8rem;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip{display:inline-flex;align-items:center;border-radius:999px;padding:2px 9px;font-size:.74rem;font-weight:600;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.c-rose{background:var(--rose-soft);color:var(--rose)} .c-sun{background:var(--sun-soft);color:var(--ink)} .c-ok{background:var(--accent-soft);color:var(--accent)}
+.c-sky{background:var(--sky-soft);color:var(--sky)} .c-plum{background:var(--plum-soft);color:var(--plum)}
+.empty{border:1.5px dashed var(--line);border-radius:16px;padding:18px;text-align:center;color:var(--muted);font-size:.88rem}
+.charts{display:grid;gap:12px}
+.chart h4{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-family:var(--f-b);font-weight:600;margin-bottom:8px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:0}
+svg text{fill:var(--muted);font-size:10px;font-family:var(--f-b)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:10px}
+.tabs button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-size:.82rem;font-weight:600;white-space:nowrap;color:var(--muted)}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.search{width:100%;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:9px 12px;margin-bottom:10px}
+.cv{display:flex;flex-direction:column;gap:10px}
+.cv textarea,.f textarea,.f input,.f select{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:10px 12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.note{font-size:.82rem;color:var(--muted)}
+.result{white-space:pre-wrap;font-size:.86rem;background:var(--accent-soft);border-radius:12px;padding:10px 12px}
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgba(5,12,9,.45);z-index:20}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-height:88vh;background:var(--bg);border-radius:22px 22px 0 0;z-index:21;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
+.grab{width:42px;height:5px;border-radius:3px;background:var(--line);margin:8px auto 0}
+.sheet-head{display:flex;gap:10px;align-items:flex-start;padding:10px 16px 12px;border-bottom:1px solid var(--line)}
+.sheet-head h3{font-size:1.15rem;line-height:1.25;flex:1;min-width:0}
+.sheet-body{overflow-y:auto;padding:14px 16px 24px;display:flex;flex-direction:column;gap:14px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:.88rem}
+.kv dt{color:var(--muted)} .kv dd{margin:0;overflow-wrap:anywhere}
+.reqs{margin:0;padding-left:18px;font-size:.9rem;display:flex;flex-direction:column;gap:4px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 11px;font-size:.82rem;font-weight:600}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.ai{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.ai h4{font-size:.95rem}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:s .8s linear infinite;vertical-align:-2px}
+@keyframes s{to{transform:rotate(360deg)}}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:.88rem;z-index:40;max-width:calc(100% - 32px)}
+.fab{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:10}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>Follow<span>·</span>Through</h1>
+    <button class="icon" id="refresh" aria-label="Refresh">↻</button>
+    <button class="icon" id="settings" aria-label="Settings">⚙</button>
+  </div>
+  <div class="sub" id="today"></div>
+  <div class="hello" id="hello">Loading your tracker…</div>
+  <div id="banners"></div>
+  <div class="tiles" id="tiles"></div>
+
+  <section>
+    <div class="sh"><h2>Needs you</h2><small>deadlines · reminders · events</small></div>
+    <div class="list" id="needs"></div>
+  </section>
+
+  <section>
+    <div class="sh"><h2>How it's going</h2><small id="chartnote"></small></div>
+    <div class="charts">
+      <div class="card chart"><h4>Your pipeline</h4><div id="pipe"></div></div>
+      <div class="card chart"><h4>Next 30 days</h4><div id="timeline"></div></div>
+      <div class="card chart"><h4>Saved per week</h4><div id="weeks"></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sh"><h2>Everything</h2><small id="count"></small></div>
+    <div class="tabs" id="tabs"></div>
+    <input class="search" id="q" type="search" placeholder="Search titles, organisations, tips">
+    <div class="list" id="all"></div>
+  </section>
+
+  <section>
+    <div class="sh"><h2>My CV</h2><small>used for every tailored CV</small></div>
+    <div class="card cv">
+      <div class="row">
+        <button class="btn" id="cv-open">Open Master CV</button>
+        <label class="btn primary" for="cv-file">Upload my current CV</label>
+        <input id="cv-file" type="file" accept=".pdf,.docx,.txt,image/*" hidden>
+      </div>
+      <div class="note" id="cv-status">PDF, Word (.docx) or a photo. Every fact is kept exactly as written.</div>
+      <label class="note" for="cv-add">Did something new? Describe it and it goes into your CV.</label>
+      <textarea id="cv-add" rows="3" placeholder="e.g. Won 2nd place at the LASUSTECH Robotics Hackathon in March 2027 with a line-following robot"></textarea>
+      <div class="row"><button class="btn primary" id="cv-add-btn">Add to my CV</button></div>
+      <div class="result" id="cv-result" hidden></div>
+    </div>
+  </section>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+/* ---------- bridge to the Android app ---------- */
+const pending = {}; let seq = 0;
+window.__fromApp = (id, text) => {
+  const p = pending[id]; if (!p) return; delete pending[id];
+  try { p(JSON.parse(text)); } catch (e) { p({ ok:false, error:'bad_response' }); }
+};
+function call(req){
+  return new Promise(res => {
+    if (!window.Android){ res(demo(req)); return; }
+    const id = 'r' + (++seq); pending[id] = res;
+    Android.request(JSON.stringify(req), id);
+  });
+}
+const open = url => { if (!url) return; window.Android ? Android.openUrl(url) : window.open(url, '_blank'); };
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const parse = s => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s||''); return m ? new Date(+m[1], +m[2]-1, +m[3]) : null; };
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+let TODAY = new Date(); TODAY.setHours(0,0,0,0);
+const days = s => { const d = parse(s); return d ? Math.round((d - TODAY)/864e5) : null; };
+const addDays = n => { const d = new Date(TODAY); d.setDate(d.getDate()+n); return iso(d); };
+const fmt = s => { const d = parse(s); return d ? d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : ''; };
+let toastT; const toast = m => { const t=$('#toast'); t.textContent=m; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,2800); };
+
+/* ---------- state ---------- */
+let D = null, tab = 'opps', query = '', sorting = false;
+try { const c = localStorage.getItem('ft-dash'); if (c) D = JSON.parse(c); } catch(e){}
+
+async function load(quiet){
+  if (!quiet) $('#refresh').innerHTML = '<span class="spin"></span>';
+  const j = await call({ action:'dashboard' });
+  $('#refresh').textContent = '↻';
+  if (!j.ok){ banner('err', j.error === 'not_connected' ? 'Connect your Google Sheet in Settings to see your tracker.' : 'Couldn\'t reach your sheet. Showing the last saved copy.', j.error === 'not_connected' ? 'Settings' : 'Retry'); render(); return; }
+  D = j; try { localStorage.setItem('ft-dash', JSON.stringify(j)); } catch(e){}
+  if (j.today){ TODAY = parse(j.today); }
+  render();
+  autoSort();
+}
+async function autoSort(){
+  if (sorting || !D || !D.ai.hasKey) return;
+  const n = D.rows.filter(r => r.Status === 'New').length;
+  if (!n) return;
+  sorting = true; render();
+  const j = await call({ action:'process' });
+  sorting = false;
+  if (j.ok && j.processed && j.processed.length){
+    const ok = j.processed.filter(x => !x.error);
+    if (ok.length) toast(`Sorted ${ok.length}: ` + ok.map(x => x.title || x.category).slice(0,2).join(', '));
+    const bad = j.processed.find(x => x.error);
+    if (bad && !ok.length) banner('err', 'Instant sorting failed: ' + bad.error.slice(0,120));
+    await load(true);
+    if (j.left) autoSort();
+  } else { render(); if (!j.ok && j.error !== 'no_key') banner('err', 'Instant sorting failed: ' + String(j.error).slice(0,120)); }
+}
+
+/* ---------- derived ---------- */
+const active = r => r.Status === 'Saved' || r.Status === 'Preparing';
+function urgency(r){
+  const d = days(r.Deadline), rem = days(r['Remind on']);
+  if (active(r)){
+    if (d !== null && d < 0) return { tone:'rose', score:0, why:'Deadline passed ' + fmt(r.Deadline) };
+    if (r.Category === 'Event' && d !== null && d <= 2) return { tone:'plum', score:1+d, why: d===0?'Event today':d===1?'Event tomorrow':'Event in 2 days' };
+    if (d !== null && d <= 3) return { tone:'rose', score:1+d, why: d===0?'Due today':d===1?'Due tomorrow':`${d} days left` };
+    if (d !== null && d <= 7) return { tone:'sun', score:5+d, why:`${d} days left` };
+    if (rem !== null && rem <= 0) return { tone:'sky', score:20, why:'Reminder' };
+    return null;
+  }
+  if (r.Status === 'Submitted' && rem !== null && rem <= 0) return { tone:'ok', score:40, why:'Check for a response' };
+  return null;
+}
+function nextStep(r){
+  if (r.Status === 'New') return 'Sorting…';
+  if (r.Status === 'Submitted') return 'Submitted · waiting';
+  if (r.Status === 'Closed') return r.Outcome || 'Closed';
+  const req = String(r.Requirements||'').split('\n').filter(Boolean);
+  if (r.Status === 'Preparing') return r['Essay doc'] || r['CV doc'] ? 'Drafts ready · finish and submit' : 'Preparing · write essays & CV';
+  return req.length ? 'Next: ' + req[0] : 'Read the requirements';
+}
+
+/* ---------- render ---------- */
+function banner(kind, text, action){
+  $('#banners').innerHTML = `<div class="banner ${kind}"><span>${esc(text)}</span>${action?`<button class="btn small" data-banner="${esc(action)}">${esc(action)}</button>`:''}</div>`;
+}
+function render(){
+  $('#today').textContent = TODAY.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  if (!D){ return; }
+  const rows = D.rows || [], tips = D.tips || [];
+  const act = rows.filter(active);
+  const need = rows.map(r => ({ r, u: urgency(r) })).filter(x => x.u).sort((a,b) => a.u.score - b.u.score);
+  const newCount = rows.filter(r => r.Status === 'New').length;
+
+  $('#hello').innerHTML = need.length ? `<em>${need.length} ${need.length===1?'thing needs':'things need'} you</em> today.` :
+    rows.length ? 'You\'re on top of it. <em>Nothing urgent today.</em>' : 'Nothing saved yet. <em>Tap the bubble on your next find.</em>';
+
+  const b = [];
+  if (!D.ai.hasKey) b.push(`<div class="banner warn"><span>Turn on instant sorting, essays and CV tailoring: add your free Gemini key.</span><button class="btn small" data-banner="Settings">Set up</button></div>`);
+  if (sorting) b.push(`<div class="banner info"><span class="spin"></span><span>Sorting ${newCount} new ${newCount===1?'capture':'captures'}…</span></div>`);
+  else if (newCount && D.ai.hasKey) b.push(`<div class="banner info"><span>${newCount} new ${newCount===1?'capture':'captures'} waiting.</span><button class="btn small" data-banner="Sort now">Sort now</button></div>`);
+  $('#banners').innerHTML = b.join('');
+
+  const week = act.filter(r => { const d = days(r.Deadline); return d !== null && d >= 0 && d <= 7; }).length;
+  $('#tiles').innerHTML = [
+    ['t1', act.length, 'in progress'], ['t2', week, 'due this week'],
+    ['t3', rows.filter(r => r.Status === 'Submitted').length, 'submitted'], ['t4', tips.length, 'tips saved'],
+  ].map(([c,n,l]) => `<div class="tile ${c}"><b>${n}</b><span>${l}</span></div>`).join('');
+
+  $('#needs').innerHTML = need.length ? need.slice(0,8).map(({r,u}) => itemRow(r, u.tone, u.why)).join('') :
+    `<div class="empty">${rows.length ? 'All clear. Reminders and close deadlines show up here.' : 'Your follow-ups will show up here.'}</div>`;
+
+  charts(rows, tips);
+  listing(rows, tips);
+}
+function itemRow(r, tone, why){
+  const cat = r.Category === 'Event' ? 'c-plum' : '';
+  return `<div class="item" data-open="${esc(r.ID)}">
+    <span class="dot d-${tone||'sky'}"></span>
+    <div class="main"><div class="t">${esc(r.Title || 'New capture')}</div>
+      <div class="m">${esc([r.Organisation, nextStep(r)].filter(Boolean).join(' · '))}</div></div>
+    ${why ? `<span class="chip c-${tone}">${esc(why)}</span>` : r.Deadline ? `<span class="chip ${cat}">${esc(fmt(r.Deadline))}</span>` : ''}
+  </div>`;
+}
+
+/* ---------- charts (inline SVG) ---------- */
+function charts(rows, tips){
+  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  // pipeline
+  const stages = [['Saved','--sky'],['Preparing','--sun'],['Submitted','--accent'],['Closed','--muted']];
+  const counts = stages.map(([s]) => rows.filter(r => r.Status === s && r.Category !== 'Other').length);
+  const total = counts.reduce((a,b)=>a+b,0);
+  let x = 0;
+  const W = 320;
+  $('#pipe').innerHTML = total ? `<svg viewBox="0 0 ${W} 22" width="100%" height="22" preserveAspectRatio="none" role="img" aria-label="Pipeline">
+    ${counts.map((c,i) => { if(!c) return ''; const w = c/total*W; const el = `<rect x="${x+1}" y="0" width="${Math.max(w-2,2)}" height="22" rx="6" fill="${css(stages[i][1])}"/>`; x += w; return el; }).join('')}
+  </svg><div class="legend">${stages.map(([s,v],i)=>`<span><i style="background:${css(v)}"></i>${s} ${counts[i]}</span>`).join('')}</div>`
+  : `<div class="note">Your applications will appear here as you save them.</div>`;
+
+  // timeline: next 30 days
+  const up = rows.filter(r => active(r) && r.Deadline).map(r => ({ r, d: days(r.Deadline) })).filter(x => x.d >= 0 && x.d <= 30).sort((a,b)=>a.d-b.d);
+  const TW = 320, pad = 10, sx = d => pad + d/30*(TW-2*pad);
+  const ticks = [0,7,14,21,28];
+  $('#timeline').innerHTML = `<svg viewBox="0 0 ${TW} 64" width="100%" height="64" role="img" aria-label="Deadlines in the next 30 days">
+    <line x1="${pad}" x2="${TW-pad}" y1="30" y2="30" stroke="${css('--line')}" stroke-width="2" stroke-linecap="round"/>
+    ${ticks.map(t => `<line x1="${sx(t)}" x2="${sx(t)}" y1="26" y2="34" stroke="${css('--line')}"/><text x="${sx(t)}" y="52" text-anchor="middle">${t===0?'today':'+'+t+'d'}</text>`).join('')}
+    ${up.map((u,i) => `<circle cx="${sx(u.d)}" cy="${30 - (i%2?10:0)}" r="6" fill="${css(u.r.Category==='Event'?'--plum':u.d<=3?'--rose':u.d<=7?'--sun':'--accent')}" stroke="${css('--card')}" stroke-width="2"><title>${esc(u.r.Title)}</title></circle>`).join('')}
+  </svg><div class="legend">${up.length ? up.slice(0,4).map(u=>`<span>${esc(fmt(u.r.Deadline))} · ${esc((u.r.Title||'').slice(0,28))}</span>`).join('') : '<span>No deadlines in the next 30 days.</span>'}</div>`;
+
+  // saved per week (last 8 weeks)
+  const weeks = Array(8).fill(0).map(()=>({o:0,t:0}));
+  const wk = s => { const d = parse(s); if(!d) return -1; return Math.floor((TODAY - d)/864e5/7); };
+  rows.forEach(r => { const w = wk(r.Captured); if (w>=0 && w<8) weeks[7-w].o++; });
+  tips.forEach(t => { const w = wk(t.Saved); if (w>=0 && w<8) weeks[7-w].t++; });
+  const max = Math.max(1, ...weeks.map(w=>w.o+w.t));
+  const BW = 320, BH = 70, bw = BW/8;
+  $('#weeks').innerHTML = `<svg viewBox="0 0 ${BW} ${BH+16}" width="100%" height="${BH+16}" role="img" aria-label="Saved per week">
+    ${weeks.map((w,i) => { const ho = w.o/max*BH, ht = w.t/max*BH; return `
+      <rect x="${i*bw+6}" y="${BH-ho}" width="${bw-12}" height="${Math.max(ho,0)}" rx="4" fill="${css('--accent')}"/>
+      <rect x="${i*bw+6}" y="${BH-ho-ht}" width="${bw-12}" height="${Math.max(ht,0)}" rx="4" fill="${css('--sun')}"/>
+      ${w.o+w.t?`<text x="${i*bw+bw/2}" y="${BH-ho-ht-3}" text-anchor="middle">${w.o+w.t}</text>`:''}
+      <text x="${i*bw+bw/2}" y="${BH+13}" text-anchor="middle">${i===7?'this wk':(7-i)+'w ago'}</text>`; }).join('')}
+  </svg><div class="legend"><span><i style="background:${css('--accent')}"></i>Opportunities & events</span><span><i style="background:${css('--sun')}"></i>Tips</span></div>`;
+  $('#chartnote').textContent = `${rows.length + tips.length} saved in total`;
+}
+
+/* ---------- full list ---------- */
+function listing(rows, tips){
+  const groups = {
+    opps: rows.filter(r => r.Category !== 'Event' && r.Category !== 'Other' && r.Status !== 'Closed'),
+    events: rows.filter(r => r.Category === 'Event' && r.Status !== 'Closed'),
+    tips: tips,
+    done: rows.filter(r => r.Status === 'Closed' || r.Status === 'Submitted'),
+  };
+  const labels = [['opps','Opportunities'],['events','Events'],['tips','Tips'],['done','Submitted & closed']];
+  $('#tabs').innerHTML = labels.map(([k,l]) => `<button data-tab="${k}" aria-pressed="${tab===k}">${l} · ${groups[k].length}</button>`).join('');
+  let list = groups[tab];
+  if (query) list = list.filter(r => JSON.stringify([r.Title,r.Organisation,r.Topic,r['Key points'],r.Type]).toLowerCase().includes(query));
+  $('#count').textContent = '';
+  if (tab === 'tips'){
+    $('#all').innerHTML = list.length ? list.slice().reverse().map(t => `<div class="item" data-tip="${esc(t.ID)}">
+      <span class="dot d-sun"></span><div class="main"><div class="t">${esc(t.Title)}</div>
+      <div class="m">${esc(t.Topic)} · ${esc(String(t['Key points']||'').split('\n')[0].replace(/^•\s*/,''))}</div></div></div>`).join('')
+      : `<div class="empty">Tips you save (CV advice, interview tricks…) land here and in your Sunday digest.</div>`;
+    return;
+  }
+  list = list.slice().sort((a,b) => (a.Deadline||'9999').localeCompare(b.Deadline||'9999'));
+  $('#all').innerHTML = list.length ? list.map(r => { const u = urgency(r); return itemRow(r, u ? u.tone : (r.Status==='Submitted'?'ok':r.Status==='New'?'sky':''), u ? u.why : ''); }).join('')
+    : `<div class="empty">${query ? 'No matches.' : 'Nothing here yet.'}</div>`;
+}
+
+/* ---------- detail sheet ---------- */
+const sheet = $('#sheet'), scrim = $('#scrim');
+let current = null;
+function openSheet(html){ sheet.innerHTML = '<div class="grab"></div>' + html; sheet.hidden = false; scrim.hidden = false; }
+function closeSheet(){ sheet.hidden = true; scrim.hidden = true; current = null; }
+scrim.onclick = closeSheet;
+
+function gcal(r){
+  if (!r.Deadline) return '';
+  const s = r.Deadline.replace(/-/g,''); const e = parse(r.Deadline); e.setDate(e.getDate()+1);
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent((r.Category==='Event'?'':'Deadline: ') + r.Title) +
+    '&dates=' + s + '/' + iso(e).replace(/-/g,'') + '&details=' + encodeURIComponent([r.Link, r.Notes].filter(Boolean).join('\n\n'));
+}
+function openItem(id){
+  const r = (D.rows||[]).find(x => x.ID === id); if (!r) return;
+  current = r;
+  const req = String(r.Requirements||'').split('\n').filter(Boolean);
+  const isOpp = r.Category !== 'Event' && r.Category !== 'Other';
+  const st = ['Saved','Preparing','Submitted','Closed'];
+  openSheet(`
+    <div class="sheet-head"><h3>${esc(r.Title || 'New capture')}</h3><button class="btn small ghost" data-close>Close</button></div>
+    <div class="sheet-body">
+      <div class="row">${r.Category?`<span class="chip ${r.Category==='Event'?'c-plum':'c-ok'}">${esc(r.Category)}</span>`:''}${r.Type?`<span class="chip">${esc(r.Type)}</span>`:''}${r.Deadline?`<span class="chip ${(urgency(r)||{}).tone?'c-'+urgency(r).tone:''}">${r.Category==='Event'?'':'Due '}${esc(fmt(r.Deadline))}</span>`:''}</div>
+      ${r.Status==='New' ? `<div class="banner info"><span>${D.ai.hasKey?'Not sorted yet.':'Add your Gemini key in Settings to sort this instantly.'}</span>${D.ai.hasKey?'<button class="btn small" data-banner="Sort now">Sort now</button>':''}</div>`:''}
+      <div>
+        <div class="note" style="margin-bottom:6px">Status</div>
+        <div class="seg">${st.map(s => `<button data-status="${s}" aria-pressed="${r.Status===s}">${s}</button>`).join('')}</div>
+      </div>
+      <dl class="kv">
+        ${r.Organisation?`<dt>From</dt><dd>${esc(r.Organisation)}</dd>`:''}
+        ${r['What it offers']?`<dt>Offers</dt><dd>${esc(r['What it offers'])}</dd>`:''}
+        ${r['Remind on']?`<dt>Reminder</dt><dd>${esc(fmt(r['Remind on']))}</dd>`:''}
+        ${r['Saved from']?`<dt>Saved from</dt><dd>${esc(r['Saved from'])}</dd>`:''}
+        ${r.Notes?`<dt>Notes</dt><dd style="white-space:pre-wrap">${esc(r.Notes)}</dd>`:''}
+      </dl>
+      ${req.length?`<div><div class="note" style="margin-bottom:4px">What you need</div><ul class="reqs">${req.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
+      ${isOpp && r.Status!=='New' ? `<div class="ai">
+        <h4>Get it written</h4>
+        <div class="row">
+          ${r['Essay doc'] ? `<button class="btn" data-url="${esc(r['Essay doc'])}">Open essays</button>` : ''}
+          <button class="btn ${r['Essay doc']?'small ghost':'primary'}" data-ai="essay" ${D.ai.hasKey?'':'disabled'}>${r['Essay doc']?'Redo essays':'Write my essays'}</button>
+        </div>
+        <div class="row">
+          ${r['CV doc'] ? `<button class="btn" data-url="${esc(r['CV doc'])}">Open tailored CV</button>` : ''}
+          <button class="btn ${r['CV doc']?'small ghost':'primary'}" data-ai="tailor" ${D.ai.hasKey?'':'disabled'}>${r['CV doc']?'Redo CV':'Tailor my CV'}</button>
+        </div>
+        <div class="note" id="ai-status">${D.ai.hasKey?'Takes about 20–60 seconds. Opens as a Google Doc you can edit.':'Add your free Gemini key in Settings to use this.'}</div>
+      </div>`:''}
+      <div class="row">
+        ${r.Link?`<button class="btn" data-url="${esc(r.Link)}">Open link ↗</button>`:''}
+        ${r.Deadline?`<button class="btn" data-url="${esc(gcal(r))}">Add to calendar</button>`:''}
+        ${r.Screenshot?`<button class="btn" data-url="${esc(r.Screenshot)}">Screenshot</button>`:''}
+      </div>
+      ${active(r)?`<div><div class="note" style="margin-bottom:6px">Remind me</div><div class="row">
+        <button class="btn small" data-snooze="1">Tomorrow</button><button class="btn small" data-snooze="3">In 3 days</button><button class="btn small" data-snooze="7">Next week</button></div></div>`:''}
+    </div>`);
+}
+function openTip(id){
+  const t = (D.tips||[]).find(x => x.ID === id); if (!t) return;
+  openSheet(`<div class="sheet-head"><h3>${esc(t.Title)}</h3><button class="btn small ghost" data-close>Close</button></div>
+    <div class="sheet-body"><div class="row"><span class="chip c-sun">${esc(t.Topic||'Tip')}</span>${t['In digest']?'<span class="chip">In a digest</span>':''}</div>
+    <ul class="reqs">${String(t['Key points']||'').split('\n').filter(Boolean).map(x=>`<li>${esc(x.replace(/^•\s*/,''))}</li>`).join('')}</ul>
+    <div class="row">${t.Link?`<button class="btn" data-url="${esc(t.Link)}">Open source ↗</button>`:''}${t.Screenshot?`<button class="btn" data-url="${esc(t.Screenshot)}">Screenshot</button>`:''}
+    ${D.docs && D.docs.digest?`<button class="btn" data-url="${esc(D.docs.digest)}">Weekly digest</button>`:''}</div></div>`);
+}
+
+async function setFields(id, fields, msg){
+  const r = D.rows.find(x => x.ID === id); Object.assign(r, fields);
+  render(); if (current && current.ID === id) openItem(id);
+  const j = await call({ action:'update', id, fields });
+  if (!j.ok){ toast('Couldn\'t save that. Check your connection.'); load(true); } else if (msg) toast(msg);
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', async e => {
+  const t = e.target.closest('[data-open],[data-tip],[data-tab],[data-close],[data-url],[data-status],[data-snooze],[data-ai],[data-banner]');
+  if (!t) return;
+  if (t.dataset.open) return openItem(t.dataset.open);
+  if (t.dataset.tip) return openTip(t.dataset.tip);
+  if (t.dataset.tab){ tab = t.dataset.tab; return render(); }
+  if (t.hasAttribute('data-close')) return closeSheet();
+  if (t.dataset.url) return open(t.dataset.url);
+  if (t.dataset.banner){
+    const a = t.dataset.banner;
+    if (a === 'Settings') return window.Android && Android.openSettings();
+    if (a === 'Retry') return load();
+    if (a === 'Sort now'){ closeSheet(); return autoSort(); }
+  }
+  if (t.dataset.status && current){
+    const s = t.dataset.status, f = { Status: s };
+    if (s === 'Submitted') f['Remind on'] = addDays(14);
+    return setFields(current.ID, f, s==='Preparing' ? 'Preparing. Tap “Write my essays” or “Tailor my CV” when ready.' : s==='Submitted' ? 'Submitted! I\'ll remind you to check for a response in 2 weeks.' : 'Updated.');
+  }
+  if (t.dataset.snooze && current){ const n = +t.dataset.snooze; return setFields(current.ID, { 'Remind on': addDays(n) }, n===1?'Back tomorrow.':`Back in ${n} days.`); }
+  if (t.dataset.ai && current){
+    const id = current.ID, kind = t.dataset.ai;
+    sheet.querySelectorAll('[data-ai]').forEach(b => b.disabled = true);
+    $('#ai-status').innerHTML = `<span class="spin"></span> ${kind==='essay'?'Writing your essays':'Tailoring your CV'}… keep this open.`;
+    const j = await call({ action: kind, id });
+    if (j.ok){
+      const r = D.rows.find(x => x.ID === id); r[kind==='essay'?'Essay doc':'CV doc'] = j.url;
+      if (r.Status === 'Saved'){ r.Status = 'Preparing'; call({ action:'update', id, fields:{ Status:'Preparing' } }); }
+      if (current && current.ID === id) openItem(id);
+      toast(kind==='essay' ? 'Essays ready.' : 'Tailored CV ready.'); open(j.url);
+    } else {
+      $('#ai-status').textContent = j.error === 'no_key' ? 'Add your Gemini key in Settings first.' : 'Didn\'t work: ' + String(j.error).slice(0,140);
+      sheet.querySelectorAll('[data-ai]').forEach(b => b.disabled = false);
+    }
+  }
+});
+$('#q').addEventListener('input', e => { query = e.target.value.trim().toLowerCase(); render(); });
+$('#refresh').onclick = () => load();
+$('#settings').onclick = () => window.Android ? Android.openSettings() : toast('Settings open in the app.');
+$('#cv-open').onclick = () => { const u = D && D.docs && D.docs['master-cv']; u ? open(u) : toast('Upload your CV first.'); };
+$('#cv-file').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  if (f.size > 8e6) return toast('That file is over 8 MB. Try a smaller PDF.');
+  $('#cv-status').innerHTML = '<span class="spin"></span> Reading your CV…';
+  const rd = new FileReader();
+  rd.onload = async () => {
+    const base64 = String(rd.result).split(',')[1];
+    const j = await call({ action:'uploadCv', name:f.name, mime:f.type, base64 });
+    e.target.value = '';
+    if (j.ok){ $('#cv-status').textContent = 'Done. Your Master CV is updated. Open it to check.'; D.docs = D.docs||{}; D.docs['master-cv'] = j.url; toast('CV uploaded.'); }
+    else $('#cv-status').textContent = j.error === 'no_key' ? 'Add your Gemini key in Settings first.' : 'Didn\'t work: ' + String(j.error).slice(0,140);
+  };
+  rd.readAsDataURL(f);
+});
+$('#cv-add-btn').onclick = async () => {
+  const text = $('#cv-add').value.trim(); if (!text) return toast('Describe what you did first.');
+  const b = $('#cv-add-btn'); b.disabled = true; b.innerHTML = '<span class="spin"></span> Adding…';
+  const j = await call({ action:'cvAdd', text });
+  b.disabled = false; b.textContent = 'Add to my CV';
+  const out = $('#cv-result'); out.hidden = false;
+  if (j.ok){ out.textContent = 'Added ✓\n' + j.changes; $('#cv-add').value = ''; }
+  else out.textContent = j.error === 'no_key' ? 'Add your Gemini key in Settings first.' : 'Didn\'t work: ' + String(j.error).slice(0,140);
+};
+window.__onResume = () => load(true);
+
+/* ---------- preview data (only when opened outside the app) ---------- */
+function demo(req){
+  if (req.action !== 'dashboard') return { ok:true };
+  const d = n => addDays(n);
+  return { ok:true, today: iso(TODAY), ai:{hasKey:true}, docs:{}, rows:[
+    {ID:'a',Title:'Example: Engineering Scholarship',Organisation:'Example Foundation',Category:'Opportunity',Type:'Scholarship',Status:'Preparing',Deadline:d(2),'Remind on':d(0),Requirements:'Essay: "Why engineering?" (500 words)\nCV\nTranscript',Captured:d(-3)},
+    {ID:'b',Title:'Example: Robotics internship',Organisation:'Example Labs',Category:'Opportunity',Type:'Internship',Status:'Saved',Deadline:d(12),'Remind on':d(5),Requirements:'CV',Captured:d(-9)},
+    {ID:'c',Title:'Example: AI for Africa webinar',Organisation:'Example Hub',Category:'Event',Type:'Event',Status:'Saved',Deadline:d(1),Captured:d(-1)},
+    {ID:'d',Title:'Example: Hackathon',Category:'Opportunity',Status:'Submitted',Deadline:d(-2),'Remind on':d(0),Captured:d(-20)},
+    {ID:'e',Status:'New',Captured:d(0)}],
+    tips:[{ID:'t',Title:'Example: Write CV bullets as results',Topic:'CV & resume','Key points':'• Start with a verb\n• Add a number',Saved:d(-2)}]};
+}
+
+render();
+load();
+})();
+</script>
+</body>
+</html>

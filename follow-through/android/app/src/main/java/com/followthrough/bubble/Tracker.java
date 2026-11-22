@@ -30,8 +30,11 @@ import java.util.concurrent.Executors;
  */
 final class Tracker {
     interface Done { void done(boolean ok, String message); }
+    interface Result { void result(String json); }
 
     private static final ExecutorService IO = Executors.newSingleThreadExecutor();
+    /** Slow calls (AI sorting, essays, CV) run here so they never hold up captures. */
+    private static final ExecutorService SLOW = Executors.newCachedThreadPool();
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
     private static final String PREFS = "follow_through";
 
@@ -90,7 +93,7 @@ final class Tracker {
             if (conn == null) msg = "That link doesn't look right. It should start with https://script.google.com/ and end with /exec";
             else {
                 try {
-                    String res = http(conn[0] + "?action=ping", null);
+                    String res = http(conn[0] + "?action=ping", null, 30000);
                     JSONObject j = new JSONObject(res);
                     ok = j.optBoolean("ok");
                     if (ok) prefs(ctx).edit().putString("sheetUrl", j.optString("sheetUrl")).apply();
@@ -101,6 +104,45 @@ final class Tracker {
             }
             final boolean fOk = ok; final String fMsg = msg;
             MAIN.post(() -> cb.done(fOk, fMsg));
+        });
+    }
+
+    /**
+     * Any request to the sheet (used by the dashboard). Calls back on the main thread with
+     * the JSON answer, or {"ok":false,"error":...}.
+     */
+    static void call(Context c, String json, Result cb) {
+        final Context ctx = c.getApplicationContext();
+        SLOW.execute(() -> {
+            String out;
+            String[] conn = connection(ctx);
+            if (conn == null) out = "{\"ok\":false,\"error\":\"not_connected\"}";
+            else {
+                try { out = http(conn[0], json, 330000); }
+                catch (Exception e) { out = "{\"ok\":false,\"error\":\"network\"}"; }
+            }
+            final String fOut = out;
+            MAIN.post(() -> cb.result(fOut));
+        });
+    }
+
+    /** After a capture: sort new rows straight away (needs the Gemini key in the sheet). */
+    static void sortNow(Context c, Done cb) {
+        call(c, "{\"action\":\"process\"}", res -> {
+            try {
+                JSONObject j = new JSONObject(res);
+                if (!j.optBoolean("ok")) { if (cb != null) cb.done(false, ""); return; }
+                org.json.JSONArray done = j.optJSONArray("processed");
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; done != null && i < done.length(); i++) {
+                    JSONObject x = done.getJSONObject(i);
+                    if (x.has("error")) continue;
+                    if (sb.length() > 0) sb.append("; ");
+                    sb.append(x.optString("category")).append(": ").append(x.optString("title", ""));
+                    if (!x.optString("deadline").isEmpty()) sb.append(" (due ").append(x.optString("deadline")).append(")");
+                }
+                if (cb != null) cb.done(sb.length() > 0, sb.length() > 0 ? "Sorted ✓ " + sb : "");
+            } catch (Exception e) { if (cb != null) cb.done(false, ""); }
         });
     }
 
@@ -151,7 +193,7 @@ final class Tracker {
         String[] conn = connection(c);
         if (conn == null) return false;
         try {
-            String res = http(conn[0], body.toString());
+            String res = http(conn[0], body.toString(), 30000);
             return new JSONObject(res).optBoolean("ok");
         } catch (Exception e) {
             return false;
@@ -162,10 +204,10 @@ final class Tracker {
      * Apps Script answers a POST with a redirect to the result page, so the
      * redirect is followed by hand with a GET.
      */
-    private static String http(String url, String postJson) throws Exception {
+    private static String http(String url, String postJson, int readTimeoutMs) throws Exception {
         HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
         con.setConnectTimeout(15000);
-        con.setReadTimeout(30000);
+        con.setReadTimeout(readTimeoutMs);
         con.setInstanceFollowRedirects(postJson == null);
         if (postJson != null) {
             con.setRequestMethod("POST");
@@ -179,7 +221,7 @@ final class Tracker {
         if (code >= 300 && code < 400) {
             String loc = con.getHeaderField("Location");
             con.disconnect();
-            return http(loc, null);
+            return http(loc, null, readTimeoutMs);
         }
         try (InputStream in = code >= 400 ? con.getErrorStream() : con.getInputStream()) {
             ByteArrayOutputStream buf = new ByteArrayOutputStream();

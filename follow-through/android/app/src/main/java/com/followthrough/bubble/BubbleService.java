@@ -230,6 +230,9 @@ public class BubbleService extends AccessibilityService {
             busy = false;
             flash(ok);
             Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            if (ok) Tracker.sortNow(this, (sorted, what) -> {
+                if (sorted) Toast.makeText(this, what, Toast.LENGTH_LONG).show();
+            });
         });
     }
 

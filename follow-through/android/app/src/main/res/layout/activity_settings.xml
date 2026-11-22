@@ -12,12 +12,12 @@
 
         <TextView
             android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="Follow-Through" android:textSize="28sp" android:textStyle="bold"
+            android:text="Settings" android:textSize="28sp" android:textStyle="bold"
             android:textColor="@color/accent" />
         <TextView
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Tap the floating bubble on any post, page or email to save the opportunity to your Google Sheet. Claude fills in the details and reminds you." />
+            android:text="Connect your sheet, turn on instant sorting, and switch on the bubble. Press back to return to your dashboard." />
 
         <!-- Step 1 -->
         <TextView
@@ -50,11 +50,42 @@
             android:visibility="gone"
             android:text="Open my tracker sheet" />
 
+        <!-- Step 1b: Gemini -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="2 · Turn on instant sorting (free)" android:textSize="18sp" android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="A free Gemini key lets your sheet sort each capture within seconds, write essay drafts and tailor your CV. Tap “Get a free key”, sign in, tap Create API key, copy it, and paste it here. It's stored only in your own Google script." />
+        <Button
+            android:id="@+id/getKey"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Get a free key" />
+        <EditText
+            android:id="@+id/key"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/field_bg"
+            android:hint="Paste your Gemini API key"
+            android:inputType="textPassword" />
+        <Button
+            android:id="@+id/saveKey"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Save key" />
+        <TextView
+            android:id="@+id/keyStatus"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" />
+
         <!-- Step 2 -->
         <TextView
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:layout_marginTop="28dp"
-            android:text="2 · Turn on the bubble" android:textSize="18sp" android:textStyle="bold" />
+            android:text="3 · Turn on the bubble" android:textSize="18sp" android:textStyle="bold" />
         <TextView
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="4dp"

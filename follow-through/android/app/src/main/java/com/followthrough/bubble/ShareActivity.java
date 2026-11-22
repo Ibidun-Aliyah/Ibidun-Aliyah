@@ -40,7 +40,12 @@ public class ShareActivity extends Activity {
         String from = getReferrer() != null ? getReferrer().getHost() : null;
         Toast.makeText(this, "Saving…", Toast.LENGTH_SHORT).show();
         Tracker.capture(this, from != null ? from : "Shared", url, body, shot, null,
-                (ok, msg) -> Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show());
+                (ok, msg) -> {
+                    Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                    if (ok) Tracker.sortNow(getApplicationContext(), (sorted, what) -> {
+                        if (sorted) Toast.makeText(getApplicationContext(), what, Toast.LENGTH_LONG).show();
+                    });
+                });
         finish();
     }
 }

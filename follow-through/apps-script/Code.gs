@@ -42,7 +42,7 @@ const TIPS_NAME = 'Tips & Resources';
 const TIP_HEADERS = ['ID', 'Saved', 'Topic', 'Title', 'Key points', 'Link', 'Saved from', 'Screenshot', 'In digest'];
 const FOLDER_NAME = 'Follow-Through captures';
 const DOCS_FOLDER = 'Follow-Through';
-const SCHEMA = '2';
+const SCHEMA = '3';
 
 /* ---------- one-time setup ---------- */
 function setup() {
@@ -103,7 +103,8 @@ function authorize() {
   DocumentApp.getActiveDocument();
   DriveApp.getRootFolder();
   SpreadsheetApp.getActiveSpreadsheet();
-  Logger.log('All set: the tracker can now create Google Docs.');
+  UrlFetchApp.getRequest('https://generativelanguage.googleapis.com/');
+  Logger.log('All set: the tracker can now create Google Docs and use Gemini.');
 }
 
 /** The tracker spreadsheet: the one this script is attached to, or one it creates in your Drive. */
@@ -127,30 +128,47 @@ function doPost(e) {
   return handle_(body);
 }
 
+const AI_ACTIONS = ['process', 'essay', 'tailor', 'uploadCv', 'cvAdd', 'setKey'];
+
 function handle_(p) {
-  const lock = LockService.getScriptLock();
-  lock.waitLock(20000);
   try {
-    if (PropertiesService.getScriptProperties().getProperty('SCHEMA') !== SCHEMA) setup();
-    switch (p.action) {
-      case 'ping': { const ss = book_(); return json_({ ok: true, sheet: ss.getName(), sheetUrl: ss.getUrl(), schema: SCHEMA }); }
-      case 'capture': return json_(capture_(p));
-      case 'list': return json_(list_(p));
-      case 'update': return json_(update_(p));
-      case 'image': return json_(image_(p));
-      case 'tip': return json_(tip_(p));
-      case 'tips': return json_(rows_(tipsSheet_(), p));
-      case 'tipUpdate': return json_(updateRow_(tipsSheet_(), TIP_HEADERS, p));
-      case 'doc': return json_(doc_(p));
-      case 'readDoc': return json_(readDoc_(p));
-      case 'docs': return json_(docs_());
-      default: return json_({ ok: false, error: 'unknown_action' });
+    if (PropertiesService.getScriptProperties().getProperty('SCHEMA') !== SCHEMA) withLock_(setup);
+    if (AI_ACTIONS.indexOf(p.action) >= 0) {
+      switch (p.action) {
+        case 'process': return json_(process_(p));
+        case 'essay': return json_(essay_(p));
+        case 'tailor': return json_(tailor_(p));
+        case 'uploadCv': return json_(uploadCv_(p));
+        case 'cvAdd': return json_(cvAdd_(p));
+        case 'setKey': return json_(setKey_(p));
+      }
     }
+    return json_(withLock_(() => {
+      switch (p.action) {
+        case 'ping': { const ss = book_(); return { ok: true, sheet: ss.getName(), sheetUrl: ss.getUrl(), schema: SCHEMA }; }
+        case 'dashboard': return dashboard_();
+        case 'capture': return capture_(p);
+        case 'list': return list_(p);
+        case 'update': return update_(p);
+        case 'image': return image_(p);
+        case 'tip': return tip_(p);
+        case 'tips': return rows_(tipsSheet_(), p);
+        case 'tipUpdate': return updateRow_(tipsSheet_(), TIP_HEADERS, p);
+        case 'doc': return doc_(p);
+        case 'readDoc': return readDoc_(p);
+        case 'docs': return docs_();
+        default: return { ok: false, error: 'unknown_action' };
+      }
+    }));
   } catch (err) {
-    return json_({ ok: false, error: String(err) });
-  } finally {
-    lock.releaseLock();
+    return json_({ ok: false, error: String(err && err.message || err) });
   }
+}
+
+function withLock_(fn) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try { return fn(); } finally { lock.releaseLock(); }
 }
 
 function capture_(p) {
@@ -349,3 +367,360 @@ function folder_() {
 function col_(h) { return HEADERS.indexOf(h) + 1; }
 function colLetter_(n) { let s = ''; while (n > 0) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; }
 function json_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
+
+
+/* =====================================================================
+ * Dashboard data (one call for the app's home screen)
+ * ===================================================================== */
+function dashboard_() {
+  const t = rows_(sheet_(), { brief: 1 });
+  t.rows.forEach(r => { delete r['Screen text']; });
+  const tips = rows_(tipsSheet_(), {}).rows;
+  const props = PropertiesService.getScriptProperties();
+  return {
+    ok: true, today: t.today, sheetUrl: book_().getUrl(),
+    rows: t.rows, tips: tips, docs: docs_().docs,
+    ai: { hasKey: !!props.getProperty('GEMINI_KEY'), model: props.getProperty('GEMINI_MODEL') || '' },
+  };
+}
+
+/* =====================================================================
+ * Gemini (free key from aistudio.google.com) — instant sorting and writing
+ * ===================================================================== */
+const GEMINI = 'https://generativelanguage.googleapis.com/v1beta/';
+
+function setKey_(p) {
+  const key = String(p.key || '').trim();
+  if (!key) return { ok: false, error: 'Paste your Gemini API key first.' };
+  const models = listModels_(key);
+  if (!models.length) return { ok: false, error: 'That key did not work. Check you copied all of it.' };
+  const props = PropertiesService.getScriptProperties();
+  props.setProperty('GEMINI_KEY', key);
+  props.setProperty('GEMINI_MODELS', JSON.stringify(models));
+  props.setProperty('GEMINI_MODELS_AT', String(Date.now()));
+  props.setProperty('GEMINI_MODEL', models[0]);
+  return { ok: true, model: models[0] };
+}
+
+/** Flash models that can generate text, best first (newest non-lite, then lite). */
+function listModels_(key) {
+  const res = UrlFetchApp.fetch(GEMINI + 'models?pageSize=200&key=' + encodeURIComponent(key), { muteHttpExceptions: true });
+  if (res.getResponseCode() !== 200) return [];
+  const list = (JSON.parse(res.getContentText()).models || [])
+    .filter(m => (m.supportedGenerationMethods || []).indexOf('generateContent') >= 0)
+    .map(m => m.name.replace(/^models\//, ''))
+    .filter(n => /flash/.test(n) && !/image|tts|audio|live|embed|vision|thinking|exp|8b/.test(n));
+  const ver = n => { const m = n.match(/gemini-(\d+(?:\.\d+)?)/); return m ? parseFloat(m[1]) : 0; };
+  const score = n => ver(n) * 10 - (/lite/.test(n) ? 50 : 0) - (/preview/.test(n) ? 1 : 0) + (/latest/.test(n) ? 0.5 : 0);
+  const sorted = list.sort((a, b) => score(b) - score(a));
+  return sorted.filter(n => !/lite/.test(n)).slice(0, 3).concat(sorted.filter(n => /lite/.test(n)).slice(0, 2));
+}
+
+function models_() {
+  const props = PropertiesService.getScriptProperties();
+  const key = props.getProperty('GEMINI_KEY');
+  if (!key) throw new Error('no_key');
+  let models = JSON.parse(props.getProperty('GEMINI_MODELS') || '[]');
+  if (!models.length || Date.now() - Number(props.getProperty('GEMINI_MODELS_AT') || 0) > 3 * 864e5) {
+    const fresh = listModels_(key);
+    if (fresh.length) { models = fresh; props.setProperty('GEMINI_MODELS', JSON.stringify(models)); props.setProperty('GEMINI_MODELS_AT', String(Date.now())); }
+  }
+  return { key: key, models: models };
+}
+
+/**
+ * Ask Gemini. parts: [{text}|{inline_data}]. opts.search tries Google Search grounding
+ * first and quietly drops it if this key's tier doesn't allow it. Falls through the
+ * model list on quota errors.
+ */
+function gemini_(parts, opts) {
+  opts = opts || {};
+  const m = models_();
+  let lastErr = 'no_model';
+  for (const model of m.models) {
+    for (const search of (opts.search ? [true, false] : [false])) {
+      const body = { contents: [{ role: 'user', parts: parts }], generationConfig: { temperature: opts.temperature || 0.4, maxOutputTokens: opts.maxTokens || 8192 } };
+      if (search) body.tools = [{ google_search: {} }];
+      else if (opts.json) body.generationConfig.responseMimeType = 'application/json';
+      const res = UrlFetchApp.fetch(GEMINI + 'models/' + model + ':generateContent?key=' + encodeURIComponent(m.key), {
+        method: 'post', contentType: 'application/json', payload: JSON.stringify(body), muteHttpExceptions: true,
+      });
+      const code = res.getResponseCode();
+      if (code === 200) {
+        const j = JSON.parse(res.getContentText());
+        const text = ((j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [])
+          .map(x => x.text || '').join('').trim();
+        if (text) {
+          PropertiesService.getScriptProperties().setProperty('GEMINI_MODEL', model);
+          return { text: text, model: model, searched: search };
+        }
+        lastErr = 'empty_answer';
+        continue;
+      }
+      lastErr = code + ' ' + res.getContentText().slice(0, 200);
+      if (code === 429 || code === 404 || code === 503 || code === 500) break;   // next model
+      // 400/403 with search on: retry the same model without search
+    }
+  }
+  throw new Error('gemini_failed: ' + lastErr);
+}
+
+function parseJson_(text) {
+  try { return JSON.parse(text); } catch (e) {}
+  const f = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (f) { try { return JSON.parse(f[1]); } catch (e) {} }
+  const a = text.indexOf('{'), b = text.lastIndexOf('}');
+  if (a >= 0 && b > a) { try { return JSON.parse(text.slice(a, b + 1)); } catch (e) {} }
+  return null;
+}
+
+function today_() { return Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd'); }
+function addDays_(iso, n) {
+  const [y, m, d] = iso.split('-').map(Number); const dt = new Date(y, m - 1, d + n);
+  return Utilities.formatDate(dt, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+}
+function daysBetween_(a, b) {
+  const p = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+  return Math.round((p(b) - p(a)) / 864e5);
+}
+function rowById_(sh, id) {
+  const values = sh.getDataRange().getValues();
+  const head = values[0];
+  const i = values.findIndex((r, k) => k > 0 && r[0] === id);
+  if (i < 1) return null;
+  const o = {}; head.forEach((h, c) => { o[h] = values[i][c]; });
+  return o;
+}
+function shotPart_(row) {
+  const id = String(row['Screenshot'] || '').match(/[-\w]{25,}/);
+  if (!id) return null;
+  try {
+    const blob = DriveApp.getFileById(id[0]).getBlob();
+    return { inline_data: { mime_type: blob.getContentType() || 'image/jpeg', data: Utilities.base64Encode(blob.getBytes()) } };
+  } catch (e) { return null; }
+}
+
+/* ---------- instant sorting ---------- */
+function process_(p) {
+  if (!PropertiesService.getScriptProperties().getProperty('GEMINI_KEY')) return { ok: false, error: 'no_key' };
+  const all = rows_(sheet_(), {}).rows.filter(r => r['Status'] === 'New' && (!p.id || r['ID'] === p.id));
+  const cache = CacheService.getScriptCache();
+  const done = [];
+  for (const r of all.slice(0, p.id ? 1 : 4)) {
+    if (cache.get('proc:' + r['ID'])) continue;
+    cache.put('proc:' + r['ID'], '1', 300);
+    try { done.push(sortOne_(r)); }
+    catch (e) { done.push({ id: r['ID'], error: String(e.message || e) }); }
+    finally { cache.remove('proc:' + r['ID']); }
+  }
+  return { ok: true, processed: done, left: Math.max(0, all.length - done.length) };
+}
+
+function sortOne_(r) {
+  const today = today_();
+  const profile = readDocText_('about-me').slice(0, 2500);
+  const prompt = `Today is ${today}. I saved this from my phone (app: ${r['Saved from'] || 'unknown'}) because it might be useful.
+I'm a Nigerian 200-level Mechatronics Engineering student at LASUSTECH. About me:
+${profile || '(no profile yet)'}
+
+Work out what it is and reply with ONLY a JSON object:
+{
+ "category": "Opportunity" | "Event" | "Tip" | "Other",
+ "title": string, "organisation": string,
+ "type": one of "Scholarship","Internship","Fellowship","Competition","Hackathon","Conference","Programme","Job","Grant","Event","Other",
+ "link": string | null,                      // official application/registration page if known
+ "deadline": "YYYY-MM-DD" | null,            // application/registration deadline. NEVER guess; null if not stated
+ "eventDate": "YYYY-MM-DD" | null, "eventTime": string | null, "venue": string | null,   // events only; time in Lagos time
+ "requirements": [string],                   // e.g. Essay: "Why this programme?" (300 words), "CV", "2 references"
+ "offers": string,                           // 1–2 sentences: what it offers and who can apply
+ "eligible": "likely" | "unclear" | "unlikely",
+ "notes": string,                            // anything I should know: fees, doubts, what to check
+ "topic": string,                            // tips only: one of "CV & resume","Interviews","Applications & essays","Career","Tech & skills","Productivity","Other"
+ "keyPoints": [string]                       // tips only: 3–6 lines of the actual advice, usable without the post
+}
+Opportunity = something to apply for. Event = something to attend (webinar, workshop, meetup…). Tip = advice or a resource to learn from. Other = not useful.
+If the year of a date is missing, use its next occurrence after today.
+
+What I saved:
+Link: ${r['Link'] || 'none'}
+Screen text:
+${String(r['Screen text'] || '').slice(0, 8000)}`;
+  const parts = [{ text: prompt }];
+  const shot = shotPart_(r);
+  if (shot) parts.push(shot);
+  const ans = gemini_(parts, { search: true, json: true, temperature: 0.2 });
+  const j = parseJson_(ans.text);
+  if (!j || !j.category) throw new Error('could_not_read_answer');
+
+  const cat = String(j.category);
+  if (cat === 'Tip') {
+    withLock_(() => tip_({ id: r['ID'], fields: { Topic: j.topic || 'Other', Title: j.title || 'Saved tip', 'Key points': (j.keyPoints || []).map(x => '• ' + x), Link: j.link || r['Link'] } }));
+    return { id: r['ID'], category: 'Tip', title: j.title };
+  }
+  if (cat === 'Other') {
+    withLock_(() => updateRow_(sheet_(), HEADERS, { id: r['ID'], fields: { Category: 'Other', Status: 'Closed', Outcome: 'Not an opportunity', Title: j.title || '' } }));
+    return { id: r['ID'], category: 'Other' };
+  }
+  const valid = s => /^\d{4}-\d{2}-\d{2}$/.test(s || '');
+  const deadline = valid(j.deadline) ? j.deadline : (cat === 'Event' && valid(j.eventDate) ? j.eventDate : '');
+  let remind;
+  if (!deadline) remind = addDays_(today, 3);
+  else {
+    const left = daysBetween_(today, deadline);
+    const before = cat === 'Event' ? 2 : 7;
+    remind = left > before ? addDays_(deadline, -before) : addDays_(today, left > 0 ? 1 : 0);
+  }
+  const notes = [
+    cat === 'Event' ? [j.eventDate && ('Date: ' + j.eventDate), j.eventTime && ('Time: ' + j.eventTime), j.venue && ('Where: ' + j.venue)].filter(Boolean).join(' · ') : '',
+    j.eligible ? 'Eligibility: ' + j.eligible : '',
+    j.notes || '',
+    deadline ? (ans.searched ? 'Sorted instantly (checked online).' : 'Sorted instantly. Deadline not yet confirmed online.') : 'No deadline found yet.',
+  ].filter(Boolean).join('\n');
+  withLock_(() => updateRow_(sheet_(), HEADERS, { id: r['ID'], fields: {
+    Category: cat, Status: 'Saved', Title: j.title || 'Untitled', Organisation: j.organisation || '',
+    Type: j.type || (cat === 'Event' ? 'Event' : 'Other'), Deadline: deadline, 'Remind on': remind,
+    Link: j.link || r['Link'] || '', Requirements: (j.requirements || []).join('\n'),
+    'What it offers': j.offers || '', Notes: notes,
+  } }));
+  return { id: r['ID'], category: cat, title: j.title, deadline: deadline };
+}
+
+/* ---------- essays & CV ---------- */
+function readDocText_(key) {
+  const id = PropertiesService.getScriptProperties().getProperty('DOC:' + key);
+  if (!id) return '';
+  try { return DocumentApp.openById(id).getBody().getText(); } catch (e) { return ''; }
+}
+function oppContext_(r) {
+  return `OPPORTUNITY: ${r['Title']} — ${r['Organisation']} (${r['Type']})
+Deadline: ${r['Deadline'] instanceof Date ? Utilities.formatDate(r['Deadline'], Session.getScriptTimeZone(), 'yyyy-MM-dd') : (r['Deadline'] || 'unknown')}
+Link: ${r['Link'] || ''}
+What it offers: ${r['What it offers'] || ''}
+Requirements:
+${r['Requirements'] || '(not listed)'}
+Notes: ${r['Notes'] || ''}`;
+}
+const NO_INVENT = 'Never invent facts, numbers, dates, grades, awards or experience. Where a real detail is needed, write [ADD: what is needed].';
+
+function essay_(p) {
+  const r = rowById_(sheet_(), p.id);
+  if (!r) return { ok: false, error: 'not_found' };
+  const about = readDocText_('about-me'), cv = readDocText_('master-cv');
+  const prompt = `Help me write the essays for this application. ${NO_INVENT}
+Write in simple markdown (# ## ### headings, - bullets, **bold**). For EACH essay/statement/short-answer question in the requirements
+(if none are listed, use the usual personal statement: "Why do you want this, and why are you a good fit?"):
+## <the exact question>
+Word limit: <n or "not stated">
+### Angles
+- 3 options, one line each, naming the real story from my profile/CV to use
+### Recommended
+One or two sentences on which angle and why.
+### First draft
+In my voice: plain, specific, first person, within the word limit. Open with a concrete moment. No clichés
+("passionate", "ever since I was young", "tapestry", "delve").
+### Before you submit
+- 3 short checks
+
+Start the document with: # Essays: <title> and a line with the deadline and link.
+
+${oppContext_(r)}
+
+ABOUT ME:
+${about.slice(0, 6000) || '(empty)'}
+
+MY CV:
+${cv.slice(0, 8000) || '(empty)'}`;
+  const ans = gemini_([{ text: prompt }], { temperature: 0.7 });
+  const d = withLock_(() => doc_({ key: 'essay-' + p.id, title: 'Essays: ' + r['Title'], body: ans.text, mode: 'replace' }));
+  withLock_(() => updateRow_(sheet_(), HEADERS, { id: p.id, fields: { 'Essay doc': d.url } }));
+  return { ok: true, url: d.url };
+}
+
+function tailor_(p) {
+  const r = rowById_(sheet_(), p.id);
+  if (!r) return { ok: false, error: 'not_found' };
+  const cv = readDocText_('master-cv');
+  if (cv.replace(/\[[^\]]*\]/g, '').trim().length < 200) return { ok: false, error: 'Add your CV first (My CV → Upload).' };
+  const prompt = `Tailor my CV for this opportunity. ${NO_INVENT}
+Use ONLY what is in my CV below. You may reorder, reword, cut, and bring forward what matters most here, and mirror
+the posting's keywords where they are true for me. Keep it to one page for internships/programmes, two at most otherwise.
+Output simple markdown (# name, ## sections, - bullets, **bold**) in this order:
+## What I changed and why
+- 3–6 bullets
+---
+<the full tailored CV>
+## Consider adding (only if true)
+- gaps worth filling for this application
+
+${oppContext_(r)}
+
+MY CV:
+${cv.slice(0, 12000)}`;
+  const ans = gemini_([{ text: prompt }], { temperature: 0.3 });
+  const d = withLock_(() => doc_({ key: 'cv-' + p.id, title: 'CV for ' + r['Title'], body: ans.text, mode: 'replace' }));
+  withLock_(() => updateRow_(sheet_(), HEADERS, { id: p.id, fields: { 'CV doc': d.url } }));
+  return { ok: true, url: d.url };
+}
+
+/* ---------- master CV: upload and updates ---------- */
+function uploadCv_(p) {
+  if (!p.base64) return { ok: false, error: 'No file received.' };
+  const name = String(p.name || 'cv');
+  const mime = String(p.mime || '');
+  const bytes = Utilities.base64Decode(p.base64);
+  const blob = Utilities.newBlob(bytes, mime || 'application/octet-stream', name);
+  const original = docsFolder_().createFile(blob.copyBlob().setName('Original CV - ' + name));
+
+  const parts = [];
+  const lower = name.toLowerCase();
+  if (/\.docx$/.test(lower) || mime.indexOf('wordprocessingml') >= 0) {
+    parts.push({ text: 'MY CV (text extracted from a Word file):\n' + docxText_(blob).slice(0, 20000) });
+  } else if (/\.(txt|md)$/.test(lower) || mime.indexOf('text/') === 0) {
+    parts.push({ text: 'MY CV:\n' + blob.getDataAsString().slice(0, 20000) });
+  } else if (mime === 'application/pdf' || /\.pdf$/.test(lower) || mime.indexOf('image/') === 0) {
+    parts.push({ inline_data: { mime_type: mime || 'application/pdf', data: p.base64 } });
+  } else {
+    return { ok: false, error: 'Upload a PDF, Word (.docx) or photo of your CV.' };
+  }
+  parts.unshift({ text: `Turn this CV into clean, well-structured simple markdown: "# Full name", a contact line, then "## " sections
+(Profile, Education, Experience/Leadership, Projects, Skills, Awards, and any others it has) with "- " bullets and **bold**
+for roles and institutions. Keep EVERY fact exactly as written: no additions, no removals, no rewording beyond fixing
+obvious typos and layout. Output only the markdown.` });
+  const ans = gemini_(parts, { temperature: 0.1 });
+  const d = withLock_(() => doc_({ key: 'master-cv', title: 'Master CV', body: ans.text, mode: 'replace' }));
+  return { ok: true, url: d.url, original: original.getUrl() };
+}
+
+function docxText_(blob) {
+  const files = Utilities.unzip(blob.copyBlob().setContentType('application/zip'));
+  const xml = files.filter(f => f.getName() === 'word/document.xml')[0];
+  if (!xml) return '';
+  return xml.getDataAsString()
+    .replace(/<w:tab\/>/g, '\t').replace(/<\/w:p>/g, '\n').replace(/<w:br[^>]*\/>/g, '\n')
+    .replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function cvAdd_(p) {
+  const update = String(p.text || '').trim();
+  if (!update) return { ok: false, error: 'Describe what you did first.' };
+  const cv = readDocText_('master-cv');
+  if (!cv.trim()) return { ok: false, error: 'Upload your CV first.' };
+  const prompt = `Here is my CV and something new I've done. Add it to the CV in the right section (create the section if
+needed), written as a strong, honest CV line in the CV's existing style. Change nothing else. Only use what I wrote:
+${NO_INVENT}
+Reply in this exact format:
+<the full updated CV in simple markdown: # name, ## sections, - bullets, **bold**>
+===CHANGES===
+- 1–3 bullets describing exactly what you added or changed
+
+NEW: ${update}
+
+MY CV:
+${cv.slice(0, 12000)}`;
+  const ans = gemini_([{ text: prompt }], { temperature: 0.2 });
+  const split = ans.text.split('===CHANGES===');
+  if (split.length < 2 || split[0].trim().length < 200) return { ok: false, error: 'Could not update the CV this time. Try again.' };
+  const d = withLock_(() => doc_({ key: 'master-cv', title: 'Master CV', body: split[0].trim(), mode: 'replace' }));
+  return { ok: true, url: d.url, changes: split[1].trim() };
+}
