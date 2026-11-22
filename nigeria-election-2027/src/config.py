@@ -5,8 +5,13 @@ Change these values to test your own assumptions; the dashboard exposes
 the most important ones as sliders.
 """
 
+import os
+from datetime import date
+
 ELECTION_DATE = "2027-01-16"
-DATA_AS_OF = "2026-11-22"
+# The run date. Each run is saved to outputs/history.json under this date,
+# so the dashboard can show how the forecast moves over time.
+DATA_AS_OF = os.environ.get("FORECAST_DATE") or date.today().isoformat()
 
 # --- Monte Carlo -----------------------------------------------------------
 N_SIMULATIONS = 20_000

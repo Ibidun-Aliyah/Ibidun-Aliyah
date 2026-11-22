@@ -65,7 +65,23 @@ def main():
         "whatif": whatif,
         "map": json.loads((ROOT / "data" / "nigeria_map.json").read_text()),
     }
+    # Forecast history: one entry per run date (a re-run on the same day replaces it)
     (ROOT / "outputs").mkdir(exist_ok=True)
+    hist_path = ROOT / "outputs" / "history.json"
+    history = json.loads(hist_path.read_text()) if hist_path.exists() else []
+    entry = {
+        "date": C.DATA_AS_OF,
+        "win": {c: round(summary["candidates"][c]["win_prob"], 4) for c in simulate.MAIN},
+        "share": {c: round(summary["candidates"][c]["mean_share"], 4) for c in simulate.MAIN},
+        "runoff": round(summary["runoff_prob"], 4),
+        "atiku_off_prob": C.ATIKU_OFF_BALLOT_PROB,
+    }
+    history = sorted([h for h in history if h["date"] != C.DATA_AS_OF] + [entry], key=lambda h: h["date"])
+    hist_path.write_text(json.dumps(history, indent=1))
+    out["history"] = history
+    out["news"] = sorted(json.loads((ROOT / "data" / "news_log.json").read_text()),
+                         key=lambda n: n["date"], reverse=True)
+
     (ROOT / "outputs" / "forecast.json").write_text(json.dumps(out, indent=1, default=float))
 
     tpl = ROOT / "dashboard" / "template.html"

@@ -49,6 +49,14 @@ State borders come from Natural Earth (public domain), simplified into SVG paths
 `tools/build_map.py` and saved in `data/nigeria_map.json`. You only need to re-run that
 script to rebuild the map with a different level of detail.
 
+## Daily updates
+
+Until results are declared, the forecast is refreshed every day: significant news is
+logged in `data/news_log.json`, the model is re-run, and each day's forecast is kept in
+`outputs/history.json`. The dashboard's **Forecast tracker** shows the odds over time next
+to the news that moved them. The rules for what counts as significant, and exactly how
+each kind of news changes the model, are in [`UPDATE_PLAYBOOK.md`](UPDATE_PLAYBOOK.md).
+
 ## Model quality and limits
 
 - Leave-one-state-out error: ~13 points per candidate per state; picks the right state

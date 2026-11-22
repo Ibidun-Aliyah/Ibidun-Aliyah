@@ -1,0 +1,20 @@
+[
+ {"date": "2026-11-05", "headline": "Federal High Court voids the ADC leadership's acts, including Atiku's nomination",
+  "source": "Channels TV", "url": "https://www.channelstv.com/2026/11/05/adc-rejects-judgment-voiding-atikus-candidacy-accuses-apc-of-desperation-to-cripple-opposition/",
+  "impact": "high", "model_change": "Added a 25% chance that Atiku is removed from the ballot (ATIKU_OFF_BALLOT_PROB = 0.25)."},
+ {"date": "2026-11-07", "headline": "ADC files a 17-ground appeal and a stay of execution; INEC keeps Atiku on its list",
+  "source": "The Sun", "url": "https://thesun.ng/2027-adc-files-17-ground-appeal-over-atikus-candidacy/",
+  "impact": "medium", "model_change": "Kept the removal chance at 25% rather than higher, because INEC still lists him."},
+ {"date": "2026-10-10", "headline": "INEC publishes the final list of 18 presidential candidates",
+  "source": "PRNigeria", "url": "https://prnigeria.com/2026/10/10/finally-inec-final-candidates/",
+  "impact": "high", "model_change": "Set the 2027 tickets: Tinubu/Shettima (APC), Atiku/Amaechi (ADC), Obi/Kwankwaso (NDC), Makinde (APM), Onor (PDP)."},
+ {"date": "2026-09-07", "headline": "Oxford-Metro online poll: Tinubu 35.4%, Obi 33.9%, Atiku 26.7%",
+  "source": "Tribune", "url": "https://tribuneonlineng.com/2027-tinubu-edges-peter-obi-by-1-55-in-oxford-metro-poll/",
+  "impact": "low", "model_change": "Not used. Online polls with self-selected respondents are not representative."},
+ {"date": "2026-03-10", "headline": "Zamfara governor joins the APC; the party now claims 31 of 36 states",
+  "source": "Pulse", "url": "https://www.pulse.ng/story/governors-who-defected-to-apc-recently-2026031014215325600",
+  "impact": "medium", "model_change": "Governor feature set to APC for 31 states; recent defectors counted at 50% strength."},
+ {"date": "2026-01-27", "headline": "Kano governor Abba Yusuf leaves the NNPP for the APC",
+  "source": "ICIR", "url": "https://www.icirnigeria.org/apc-gains-29th-governor-as-abba-yusuf-joins-ruling-party/",
+  "impact": "medium", "model_change": "Kano's governor counted for the APC at 50% strength. Kwankwaso, now Obi's running mate, keeps his home-state boost."}
+]
