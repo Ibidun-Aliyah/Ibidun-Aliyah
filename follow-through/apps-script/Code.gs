@@ -1,12 +1,16 @@
 /**
  * Follow-Through — Google Sheet backend.
  *
- * Paste this into Extensions → Apps Script of your tracker spreadsheet,
- * run `setup` once, then Deploy → New deployment → Web app
- * (Execute as: Me, Who has access: Anyone). The setup log prints your
- * connection code for the phone app.
+ * Works from a phone browser, no spreadsheet editor needed:
+ *   1. script.google.com → New project → paste this file → Save.
+ *   2. Deploy → New deployment → Web app (Execute as: Me, Who has access: Anyone)
+ *      → Authorize → copy the Web app URL.
+ *   3. Paste that URL into the phone app. The first request creates the
+ *      "Opportunities Tracker" sheet in your Google Drive by itself.
  *
- * Endpoints (all need ?token= or a "token" field):
+ * The web app URL is the secret: keep it private.
+ *
+ * Endpoints:
  *   POST {action:"capture", app, url, screenText, imageBase64, note}  → new row
  *   GET  ?action=list[&status=New]                                     → rows as JSON
  *   POST {action:"update", id, fields:{Header: value, ...}}            → edit a row
@@ -24,7 +28,7 @@ const FOLDER_NAME = 'Follow-Through captures';
 
 /* ---------- one-time setup ---------- */
 function setup() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = book_();
   let sh = ss.getSheetByName(SHEET_NAME);
   if (!sh) sh = ss.insertSheet(SHEET_NAME, 0);
   sh.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS])
@@ -52,12 +56,22 @@ function setup() {
       .setBackground('#F7E9CF').setFontColor('#A8670F').setRanges([dl]).build(),
   ]);
 
-  const props = PropertiesService.getScriptProperties();
-  let token = props.getProperty('TOKEN');
-  if (!token) { token = Utilities.getUuid().replace(/-/g, ''); props.setProperty('TOKEN', token); }
+  const extra = ss.getSheetByName('Sheet1');
+  if (extra && ss.getSheets().length > 1) ss.deleteSheet(extra);
   folder_();
-  Logger.log('Setup done. Your token: ' + token);
-  Logger.log('After you deploy as a Web app, your connection code is:  <web app URL>?token=' + token);
+  PropertiesService.getScriptProperties().setProperty('SETUP_DONE', '1');
+  Logger.log('Setup done. Your sheet: ' + ss.getUrl());
+}
+
+/** The tracker spreadsheet: the one this script is attached to, or one it creates in your Drive. */
+function book_() {
+  try { const a = SpreadsheetApp.getActiveSpreadsheet(); if (a) return a; } catch (e) {}
+  const props = PropertiesService.getScriptProperties();
+  const id = props.getProperty('SHEET_ID');
+  if (id) { try { return SpreadsheetApp.openById(id); } catch (e) {} }
+  const ss = SpreadsheetApp.create('Opportunities Tracker');
+  props.setProperty('SHEET_ID', ss.getId());
+  return ss;
 }
 
 /* ---------- web endpoints ---------- */
@@ -67,18 +81,16 @@ function doGet(e) {
 function doPost(e) {
   let body = {};
   try { body = JSON.parse(e.postData.contents || '{}'); } catch (err) { return json_({ ok: false, error: 'bad_json' }); }
-  if (!body.token && e.parameter) body.token = e.parameter.token;
   return handle_(body);
 }
 
 function handle_(p) {
-  const token = PropertiesService.getScriptProperties().getProperty('TOKEN');
-  if (!token || p.token !== token) return json_({ ok: false, error: 'bad_token' });
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
+    if (!PropertiesService.getScriptProperties().getProperty('SETUP_DONE')) setup();
     switch (p.action) {
-      case 'ping': return json_({ ok: true, sheet: SpreadsheetApp.getActiveSpreadsheet().getName() });
+      case 'ping': { const ss = book_(); return json_({ ok: true, sheet: ss.getName(), sheetUrl: ss.getUrl() }); }
       case 'capture': return json_(capture_(p));
       case 'list': return json_(list_(p));
       case 'update': return json_(update_(p));
@@ -168,8 +180,8 @@ function image_(p) {
 
 /* ---------- helpers ---------- */
 function sheet_() {
-  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
-  if (!sh) throw new Error('Run setup() first');
+  let sh = book_().getSheetByName(SHEET_NAME);
+  if (!sh) { setup(); sh = book_().getSheetByName(SHEET_NAME); }
   return sh;
 }
 function folder_() {

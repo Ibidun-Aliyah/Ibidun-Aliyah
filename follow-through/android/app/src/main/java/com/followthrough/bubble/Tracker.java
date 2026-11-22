@@ -37,25 +37,20 @@ final class Tracker {
 
     private Tracker() {}
 
-    /* ---------- connection code: "<web app URL>?token=<token>" ---------- */
+    /* ---------- connection: the Apps Script web app URL ---------- */
 
     static SharedPreferences prefs(Context c) {
         return c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
     }
 
-    /** Returns {url, token} or null when the code is not valid. */
+    /** Returns {web app URL} or null when it doesn't look like an Apps Script web app link. */
     static String[] parseCode(String code) {
         if (code == null) return null;
         code = code.trim();
-        try {
-            Uri u = Uri.parse(code);
-            String token = u.getQueryParameter("token");
-            if (!"https".equals(u.getScheme()) || token == null || token.isEmpty()) return null;
-            String base = code.substring(0, code.indexOf('?'));
-            return new String[]{base, token};
-        } catch (Exception e) {
-            return null;
-        }
+        int q = code.indexOf('?');
+        if (q >= 0) code = code.substring(0, q);          // older codes had ?token=…
+        if (!code.startsWith("https://script.google.com/") || !code.endsWith("/exec")) return null;
+        return new String[]{code};
     }
 
     static String[] connection(Context c) {
@@ -92,16 +87,16 @@ final class Tracker {
         IO.execute(() -> {
             String[] conn = connection(ctx);
             String msg; boolean ok = false;
-            if (conn == null) msg = "That connection code doesn't look right. It should start with https:// and end with ?token=…";
+            if (conn == null) msg = "That link doesn't look right. It should start with https://script.google.com/ and end with /exec";
             else {
                 try {
-                    String res = http(conn[0] + "?action=ping&token=" + Uri.encode(conn[1]), null);
+                    String res = http(conn[0] + "?action=ping", null);
                     JSONObject j = new JSONObject(res);
                     ok = j.optBoolean("ok");
-                    msg = ok ? "Connected to “" + j.optString("sheet") + "”"
-                            : ("bad_token".equals(j.optString("error")) ? "The sheet rejected the token. Copy the connection code again." : "Sheet error: " + j.optString("error"));
+                    if (ok) prefs(ctx).edit().putString("sheetUrl", j.optString("sheetUrl")).apply();
+                    msg = ok ? "Connected to “" + j.optString("sheet") + "”" : "Sheet error: " + j.optString("error");
                 } catch (Exception e) {
-                    msg = "Couldn't reach the sheet. Check the code and your internet connection.";
+                    msg = "Couldn't reach the sheet. Check the link, that the deployment's access is “Anyone”, and your internet.";
                 }
             }
             final boolean fOk = ok; final String fMsg = msg;
@@ -156,7 +151,6 @@ final class Tracker {
         String[] conn = connection(c);
         if (conn == null) return false;
         try {
-            body.put("token", conn[1]);
             String res = http(conn[0], body.toString());
             return new JSONObject(res).optBoolean("ok");
         } catch (Exception e) {

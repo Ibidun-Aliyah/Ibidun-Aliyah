@@ -20,26 +20,26 @@ See an opportunity → tap the bubble → it lands in your Google Sheet, filled 
 
 ## Setup (about 10 minutes)
 
-### 1. The sheet
-1. Create a new Google Sheet (name it e.g. *Opportunities Tracker*).
-2. **Extensions → Apps Script**. Delete what's there, paste all of `apps-script/Code.gs`, save.
-3. Pick `setup` in the function menu and click **Run**. Allow the permissions it asks for (it's your own script;
-   Google shows an "unverified app" warning: **Advanced → Go to project**).
-4. **Deploy → New deployment → ⚙ → Web app**. *Execute as:* **Me**. *Who has access:* **Anyone**. Deploy and copy the
-   web app URL.
-5. Open **View → Logs / Execution log** from the `setup` run and copy the token. Your **connection code** is:
-   `<web app URL>?token=<token>`. Keep it private; anyone with it can add rows to your sheet.
+### 1. The sheet (works from a phone browser)
+1. In Chrome, open **script.google.com** → **New project** (tick ⋮ → *Desktop site* if it looks squashed).
+2. Delete the sample code, paste all of `apps-script/Code.gs`, tap save.
+3. **Deploy → New deployment → ⚙ → Web app**. *Execute as:* **Me**. *Who has access:* **Anyone**. Deploy, then
+   **Authorize access** (Google warns it's unverified: **Advanced → Go to … → Allow**; it's your own script).
+4. Copy the **Web app URL** (ends in `/exec`). That link is your connection code: keep it private.
+   The tracker sheet ("Opportunities Tracker") is created in your Drive the first time the phone app connects.
+
+The tracker page's **Connect phone** button walks through the same steps with a Copy button for the code.
 
 ### 2. The phone app
 1. On your Android phone, download `android/releases/follow-through.apk` from this repo and open it. Allow
    "install unknown apps" for your browser when asked.
-2. Open **Follow-Through**, paste the connection code, tap **Save & test**. You should see "Connected".
+2. Open **Follow-Through**, paste the Web app link, tap **Save & test**. You should see "Connected" and an **Open my tracker sheet** button.
 3. Tap **Open settings** → *Downloaded apps* → **Follow-Through bubble** → on.
    If it's greyed out ("restricted setting"): back in the app tap **App info** → ⋮ → **Allow restricted settings**,
    then switch it on.
 
 ### 3. Claude does the rest
-Send Claude your connection code and it sets up the twice-daily task that fills in new captures and pushes your
+Send Claude your Web app link and it sets up the twice-daily task that fills in new captures and pushes your
 reminders.
 
 ## Using it

@@ -34,6 +34,7 @@ public class MainActivity extends Activity {
                 connStatus.setText((ok ? "✓ " : "✕ ") + msg);
                 connStatus.setTextColor(getColor(ok ? R.color.ok : R.color.bad));
                 if (ok) Tracker.flushQueue(this, (o, m) -> refresh());
+                refresh();
             });
         });
         findViewById(R.id.accessibility).setOnClickListener(v ->
@@ -44,6 +45,10 @@ public class MainActivity extends Activity {
         findViewById(R.id.show).setOnClickListener(v -> {
             if (BubbleService.instance != null) BubbleService.instance.showNow();
             refresh();
+        });
+        findViewById(R.id.openSheet).setOnClickListener(v -> {
+            String u = Tracker.prefs(this).getString("sheetUrl", "");
+            if (!u.isEmpty()) startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(u)));
         });
         findViewById(R.id.flush).setOnClickListener(v -> {
             queue.setText("Sending…");
@@ -62,6 +67,8 @@ public class MainActivity extends Activity {
         bubbleStatus.setText(on ? "✓ Bubble is on" : "Bubble is off. Tap “Open settings”, find Follow-Through bubble under Downloaded apps and switch it on.");
         bubbleStatus.setTextColor(getColor(on ? R.color.ok : R.color.bad));
         findViewById(R.id.show).setEnabled(on);
+        findViewById(R.id.openSheet).setVisibility(
+                Tracker.prefs(this).getString("sheetUrl", "").isEmpty() ? android.view.View.GONE : android.view.View.VISIBLE);
         int n = Tracker.queued(this);
         queue.setText(n == 0 ? "Nothing waiting to send." : n + (n == 1 ? " capture is" : " captures are") + " waiting to send.");
         findViewById(R.id.flush).setEnabled(n > 0);

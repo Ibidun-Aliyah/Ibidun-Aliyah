@@ -27,13 +27,13 @@
         <TextView
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Paste the connection code from your sheet's Apps Script (the web app link ending in ?token=…)." />
+            android:text="Paste your Web app link from Apps Script (it starts with https://script.google.com/macros/s/ and ends with /exec). Your tracker sheet is created automatically the first time it connects." />
         <EditText
             android:id="@+id/code"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:background="@drawable/field_bg"
-            android:hint="https://script.google.com/macros/s/…/exec?token=…"
+            android:hint="https://script.google.com/macros/s/…/exec"
             android:inputType="textUri" android:minLines="2" android:gravity="top" />
         <Button
             android:id="@+id/connect"
@@ -44,6 +44,11 @@
             android:id="@+id/connStatus"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="4dp" />
+        <Button
+            android:id="@+id/openSheet"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:text="Open my tracker sheet" />
 
         <!-- Step 2 -->
         <TextView

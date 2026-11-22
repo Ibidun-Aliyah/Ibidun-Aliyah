@@ -3,19 +3,19 @@
 This is the prompt the scheduled Claude task runs (twice a day). It needs the
 environment's network to allow `script.google.com` and
 `script.googleusercontent.com`. `{{CONNECTION_CODE}}` is replaced by the web app
-link with `?token=…` when the task is created.
+link (ending in `/exec`) when the task is created.
 
 ---
 
 You maintain my opportunity tracker, a Google Sheet behind an Apps Script web app.
-Connection: `{{CONNECTION_CODE}}` (call it BASE?token=TOKEN below).
+Web app: `{{CONNECTION_CODE}}` (called BASE below).
 
 API (always use `curl -sL`, the web app redirects):
-- List rows: `curl -sL "BASE?token=TOKEN&action=list&brief=1"` → `{ok, today, rows:[{ID, Status, Title, ...}]}`.
+- List rows: `curl -sL "BASE?action=list&brief=1"` → `{ok, today, rows:[{ID, Status, Title, ...}]}`.
   Use `&status=New` to get only new captures (without `brief` to see full screen text).
-- Screenshot of a row: `curl -sL "BASE?token=TOKEN&action=image&id=ID"` → `{base64, mime}`. Decode it to a
+- Screenshot of a row: `curl -sL "BASE?action=image&id=ID"` → `{base64, mime}`. Decode it to a
   file in your scratchpad and look at it with the Read tool.
-- Update a row: `curl -sL -H 'Content-Type: application/json' -d '{"token":"TOKEN","action":"update","id":"ID","fields":{...}}' BASE`
+- Update a row: `curl -sL -H 'Content-Type: application/json' -d '{"action":"update","id":"ID","fields":{...}}' BASE`
   Field names are the sheet headers: Status, Title, Organisation, Type, Deadline (YYYY-MM-DD), Remind on (YYYY-MM-DD),
   Link, Requirements, What it offers, Notes, Outcome.
 
@@ -57,4 +57,4 @@ Plain text, no more than ~8 lines:
 - "Due soon: <title>, <n> days left, next: <first requirement>" for each urgent item, most urgent first.
 - "Check for a response: <title>" for submitted items due a check.
 If nothing was added and nothing is due, reply only: "Nothing needs you today."
-Never print the token.
+Never print the web app link.
