@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* Layout: intake (two modes) on an ink ground, then a full-screen auto-playing story of color-blocked slides with a soundtrack, ending in a share studio. Single deliberate look (no light/dark switch). */
+/* Layout: intake (two modes) on an ink ground, then a full-screen auto-playing story of colour-blocked slides, ending in a share studio. Single deliberate look (no light/dark switch). */
 @property --bg{syntax:'<color>';inherits:true;initial-value:#1d0f14}
 @property --fg{syntax:'<color>';inherits:true;initial-value:#fff4e8}
 @property --acc{syntax:'<color>';inherits:true;initial-value:#ff9ecf}
@@ -271,10 +271,6 @@ textarea#emails:focus{border-color:var(--ink);outline:none}
 .invite .links{display:flex;flex-wrap:wrap;gap:8px}
 .invite a,.invite button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:7px 14px;font:600 13px var(--body);color:var(--paper);text-decoration:none;cursor:pointer}
 .invite a:hover,.invite button:hover{border-color:var(--paper)}
-.eq{display:flex;gap:5px;align-items:flex-end;height:48px;margin-bottom:18px}
-.eq i{width:9px;height:100%;background:var(--acc);border-radius:3px;transform-origin:bottom;animation:eq .8s ease-in-out infinite alternate}
-.eq i:nth-child(2n){animation-duration:.55s}.eq i:nth-child(3n){animation-duration:1.1s}.eq i:nth-child(4n){animation-duration:.7s;animation-delay:-.3s}.eq i:nth-child(5n){animation-delay:-.5s}
-@keyframes eq{from{transform:scaleY(.15)}to{transform:scaleY(1)}}
 .projs{list-style:none;margin:14px 0 18px;padding:0;display:grid;gap:10px}
 .projs li{display:flex;gap:12px;align-items:center;justify-content:space-between;background:color-mix(in srgb,var(--fg) 12%,transparent);border-radius:14px;padding:12px 14px;min-width:0}
 .projs li div{min-width:0}
@@ -387,7 +383,6 @@ From: ...
   <div class="bars" id="bars"></div>
   <div class="topbar"><span>L Wrapped · <span id="yr2">2026</span></span>
     <span class="tools">
-      <button class="x" id="mute" type="button" aria-label="Mute music" title="Sound"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path id="wave" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/><path id="cross" d="M16 9l5 6M21 9l-5 6" hidden/></svg></button>
       <button class="x" id="share" type="button" aria-label="Share this slide">Share</button>
       <button class="x" id="close" type="button" aria-label="Close and go back"><svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
     </span></div>
@@ -403,7 +398,7 @@ From: ...
       <img id="sheetimg" alt="Share card for this slide">
       <div class="fmt" id="sheetfmt"></div>
       <div class="actions"><button class="btn" id="sheetsave" type="button">Save image</button><button class="btn alt" id="sheetnative" type="button" hidden>Share…</button><button class="btn alt" id="sheetclose" type="button">Done</button></div>
-      <div class="send"><a id="sh-wa" target="_blank" rel="noopener">WhatsApp</a><a id="sh-x" target="_blank" rel="noopener">X</a><a id="sh-li" target="_blank" rel="noopener">LinkedIn</a><button type="button" id="sh-copy">Copy caption</button></div>
+      <div class="send"><a id="sh-wa" target="_blank" rel="noopener">WhatsApp</a><button type="button" id="sh-ig">Instagram</button><a id="sh-x" target="_blank" rel="noopener">X</a><a id="sh-li" target="_blank" rel="noopener">LinkedIn</a><button type="button" id="sh-copy">Copy caption</button></div>
       <p class="small">If Save doesn't work here, press and hold (or right-click) the image to save it.</p>
     </div>
   </div>
@@ -827,7 +822,6 @@ function enrich(S){
   if (nL >= 1 && nL <= 4) P.push({ key: 'fresh', name: 'Fresh Recruit', theme: 't-paper', icon: 'seed', line: N(`${plural(nL, 'L')} so far. Lock in. Everybody start from somewhere.`, `${plural(nL, 'L')} so far. Everyone's L count starts somewhere. Yours just started.`) });
   if (nL === 0) P.push({ key: 'untouched', name: 'Untouched', theme: 't-paper', icon: 'seed', line: `Zero Ls detected. Either you're winning or you haven't started shooting yet.` });
   P.push({ key: 'collector', name: 'Professional L Collector', theme: 't-red', icon: 'stack', line: N(`Every L is a rep, and you got ${nL} in. No dulling.`, `Every L is a rep, and you got ${nL} of them in. That's what shooting your shot looks like.`) });
-  S.track = (S.total || 0) >= 50 ? 'motion' : S.nO ? 'testimony' : (S.heart >= 3 || (nL >= 4 && S.heart / nL >= .35)) ? 'close' : (S.ghosted >= 10 && S.ghosted >= nL) ? 'ghost' : nL >= 30 ? 'fra' : nProj >= 2 ? 'build' : 'still';
   S.persona = P[0]; S.rising = P.find(p => p !== P[0] && p.key !== 'collector') || null;
 
   // aura
@@ -902,7 +896,6 @@ function posts(S){
     `⚖️ L-to-W ratio: ${nL}:${S.nO}`,
     `🧠 L personality: ${S.persona.name}`,
     S.nProj ? `🛠️ Projects built: ${S.nProj}${S.projects.some(p => p.url) ? `\n${S.projects.filter(p => p.url).map(p => `   ↳ ${p.name}: ${p.url}`).join('\n')}` : ''}` : null,
-    `🎧 Song of my year: ${songName(SONGS[S.track])}`,
     ``,
     S.naija ? `Still applying. No dulling. We move.` : `Still applying. Still delusional. Still here.`,
     ``,
@@ -991,80 +984,22 @@ function appUrl(){
   return 'https://claude.ai/artifact/GorWnueLFxktu1m8GJAPur';
 }
 const shareLinks = text => ({ wa: 'https://wa.me/?text=' + encodeURIComponent(text), x: 'https://x.com/intent/post?text=' + encodeURIComponent(text), li: 'https://www.linkedin.com/feed/?shareActive=true&text=' + encodeURIComponent(text) });
+const canShareFiles = () => { try { return !!(navigator.canShare && navigator.canShare({ files: [new File([''], 'x.png', { type: 'image/png' })] })); } catch { return false; } };
+async function shareImage(card, text){
+  if (!card || !canShareFiles()) return false;
+  try { await navigator.share({ files: [new File([card.blob], 'l-wrapped.png', { type: 'image/png' })], text }); } catch {}
+  return true;
+}
+// Instagram has no web share link, so phones get the share sheet with the story-size image; elsewhere we save it and copy the caption.
+async function shareInstagram(storyCard, text, name){
+  if (await shareImage(storyCard, text)) return;
+  if (storyCard) await saveImage(storyCard, name);
+  const ok = await copyText(text);
+  toast(ok ? 'Image saved, caption copied. Open Instagram and add it to your story.' : 'Image saved. Open Instagram and add it to your story.');
+}
 async function copyText(t){ try { await navigator.clipboard.writeText(t); return true; } catch { return false; } }
 
 /* ================= sound (generated in-browser) ================= */
-// One original track per kind of year. The results pick which one plays.
-const TRACKS = {
-  still: { title: 'Still Applying', genre: 'Pop', bpm: 116, kick: [0, 4, 8, 10, 12], clap: [4, 12], hat: [1, 3, 5, 7, 9, 11, 13, 15], bass: [0, 3, 6, 8, 11, 14], bassOct: { 14: 12 }, prog: [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]], root: [45, 41, 48, 43], pad: 'triangle', lead: [2, 7, 10] },
-  motion: { title: 'Motion (Executions Mix)', genre: 'Amapiano', bpm: 113, kick: [0, 8], clap: [4, 12], rim: [3, 7, 11], hat: [2, 6, 10, 14], hatVol: .08, shaker: true, bass: [0, 3, 6, 10, 13], bassType: 'log', bassOct: { 6: 12, 13: 7 }, prog: [[60, 64, 67, 71], [57, 60, 64, 67], [62, 65, 69, 72], [55, 59, 62, 65]], root: [48, 45, 50, 43], pad: 'sine', padVol: .04, lead: [3, 7, 11, 15], stab: true, leadOct: 12, leadVol: .022 },
-  fra: { title: 'Almost Fra', genre: 'Trap', bpm: 140, kick: [0, 7, 10], clap: [8], hat: [0, 2, 4, 6, 8, 10, 12, 13, 14, 15], roll: [13, 14, 15], hatVol: .05, bass: [0, 7, 10], bassType: '808', prog: [[57, 60, 64], [56, 60, 63], [53, 57, 60], [52, 56, 59]], root: [45, 44, 41, 40], pad: 'sawtooth', padVol: .025, padCut: 900, lead: [0, 3, 6], leadOct: 24, leadVol: .02 },
-  close: { title: 'So Close (Voice Note)', genre: 'Slow jam', bpm: 84, kick: [0, 10], clap: [8], hat: [2, 6, 10, 14], hatVol: .035, bass: [0, 8], bassWave: 'triangle', bassCut: 700, prog: [[57, 60, 64], [53, 57, 60], [48, 52, 55], [52, 55, 59]], root: [45, 41, 48, 40], pad: 'triangle', padVol: .05, lead: [0, 2, 4, 6, 8, 10, 12, 14], leadWave: 'triangle', leadOct: 12, leadVol: .03, leadDur: .3, echo: true },
-  ghost: { title: 'Seen, No Reply', genre: 'Ambient', bpm: 92, kick: [0], clap: [], hat: [], bass: [0], bassWave: 'sine', bassCut: 400, prog: [[57, 60, 64], [50, 53, 57], [52, 55, 59], [57, 60, 64]], root: [45, 38, 40, 45], pad: 'triangle', padVol: .045, lead: [0, 6, 11], leadWave: 'triangle', leadOct: 24, leadVol: .04, leadDur: .4, echo: true },
-  testimony: { title: 'Testimony', genre: 'Afrobeats', bpm: 108, kick: [0, 7, 8, 13], clap: [4, 12], rim: [3, 10], shaker: true, hat: [], bass: [0, 3, 6, 8, 11, 14], bassWave: 'triangle', bassCut: 800, bassVol: .25, prog: [[60, 64, 67], [65, 69, 72], [67, 71, 74], [64, 67, 71]], root: [48, 53, 55, 52], pad: 'sawtooth', padVol: .025, padCut: 1800, lead: [2, 5, 10, 13], stab: true, leadOct: 12, leadVol: .025 },
-  build: { title: 'Builder Beat', genre: 'House', bpm: 118, kick: [0, 4, 8, 12], clap: [4, 12], hat: [2, 6, 10, 14], hatVol: .08, bass: [0, 2, 4, 6, 8, 10, 12, 14], bassOct: { 2: 12, 6: 12, 10: 12, 14: 12 }, prog: [[62, 65, 69], [58, 62, 65], [60, 64, 67], [57, 60, 64]], root: [50, 46, 48, 45], pad: 'triangle', lead: [0, 3, 6, 9, 12], leadOct: 24, leadVol: .022 },
-};
-// Real songs each result points to. Edit this list to swap in your own picks.
-const SONGS = {
-  motion: { artist: 'Asake', title: 'Terminator', year: 2023 },
-  fra: { artist: 'Rema', title: 'Calm Down', year: 2022 },
-  close: { artist: 'Burna Boy', title: 'Last Last', year: 2022 },
-  ghost: { artist: 'Davido ft. Musa Keys', title: 'Unavailable', year: 2023 },
-  testimony: { artist: 'Kizz Daniel ft. Tekno', title: 'Buga', year: 2022 },
-  build: { artist: 'Asake', title: 'Lonely At The Top', year: 2023 },
-  still: { artist: 'Ayra Starr', title: 'Rush', year: 2022 },
-};
-const songLinks = sg => { const q = encodeURIComponent(`${sg.artist.replace(/ ft\..*$/, '')} ${sg.title}`); return { spotify: 'https://open.spotify.com/search/' + q, apple: 'https://music.apple.com/search?term=' + q, youtube: 'https://www.youtube.com/results?search_query=' + q }; };
-const songName = sg => `${sg.title} by ${sg.artist}`;
-const Sound = (() => {
-  let ctx, master, noise, delay, timer, step = 0, next = 0, on = false, muted = false, tr = TRACKS.still, arp = 0;
-  const hz = m => 440 * Math.pow(2, (m - 69) / 12);
-  const VOL = .5;
-  function init(){
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
-    master = ctx.createGain(); master.gain.value = 0;
-    const comp = ctx.createDynamicsCompressor(); master.connect(comp).connect(ctx.destination);
-    noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = noise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-    delay = ctx.createDelay(1); delay.delayTime.value = .33; const fb = ctx.createGain(); fb.gain.value = .35; const wet = ctx.createGain(); wet.gain.value = .45;
-    delay.connect(fb).connect(delay); delay.connect(wet).connect(master);
-  }
-  function env(g, t, a, peak, d){ g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(.0001, t + a + d); }
-  function kick(t, big){ const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(big ? 110 : 150, t); o.frequency.exponentialRampToValueAtTime(38, t + (big ? .35 : .14)); env(g, t, .003, big ? 1.4 : .9, big ? 1.1 : .32); o.connect(g).connect(master); o.start(t); o.stop(t + 1.3); }
-  function nz(t, type, f, peak, d){ const s = ctx.createBufferSource(); s.buffer = noise; const fl = ctx.createBiquadFilter(); fl.type = type; fl.frequency.value = f; const g = ctx.createGain(); env(g, t, .002, peak, d); s.connect(fl).connect(g).connect(master); s.start(t); s.stop(t + d + .05); }
-  function tone(t, m, type, peak, d, cut, echo){ const o = ctx.createOscillator(), fl = ctx.createBiquadFilter(), g = ctx.createGain(); o.type = type; o.frequency.value = hz(m); fl.type = 'lowpass'; fl.frequency.value = cut; env(g, t, .01, peak, d); o.connect(fl).connect(g).connect(master); if (echo) g.connect(delay); o.start(t); o.stop(t + d + .1); }
-  function bass(t, m){
-    if (tr.bassType) { const log = tr.bassType === 'log', o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(hz(m + (log ? 12 : 5)), t); o.frequency.exponentialRampToValueAtTime(hz(m), t + (log ? .06 : .12)); env(g, t, .005, log ? .6 : .75, log ? .32 : .6); o.connect(g).connect(master); o.start(t); o.stop(t + .9); }
-    else tone(t, m, tr.bassWave || 'sawtooth', tr.bassVol || .2, .16, tr.bassCut || 520);
-  }
-  function schedule(){
-    const spb = 60 / tr.bpm / 4;
-    while (next < ctx.currentTime + .12) {
-      const s = step % 16, bar = Math.floor(step / 16) % 4, t = next, ch = tr.prog[bar];
-      if (tr.kick.includes(s)) kick(t);
-      if (tr.clap.includes(s)) { nz(t, 'bandpass', 1700, .3, .16); nz(t + .012, 'bandpass', 1300, .16, .12); }
-      if (tr.rim && tr.rim.includes(s)) nz(t, 'bandpass', 3200, .12, .04);
-      if (tr.hat.includes(s)) nz(t, 'highpass', 7500, tr.hatVol || .06, .035);
-      if (tr.roll && tr.roll.includes(s)) nz(t + spb / 2, 'highpass', 8000, .05, .03);
-      if (tr.shaker) nz(t, 'bandpass', 6000, s % 4 === 2 ? .05 : .025, .045);
-      if (tr.bass.includes(s)) bass(t, tr.root[bar] + ((tr.bassOct || {})[s] || 0));
-      if (s === 0 && tr.pad) ch.forEach(m => tone(t, m + 12, tr.pad, tr.padVol || .045, spb * 15, tr.padCut || 2200, tr.echo));
-      if (tr.lead && tr.lead.includes(s)) {
-        if (tr.stab) ch.forEach(m => tone(t, m + (tr.leadOct || 12), 'triangle', tr.leadVol || .03, .12, 2600));
-        else { tone(t, ch[arp % ch.length] + (tr.leadOct || 24), tr.leadWave || 'square', tr.leadVol || .025, tr.leadDur || .1, 3200, tr.echo); arp++; }
-      }
-      next += spb; step++;
-    }
-  }
-  return {
-    setTrack(k){ tr = TRACKS[k] || TRACKS.still; step = 0; arp = 0; if (ctx) next = Math.max(next, ctx.currentTime + .05); },
-    start(k){ if (k) this.setTrack(k); try { if (!ctx) init(); ctx.resume(); } catch { return; } if (on) return; on = true; next = ctx.currentTime + .06; master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(muted ? 0 : VOL, ctx.currentTime, .4); timer = setInterval(schedule, 25); },
-    stop(){ if (!on) return; on = false; clearInterval(timer); master.gain.setTargetAtTime(0, ctx.currentTime, .15); },
-    hit(){ if (!on || muted) return; const t = ctx.currentTime; kick(t, true); nz(t, 'lowpass', 2600, .55, .7); },
-    toggle(){ muted = !muted; if (ctx) master.gain.setTargetAtTime(muted || !on ? 0 : VOL, ctx.currentTime, .1); return muted; },
-    get on(){ return on; }, get muted(){ return muted; },
-  };
-})();
-
 /* ================= confetti ================= */
 const Confetti = (() => {
   const cv = $('#confetti'), cx = cv.getContext('2d'); let parts = [], raf = 0;
@@ -1144,7 +1079,7 @@ function updateOrb(S){
   P.colors.forEach((c, i) => orb.style.setProperty('--o' + (i + 1), c));
   form.style.setProperty('--gobg', P.bold.bg); form.style.setProperty('--gofg', P.bold.fg);
   $('#orbname').textContent = auraTitle(S);
-  $('#orbtxt').textContent = `${S.persona.name} · your song: ${songName(SONGS[S.track])}`;
+  $('#orbtxt').textContent = `${S.persona.name} · your story will use these colours`;
 }
 ta.addEventListener('input', () => { clearTimeout(liveTimer); liveTimer = setTimeout(updateLive, 200); });
 $('#total').addEventListener('input', updateLive);
@@ -1232,7 +1167,7 @@ function buildSlides(S){
   const add = s => L.push(Object.assign({ dur: 6500 }, s));
   const N = (ng, en) => S.naija ? ng : en;
 
-  add({ t: 't-ink', dur: null, gate: true, h: () => `<p class="eyebrow rise">${who ? who + ', your' : 'Your'} ${yr} L Wrapped is ready</p><p class="big rise">LinkedIn saw your <span class="acc">wins.</span></p><p class="say rise">This is everything else.</p><div class="actions interactive rise" style="justify-content:flex-start;margin-top:18px"><button class="btn" id="start-sound" type="button">Play with sound</button><button class="btn alt" id="start-quiet" type="button">Play muted</button></div><p class="sub rise" style="margin-top:14px;font-size:15px">Your results picked your soundtrack. Sound on for the full experience.</p>`,
+  add({ t: 't-ink', dur: null, gate: true, h: () => `<p class="eyebrow rise">${who ? who + ', your' : 'Your'} ${yr} L Wrapped is ready</p><p class="big rise">LinkedIn saw your <span class="acc">wins.</span></p><p class="say rise">This is everything else.</p><div class="actions interactive rise" style="justify-content:flex-start;margin-top:18px"><button class="btn" id="start-sound" type="button">Start</button></div>`,
     card: { eyebrow: `My ${yr} L Wrapped`, big: 'LinkedIn saw my wins.', line: 'This is everything else.' } });
 
   add({ t: 't-legal', dur: null, h: () => `<p class="eyebrow rise">Quick question</p><p class="say rise">How many Ls do you think you took in ${yr}?</p><div class="guess interactive">${guessBuckets(nL).map((b, i) => `<button type="button" class="rise" data-i="${i}">${b.label}</button>`).join('')}</div><p class="verdict" id="verdict" aria-live="polite"></p>`,
@@ -1252,11 +1187,6 @@ function buildSlides(S){
   const bdLine = S.total ? `Out of ${S.total} applications, ${Math.round(nL / S.total * 100)}% ended in an L${S.ghosted ? ` and ${Math.round(S.ghosted / S.total * 100)}% ended in silence` : ''}.` : `Of everything that came back, ${Math.round(nL / Math.max(S.responses, 1) * 100)}% was a no.`;
   add({ t: 't-violet', h: () => `<p class="eyebrow rise">Your inbox, broken down</p><p class="say rise">${bdLine}</p><div class="split rise">${segs.map(s => `<span style="width:${s[1] / sum * 100}%;background:${s[2]}"></span>`).join('')}</div><div class="legend rise">${segs.map(s => `<div><span class="sw" style="background:${s[2]}"></span><b>${s[1]}</b><i>${s[0]}</i></div>`).join('')}</div>`,
     card: { eyebrow: 'My inbox, broken down', big: bdLine, rows: segs.slice(0, 4).map(s => [s[1], s[0]]) } });
-
-  const TR = TRACKS[S.track], SG = SONGS[S.track], SL = songLinks(SG);
-  const why = { motion: N(`${S.total} applications. Na pure motion, executions only. We move.`, `${S.total} applications. That's not job hunting, that's pure motion.`), fra: N(`${nL} Ls. You almost fra this year alone. (Fra: to go completely crazy.)`, `${nL} Ls. Only something this loud could match it.`), close: N('For every final round that almost happened. E remain small.', 'For every final round that almost happened.'), ghost: N(`For the ${S.ghosted} applications that left you on seen. E choke.`, `For the ${S.ghosted} applications that never wrote back.`), testimony: N('After all the Ls, the W landed. Testimony time!', 'After all the Ls, the W landed. This one is a celebration.'), build: N(`For the ${S.nProj} projects you built while the Ls rolled in. Builder on motion.`, `For the ${S.nProj} projects you built while the Ls rolled in.`), still: N('Steady Ls, steady applying. No dulling.', 'Steady Ls, steady applying. This one is for the grind.') }[S.track];
-  add({ t: 't-ink', dur: 8000, h: () => `<p class="eyebrow rise">Your ${yr} song</p><div class="eq rise">${'<i></i>'.repeat(10)}</div><p class="big rise"><span class="acc">${esc(SG.title)}</span></p><p class="say rise" style="margin-top:-6px">${esc(SG.artist)} · ${SG.year}</p><p class="sub rise" style="margin-bottom:16px">${esc(why)}</p><div class="actions interactive rise" style="justify-content:flex-start"><a class="btn" href="${SL.spotify}" target="_blank" rel="noopener">Spotify</a><a class="btn alt" href="${SL.apple}" target="_blank" rel="noopener">Apple Music</a><a class="btn alt" href="${SL.youtube}" target="_blank" rel="noopener">YouTube</a></div><p class="meta rise" style="margin-top:16px">Different results get a different song. The beat playing now is our own ${TR.genre.toLowerCase()} vibe.</p>`,
-    card: { eyebrow: `My ${yr} song of the year`, big: SG.title, line: `${SG.artist}. ${why}` } });
 
   if (S.kinds.length > 1) add({ t: 't-pink', h: () => `<p class="eyebrow rise">Your top genres</p><p class="say rise">You didn't just get rejected from jobs. You diversified.</p><ol class="toplist">${S.kinds.slice(0, 5).map(([k, n], i) => `<li class="rise"><span class="n">${i + 1}</span><span class="p">${esc(k)}</span><span class="c">${n} email${n === 1 ? '' : 's'}</span></li>`).join('')}</ol>`,
     card: { eyebrow: 'My top rejection genres', big: S.kinds[0][0], line: 'I didn\'t just get rejected from jobs. I diversified.', rows: S.kinds.slice(0, 4).map(([k, n]) => [n, k]) } });
@@ -1368,7 +1298,7 @@ function summarySpec(){
 }
 function finalHTML(){
   return `<div class="final"><p class="eyebrow">Your L Wrapped</p><img id="cardimg" alt="Your L Wrapped summary card"><div class="fmt" id="finalfmt">${fmtButtons(fmt)}</div>
-  <div class="actions"><button class="btn" id="dl" type="button">Save image</button><button class="btn alt" id="replay" type="button">Watch again</button></div>
+  <div class="actions"><button class="btn" id="dl" type="button">Save image</button><a class="btn alt" id="fin-wa" target="_blank" rel="noopener">WhatsApp</a><button class="btn alt" id="fin-ig" type="button">Instagram</button><button class="btn alt" id="replay" type="button">Watch again</button></div>
   <div class="composer"><h3>Write my post</h3><div class="fmt" id="tones"><button type="button" data-t="vulnerable" aria-pressed="${tone === 'vulnerable'}">Honest</button><button type="button" data-t="funny" aria-pressed="${tone === 'funny'}">Funny</button><button type="button" data-t="motivational" aria-pressed="${tone === 'motivational'}">Motivating</button></div>
   <label class="small" for="posttext">Edit it however you like. Then attach your image.</label><textarea id="posttext" spellcheck="true"></textarea>
   <div class="actions" style="justify-content:flex-start"><button class="btn" id="copypost" type="button">Copy post</button><a class="btn alt" id="li" target="_blank" rel="noopener">Post on LinkedIn</a><a class="btn alt" id="tw" target="_blank" rel="noopener">Post on X</a></div></div>
@@ -1391,6 +1321,11 @@ async function wireFinal(){
   setTone(tone);
   $('#copypost').onclick = async () => { try { await navigator.clipboard.writeText(ptext.value); toast('Post copied'); } catch { ptext.select(); toast('Selected. Copy it with your keyboard'); } };
   $('#dl').onclick = () => state.summary && saveImage(state.summary, `l-wrapped-${S.year}-${fmt}.png`);
+  const finCap = `${POSTS.x}\n\nGet your own L Wrapped: ${appUrl()}`;
+  renderCard(summarySpec(), 'story').then(r => { state.summaryStory = r; });
+  $('#fin-wa').href = shareLinks(finCap).wa;
+  $('#fin-wa').onclick = e => { if (canShareFiles() && state.summary) { e.preventDefault(); shareImage(state.summary, finCap); } };
+  $('#fin-ig').onclick = () => shareInstagram(state.summaryStory || state.summary, finCap, `l-wrapped-${S.year}-story.png`);
   $('#replay').onclick = () => { state = {}; slides = buildSlides(S); show(1); };
   $('#again').onclick = closeStory;
   const inv = $('#invitetext');
@@ -1492,16 +1427,18 @@ let toastT;
 function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 1800); }
 
 /* ================= share sheet ================= */
-let sheetFmt = 'story', sheetCard = null;
+let sheetFmt = 'story', sheetCard = null, sheetStory = null;
 async function openSheet(){
   const s = slides[cur]; const spec = s.final ? summarySpec() : s.card; if (!spec) return;
   pause(true, 'sheet');
   $('#sheet').hidden = false; $('#sheetfmt').innerHTML = fmtButtons(sheetFmt);
-  const draw = async () => { sheetCard = await renderCard({ theme: s.t, ...spec }, sheetFmt); $('#sheetimg').src = sheetCard.url; };
+  const draw = async () => { sheetCard = await renderCard({ theme: s.t, ...spec }, sheetFmt); $('#sheetimg').src = sheetCard.url; sheetStory = sheetFmt === 'story' ? sheetCard : await renderCard({ theme: s.t, ...spec }, 'story'); };
   $('#sheetfmt').onclick = e => { const b = e.target.closest('button'); if (!b) return; sheetFmt = b.dataset.f; $('#sheetfmt').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); draw(); };
   $('#sheetsave').onclick = () => sheetCard && saveImage(sheetCard, `l-wrapped-${S.year}-slide-${cur}.png`);
   const cap = `${spec.eyebrow}: ${spec.big}${spec.line ? '\n' + spec.line : ''}\n\nGet your own L Wrapped: ${appUrl()}\n#LWrapped`;
   const l = shareLinks(cap); $('#sh-wa').href = l.wa; $('#sh-x').href = l.x; $('#sh-li').href = l.li;
+  $('#sh-wa').onclick = e => { if (canShareFiles() && sheetCard) { e.preventDefault(); shareImage(sheetCard, cap); } };
+  $('#sh-ig').onclick = () => shareInstagram(sheetStory || sheetCard, cap, `l-wrapped-${S.year}-story.png`);
   $('#sh-copy').onclick = async () => toast(await copyText(cap) ? 'Caption copied. Attach the image.' : 'Copy was blocked here');
   const nat = $('#sheetnative'); nat.hidden = !navigator.share;
   nat.onclick = async () => { try { const f = new File([sheetCard.blob], 'l-wrapped.png', { type: 'image/png' }); if (navigator.canShare && navigator.canShare({ files: [f] })) await navigator.share({ files: [f], text: cap }); else await navigator.share({ text: cap }); } catch {} };
@@ -1534,7 +1471,7 @@ function startStory(stats){
   show(0);
   loadFonts();
 }
-function closeStory(){ cancelAnimationFrame(T.raf); T.dur = 0; Sound.stop(); Confetti.clear(); $('#sheet').hidden = true; T.holds.clear(); story.hidden = true; document.body.style.overflow = ''; }
+function closeStory(){ cancelAnimationFrame(T.raf); T.dur = 0; Confetti.clear(); $('#sheet').hidden = true; T.holds.clear(); story.hidden = true; document.body.style.overflow = ''; }
 function animateCounts(root){
   root.querySelectorAll('.count').forEach(el => {
     const n = +el.dataset.n, t0 = performance.now(), dur = REDUCED ? 0 : 1000;
@@ -1546,7 +1483,6 @@ let fxTimers = [];
 function show(i){
   if (i < 0) i = 0;
   if (i >= slides.length) i = slides.length - 1;
-  if (i > 0 && slides[0].gate && cur === 0 && !Sound.on && !state.started) state.started = true;
   cancelAnimationFrame(T.raf); fxTimers.forEach(clearTimeout); fxTimers = []; Confetti.clear();
   const back = i < cur;
   cur = i;
@@ -1568,12 +1504,11 @@ function show(i){
   $('#share').hidden = !(s.card || s.final);
   $('#cardshare').hidden = !s.card || !!s.final || !!s.gate;
   animateCounts(slideEl);
-  if (s.hit) fxTimers.push(setTimeout(() => { Sound.hit(); if (!REDUCED) { story.classList.remove('shake'); void story.offsetWidth; story.classList.add('shake'); } }, s.hit));
+  if (s.hit) fxTimers.push(setTimeout(() => { if (!REDUCED) { story.classList.remove('shake'); void story.offsetWidth; story.classList.add('shake'); } }, s.hit));
   if (s.confetti) fxTimers.push(setTimeout(() => Confetti.burst([...PAL.colors, PAL.soft.bg, '#fff4e8']), s.confetti));
   if (s.after) s.after(slideEl);
   if (s.gate) {
-    const begin = withSound => { if (withSound) Sound.start(S && S.track); else if (!Sound.muted) { Sound.toggle(); Sound.start(S && S.track); } syncMute(); show(1); };
-    $('#start-sound').onclick = () => begin(true); $('#start-quiet').onclick = () => begin(false);
+    $('#start-sound').onclick = () => show(1);
     $('#start-sound').focus({ preventScroll: true });
   }
   if (s.final) { wireFinal(); slideEl.scrollTop = 0; }
@@ -1587,8 +1522,6 @@ function applyTheme(t){
   story.dataset.tone = th.dark ? 'dark' : 'light';
 }
 story.addEventListener('pointermove', e => { if (REDUCED) return; story.style.setProperty('--px', (e.clientX / innerWidth - .5).toFixed(3)); story.style.setProperty('--py', (e.clientY / innerHeight - .5).toFixed(3)); });
-function syncMute(){ const m = Sound.muted || !Sound.on; $('#wave').toggleAttribute('hidden', m); $('#cross').toggleAttribute('hidden', !m); $('#mute').setAttribute('aria-label', m ? 'Turn music on' : 'Mute music'); }
-$('#mute').addEventListener('click', () => { if (!Sound.on) { if (Sound.muted) Sound.toggle(); Sound.start(S && S.track); } else Sound.toggle(); syncMute(); });
 $('#close').addEventListener('click', closeStory);
 
 // tap / hold / swipe
