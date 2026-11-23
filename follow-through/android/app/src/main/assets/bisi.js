@@ -1,125 +1,172 @@
-/* Bisi the bee — Follow-Through's mascot. bisiSvg(mood, size) returns an SVG string.
- * Moods: happy, worried, sassy, sleepy, party, crying. Original character; flat style. */
+/* Bisi the bee — Follow-Through's mascot. bisiSvg(mood, size, animate, style) returns an SVG string.
+ * Moods: happy, worried, sassy, sleepy, party, crying. Styles: polished (round body) and plushie (big head).
+ * Original character, hand-drawn look with shading and fuzz. */
 (function (root) {
-  var INK = '#2B1D04', BODY = '#F6C343', BODY_SHADE = '#E8A92B', CHEEK = '#F29B8B', WING = '#CFEAF6', WING_EDGE = '#8FC3DA', GREEN = '#1E6A4E';
+  var INK = '#1E1606', BODY = '#F6C343', CHEEK = '#F29B8B', WING = '#CFEAF6', WING_EDGE = '#8FC3DA', GREEN = '#1E6A4E', TEAR = '#8FD0F0';
+  var uid = 0;
 
-  function eyes(mood) {
+  /* ---------- shared pieces ---------- */
+  function defs(id, clip) {
+    return '<defs>' +
+      '<radialGradient id="bb' + id + '" cx="0.36" cy="0.3" r="0.8"><stop offset="0" stop-color="#FFE68A"/><stop offset="0.55" stop-color="#F6C343"/><stop offset="1" stop-color="#D3901A"/></radialGradient>' +
+      '<linearGradient id="bw' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.96"/><stop offset="1" stop-color="#BFE3F3" stop-opacity="0.85"/></linearGradient>' +
+      '<pattern id="bh' + id + '" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(40)"><line x1="0" y1="0" x2="0" y2="6" stroke="' + INK + '" stroke-width="1.3" opacity="0.26"/></pattern>' +
+      '<clipPath id="bc' + id + '">' + clip + '</clipPath>' +
+      '<filter id="bf' + id + '" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="3"/><feDisplacementMap in="SourceGraphic" scale="6"/></filter>' +
+      '</defs>';
+  }
+  function flap(cx, cy, deg, animate) {
+    return animate ? '<animateTransform attributeName="transform" type="rotate" values="0 ' + cx + ' ' + cy + ';' + deg + ' ' + cx + ' ' + cy + ';0 ' + cx + ' ' + cy + '" dur="0.18s" repeatCount="indefinite"/>' : '';
+  }
+  function droops(mood) { return mood === 'sleepy' || mood === 'crying'; }
+  function stroke(w) { return ' stroke="' + INK + '" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round"'; }
+
+  /* ---------- Polished Bisi: one round body ---------- */
+  function polishedBase(id, mood, animate) {
+    var ant = droops(mood)
+      ? '<path d="M86 64 C80 50 66 46 58 52 C50 58 56 66 62 62"' + stroke(3.6) + ' fill="none"/><path d="M114 64 C120 50 134 46 142 52 C150 58 144 66 138 62"' + stroke(3.6) + ' fill="none"/>'
+      : '<path d="M86 64 C80 44 70 34 62 32 C54 30 51 41 60 43"' + stroke(3.6) + ' fill="none"/><path d="M114 64 C120 44 130 34 138 32 C146 30 149 41 140 43"' + stroke(3.6) + ' fill="none"/>';
+    return '<ellipse cx="100" cy="188" rx="46" ry="7" fill="' + INK + '" opacity="0.14"/>' +
+      '<g>' + flap(82, 70, -22, animate) +
+        '<path d="M80 66 C42 20 8 46 28 74 C42 92 70 84 80 66Z" fill="url(#bw' + id + ')"' + stroke(3) + '/>' +
+        '<path d="M76 68 C60 58 42 58 30 66 M74 72 C60 74 48 78 40 82" stroke="' + WING_EDGE + '" stroke-width="1.8" fill="none"/></g>' +
+      '<g>' + flap(118, 70, 22, animate) +
+        '<path d="M120 66 C158 20 192 46 172 74 C158 92 130 84 120 66Z" fill="url(#bw' + id + ')"' + stroke(3) + '/>' +
+        '<path d="M124 68 C140 58 158 58 170 66 M126 72 C140 74 152 78 160 82" stroke="' + WING_EDGE + '" stroke-width="1.8" fill="none"/></g>' +
+      (mood === 'party' ? '' : ant) +
+      '<path d="M92 166 L100 184 L108 166Z" fill="' + INK + '"/>' +
+      '<path d="M80 164 q-4 10 -12 10 M120 164 q4 10 12 10"' + stroke(4.5) + ' fill="none"/>' +
+      '<ellipse cx="100" cy="114" rx="60" ry="56" fill="url(#bb' + id + ')"/>' +
+      '<g clip-path="url(#bc' + id + ')">' +
+        '<path d="M36 128 Q100 144 164 128 L164 142 Q100 158 36 142Z" fill="' + INK + '"/>' +
+        '<path d="M40 152 Q100 168 160 152 L160 166 Q100 182 40 166Z" fill="' + INK + '"/>' +
+        '<path d="M100 172 A60 56 0 0 0 162 112 L162 172Z" fill="url(#bh' + id + ')"/></g>' +
+      '<ellipse cx="100" cy="114" rx="61" ry="57" fill="none" stroke="#C98A1B" stroke-width="4" filter="url(#bf' + id + ')"/>' +
+      '<ellipse cx="100" cy="114" rx="60" ry="56" fill="none" stroke="' + INK + '" stroke-width="3.4"/>' +
+      '<ellipse cx="72" cy="80" rx="16" ry="9" transform="rotate(-25 72 80)" fill="#FFFFFF" opacity="0.6"/>' +
+      '<circle cx="92" cy="70" r="3" fill="#FFFFFF" opacity="0.75"/>' +
+      '<ellipse cx="62" cy="114" rx="9" ry="5.5" fill="' + CHEEK + '" opacity="' + (mood === 'sassy' ? 0.45 : 0.95) + '"/>' +
+      '<ellipse cx="138" cy="114" rx="9" ry="5.5" fill="' + CHEEK + '" opacity="' + (mood === 'sassy' ? 0.45 : 0.95) + '"/>';
+  }
+  function bigEye(cx, cy, look) {
+    return '<ellipse cx="' + cx + '" cy="' + cy + '" rx="11" ry="13" fill="#FFFFFF"' + stroke(3) + '/>' +
+      '<ellipse cx="' + (cx + 2 + look[0]) + '" cy="' + (cy + 3 + look[1]) + '" rx="6.5" ry="8" fill="' + INK + '"/>' +
+      '<circle cx="' + (cx + 5 + look[0]) + '" cy="' + (cy - 1 + look[1]) + '" r="2.6" fill="#FFFFFF"/>' +
+      '<circle cx="' + (cx - 1 + look[0]) + '" cy="' + (cy + 7 + look[1]) + '" r="1.3" fill="#FFFFFF"/>';
+  }
+  function polishedFace(mood) {
     switch (mood) {
       case 'worried':
-        return eye(47, 58, 6.5, 0, 1) + eye(73, 58, 6.5, 0, 1) +
-          '<path d="M39 47 L52 50" stroke="' + INK + '" stroke-width="3" stroke-linecap="round"/>' +
-          '<path d="M81 47 L68 50" stroke="' + INK + '" stroke-width="3" stroke-linecap="round"/>';
+        return bigEye(80, 98, [0, -3]) + bigEye(120, 98, [0, -3]) +
+          '<path d="M68 86 L90 78"' + stroke(3.6) + '/><path d="M132 86 L110 78"' + stroke(3.6) + '/>' +
+          '<path d="M86 127 Q93 121 100 127 Q107 133 114 127"' + stroke(3.4) + ' fill="none"/>' +
+          '<path d="M150 66 Q143 77 150 81 Q157 77 150 66Z" fill="' + TEAR + '"' + stroke(2) + '/>';
       case 'sassy':
-        // half-closed, unimpressed lids + one raised brow
-        return eye(47, 59, 6.5, 0, 0) + eye(73, 59, 6.5, 0, 0) +
-          '<path d="M40 56 H54" stroke="' + INK + '" stroke-width="3.2" stroke-linecap="round"/>' +
-          '<rect x="40" y="51" width="14" height="5" fill="' + BODY + '"/>' +
-          '<path d="M66 56 H80" stroke="' + INK + '" stroke-width="3.2" stroke-linecap="round"/>' +
-          '<rect x="66" y="51" width="14" height="5" fill="' + BODY + '"/>' +
-          '<path d="M40 48 L53 50" stroke="' + INK + '" stroke-width="3" stroke-linecap="round"/>' +
-          '<path d="M67 46 Q73 41 80 45" stroke="' + INK + '" stroke-width="3" fill="none" stroke-linecap="round"/>';
+        return '<ellipse cx="80" cy="100" rx="11" ry="11" fill="#FFFFFF"' + stroke(3) + '/><circle cx="85" cy="102" r="6" fill="' + INK + '"/>' +
+          '<ellipse cx="120" cy="100" rx="11" ry="11" fill="#FFFFFF"' + stroke(3) + '/><circle cx="125" cy="102" r="6" fill="' + INK + '"/>' +
+          '<path d="M67 99 Q80 95 93 99 L93 87 L67 87Z" fill="#F6C343"/><path d="M68 99 Q80 95 92 99"' + stroke(3.2) + ' fill="none"/>' +
+          '<path d="M107 99 Q120 95 133 99 L133 87 L107 87Z" fill="#F6C343"/><path d="M108 99 Q120 95 132 99"' + stroke(3.2) + ' fill="none"/>' +
+          '<path d="M68 84 L92 88"' + stroke(3.6) + '/><path d="M108 80 Q120 70 133 77"' + stroke(3.6) + ' fill="none"/>' +
+          '<path d="M90 126 Q104 128 114 120"' + stroke(3.4) + ' fill="none"/>' +
+          '<path d="M44 134 Q74 152 124 138"' + stroke(13) + ' fill="none"/><path d="M44 134 Q74 152 124 138" stroke="#F6C343" stroke-width="7" stroke-linecap="round" fill="none"/>' +
+          '<path d="M156 134 Q126 152 76 138"' + stroke(13) + ' fill="none"/><path d="M156 134 Q126 152 76 138" stroke="#F6C343" stroke-width="7" stroke-linecap="round" fill="none"/>';
       case 'sleepy':
-        return '<path d="M41 59 Q47 63 53 59" stroke="' + INK + '" stroke-width="3" fill="none" stroke-linecap="round"/>' +
-          '<path d="M67 59 Q73 63 79 59" stroke="' + INK + '" stroke-width="3" fill="none" stroke-linecap="round"/>' +
-          '<text x="88" y="38" font-family="Arial,sans-serif" font-weight="700" font-size="12" fill="' + GREEN + '">z</text>' +
-          '<text x="96" y="28" font-family="Arial,sans-serif" font-weight="700" font-size="9" fill="' + GREEN + '">z</text>';
+        return '<path d="M70 100 Q80 107 90 100"' + stroke(3.6) + ' fill="none"/><path d="M110 100 Q120 107 130 100"' + stroke(3.6) + ' fill="none"/>' +
+          '<ellipse cx="100" cy="124" rx="5" ry="6" fill="' + INK + '"/>' +
+          '<text x="150" y="58" font-family="Patrick Hand, Arial, sans-serif" font-weight="700" font-size="22" fill="' + GREEN + '">z</text>' +
+          '<text x="166" y="40" font-family="Patrick Hand, Arial, sans-serif" font-weight="700" font-size="16" fill="' + GREEN + '">z</text>';
       case 'party':
-        return '<path d="M41 60 Q47 52 53 60" stroke="' + INK + '" stroke-width="3.2" fill="none" stroke-linecap="round"/>' +
-          '<path d="M67 60 Q73 52 79 60" stroke="' + INK + '" stroke-width="3.2" fill="none" stroke-linecap="round"/>';
+        return '<path d="M70 102 Q80 90 90 102"' + stroke(3.8) + ' fill="none"/><path d="M110 102 Q120 90 130 102"' + stroke(3.8) + ' fill="none"/>' +
+          '<path d="M84 116 Q100 142 116 116Z" fill="' + INK + '"/><path d="M91 127 Q100 134 109 127" fill="#E86B5A"/>' +
+          '<path d="M100 6 L80 58 L120 58Z" fill="' + GREEN + '"' + stroke(3) + '/><circle cx="100" cy="7" r="7" fill="' + '#F5B700' + '"' + stroke(2.4) + '/>' +
+          '<circle cx="92" cy="44" r="3" fill="#F5B700"/><circle cx="105" cy="32" r="3" fill="#F5B700"/>' +
+          '<path d="M24 40 l8 -8 M176 46 l-8 -8 M18 88 l10 0 M172 92 l10 0" stroke="#D9533B" stroke-width="4" stroke-linecap="round"/>';
       case 'crying':
-        return '<path d="M41 57 Q47 61 53 57" stroke="' + INK + '" stroke-width="3" fill="none" stroke-linecap="round"/>' +
-          '<path d="M67 57 Q73 61 79 57" stroke="' + INK + '" stroke-width="3" fill="none" stroke-linecap="round"/>' +
-          '<path d="M44 63 Q41 71 44 74 Q48 71 44 63 Z" fill="#6FB7E0"/>' +
-          '<path d="M77 63 Q74 71 77 74 Q81 71 77 63 Z" fill="#6FB7E0"/>' +
-          '<path d="M39 50 L52 47" stroke="' + INK + '" stroke-width="3" stroke-linecap="round"/>' +
-          '<path d="M81 50 L68 47" stroke="' + INK + '" stroke-width="3" stroke-linecap="round"/>';
+        return '<path d="M70 92 L88 100 L70 108"' + stroke(3.6) + ' fill="none"/><path d="M130 92 L112 100 L130 108"' + stroke(3.6) + ' fill="none"/>' +
+          '<path d="M66 84 L88 80"' + stroke(3.2) + '/><path d="M134 84 L112 80"' + stroke(3.2) + '/>' +
+          '<path d="M80 110 Q74 126 78 146" stroke="' + TEAR + '" stroke-width="6" stroke-linecap="round" fill="none"/>' +
+          '<path d="M120 110 Q126 126 122 146" stroke="' + TEAR + '" stroke-width="6" stroke-linecap="round" fill="none"/>' +
+          '<path d="M84 132 Q100 114 116 132 Q100 126 84 132Z" fill="' + INK + '"/>';
       default: // happy
-        return eye(47, 58, 7, -1, 1) + eye(73, 58, 7, -1, 1);
+        return bigEye(80, 98, [0, 0]) + bigEye(120, 98, [0, 0]) +
+          '<path d="M88 120 Q100 136 112 120Z" fill="' + INK + '"/><path d="M93 127 Q100 133 107 127" fill="#E86B5A"/>';
     }
-  }
-  function eye(cx, cy, r, look, shine) {
-    return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="#fff" stroke="' + INK + '" stroke-width="2.4"/>' +
-      '<circle cx="' + (cx + 1) + '" cy="' + (cy + 1 + look) + '" r="' + (r * 0.5) + '" fill="' + INK + '"/>' +
-      (shine ? '<circle cx="' + (cx + 2.5) + '" cy="' + (cy - 1.5 + look) + '" r="1.4" fill="#fff"/>' : '');
-  }
-  function mouth(mood) {
-    switch (mood) {
-      case 'worried': return '<path d="M53 75 Q56 72 60 75 Q64 78 67 75" stroke="' + INK + '" stroke-width="3" fill="none" stroke-linecap="round"/>';
-      case 'sassy': return '<path d="M53 75 Q62 77 68 72" stroke="' + INK + '" stroke-width="3" fill="none" stroke-linecap="round"/>';
-      case 'sleepy': return '<ellipse cx="60" cy="75" rx="3.2" ry="3.8" fill="' + INK + '"/>';
-      case 'party': return '<path d="M50 70 Q60 84 70 70 Z" fill="' + INK + '"/><path d="M55 75 Q60 79 65 75" fill="#E86B5A"/>';
-      case 'crying': return '<path d="M52 78 Q60 70 68 78" stroke="' + INK + '" stroke-width="3" fill="none" stroke-linecap="round"/>';
-      default: return '<path d="M52 72 Q60 80 68 72" stroke="' + INK + '" stroke-width="3.2" fill="none" stroke-linecap="round"/>';
-    }
-  }
-  function extras(mood) {
-    if (mood === 'party') {
-      return '<path d="M60 8 L48 34 L72 34 Z" fill="' + GREEN + '" stroke="' + INK + '" stroke-width="2.4" stroke-linejoin="round"/>' +
-        '<circle cx="60" cy="8" r="4" fill="#F3B33D" stroke="' + INK + '" stroke-width="2"/>' +
-        '<circle cx="54" cy="26" r="2" fill="#F3B33D"/><circle cx="63" cy="20" r="2" fill="#F3B33D"/>' +
-        '<path d="M14 30 l4 -4 M106 34 l-4 -4 M18 52 l5 0 M98 56 l5 0" stroke="#D9604A" stroke-width="3" stroke-linecap="round"/>';
-    }
-    if (mood === 'sassy') {
-      // a little honey-pot "deadline" sign tapping energy: crossed arms implied by tiny arms
-      return '';
-    }
-    return '';
-  }
-  function antennae(mood) {
-    if (mood === 'party') return '';
-    var droop = (mood === 'sleepy' || mood === 'crying') ? 8 : 0;
-    return '<path d="M50 34 Q44 22 ' + (40 - droop / 2) + ' ' + (16 + droop) + '" stroke="' + INK + '" stroke-width="3" fill="none" stroke-linecap="round"/>' +
-      '<circle cx="' + (40 - droop / 2) + '" cy="' + (16 + droop) + '" r="4" fill="' + INK + '"/>' +
-      '<path d="M70 34 Q76 22 ' + (80 + droop / 2) + ' ' + (16 + droop) + '" stroke="' + INK + '" stroke-width="3" fill="none" stroke-linecap="round"/>' +
-      '<circle cx="' + (80 + droop / 2) + '" cy="' + (16 + droop) + '" r="4" fill="' + INK + '"/>';
-  }
-  function arms(mood) {
-    if (mood === 'sassy') {
-      // crossed arms over the tummy: outlined in ink, filled in body colour
-      var a1 = 'M30 80 Q44 94 72 88', a2 = 'M90 80 Q76 94 48 88';
-      return '<path d="' + a1 + '" stroke="' + INK + '" stroke-width="9" fill="none" stroke-linecap="round"/>' +
-        '<path d="' + a1 + '" stroke="' + BODY + '" stroke-width="4.5" fill="none" stroke-linecap="round"/>' +
-        '<path d="' + a2 + '" stroke="' + INK + '" stroke-width="9" fill="none" stroke-linecap="round"/>' +
-        '<path d="' + a2 + '" stroke="' + BODY + '" stroke-width="4.5" fill="none" stroke-linecap="round"/>';
-    }
-    if (mood === 'party') {
-      return '<path d="M30 74 Q20 62 22 52" stroke="' + INK + '" stroke-width="4" fill="none" stroke-linecap="round"/>' +
-        '<path d="M90 74 Q100 62 98 52" stroke="' + INK + '" stroke-width="4" fill="none" stroke-linecap="round"/>';
-    }
-    return '<path d="M29 80 Q22 86 24 92" stroke="' + INK + '" stroke-width="4" fill="none" stroke-linecap="round"/>' +
-      '<path d="M91 80 Q98 86 96 92" stroke="' + INK + '" stroke-width="4" fill="none" stroke-linecap="round"/>';
   }
 
-  function bisiSvg(mood, size, animate) {
-    mood = mood || 'happy';
-    size = size || 96;
-    var flap = animate ? '<animateTransform attributeName="transform" type="rotate" values="0 60 60;-8 60 60;0 60 60" dur="0.35s" repeatCount="indefinite"/>' : '';
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="' + size + '" height="' + size + '" role="img" aria-label="Bisi the bee, ' + mood + '">' +
-      '<defs><clipPath id="bisi-body-' + mood + '"><ellipse cx="60" cy="74" rx="34" ry="32"/></clipPath></defs>' +
-      // wings
-      '<g>' + flap +
-        '<ellipse cx="34" cy="44" rx="17" ry="11" transform="rotate(-28 34 44)" fill="' + WING + '" stroke="' + WING_EDGE + '" stroke-width="2.4" opacity="0.95"/>' +
-      '</g>' +
-      '<g>' + (animate ? '<animateTransform attributeName="transform" type="rotate" values="0 60 60;8 60 60;0 60 60" dur="0.35s" repeatCount="indefinite"/>' : '') +
-        '<ellipse cx="86" cy="44" rx="17" ry="11" transform="rotate(28 86 44)" fill="' + WING + '" stroke="' + WING_EDGE + '" stroke-width="2.4" opacity="0.95"/>' +
-      '</g>' +
-      antennae(mood) +
-      // stinger
-      '<path d="M56 104 L60 114 L64 104 Z" fill="' + INK + '"/>' +
-      // body
-      '<ellipse cx="60" cy="74" rx="34" ry="32" fill="' + BODY + '"/>' +
-      '<g clip-path="url(#bisi-body-' + mood + ')">' +
-        '<rect x="20" y="86" width="80" height="7" fill="' + INK + '"/>' +
-        '<rect x="20" y="99" width="80" height="7" fill="' + INK + '"/>' +
-        '<ellipse cx="72" cy="96" rx="30" ry="14" fill="' + BODY_SHADE + '" opacity="0.35"/>' +
-      '</g>' +
-      '<ellipse cx="60" cy="74" rx="34" ry="32" fill="none" stroke="' + INK + '" stroke-width="3"/>' +
-      arms(mood) +
-      // cheeks
-      '<ellipse cx="38" cy="70" rx="5" ry="3.4" fill="' + CHEEK + '" opacity="' + (mood === 'sassy' ? 0.35 : 0.85) + '"/>' +
-      '<ellipse cx="82" cy="70" rx="5" ry="3.4" fill="' + CHEEK + '" opacity="' + (mood === 'sassy' ? 0.35 : 0.85) + '"/>' +
-      eyes(mood) + mouth(mood) + extras(mood) +
-      '</svg>';
+  /* ---------- Plushie Bisi: big head, small body ---------- */
+  function plushieBase(id, mood, animate) {
+    var ant = droops(mood)
+      ? '<path d="M84 32 C78 22 66 22 60 30"' + stroke(3.6) + ' fill="none"/><circle cx="58" cy="34" r="7.5" fill="' + INK + '"/>' +
+        '<path d="M116 32 C122 22 134 22 140 30"' + stroke(3.6) + ' fill="none"/><circle cx="142" cy="34" r="7.5" fill="' + INK + '"/>'
+      : '<path d="M84 32 C80 18 72 12 66 12"' + stroke(3.6) + ' fill="none"/><circle cx="63" cy="12" r="7.5" fill="' + INK + '"/><circle cx="61" cy="10" r="2.2" fill="#FFFFFF"/>' +
+        '<path d="M116 32 C120 18 128 12 134 12"' + stroke(3.6) + ' fill="none"/><circle cx="137" cy="12" r="7.5" fill="' + INK + '"/><circle cx="135" cy="10" r="2.2" fill="#FFFFFF"/>';
+    return '<ellipse cx="100" cy="192" rx="40" ry="6" fill="' + INK + '" opacity="0.14"/>' +
+      '<g>' + flap(76, 136, -30, animate) + '<ellipse cx="58" cy="128" rx="24" ry="15" transform="rotate(-35 58 128)" fill="url(#bw' + id + ')"' + stroke(3) + '/></g>' +
+      '<g>' + flap(124, 136, 30, animate) + '<ellipse cx="142" cy="128" rx="24" ry="15" transform="rotate(35 142 128)" fill="url(#bw' + id + ')"' + stroke(3) + '/></g>' +
+      '<path d="M94 180 L100 194 L106 180Z" fill="' + INK + '"/>' +
+      '<ellipse cx="84" cy="182" rx="8" ry="5" fill="' + INK + '"/><ellipse cx="116" cy="182" rx="8" ry="5" fill="' + INK + '"/>' +
+      '<ellipse cx="100" cy="150" rx="44" ry="34" fill="url(#bb' + id + ')"/>' +
+      '<g clip-path="url(#bc' + id + ')"><rect x="50" y="146" width="100" height="10" fill="' + INK + '"/><rect x="50" y="166" width="100" height="10" fill="' + INK + '"/>' +
+        '<path d="M100 184 A44 34 0 0 0 144 150 L144 184Z" fill="url(#bh' + id + ')"/></g>' +
+      '<ellipse cx="100" cy="150" rx="44" ry="34" fill="none" stroke="' + INK + '" stroke-width="3.2"/>' +
+      (mood === 'party' ? '' : ant) +
+      '<circle cx="100" cy="82" r="54" fill="url(#bb' + id + ')"/>' +
+      '<path d="M100 136 A54 54 0 0 0 154 82 L154 136Z" fill="url(#bh' + id + ')" opacity="0.7"/>' +
+      '<circle cx="100" cy="82" r="55" fill="none" stroke="#C98A1B" stroke-width="4" filter="url(#bf' + id + ')"/>' +
+      '<circle cx="100" cy="82" r="54" fill="none" stroke="' + INK + '" stroke-width="3.4"/>' +
+      '<ellipse cx="72" cy="50" rx="15" ry="8" transform="rotate(-30 72 50)" fill="#FFFFFF" opacity="0.6"/>' +
+      '<ellipse cx="64" cy="102" rx="10" ry="6" fill="' + CHEEK + '"/><ellipse cx="136" cy="102" rx="10" ry="6" fill="' + CHEEK + '"/>';
+  }
+  function plushEye(cx, cy, hx, hy) {
+    return '<ellipse cx="' + cx + '" cy="' + cy + '" rx="12" ry="15" fill="' + INK + '"/>' +
+      '<circle cx="' + (cx + hx) + '" cy="' + (cy + hy) + '" r="5" fill="#FFFFFF"/><circle cx="' + (cx - 3) + '" cy="' + (cy + 7) + '" r="2.2" fill="#FFFFFF"/>';
+  }
+  function star(cx, cy) {
+    return '<path transform="translate(' + cx + ' ' + cy + ')" d="M0 -14 l4.5 9 10 1.4 -7.3 7 1.8 10 -9 -4.7 -9 4.7 1.8 -10 -7.3 -7 10 -1.4z" fill="#F5B700"' + stroke(2.4) + '/>';
+  }
+  function plushieFace(mood) {
+    switch (mood) {
+      case 'worried':
+        return plushEye(80, 86, 3, -8) + plushEye(120, 86, 3, -8) +
+          '<path d="M66 66 L90 60"' + stroke(3.6) + '/><path d="M134 66 L110 60"' + stroke(3.6) + '/>' +
+          '<path d="M90 110 Q95 105 100 110 Q105 115 110 110"' + stroke(3.2) + ' fill="none"/>' +
+          '<path d="M152 46 Q145 57 152 61 Q159 57 152 46Z" fill="' + TEAR + '"' + stroke(2) + '/>';
+      case 'sassy':
+        return '<ellipse cx="80" cy="88" rx="13" ry="9" fill="#FFFFFF"' + stroke(3) + '/><circle cx="88" cy="89" r="5.5" fill="' + INK + '"/>' +
+          '<ellipse cx="120" cy="88" rx="13" ry="9" fill="#FFFFFF"' + stroke(3) + '/><circle cx="128" cy="89" r="5.5" fill="' + INK + '"/>' +
+          '<path d="M66 85 H94"' + stroke(3.6) + '/><path d="M106 85 H134"' + stroke(3.6) + '/>' +
+          '<path d="M68 72 L92 76"' + stroke(3.6) + '/><path d="M108 70 Q120 60 133 66"' + stroke(3.6) + ' fill="none"/>' +
+          '<path d="M92 108 H112"' + stroke(3.4) + '/>' +
+          '<path d="M150 104 q8 -2 10 4 q6 -4 10 2" stroke="#6E5A2C" stroke-width="2.4" fill="none" stroke-linecap="round"/>';
+      case 'sleepy':
+        return '<path d="M68 86 Q80 94 92 86"' + stroke(3.6) + ' fill="none"/><path d="M108 86 Q120 94 132 86"' + stroke(3.6) + ' fill="none"/>' +
+          '<ellipse cx="100" cy="107" rx="4" ry="5" fill="' + INK + '"/>' +
+          '<text x="148" y="40" font-family="Patrick Hand, Arial, sans-serif" font-weight="700" font-size="22" fill="' + GREEN + '">z</text>' +
+          '<text x="164" y="24" font-family="Patrick Hand, Arial, sans-serif" font-weight="700" font-size="16" fill="' + GREEN + '">z</text>';
+      case 'party':
+        return star(80, 84) + star(120, 84) +
+          '<path d="M88 102 Q100 122 112 102Z" fill="' + INK + '"/><path d="M93 110 Q100 116 107 110" fill="#E86B5A"/>' +
+          '<path d="M100 0 L84 34 L116 34Z" fill="' + GREEN + '"' + stroke(3) + '/><circle cx="100" cy="2" r="6" fill="#F5B700"' + stroke(2.2) + '/>' +
+          '<path d="M22 60 l8 -8 M178 64 l-8 -8 M20 104 l10 0 M170 108 l10 0" stroke="#D9533B" stroke-width="4" stroke-linecap="round"/>';
+      case 'crying':
+        return '<path d="M70 78 L88 86 L70 94"' + stroke(3.6) + ' fill="none"/><path d="M130 78 L112 86 L130 94"' + stroke(3.6) + ' fill="none"/>' +
+          '<path d="M78 96 Q72 112 76 130" stroke="' + TEAR + '" stroke-width="6" stroke-linecap="round" fill="none"/>' +
+          '<path d="M122 96 Q128 112 124 130" stroke="' + TEAR + '" stroke-width="6" stroke-linecap="round" fill="none"/>' +
+          '<path d="M88 114 Q100 98 112 114 Q100 108 88 114Z" fill="' + INK + '"/>';
+      default:
+        return plushEye(80, 84, 4, -6) + plushEye(120, 84, 4, -6) +
+          '<path d="M88 102 Q100 118 112 102Z" fill="' + INK + '"/><path d="M93 109 Q100 114 107 109" fill="#E86B5A"/>';
+    }
+  }
+
+  /** Bisi as an SVG string. style: 'polished' (default) or 'plushie'. */
+  function bisiSvg(mood, size, animate, style) {
+    mood = mood || 'happy'; size = size || 96;
+    var id = 'q' + (++uid);
+    var plush = style === 'plushie';
+    var clip = plush ? '<ellipse cx="100" cy="150" rx="44" ry="34"/>' : '<ellipse cx="100" cy="114" rx="60" ry="56"/>';
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="' + size + '" height="' + size + '" role="img" aria-label="Bisi the bee, ' + mood + '">' +
+      defs(id, clip) + (plush ? plushieBase(id, mood, animate) + plushieFace(mood) : polishedBase(id, mood, animate) + polishedFace(mood)) + '</svg>';
   }
 
   /** Lines in Bisi's voice. Mostly passive-aggressive, occasionally sweet. {t} = title, {d} = days. */
@@ -194,12 +241,89 @@
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 34" preserveAspectRatio="none" width="100%" height="26" aria-hidden="true"><path d="' + d + '" fill="' + color + '"/></svg>';
   }
 
+
+  /** Hand-drawn honey drips for the Hive header (width-filling). */
+  function dripBand(height) {
+    height = height || 120;
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 150" preserveAspectRatio="none" width="100%" height="' + height + '" aria-hidden="true">' +
+      '<defs><linearGradient id="hdg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFCB3A"/><stop offset="1" stop-color="#E39B1B"/></linearGradient></defs>' +
+      '<path d="M0 0H390V86C380 86 378 112 370 112C362 112 364 88 352 88C340 88 342 128 330 128C318 128 322 90 300 90C282 90 286 104 276 104C266 104 268 88 240 88C222 88 224 120 212 120C200 120 204 89 180 89C160 89 164 140 150 140C136 140 142 90 118 90C100 90 104 108 92 108C80 108 84 88 60 88C44 88 46 118 34 118C22 118 26 88 0 90Z" fill="url(#hdg)" stroke="' + INK + '" stroke-width="2.6" stroke-linejoin="round"/>' +
+      '<path d="M12 74C70 70 130 76 190 72S320 70 380 74" stroke="#FFF3CC" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.6"/>' +
+      '<ellipse cx="151" cy="126" rx="3" ry="5" fill="#FFF3CC" opacity="0.7"/></svg>';
+  }
+  /** Hand-drawn grassy hill for the Garden header. */
+  function grassBand(height) {
+    height = height || 120;
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 150" preserveAspectRatio="none" width="100%" height="' + height + '" aria-hidden="true">' +
+      '<defs><linearGradient id="hgg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8CC66F"/><stop offset="1" stop-color="#5E9E4B"/></linearGradient>' +
+      '<linearGradient id="hgl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9BD27C"/><stop offset="1" stop-color="#4E8C3E"/></linearGradient></defs>' +
+      '<path d="M0 0H390V92C360 84 340 104 310 96C280 88 262 108 232 100C204 92 186 110 156 102C126 94 104 112 76 102C50 94 28 106 0 98Z" fill="url(#hgg)" stroke="#1D2B1F" stroke-width="2.6" stroke-linejoin="round"/>' +
+      '<path d="M24 100 q-2 -14 6 -22 M30 102 q4 -12 14 -16 M118 108 q-4 -16 4 -24 M126 108 q6 -10 14 -12 M268 104 q-2 -12 6 -18 M344 96 q2 -12 10 -16" stroke="#1D2B1F" stroke-width="2" fill="none" stroke-linecap="round"/>' +
+      '<path d="M60 104 C54 118 66 128 74 118 C80 110 70 102 60 104Z" fill="url(#hgl)" stroke="#1D2B1F" stroke-width="2"/>' +
+      '<path d="M200 102 C192 114 202 126 212 118 C220 110 210 100 200 102Z" fill="url(#hgl)" stroke="#1D2B1F" stroke-width="2"/>' +
+      '<path d="M300 98 C306 112 296 124 288 116 C282 108 292 98 300 98Z" fill="url(#hgl)" stroke="#1D2B1F" stroke-width="2"/>' +
+      '<path d="M14 70C80 64 150 72 210 66S330 64 380 70" stroke="#E8F4DD" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.5"/></svg>';
+  }
+  function vineSvg(height) {
+    height = height || 420;
+    var leaf = function (d) { return '<path d="' + d + '" fill="#7DBA62" stroke="#1D2B1F" stroke-width="1.8"/>'; };
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 420" width="' + (height * 60 / 420) + '" height="' + height + '" aria-hidden="true">' +
+      '<path d="M44 0 C20 60 56 110 34 170 C14 230 50 290 30 350 C22 380 34 400 40 420" stroke="#3F7A3A" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+      leaf('M38 52 C22 44 14 56 24 64 C32 70 40 62 38 52Z') + leaf('M36 150 C52 138 60 152 50 160 C42 166 34 160 36 150Z') + leaf('M30 250 C14 242 6 256 16 262 C24 268 32 260 30 250Z') +
+      '<g transform="translate(40 330)"><circle cx="0" cy="-5" r="4.5" fill="#F7B6C8" stroke="#1D2B1F" stroke-width="1.4"/><circle cx="5" cy="0" r="4.5" fill="#F7B6C8" stroke="#1D2B1F" stroke-width="1.4"/><circle cx="0" cy="5" r="4.5" fill="#F7B6C8" stroke="#1D2B1F" stroke-width="1.4"/><circle cx="-5" cy="0" r="4.5" fill="#F7B6C8" stroke="#1D2B1F" stroke-width="1.4"/><circle cx="0" cy="0" r="3.4" fill="#FFD23F" stroke="#1D2B1F" stroke-width="1.4"/></g></svg>';
+  }
+  function ladybugSvg(size) {
+    size = size || 34;
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -14 32 28" width="' + size + '" height="' + (size * 28 / 32) + '" role="img" aria-label="Dot the ladybug">' +
+      '<ellipse cx="2" cy="1" rx="11" ry="9" fill="#D9533B" stroke="#1D2B1F" stroke-width="2"/><path d="M2 -8 V10" stroke="#1D2B1F" stroke-width="1.6"/>' +
+      '<circle cx="-3" cy="-1" r="2" fill="#1D2B1F"/><circle cx="7" cy="4" r="2" fill="#1D2B1F"/><circle cx="6" cy="-3" r="1.5" fill="#1D2B1F"/>' +
+      '<circle cx="-8" cy="-5" r="5" fill="#1D2B1F"/><circle cx="-9.5" cy="-6" r="1.2" fill="#FFFFFF"/></svg>';
+  }
+  /** A honey jar: n shown on it, frac = how full (0..1), label underneath; star = results jar. */
+  function jarSvg(n, frac, label, starJar) {
+    var top = 78 - Math.max(0.08, Math.min(1, frac)) * 56;
+    var id = 'j' + (++uid);
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 68 104" width="68" height="104" role="img" aria-label="' + label + ': ' + n + '">' +
+      '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFCB3A"/><stop offset="1" stop-color="#E39B1B"/></linearGradient>' +
+      '<linearGradient id="' + id + 'g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.65"/><stop offset="0.35" stop-color="#FFFFFF" stop-opacity="0.15"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0.35"/></linearGradient></defs>' +
+      '<rect x="12" y="6" width="44" height="10" rx="3" fill="' + (starJar ? INK : '#C98A1B') + '" stroke="' + INK + '" stroke-width="2"/>' +
+      '<path d="M10 18 H58 Q62 18 62 24 V72 Q62 80 54 80 H14 Q6 80 6 72 V24 Q6 18 10 18Z" fill="#FFFFFF" stroke="' + INK + '" stroke-width="2.4"/>' +
+      '<path d="M8 ' + top + ' Q34 ' + (top - 5) + ' 60 ' + top + ' V72 Q60 78 54 78 H14 Q8 78 8 72Z" fill="' + (starJar ? '#F5B700' : 'url(#' + id + ')') + '"/>' +
+      '<rect x="8" y="20" width="10" height="56" rx="5" fill="url(#' + id + 'g)"/>' +
+      (starJar ? '<path d="M34 28 l4 8 9 1 -7 6 2 9 -8 -5 -8 5 2 -9 -7 -6 9 -1z" fill="#FFD23F" stroke="' + INK + '" stroke-width="1.6"/>' : '') +
+      '<text x="34" y="' + (starJar ? 70 : Math.min(64, top + 22)) + '" text-anchor="middle" font-family="Patrick Hand, cursive" font-size="22" fill="' + INK + '">' + n + '</text>' +
+      '<text x="34" y="98" text-anchor="middle" font-family="Patrick Hand, cursive" font-size="15" fill="currentColor">' + label + '</text></svg>';
+  }
+  /** A plant pot at a growth stage: 0 seeds, 1 sprout, 2 bud, 3 bloom. */
+  function potSvg(stage, n, label) {
+    var I = '#1D2B1F', leaf = function (d) { return '<path d="' + d + '" fill="#7DBA62" stroke="' + I + '" stroke-width="1.6"/>'; };
+    var plant = '';
+    if (stage === 0) plant = '<ellipse cx="26" cy="50" rx="3.5" ry="2.4" fill="#8A5A2B" stroke="' + I + '" stroke-width="1.2"/><ellipse cx="36" cy="49" rx="3.5" ry="2.4" fill="#8A5A2B" stroke="' + I + '" stroke-width="1.2"/><ellipse cx="44" cy="50" rx="3.5" ry="2.4" fill="#8A5A2B" stroke="' + I + '" stroke-width="1.2"/>';
+    if (stage === 1) plant = '<path d="M34 52 V36" stroke="#3F7A3A" stroke-width="3" stroke-linecap="round"/>' + leaf('M34 40 C24 30 18 40 26 44 C30 46 34 42 34 40Z') + leaf('M34 38 C44 28 50 38 42 42 C38 44 34 40 34 38Z');
+    if (stage === 2) plant = '<path d="M34 52 V26" stroke="#3F7A3A" stroke-width="3" stroke-linecap="round"/>' + leaf('M34 44 C24 36 18 46 26 48 C30 50 34 46 34 44Z') +
+      '<path d="M34 26 C26 22 28 10 34 8 C40 10 42 22 34 26Z" fill="#F7B6C8" stroke="' + I + '" stroke-width="1.8"/><path d="M30 24 Q34 28 38 24" stroke="#3F7A3A" stroke-width="2" fill="none"/>';
+    if (stage === 3) plant = '<path d="M34 52 V24" stroke="#3F7A3A" stroke-width="3" stroke-linecap="round"/>' + leaf('M34 44 C44 36 50 46 42 48 C38 50 34 46 34 44Z') +
+      '<g transform="translate(34 18)"><circle cx="0" cy="-9" r="7" fill="#F29B8B" stroke="' + I + '" stroke-width="1.8"/><circle cx="9" cy="0" r="7" fill="#F29B8B" stroke="' + I + '" stroke-width="1.8"/><circle cx="0" cy="9" r="7" fill="#F29B8B" stroke="' + I + '" stroke-width="1.8"/><circle cx="-9" cy="0" r="7" fill="#F29B8B" stroke="' + I + '" stroke-width="1.8"/><circle cx="0" cy="0" r="5.5" fill="#FFD23F" stroke="' + I + '" stroke-width="1.8"/></g>';
+    var id = 'p' + (++uid);
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 68 108" width="68" height="108" role="img" aria-label="' + label + ': ' + n + '">' +
+      '<defs><radialGradient id="' + id + '" cx="0.35" cy="0.3" r="0.9"><stop offset="0" stop-color="#E9A27A"/><stop offset="1" stop-color="#B8643F"/></radialGradient></defs>' +
+      plant + '<path d="M14 58 H54 L50 82 H18Z" fill="url(#' + id + ')" stroke="' + I + '" stroke-width="2.2"/><rect x="10" y="52" width="48" height="9" rx="3" fill="#C9744B" stroke="' + I + '" stroke-width="2"/>' +
+      '<text x="' + (stage >= 2 ? 58 : 34) + '" y="' + (stage === 0 ? 36 : stage === 1 ? 22 : 16) + '" text-anchor="middle" font-family="Patrick Hand, cursive" font-size="22" fill="currentColor">' + n + '</text>' +
+      '<text x="34" y="100" text-anchor="middle" font-family="Patrick Hand, cursive" font-size="15" fill="currentColor">' + label + '</text></svg>';
+  }
+
   root.hiveSvg = hiveSvg;
+  root.dripBand = dripBand;
+  root.grassBand = grassBand;
+  root.vineSvg = vineSvg;
+  root.ladybugSvg = ladybugSvg;
+  root.jarSvg = jarSvg;
+  root.potSvg = potSvg;
   root.honeycombSvg = honeycombSvg;
   root.flowerSvg = flowerSvg;
   root.dripSvg = dripSvg;
   root.bisiSvg = bisiSvg;
   root.bisiLine = pickLine;
   root.BISI_LINES = LINES;
-  if (typeof module !== 'undefined') module.exports = { bisiSvg: bisiSvg, bisiLine: pickLine, LINES: LINES, hiveSvg: hiveSvg, honeycombSvg: honeycombSvg, flowerSvg: flowerSvg, dripSvg: dripSvg };
+  if (typeof module !== 'undefined') module.exports = { bisiSvg: bisiSvg, bisiLine: pickLine, LINES: LINES, hiveSvg: hiveSvg, honeycombSvg: honeycombSvg, flowerSvg: flowerSvg, dripSvg: dripSvg, dripBand: dripBand, grassBand: grassBand, vineSvg: vineSvg, ladybugSvg: ladybugSvg, jarSvg: jarSvg, potSvg: potSvg };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -59,8 +59,11 @@ Bisi talks on the dashboard, the widget, notifications and emails: mostly passiv
 Source: `android/app/src/main/assets/bisi.js` (SVG + lines); PNGs in `res/drawable-nodpi/`.
 
 ## Looks
-Tap 🎨 on the dashboard to switch between **Hive** (honey yellow and bee black, honeycomb background, honey drips,
-a little beehive in empty spaces, the default) and **Garden** (the original calm greens). The widget follows along.
+The app is hand-drawn: paper texture, wobbly ink outlines, sticker shadows, taped cards, pencil-hatched shading.
+Tap 🎨 to pick **Hive** (honey and bee black, honeycombs, honey drips; your pipeline as honey jars) or **Garden**
+(leaves, a vine, flowers and Dot the ladybug; your pipeline as plants growing from seed to bloom), and **Auto / Light /
+Dark** (Hive starts in Light). Bisi comes in two styles: Polished on the dashboard, Plushie on the widget and in
+notifications. The widget follows the look you pick.
 
 ## Emails
 Your daily streak is your **nectar** 🍯: any real action collects a day of it, and Bisi cries if you spill the jar.

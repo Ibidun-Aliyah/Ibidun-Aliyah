@@ -204,6 +204,18 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public String getMode() {
+            android.content.SharedPreferences p = Nag.prefs(MainActivity.this);
+            return p.getString("mode", "garden".equals(p.getString("skin", "hive")) ? "auto" : "light");
+        }
+
+        @JavascriptInterface
+        public void setMode(String mode) {
+            String m = "dark".equals(mode) ? "dark" : "light".equals(mode) ? "light" : "auto";
+            Nag.prefs(MainActivity.this).edit().putString("mode", m).apply();
+        }
+
+        @JavascriptInterface
         public int streak() { return Nag.streak(MainActivity.this); }
 
         @JavascriptInterface
