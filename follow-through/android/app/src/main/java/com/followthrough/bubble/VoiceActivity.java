@@ -33,15 +33,45 @@ public class VoiceActivity extends Activity {
         if (req == SPEAK && res == RESULT_OK && data != null) {
             ArrayList<String> said = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             String text = said != null && !said.isEmpty() ? said.get(0) : "";
-            if (!text.trim().isEmpty()) {
-                Toast.makeText(this, "“" + text + "”: saving…", Toast.LENGTH_SHORT).show();
-                final android.content.Context app = getApplicationContext();
-                Tracker.capture(app, "Voice note", null, "Spoken note: " + text, null, text, (ok, msg) -> {
-                    Toast.makeText(app, msg, Toast.LENGTH_SHORT).show();
-                    if (ok) Tracker.sortNow(app, (sorted, what) -> { if (sorted) Toast.makeText(app, what, Toast.LENGTH_LONG).show(); });
-                });
-            }
+            if (!text.trim().isEmpty()) { choose(text); return; }
         }
         finish();
+    }
+
+    /** Ask what this is: a reminder (if a time was said), a note, or an opportunity for the tracker. */
+    private void choose(String text) {
+        final long when = Notes.parseWhen(text);
+        final android.content.Context app = getApplicationContext();
+        String whenLabel = when == 0 ? "" : new java.text.SimpleDateFormat("EEE d MMM, h:mm a", java.util.Locale.getDefault()).format(new java.util.Date(when));
+        android.app.AlertDialog.Builder b = new android.app.AlertDialog.Builder(this)
+                .setTitle("🐝 Save this as…")
+                .setMessage("“" + text + "”" + (when == 0 ? "" : "\n\n⏰ " + whenLabel))
+                .setNeutralButton("Opportunity", (d, w) -> {
+                    Tracker.capture(app, "Voice note", null, "Spoken note: " + text, null, text, (ok, msg) -> {
+                        Toast.makeText(app, msg, Toast.LENGTH_SHORT).show();
+                        if (ok) Tracker.sortNow(app, (sorted, what) -> { if (sorted) Toast.makeText(app, what, Toast.LENGTH_LONG).show(); });
+                    });
+                    finish();
+                })
+                .setOnCancelListener(d -> finish());
+        if (when != 0) {
+            b.setPositiveButton("Reminder", (d, w) -> { saveNote(text, when); Toast.makeText(app, "I'll remind you " + whenLabel + ". Count on it. 🐝", Toast.LENGTH_LONG).show(); finish(); });
+            b.setNegativeButton("Note", (d, w) -> { saveNote(text, 0); Toast.makeText(app, "Saved to your notes. 📝", Toast.LENGTH_SHORT).show(); finish(); });
+        } else {
+            b.setPositiveButton("Note", (d, w) -> { saveNote(text, 0); Toast.makeText(app, "Saved to your notes. 📝", Toast.LENGTH_SHORT).show(); finish(); });
+            b.setNegativeButton("Cancel", (d, w) -> finish());
+        }
+        b.show();
+    }
+
+    private void saveNote(String text, long when) {
+        try {
+            org.json.JSONObject n = new org.json.JSONObject()
+                    .put("text", text.substring(0, 1).toUpperCase() + text.substring(1))
+                    .put("items", new org.json.JSONArray()).put("color", when != 0 ? "honey" : "mint")
+                    .put("pinned", false).put("remindAt", when).put("done", false).put("voice", true);
+            Notes.save(getApplicationContext(), n);
+            Nag.markActive(getApplicationContext());
+        } catch (Exception ignored) {}
     }
 }

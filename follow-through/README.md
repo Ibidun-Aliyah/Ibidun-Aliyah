@@ -73,6 +73,12 @@ the phone is off: ☀️ morning brief (7:00), ⏳ deadline countdown at 7/3/1/0
 😤 "you ignored me" for untouched deadlines ≤ 2 days away (18:00), 📊 Sunday digest (20:00). Buttons in emails
 (I applied ✓, Remind me tomorrow, Accepted, Rejected…) update the sheet in one tap through signed links.
 
+## Notes & reminders
+The **Notes** tab is a sticky-note pad kept on the phone: checklists, colours, pins, search, and reminders at an exact
+time (they ring even if the app is closed, and come back after a restart; buttons: Done ✓, 10 min, 1 hour).
+**Hold Bisi's bubble** and talk: “Call mum at 6pm” becomes a reminder, anything else a note, or send it to the
+tracker as an opportunity. Typing a time in a note (“submit form tomorrow at 9am”) sets the reminder for you.
+
 ## Applied history
 The dashboard's **Applied history** tab lists everything you've applied to by month, with results (Accepted,
 Shortlisted, Interview, Rejected, No response, Waiting), your success rate, applications per month, and a
@@ -107,7 +113,7 @@ the same web app link. ("New deployment" makes a new link, and the phone app wou
 
 ## Using it
 - **Tap the bubble**: saves what's on screen. It turns ✓ green when it's in the sheet.
-- **Drag** it anywhere; it tucks into the edge. **Hold** it to hide it for an hour.
+- **Drag** it anywhere; it tucks into the edge. **Hold** it to talk (reminder, note or opportunity). Drag it to the bottom edge to hide it for a while.
 - **Share → Save to Follow-Through** works from any app too.
 - No internet? Captures wait on the phone and send themselves later.
 - In the sheet, change **Status** as you go: New → Saved → Preparing → Submitted → Closed.

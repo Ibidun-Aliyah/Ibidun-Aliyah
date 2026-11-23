@@ -62,7 +62,11 @@ public class MainActivity extends Activity {
                 openExternal(r.getUrl().toString());
                 return true;
             }
-            @Override public void onPageFinished(WebView v, String url) { loaded = true; v.postDelayed(MainActivity.this::checkClipboard, 1500); }
+            @Override public void onPageFinished(WebView v, String url) {
+                loaded = true; v.postDelayed(MainActivity.this::checkClipboard, 1500);
+                String note = getIntent() != null ? getIntent().getStringExtra("openNote") : null;
+                if (note != null) { getIntent().removeExtra("openNote"); v.evaluateJavascript("window.__openNote && window.__openNote(" + JSONObject.quote(note) + ")", null); }
+            }
 
             @Override
             public boolean onRenderProcessGone(WebView v, android.webkit.RenderProcessGoneDetail detail) {
@@ -163,6 +167,14 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        String note = intent.getStringExtra("openNote");
+        if (note != null && loaded && web != null) web.evaluateJavascript("window.__openNote && window.__openNote(" + JSONObject.quote(note) + ")", null);
+    }
+
+    @Override
     protected void onActivityResult(int req, int res, Intent data) {
         if (req == PICK_FILE && fileCallback != null) {
             Uri[] result = (res == RESULT_OK && data != null && data.getData() != null) ? new Uri[]{data.getData()} : null;
@@ -259,6 +271,21 @@ public class MainActivity extends Activity {
                 cm.setPrimaryClip(android.content.ClipData.newPlainText("Applied history", text));
             });
         }
+
+        /* ---- notes ---- */
+        @JavascriptInterface
+        public String notesGet() { return Notes.all(MainActivity.this).toString(); }
+
+        @JavascriptInterface
+        public String notesSave(String json) {
+            try { return Notes.save(MainActivity.this, new JSONObject(json)).toString(); } catch (Exception e) { return "{}"; }
+        }
+
+        @JavascriptInterface
+        public void notesDelete(String id) { Notes.delete(MainActivity.this, id); }
+
+        @JavascriptInterface
+        public double notesParse(String text) { return Notes.parseWhen(text == null ? "" : text); }
 
         @JavascriptInterface
         public void voice() { runOnUiThread(() -> startActivity(new Intent(MainActivity.this, VoiceActivity.class))); }

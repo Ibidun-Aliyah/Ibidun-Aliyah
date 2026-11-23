@@ -18,7 +18,7 @@ import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.LinkedHashSet;
@@ -46,7 +46,7 @@ public class BubbleService extends AccessibilityService {
 
     private final Handler main = new Handler(Looper.getMainLooper());
     private WindowManager wm;
-    private TextView bubble;
+    private ImageView bubble;
     private WindowManager.LayoutParams lp;
     private boolean busy;
     private int size;
@@ -81,13 +81,13 @@ public class BubbleService extends AccessibilityService {
     @SuppressLint("ClickableViewAccessibility")
     private void addBubble() {
         DisplayMetrics dm = getResources().getDisplayMetrics();
-        size = Math.round(50 * dm.density);
+        size = Math.round(58 * dm.density);
 
-        bubble = new TextView(this);
-        bubble.setText("+");
-        bubble.setTextSize(26);
-        bubble.setTextColor(Color.WHITE);
-        bubble.setGravity(Gravity.CENTER);
+        bubble = new ImageView(this);
+        bubble.setImageResource(R.drawable.bubble_happy);
+        bubble.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        int pad = Math.round(4 * dm.density);
+        bubble.setPadding(pad, pad, pad, pad);
         bubble.setBackgroundResource(R.drawable.bubble_bg);
         bubble.setAlpha(0.8f);
         bubble.setElevation(8 * dm.density);
@@ -162,16 +162,15 @@ public class BubbleService extends AccessibilityService {
         main.postDelayed(() -> bubble.setVisibility(View.VISIBLE), HIDE_MS);
     }
 
+    /** Bisi reacts: party face when saved, worried face while saving or if it failed. */
     private void flash(boolean ok) {
-        bubble.setText(ok ? "✓" : "…");
-        GradientDrawable bg = new GradientDrawable();
-        bg.setShape(GradientDrawable.OVAL);
-        bg.setColor(getColor(ok ? R.color.ok : R.color.mark));
-        bubble.setBackground(bg);
+        bubble.setImageResource(ok ? R.drawable.bubble_party : R.drawable.bubble_worried);
+        bubble.setBackgroundResource(ok ? R.drawable.bubble_bg_ok : R.drawable.bubble_bg);
+        bubble.animate().scaleX(1.2f).scaleY(1.2f).setDuration(140).withEndAction(() -> bubble.animate().scaleX(1f).scaleY(1f).setDuration(160).start()).start();
         main.postDelayed(() -> {
-            bubble.setText("+");
+            bubble.setImageResource(R.drawable.bubble_happy);
             bubble.setBackgroundResource(R.drawable.bubble_bg);
-        }, 1600);
+        }, 1800);
     }
 
     /* ---------- capture ---------- */
