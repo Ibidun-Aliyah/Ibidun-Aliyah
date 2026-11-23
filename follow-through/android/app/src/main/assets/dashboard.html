@@ -30,6 +30,10 @@ button,input,textarea,select{font:inherit;color:inherit}
 .icon{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;font-size:1.1rem;cursor:pointer}
 .sub{color:var(--muted);font-size:.85rem;margin-top:2px}
 .hello{margin:18px 0 4px;font-size:1.35rem;font-weight:800;line-height:1.25}
+.bisi{display:flex;gap:10px;align-items:flex-end;margin-top:14px}
+.bisi .face{flex:none;width:76px;height:76px}
+.bisi .say{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px 16px 16px 4px;padding:10px 12px;font-size:.92rem;line-height:1.4;flex:1;min-width:0}
+.bisi .say b{display:block;font-family:var(--f-d);font-size:.78rem;color:var(--muted);font-weight:600;margin-bottom:2px}
 .hello em{font-style:normal;background:linear-gradient(transparent 60%,var(--sun-soft) 60%)}
 .banner{margin-top:12px;padding:12px 14px;border-radius:14px;font-size:.88rem;display:flex;gap:10px;align-items:center}
 .banner.warn{background:var(--sun-soft)} .banner.info{background:var(--sky-soft)} .banner.err{background:var(--rose-soft)}
@@ -115,6 +119,7 @@ svg text{fill:var(--muted);font-size:10px;font-family:var(--f-b)}
   <div class="sub" id="today"></div>
   <div class="views" role="tablist"><button data-view="home" aria-pressed="true">Today</button><button data-view="history" aria-pressed="false">Applied history</button></div>
   <div id="v-home">
+  <div class="bisi" id="bisi"><div class="face" id="bisi-face"></div><div class="say"><b>Bisi</b><span id="bisi-say">Buzzing in…</span></div></div>
   <div class="hello" id="hello">Loading your tracker…</div>
   <div id="banners"></div>
   <div class="tiles" id="tiles"></div>
@@ -165,6 +170,7 @@ svg text{fill:var(--muted);font-size:10px;font-family:var(--f-b)}
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true"></div>
 <div class="toast" id="toast" hidden></div>
 
+<script src="bisi.js"></script>
 <script>
 (() => {
 /* ---------- bridge to the Android app ---------- */
@@ -194,7 +200,7 @@ const fmt = s => { const d = parse(s); return d ? d.toLocaleDateString('en-GB',{
 let toastT; const toast = m => { const t=$('#toast'); t.textContent=m; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,2800); };
 
 /* ---------- state ---------- */
-let D = null, tab = 'opps', query = '', sorting = false, view = 'home';
+let D = null, tab = 'opps', query = '', sorting = false, view = 'home', statsSent = false;
 try { const c = localStorage.getItem('ft-dash'); if (c) D = JSON.parse(c); } catch(e){}
 
 async function load(quiet){
@@ -204,6 +210,7 @@ async function load(quiet){
   if (!j.ok){ banner('err', j.error === 'not_connected' ? 'Connect your Google Sheet in Settings to see your tracker.' : 'Couldn\'t reach your sheet. Showing the last saved copy.', j.error === 'not_connected' ? 'Settings' : 'Retry'); render(); return; }
   D = j; try { localStorage.setItem('ft-dash', JSON.stringify(j)); } catch(e){}
   if (window.Android && Android.saveDashboard) Android.saveDashboard(JSON.stringify(j));
+  if (window.Android && Android.streak && !statsSent){ statsSent = true; call({ action:'stats', streak: Android.streak(), url: Android.webAppUrl() }); }
   if (j.today){ TODAY = parse(j.today); }
   render();
   autoSort();
@@ -261,6 +268,7 @@ function render(){
   const need = rows.map(r => ({ r, u: urgency(r) })).filter(x => x.u).sort((a,b) => a.u.score - b.u.score);
   const newCount = rows.filter(r => r.Status === 'New').length;
 
+  bisiSay(rows, need);
   $('#hello').innerHTML = need.length ? `<em>${need.length} ${need.length===1?'thing needs':'things need'} you</em> today.` :
     rows.length ? 'You\'re on top of it. <em>Nothing urgent today.</em>' : 'Nothing saved yet. <em>Tap the bubble on your next find.</em>';
 
@@ -291,6 +299,33 @@ function itemRow(r, tone, why){
       <div class="m">${esc([r.Organisation, nextStep(r)].filter(Boolean).join(' · '))}</div></div>
     ${why ? `<span class="chip c-${tone}">${esc(why)}</span>` : r.Deadline ? `<span class="chip ${cat}">${esc(fmt(r.Deadline))}</span>` : ''}
   </div>`;
+}
+
+/* ---------- Bisi ---------- */
+function bisiSay(rows, need){
+  if (!window.bisiSvg) return;
+  const seed = Math.floor(TODAY / 864e5);
+  const streak = window.Android && Android.streak ? Android.streak() : 0;
+  const lost = window.Android && Android.lostStreak ? Android.lostStreak() : 0;
+  const recentWin = rows.find(r => { const du = days(String(r.Updated||'').slice(0,10)); return (r.Outcome === 'Accepted' || r.Outcome === 'Shortlisted') && du !== null && du >= -3; });
+  const lastSave = rows.map(r => String(r.Captured||'').slice(0,10)).concat((D.tips||[]).map(t => String(t.Saved||'').slice(0,10))).sort().pop();
+  const idle = lastSave ? -days(lastSave) : 99;
+  let mood = 'happy', line;
+  const top = need[0];
+  if (recentWin){ mood = 'party'; line = bisiLine('accepted', {}, seed).replace('YOU GOT IN?!', recentWin.Outcome === 'Accepted' ? 'YOU GOT IN?!' : 'SHORTLISTED?!'); }
+  else if (lost >= 2){ mood = 'crying'; line = `Your ${lost}-day streak… it's gone. I'm fine. I'm totally fine. 😭 Do one thing today and we start again.`; }
+  else if (top && top.u.why.startsWith('Deadline passed')){ mood = 'sassy'; line = bisiLine('overdue', { t: top.r.Title }, seed); }
+  else if (top && /today|tomorrow|Event/.test(top.u.why)){ mood = 'worried'; line = top.r.Category === 'Event' ? bisiLine('event', { t: top.r.Title, when: top.u.why.replace('Event ','') }, seed) : (days(top.r.Deadline) === 0 ? bisiLine('dueToday', { t: top.r.Title }, seed) : bisiLine('due', { t: top.r.Title, d: 1 }, seed).replace('1 days','1 day')); }
+  else if (top && top.u.tone === 'rose'){ mood = 'sassy'; line = bisiLine('due', { t: top.r.Title, d: days(top.r.Deadline) }, seed); }
+  else if (top && top.u.tone === 'sun'){ mood = 'worried'; line = bisiLine('soon', { t: top.r.Title, d: days(top.r.Deadline) }, seed); }
+  else if (top && top.u.why === 'Check for a response'){ mood = 'worried'; line = bisiLine('check', { t: top.r.Title }, seed); }
+  else if (top){ mood = 'sassy'; line = bisiLine('reminder', { t: top.r.Title }, seed); }
+  else if (idle >= 3 && idle < 99){ mood = 'sleepy'; line = bisiLine('idle', { n: idle }, seed); }
+  else if (seed % 4 === 0){ line = bisiLine('sweet', {}, seed); }
+  else line = rows.length ? bisiLine('clear', {}, seed) : 'Hi, I\'m Bisi. 🐝 Tap the bubble on your next opportunity and I\'ll take it from there. And by "take it from there" I mean nag you.';
+  if (streak >= 3 && mood === 'happy') line += ` (Also: ${streak}-day streak 🔥)`;
+  $('#bisi-face').innerHTML = bisiSvg(mood, 76, true);
+  $('#bisi-say').textContent = line;
 }
 
 /* ---------- charts (inline SVG) ---------- */
@@ -509,7 +544,7 @@ document.addEventListener('click', async e => {
     if (f.Status === 'Closed') f['Remind on'] = '';
     if (!current['Applied on'] && DECIDED.indexOf(o) >= 0) f['Applied on'] = iso(TODAY);
     active_();
-    return setFields(current.ID, f, o==='Accepted' ? 'Congratulations! 🎉 Saved to your history.' : o==='Rejected' ? 'Noted. Their loss. On to the next one.' : 'Saved to your history.');
+    return setFields(current.ID, f, o==='Accepted' ? '🐝 YOU GOT IN?! I\'m telling every flower I know. 🎉' : o==='Rejected' ? '🐝 Their loss. Genuinely. On to the next one. 💛' : 'Saved to your history.');
   }
   if (t.dataset.open) return openItem(t.dataset.open);
   if (t.dataset.tip) return openTip(t.dataset.tip);
@@ -526,7 +561,7 @@ document.addEventListener('click', async e => {
     const s = t.dataset.status, f = { Status: s };
     if (s === 'Submitted'){ f['Remind on'] = addDays(14); if (!current['Applied on']) f['Applied on'] = iso(TODAY); }
     active_();
-    return setFields(current.ID, f, s==='Preparing' ? 'Preparing. Tap “Write my essays” or “Tailor my CV” when ready.' : s==='Submitted' ? 'Submitted! I\'ll remind you to check for a response in 2 weeks.' : 'Updated.');
+    return setFields(current.ID, f, s==='Preparing' ? 'Preparing. Tap “Write my essays” or “Tailor my CV” when ready.' : s==='Submitted' ? '🐝 Look at you! I\'ll ask about the result in 2 weeks.' : 'Updated.');
   }
   if (t.dataset.snooze && current){ const n = +t.dataset.snooze; active_(); return setFields(current.ID, { 'Remind on': addDays(n) }, n===1?'Back tomorrow.':`Back in ${n} days.`); }
   if (t.dataset.ai && current){

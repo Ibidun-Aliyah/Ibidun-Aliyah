@@ -102,29 +102,46 @@ final class Nag {
     private static String pick(String... options) { return options[RNG.nextInt(options.length)]; }
     private static String when(int d) { return d == 0 ? "today" : d == 1 ? "tomorrow" : "in " + d + " days"; }
 
-    /** The nag line for an item; level = how many times you've been nagged today. */
+    /** The nag line for an item, in Bisi's voice; level = how many times you've been nagged today. */
     static String line(Item it, int level) {
         String t = it.title;
         switch (it.kind) {
-            case "overdue": return pick("The deadline for " + t + " has passed. Did you apply? Tap Submitted, or let it go.",
-                    t + " closed " + (-it.days) + (it.days == -1 ? " day" : " days") + " ago. Tell me what happened so I can stop asking. 🙃");
-            case "event": return "📅 " + t + " is " + when(it.days) + ". Registered yet?";
+            case "overdue": return pick("The deadline for " + t + " passed. Did you apply, or should I start grieving?",
+                    t + " closed. Tell me what happened so I can stop asking. (I won't stop asking.)");
+            case "event": return pick("📅 " + t + " is " + when(it.days) + ". Registered yet? Asking very calmly.",
+                    t + " is " + when(it.days) + ". I already picked my outfit. Did you register?");
             case "due":
-                if (it.days == 0) return pick("🚨 " + t + " closes TODAY. This is your sign.", "🚨 Today's the day for " + t + ". Not tomorrow. Today.");
-                if (level == 0) return "⏳ " + t + ": " + when(it.days) + ". Five minutes now beats a panic later.";
-                if (level == 1) return "Still me. " + t + " closes " + when(it.days) + ". 👀";
-                if (level == 2) return "I'll keep reminding you until " + t + " is done. That's a promise. 😤";
-                return pick("Okay this is getting awkward. " + t + ". " + when(it.days) + ". You've got this.",
-                        "Me again. " + t + ". Open it. Just open it. 🙏");
-            case "soon": return pick(t + " closes " + when(it.days) + ". Start the essay while it's calm.",
-                    "One week warning ⏳ " + t + ". Future you says thanks.");
-            case "reminder": return pick("You asked me to remind you about " + t + ". Here I am. 🙃",
+                if (it.days == 0) return pick(t + " closes TODAY. I'm not mad. I'm just… hovering. 🐝",
+                        "Today. " + t + ". Today. Bee-lieve me, tomorrow is too late.",
+                        "It's deadline day for " + t + ". I cleared my whole schedule to watch you do this.");
+                if (level == 0) return pick(t + " closes " + when(it.days) + ". Just thought you'd want to know.",
+                        "Bee honest: have you even opened " + t + "?");
+                if (level == 1) return pick("Me again. " + t + ". " + when(it.days) + ". 👀", t + " closes " + when(it.days) + ". Just thought you'd want to know. Again.");
+                if (level == 2) return pick("Okay. I'll just keep reminding you about " + t + ". I have nothing but time. 🐝",
+                        "Fun fact: " + t + " doesn't apply for itself. I checked.");
+                return pick("I'm not saying I'm disappointed about " + t + ". I'm just saying I'm a bee and I'm sad.",
+                        "Still " + t + ". Still " + when(it.days) + ". Still me. 🐝");
+            case "soon": return pick(t + " closes " + when(it.days) + ". Starting now would be very mature of you.",
+                    "One week until " + t + ". Future you is begging. I can hear her.");
+            case "reminder": return pick("You asked me to remind you about " + t + ". So. Here I am. Reminding.",
                     "Remember " + t + "? It remembers you.");
-            case "check": return pick("It's been two weeks since you applied to " + t + ". Any news?",
-                    "Heard back from " + t + "? Tap to record the result.");
-            case "new": return "You saved something that hasn't been sorted yet. Open the app and I'll sort it.";
+            case "check": return pick("Two weeks since you applied to " + t + ". Any news, or are we pretending it didn't happen?",
+                    "Heard back from " + t + "? I'm asking for a friend. The friend is me.");
+            case "new": return "You saved something I haven't sorted yet. Open the app and I'll deal with it. Like always. 🐝";
         }
         return t;
+    }
+
+    /** Which Bisi face fits an item. */
+    static int face(Item it) {
+        if (it == null) return R.drawable.bisi_happy;
+        switch (it.kind) {
+            case "overdue": return R.drawable.bisi_sassy;
+            case "due": return it.days <= 1 ? R.drawable.bisi_worried : R.drawable.bisi_sassy;
+            case "event": case "check": case "soon": return R.drawable.bisi_worried;
+            case "reminder": return R.drawable.bisi_sassy;
+            default: return R.drawable.bisi_happy;
+        }
     }
 
     /* ---------- streak ---------- */
@@ -144,6 +161,14 @@ final class Nag {
         SharedPreferences p = prefs(c);
         int d = daysUntil(p.getString("activeDay", ""));
         return (d == 0 || d == -1) ? p.getInt("streak", 0) : 0;
+    }
+
+    /** If you just broke a streak of 2+ days, how long it was (for Bisi's dramatic crying). */
+    static int lostStreak(Context c) {
+        SharedPreferences p = prefs(c);
+        int d = daysUntil(p.getString("activeDay", ""));
+        int s = p.getInt("streak", 0);
+        return (d != Integer.MIN_VALUE && d < -1 && d >= -3 && s >= 2) ? s : 0;
     }
 
     static boolean activeToday(Context c) { return today().equals(prefs(c).getString("activeDay", "")); }
@@ -214,7 +239,7 @@ final class Nag {
         // Morning summary
         if (!p.getBoolean("morningSent", false) && !items.isEmpty()) {
             Item top = items.get(0);
-            notify(c, 1, "Good morning ☀️ " + items.size() + (items.size() == 1 ? " thing needs" : " things need") + " you today",
+            notify(c, 1, "Bisi · Good morning ☀️ " + items.size() + (items.size() == 1 ? " thing needs" : " things need") + " you today",
                     "First up: " + line(top, 0), top);
             p.edit().putBoolean("morningSent", true).putLong("lastNag", System.currentTimeMillis()).apply();
             return;
@@ -235,8 +260,8 @@ final class Nag {
         int streak = streak(c);
         if (hour >= 19 && streak > 0 && !activeToday(c) && !p.getBoolean("streakSent", false)) {
             notify(c, 3, "🔥 Your " + streak + "-day streak ends at midnight",
-                    pick("One small step keeps it alive: save an opportunity, update a status, or tailor your CV.",
-                         "Don't let it die like that hackathon idea. Tap to keep it going."), null);
+                    pick("No pressure. (Pressure.) One small step keeps it alive: save something, update a status, tailor your CV. 🐝",
+                         streak + " days. It'd be a shame if something happened to them."), null, R.drawable.bisi_worried);
             p.edit().putBoolean("streakSent", true).apply();
             return;
         }
@@ -244,18 +269,23 @@ final class Nag {
         int idle = daysSinceLastSave(dash);
         if (idle >= 3 && idle < 99 && hour >= 12 && !p.getBoolean("idleSent", false)) {
             notify(c, 4, "It's quiet in here 👀",
-                    pick("You haven't saved an opportunity in " + idle + " days. They don't find themselves.",
-                         idle + " days without a new find. Scroll with purpose today: tap the bubble on one thing."), null);
+                    pick("You haven't saved anything in " + idle + " days. I'm fine. Everything's fine.",
+                         idle + " days without a single opportunity. The bubble misses you. I miss you."), null, R.drawable.bisi_sleepy);
             p.edit().putBoolean("idleSent", true).apply();
         }
     }
 
     private static void notify(Context c, int nid, String title, String text, Item item) {
+        notify(c, nid, title, text, item, face(item));
+    }
+
+    private static void notify(Context c, int nid, String title, String text, Item item, int faceRes) {
         ensureChannel(c);
         Intent open = new Intent(c, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         Notification.Builder b = new Notification.Builder(c, CHANNEL)
                 .setSmallIcon(R.drawable.ic_notify)
                 .setColor(c.getColor(R.color.accent))
+                .setLargeIcon(android.graphics.drawable.Icon.createWithResource(c, faceRes))
                 .setContentTitle(title)
                 .setContentText(text)
                 .setStyle(new Notification.BigTextStyle().bigText(text))
@@ -294,18 +324,24 @@ final class Nag {
         int streak = streak(c);
         v.setTextViewText(R.id.w_streak, streak > 0 ? "🔥 " + streak : "🔥 0");
 
-        String headline; int bg;
-        if (!dash.has("rows")) { headline = "Open Follow-Through once to wake me up."; bg = R.drawable.widget_bg_calm; }
-        else if (items.isEmpty()) {
-            headline = activeToday(c) ? "All clear. Proud of you. 😌" : pick("Nothing urgent. Go find something new to apply for. 👀", "Quiet day. Perfect time to polish your CV.");
-            bg = R.drawable.widget_bg_calm;
+        String headline; int bg; int faceRes;
+        int lost = lostStreak(c);
+        if (!dash.has("rows")) { headline = "Hi, I'm Bisi. Open Follow-Through once to wake me up. 🐝"; bg = R.drawable.widget_bg_calm; faceRes = R.drawable.bisi_sleepy; }
+        else if (lost >= 2 && !activeToday(c)) {
+            headline = "Your " + lost + "-day streak… it's gone. I'm fine. 😭"; bg = R.drawable.widget_bg_warn; faceRes = R.drawable.bisi_crying;
+        } else if (items.isEmpty()) {
+            headline = activeToday(c) ? pick("All clear. Look at you being responsible. 🥹", "Nothing urgent. I'm genuinely proud. Don't make it weird.")
+                    : pick("Nothing urgent. Go find something new to apply for. 👀", "Quiet day. Perfect time to polish your CV. Just saying.");
+            bg = R.drawable.widget_bg_calm; faceRes = activeToday(c) ? R.drawable.bisi_happy : R.drawable.bisi_sleepy;
         } else {
             Item top = items.get(0);
+            faceRes = face(top);
             headline = line(top, prefs(c).getInt("nagsToday", 0));
             boolean hot = top.kind.equals("overdue") || ((top.kind.equals("due") || top.kind.equals("event")) && top.days <= 1);
             bg = hot ? R.drawable.widget_bg_hot : (top.kind.equals("due") || top.kind.equals("event")) ? R.drawable.widget_bg_warn : R.drawable.widget_bg_calm;
         }
         v.setInt(R.id.w_root, "setBackgroundResource", bg);
+        v.setImageViewResource(R.id.w_bisi, faceRes);
         v.setTextViewText(R.id.w_headline, headline);
 
         int[] lineIds = {R.id.w_line1, R.id.w_line2, R.id.w_line3};

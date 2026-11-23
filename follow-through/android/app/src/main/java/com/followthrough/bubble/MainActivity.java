@@ -195,6 +195,15 @@ public class MainActivity extends Activity {
         public void markActive() { Nag.markActive(MainActivity.this); }
 
         @JavascriptInterface
+        public int streak() { return Nag.streak(MainActivity.this); }
+
+        @JavascriptInterface
+        public int lostStreak() { return Nag.lostStreak(MainActivity.this); }
+
+        @JavascriptInterface
+        public String webAppUrl() { String[] c = Tracker.connection(MainActivity.this); return c == null ? "" : c[0]; }
+
+        @JavascriptInterface
         public void copy(String text) {
             runOnUiThread(() -> {
                 android.content.ClipboardManager cm = getSystemService(android.content.ClipboardManager.class);

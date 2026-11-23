@@ -44,7 +44,7 @@ const TIPS_NAME = 'Tips & Resources';
 const TIP_HEADERS = ['ID', 'Saved', 'Topic', 'Title', 'Key points', 'Link', 'Saved from', 'Screenshot', 'In digest'];
 const FOLDER_NAME = 'Follow-Through captures';
 const DOCS_FOLDER = 'Follow-Through';
-const SCHEMA = '6';
+const SCHEMA = '7';
 
 /* ---------- one-time setup ---------- */
 function setup() {
@@ -107,7 +107,9 @@ function authorize() {
   DriveApp.getRootFolder();
   SpreadsheetApp.getActiveSpreadsheet();
   UrlFetchApp.getRequest('https://generativelanguage.googleapis.com/');
-  Logger.log('All set: the tracker can now create Google Docs and use Gemini.');
+  MailApp.getRemainingDailyQuota();
+  installEmailTrigger_();
+  Logger.log('All set: Docs, Gemini and Bisi\'s emails are on. Emails go to ' + Session.getEffectiveUser().getEmail());
 }
 
 /** The tracker spreadsheet: the one this script is attached to, or one it creates in your Drive. */
@@ -123,7 +125,9 @@ function book_() {
 
 /* ---------- web endpoints ---------- */
 function doGet(e) {
-  return handle_(e.parameter || {});
+  const p = e.parameter || {};
+  if (p.action === 'act') return actPage_(p);
+  return handle_(p);
 }
 function doPost(e) {
   let body = {};
@@ -160,6 +164,10 @@ function handle_(p) {
         case 'doc': return doc_(p);
         case 'readDoc': return readDoc_(p);
         case 'docs': return docs_();
+        case 'asset': return asset_(p);
+        case 'stats': return stats_(p);
+        case 'emailNow': return emailNow_(p);
+        case 'emailSettings': return emailSettings_(p);
         default: return { ok: false, error: 'unknown_action' };
       }
     }));
@@ -773,4 +781,244 @@ ${cv.slice(0, 12000)}`;
   if (split.length < 2 || split[0].trim().length < 200) return { ok: false, error: 'Could not update the CV this time. Try again.' };
   const d = withLock_(() => doc_({ key: 'master-cv', title: 'Master CV', body: split[0].trim(), mode: 'replace' }));
   return { ok: true, url: d.url, changes: split[1].trim() };
+}
+
+
+/* =====================================================================
+ * Bisi's emails — sent from your own Gmail by an hourly timer
+ * ===================================================================== */
+const BISI = {
+  dueToday: ["{t} closes TODAY. I'm not mad. I'm just… hovering. 🐝", "Today. {t}. Today. Bee-lieve me, tomorrow is too late.", "It's deadline day for {t}. I cleared my whole schedule to watch you do this."],
+  due: ["{t} closes in {d} days. Just thought you'd want to know. Again.", "Bee honest: have you even opened {t}?", "{d} days left for {t}. I'm sure you have a plan. Right? 🙂"],
+  ignored: ["Okay. I'll just keep reminding you then. I have nothing but time. 🐝", "Fun fact: applications don't submit themselves. I checked.", "I'm not saying I'm disappointed. I'm just saying I'm a bee and I'm sad."],
+  check: ["It's been two weeks since you applied to {t}. Any news, or are we pretending it didn't happen?", "Heard back from {t}? I'm asking for a friend. The friend is me."],
+  morning: ["Good morning. I've already been up for hours worrying about your deadlines. ☀️", "Rise and shine. Mostly shine. The deadlines aren't going anywhere. 🐝", "Morning! Small steps today. I'll be watching. Lovingly."],
+  clear: ["Nothing urgent today. Look at you being responsible. 🥹", "All clear. I'm genuinely proud. Don't make it weird."],
+  sunday: ["Here's your week. I made it pretty so you'd actually read it. 💛", "Weekly report from your favourite bee. Grades are… let's just read it."],
+};
+function bisiLine_(kind, vars) {
+  const arr = BISI[kind] || BISI.morning;
+  const seed = Number(Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'D')) + (vars && vars.t ? vars.t.length : 0);
+  return arr[seed % arr.length].replace(/\{(\w+)\}/g, (_, k) => (vars && vars[k] != null ? vars[k] : ''));
+}
+
+function installEmailTrigger_() {
+  const has = ScriptApp.getProjectTriggers().some(t => t.getHandlerFunction() === 'emailTick');
+  if (!has) ScriptApp.newTrigger('emailTick').timeBased().everyHours(1).create();
+}
+
+function asset_(p) {
+  if (!/^[\w.-]{1,60}$/.test(p.name || '') || !p.base64) return { ok: false, error: 'bad_asset' };
+  const props = PropertiesService.getScriptProperties();
+  const old = props.getProperty('ASSET:' + p.name);
+  if (old) { try { DriveApp.getFileById(old).setTrashed(true); } catch (e) {} }
+  const f = docsFolder_().createFile(Utilities.newBlob(Utilities.base64Decode(p.base64), p.mime || 'image/png', p.name));
+  props.setProperty('ASSET:' + p.name, f.getId());
+  return { ok: true, name: p.name };
+}
+function assetBlob_(name) {
+  const id = PropertiesService.getScriptProperties().getProperty('ASSET:' + name);
+  if (!id) return null;
+  try { return DriveApp.getFileById(id).getBlob().setName(name); } catch (e) { return null; }
+}
+
+function stats_(p) {
+  const props = PropertiesService.getScriptProperties();
+  if (p.streak != null) { props.setProperty('STREAK', String(Number(p.streak) || 0)); props.setProperty('STREAK_AT', today_()); }
+  if (p.url && /^https:\/\/script\.google\.com\/.+\/exec$/.test(p.url)) props.setProperty('WEBAPP_URL', p.url);
+  return { ok: true };
+}
+function emailSettings_(p) {
+  const props = PropertiesService.getScriptProperties();
+  if (p.on != null) props.setProperty('EMAILS_OFF', p.on ? '' : '1');
+  return { ok: true, on: !props.getProperty('EMAILS_OFF'), to: Session.getEffectiveUser().getEmail(), quota: MailApp.getRemainingDailyQuota() };
+}
+
+/* ---------- signed one-tap links ---------- */
+function secret_() {
+  const props = PropertiesService.getScriptProperties();
+  let s = props.getProperty('LINK_SECRET');
+  if (!s) { s = Utilities.getUuid(); props.setProperty('LINK_SECRET', s); }
+  return s;
+}
+function sig_(id, what) {
+  const raw = Utilities.computeHmacSha256Signature(id + '|' + what, secret_());
+  return Utilities.base64EncodeWebSafe(raw).slice(0, 22);
+}
+function actUrl_(id, what) {
+  const base = PropertiesService.getScriptProperties().getProperty('WEBAPP_URL') || ScriptApp.getService().getUrl();
+  return base + '?action=act&id=' + encodeURIComponent(id) + '&do=' + encodeURIComponent(what) + '&sig=' + sig_(id, what);
+}
+const ACTIONS = {
+  applied: { label: 'I applied ✓', fields: () => ({ Status: 'Submitted', 'Applied on': today_(), 'Remind on': addDays_(today_(), 14) }), msg: "Look at you! Marked as applied. I'll ask about the result in two weeks.", mood: 'party' },
+  snooze: { label: 'Remind me tomorrow', fields: () => ({ 'Remind on': addDays_(today_(), 1) }), msg: "Fine. Tomorrow. I'm writing that down. 📝", mood: 'sassy' },
+  preparing: { label: "I'm on it", fields: () => ({ Status: 'Preparing' }), msg: "Marked as Preparing. Open the app to get your essays and CV written.", mood: 'happy' },
+  accepted: { label: 'Accepted 🎉', fields: () => ({ Status: 'Closed', Outcome: 'Accepted', 'Remind on': '' }), msg: "YOU GOT IN?! I'm telling every flower I know. 🎉", mood: 'party' },
+  shortlisted: { label: 'Shortlisted', fields: () => ({ Status: 'Submitted', Outcome: 'Shortlisted', 'Remind on': addDays_(today_(), 7) }), msg: "Shortlisted! I knew it. Let's prepare. 🐝", mood: 'party' },
+  interview: { label: 'Interview', fields: () => ({ Status: 'Submitted', Outcome: 'Interview', 'Remind on': addDays_(today_(), 7) }), msg: "An interview! Breathe. Then prepare. I'll remind you.", mood: 'happy' },
+  rejected: { label: 'Rejected', fields: () => ({ Status: 'Closed', Outcome: 'Rejected', 'Remind on': '' }), msg: "Their loss. Genuinely. On to the next one. 💛", mood: 'crying' },
+  nonews: { label: 'No news yet', fields: () => ({ 'Remind on': addDays_(today_(), 7) }), msg: "Okay. I'll ask again next week. Patiently. Mostly.", mood: 'sleepy' },
+};
+function actPage_(p) {
+  const a = ACTIONS[p.do];
+  let ok = false, msg = "That link didn't work. Open the app instead.", mood = 'worried', title = '';
+  if (a && p.id && p.sig === sig_(p.id, p.do)) {
+    const r = withLock_(() => updateRow_(sheet_(), HEADERS, { id: p.id, fields: a.fields() }));
+    if (r.ok) { ok = true; msg = a.msg; mood = a.mood; const row = rowById_(sheet_(), p.id); title = row ? row['Title'] : ''; }
+  }
+  const img = assetBlob_('bisi_' + mood + '.png');
+  const src = img ? 'data:image/png;base64,' + Utilities.base64Encode(img.getBytes()) : '';
+  const html = `<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1">
+  <body style="margin:0;background:#EEF2EF;font-family:Arial,sans-serif;color:#13231C;display:flex;min-height:100vh;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:22px;padding:28px;max-width:360px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.08)">
+  ${src ? `<img src="${src}" width="120" height="120" alt="Bisi">` : '<div style="font-size:64px">🐝</div>'}
+  <h2 style="margin:12px 0 6px">${ok ? 'Saved ✓' : 'Hmm'}</h2>
+  ${title ? `<div style="color:#5A6A62;margin-bottom:8px">${escHtml_(title)}</div>` : ''}
+  <p style="font-size:16px;line-height:1.5">${escHtml_(msg)}</p>
+  <p style="color:#5A6A62;font-size:13px">You can close this tab.</p></div></body>`;
+  return HtmlService.createHtmlOutput(html).setTitle('Bisi').addMetaTag('viewport', 'width=device-width, initial-scale=1');
+}
+function escHtml_(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+/* ---------- email layout ---------- */
+function sendBisi_(subject, mood, headline, bodyHtml) {
+  const to = Session.getEffectiveUser().getEmail();
+  const img = assetBlob_('bisi_' + mood + '.png');
+  const html = `<div style="background:#EEF2EF;padding:20px 12px;font-family:Arial,Helvetica,sans-serif;color:#13231C">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:18px">
+  <tr><td style="padding:22px 22px 8px">
+    <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+      <td style="vertical-align:middle;padding-right:14px">${img ? '<img src="cid:bisi" width="84" height="84" alt="Bisi the bee" style="display:block">' : '<div style="font-size:56px">🐝</div>'}</td>
+      <td style="vertical-align:middle;font-size:17px;line-height:1.4;font-weight:bold">${escHtml_(headline)}</td>
+    </tr></table>
+  </td></tr>
+  <tr><td style="padding:6px 22px 22px;font-size:15px;line-height:1.55">${bodyHtml}</td></tr>
+  <tr><td style="padding:12px 22px 20px;border-top:1px solid #DBE3DD;color:#5D6D65;font-size:12px">
+    Bisi 🐝 from Follow-Through · <a href="${book_().getUrl()}" style="color:#1E6A4E">Open your tracker</a>
+  </td></tr></table></div>`;
+  const opts = { to: to, subject: subject, htmlBody: html, name: 'Bisi from Follow-Through' };
+  if (img) opts.inlineImages = { bisi: img };
+  MailApp.sendEmail(opts);
+}
+function button_(id, what, primary) {
+  return `<a href="${actUrl_(id, what)}" style="display:inline-block;margin:4px 6px 4px 0;padding:10px 14px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:14px;${primary ? 'background:#1E6A4E;color:#ffffff' : 'background:#E6ECE7;color:#13231C'}">${ACTIONS[what].label}</a>`;
+}
+function itemHtml_(r, extra) {
+  const req = String(r['Requirements'] || '').split('\n').filter(String);
+  const links = [r['Link'] && `<a href="${r['Link']}" style="color:#1E6A4E">Application</a>`,
+    r['Essay doc'] && `<a href="${r['Essay doc']}" style="color:#1E6A4E">Essays</a>`,
+    r['CV doc'] && `<a href="${r['CV doc']}" style="color:#1E6A4E">Tailored CV</a>`].filter(Boolean).join(' · ');
+  return `<div style="border:1px solid #DBE3DD;border-radius:14px;padding:12px 14px;margin:10px 0">
+    <div style="font-weight:bold;font-size:15px">${escHtml_(r['Title'] || 'Untitled')}</div>
+    <div style="color:#5D6D65;font-size:13px">${escHtml_([r['Organisation'], extra].filter(Boolean).join(' · '))}</div>
+    ${req.length ? `<div style="font-size:13px;margin-top:6px">Next: ${escHtml_(req[0])}${req.length > 1 ? ` (+${req.length - 1} more)` : ''}</div>` : ''}
+    ${links ? `<div style="font-size:13px;margin-top:6px">${links}</div>` : ''}
+  </div>`;
+}
+
+/* ---------- the hourly tick ---------- */
+function emailTick() {
+  const props = PropertiesService.getScriptProperties();
+  if (props.getProperty('EMAILS_OFF')) return;
+  const tz = Session.getScriptTimeZone();
+  const hour = Number(Utilities.formatDate(new Date(), tz, 'H'));
+  const weekday = Number(Utilities.formatDate(new Date(), tz, 'u'));   // 1 = Monday … 7 = Sunday
+  const today = today_();
+  const sent = JSON.parse(props.getProperty('SENT') || '{}');
+  Object.keys(sent).forEach(k => { if (daysBetween_(sent[k], today) > 30) delete sent[k]; });
+  const once = key => { if (sent[key]) return false; sent[key] = today; return true; };
+  const rows = rows_(sheet_(), {}).rows;
+  const active = r => r['Status'] === 'Saved' || r['Status'] === 'Preparing';
+  const left = r => (r['Deadline'] ? daysBetween_(today, String(r['Deadline'])) : null);
+  try {
+    if (hour === 7 && once('morning:' + today)) morningEmail_(rows, today);
+    if (hour === 9) countdownEmails_(rows.filter(r => active(r) && left(r) !== null), today, once);
+    if (hour === 10) rows.filter(r => r['Status'] === 'Submitted' && r['Remind on'] && String(r['Remind on']) <= today)
+      .forEach(r => { if (once('check:' + r['ID'] + ':' + r['Remind on'])) checkEmail_(r); });
+    if (hour === 18) {
+      const ignored = rows.filter(r => active(r) && left(r) !== null && left(r) >= 0 && left(r) <= 2 &&
+        String(r['Updated'] || '').slice(0, 10) < addDays_(today, -1));
+      if (ignored.length && once('ignored:' + today)) ignoredEmail_(ignored, today);
+    }
+    if (weekday === 7 && hour === 20 && once('sunday:' + today)) sundayEmail_(rows, today);
+  } finally {
+    props.setProperty('SENT', JSON.stringify(sent));
+  }
+}
+
+function morningEmail_(rows, today) {
+  const act = rows.filter(r => r['Status'] === 'Saved' || r['Status'] === 'Preparing');
+  const due = act.filter(r => r['Deadline'] && daysBetween_(today, String(r['Deadline'])) >= 0 && daysBetween_(today, String(r['Deadline'])) <= 7)
+    .sort((a, b) => String(a['Deadline']).localeCompare(String(b['Deadline'])));
+  const overdue = act.filter(r => r['Deadline'] && daysBetween_(today, String(r['Deadline'])) < 0);
+  const remind = act.filter(r => r['Remind on'] && String(r['Remind on']) <= today && due.indexOf(r) < 0);
+  const fresh = rows.filter(r => String(r['Captured'] || '').slice(0, 10) >= addDays_(today, -1) && r['Status'] !== 'New' && r['Status'] !== 'Closed');
+  const props = PropertiesService.getScriptProperties();
+  const streak = props.getProperty('STREAK_AT') >= addDays_(today, -1) ? Number(props.getProperty('STREAK') || 0) : 0;
+  const n = due.length + overdue.length + remind.length;
+  const mood = overdue.length ? 'sassy' : due.some(r => daysBetween_(today, String(r['Deadline'])) <= 1) ? 'worried' : n ? 'happy' : 'sleepy';
+  let body = `<p style="margin:0 0 6px">${streak ? `🔥 <b>${streak}-day streak.</b> ` : ''}${n ? `<b>${n} ${n === 1 ? 'thing needs' : 'things need'} you.</b>` : bisiLine_('clear')}</p>`;
+  if (overdue.length) body += `<h3 style="margin:16px 0 4px;font-size:15px;color:#C2412B">Deadline passed (did you apply?)</h3>` + overdue.map(r => itemHtml_(r, 'closed ' + String(r['Deadline'])) + button_(r['ID'], 'applied', true)).join('');
+  if (due.length) body += `<h3 style="margin:16px 0 4px;font-size:15px">Due this week</h3>` + due.map(r => { const d = daysBetween_(today, String(r['Deadline'])); return itemHtml_(r, d === 0 ? 'due TODAY' : d === 1 ? 'due tomorrow' : `${d} days left`); }).join('');
+  if (remind.length) body += `<h3 style="margin:16px 0 4px;font-size:15px">You asked me to remind you</h3>` + remind.map(r => itemHtml_(r, r['Deadline'] ? 'due ' + r['Deadline'] : '')).join('');
+  if (fresh.length) body += `<h3 style="margin:16px 0 4px;font-size:15px">Sorted since yesterday</h3><ul style="padding-left:18px;margin:4px 0">` + fresh.map(r => `<li>${escHtml_(r['Title'] || 'Untitled')}${r['Category'] ? ' <span style="color:#5D6D65">(' + escHtml_(r['Category']) + ')</span>' : ''}</li>`).join('') + '</ul>';
+  sendBisi_(n ? `☀️ ${n} ${n === 1 ? 'thing' : 'things'} need you today` : '☀️ Nothing urgent today (enjoy it)', mood, bisiLine_('morning'), body);
+}
+
+function countdownEmails_(rows, today, once) {
+  const group = [];
+  rows.forEach(r => {
+    const d = daysBetween_(today, String(r['Deadline']));
+    if ([7, 3, 1, 0].indexOf(d) < 0 || !once('count:' + r['ID'] + ':' + d)) return;
+    if (d <= 1) {
+      const line = d === 0 ? bisiLine_('dueToday', { t: r['Title'] }) : bisiLine_('due', { t: r['Title'], d: 1 }).replace('1 days', '1 day');
+      sendBisi_(d === 0 ? `🚨 ${r['Title']} closes TODAY` : `⏰ ${r['Title']} closes tomorrow`, d === 0 ? 'worried' : 'sassy', line,
+        itemHtml_(r, d === 0 ? 'due TODAY' : 'due tomorrow') + button_(r['ID'], 'applied', true) + (r['Status'] === 'Saved' ? button_(r['ID'], 'preparing') : '') + button_(r['ID'], 'snooze'));
+    } else group.push([r, d]);
+  });
+  if (group.length) {
+    const top = group.sort((a, b) => a[1] - b[1])[0];
+    sendBisi_(`⏳ ${group.length === 1 ? top[0]['Title'] + ' closes in ' + top[1] + ' days' : group.length + ' deadlines coming up'}`, 'worried',
+      bisiLine_('due', { t: top[0]['Title'], d: top[1] }),
+      group.map(([r, d]) => itemHtml_(r, `${d} days left`) + (r['Status'] === 'Saved' ? button_(r['ID'], 'preparing', true) : '') + button_(r['ID'], 'applied')).join(''));
+  }
+}
+
+function ignoredEmail_(rows, today) {
+  sendBisi_(`😤 You've been ignoring ${rows.length === 1 ? rows[0]['Title'] : rows.length + ' deadlines'}`, 'sassy', bisiLine_('ignored'),
+    `<p style="margin:0 0 6px">These close in two days or less and nothing has changed since yesterday. I noticed. I always notice.</p>` +
+    rows.map(r => { const d = daysBetween_(today, String(r['Deadline'])); return itemHtml_(r, d === 0 ? 'due TODAY' : d === 1 ? 'due tomorrow' : '2 days left') + button_(r['ID'], 'applied', true) + button_(r['ID'], 'preparing') + button_(r['ID'], 'snooze'); }).join(''));
+}
+
+function checkEmail_(r) {
+  sendBisi_(`📬 Heard back from ${r['Title']}?`, 'worried', bisiLine_('check', { t: r['Title'] }),
+    itemHtml_(r, r['Applied on'] ? 'applied ' + r['Applied on'] : 'submitted') +
+    `<p style="margin:10px 0 4px">Tap what happened:</p>` +
+    ['accepted', 'shortlisted', 'interview', 'rejected', 'nonews'].map((w, i) => button_(r['ID'], w, i === 0)).join(''));
+}
+
+function sundayEmail_(rows, today) {
+  const docText = readDocText_('digest');
+  const idx = docText.lastIndexOf('Week of');
+  let section = idx >= 0 ? docText.slice(idx) : '';
+  const fresh = section && /Week of/.test(section) ? section : '';
+  const applied = rows.filter(r => String(r['Applied on'] || '').slice(0, 10) >= addDays_(today, -6)).length;
+  const saved = rows.filter(r => String(r['Captured'] || '').slice(0, 10) >= addDays_(today, -6)).length;
+  const results = rows.filter(r => r['Outcome'] && ['Accepted', 'Shortlisted', 'Interview', 'Rejected'].indexOf(r['Outcome']) >= 0 && String(r['Updated'] || '').slice(0, 10) >= addDays_(today, -6));
+  const mood = results.some(r => r['Outcome'] !== 'Rejected') ? 'party' : applied ? 'happy' : 'sassy';
+  let body = `<p style="margin:0 0 10px"><b>This week:</b> ${saved} saved · ${applied} applied${results.length ? ' · ' + results.length + ' result' + (results.length > 1 ? 's' : '') : ''}${applied ? '' : '. Zero applications. I said nothing. (I said this.)'}</p>`;
+  if (results.length) body += '<ul style="padding-left:18px;margin:4px 0">' + results.map(r => `<li>${escHtml_(r['Title'])}: <b>${escHtml_(r['Outcome'])}</b></li>`).join('') + '</ul>';
+  if (fresh) {
+    body += `<div style="background:#F6F9F7;border-radius:12px;padding:12px 14px;margin-top:12px;white-space:pre-wrap;font-size:14px">${escHtml_(fresh.slice(0, 6000))}</div>`;
+  }
+  const digestUrl = docs_().docs['digest'];
+  if (digestUrl) body += `<p style="margin-top:12px"><a href="${digestUrl}" style="color:#1E6A4E;font-weight:bold">Open your full digest →</a></p>`;
+  sendBisi_('📊 Your week, from Bisi', mood, bisiLine_('sunday'), body);
+}
+
+/** Send one email now (for testing): kind = morning | sunday. */
+function emailNow_(p) {
+  const rows = rows_(sheet_(), {}).rows, today = today_();
+  if (p.kind === 'sunday') sundayEmail_(rows, today); else morningEmail_(rows, today);
+  return { ok: true, to: Session.getEffectiveUser().getEmail(), quota: MailApp.getRemainingDailyQuota() };
 }

@@ -53,6 +53,17 @@ Captures are sorted seconds after you save them; the twice-daily Claude check th
 After updating the script, run `authorize` once in the editor (it now also needs permission to reach Gemini),
 then deploy a new version.
 
+## Bisi the bee 🐝
+Follow-Through's mascot, with six moods (happy, worried, sassy, sleepy, party, crying) that follow how you're doing.
+Bisi talks on the dashboard, the widget, notifications and emails: mostly passive-aggressive, occasionally sweet.
+Source: `android/app/src/main/assets/bisi.js` (SVG + lines); PNGs in `res/drawable-nodpi/`.
+
+## Emails
+Sent from your own Gmail by the script's hourly timer (installed by running `authorize`), so they arrive even when
+the phone is off: ☀️ morning brief (7:00), ⏳ deadline countdown at 7/3/1/0 days (9:00), 📬 results check (10:00),
+😤 "you ignored me" for untouched deadlines ≤ 2 days away (18:00), 📊 Sunday digest (20:00). Buttons in emails
+(I applied ✓, Remind me tomorrow, Accepted, Rejected…) update the sheet in one tap through signed links.
+
 ## Applied history
 The dashboard's **Applied history** tab lists everything you've applied to by month, with results (Accepted,
 Shortlisted, Interview, Rejected, No response, Waiting), your success rate, applications per month, and a
