@@ -76,7 +76,7 @@ the phone is off: ☀️ morning brief (7:00), ⏳ deadline countdown at 7/3/1/0
 ## Notes & reminders
 The **Notes** tab is a sticky-note pad kept on the phone: checklists, colours, pins, search, and reminders at an exact
 time (they ring even if the app is closed, and come back after a restart; buttons: Done ✓, 10 min, 1 hour).
-**Hold Bisi's bubble** and talk: “Call mum at 6pm” becomes a reminder, anything else a note, or send it to the
+**Hold Bisi's bubble** and talk (a small Bisi card listens right over the app you're in; it asks for the microphone once): “Call mum at 6pm” becomes a reminder, anything else a note, or send it to the
 tracker as an opportunity. Typing a time in a note (“submit form tomorrow at 9am”) sets the reminder for you.
 
 ## Applied history

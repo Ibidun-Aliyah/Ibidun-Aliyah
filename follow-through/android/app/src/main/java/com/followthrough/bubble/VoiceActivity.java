@@ -16,6 +16,29 @@ public class VoiceActivity extends Activity {
     @Override
     protected void onCreate(Bundle saved) {
         super.onCreate(saved);
+        // From the bubble: ask for the microphone once, then listen in the floating card from now on.
+        if (getIntent().getBooleanExtra("fromBubble", false)
+                && checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{android.Manifest.permission.RECORD_AUDIO}, MIC);
+            return;
+        }
+        listen();
+    }
+
+    private static final int MIC = 12;
+
+    @Override
+    public void onRequestPermissionsResult(int req, String[] perms, int[] res) {
+        super.onRequestPermissionsResult(req, perms, res);
+        if (req != MIC) return;
+        if (res.length > 0 && res[0] == android.content.pm.PackageManager.PERMISSION_GRANTED
+                && android.speech.SpeechRecognizer.isRecognitionAvailable(this) && BubbleService.instance != null) {
+            finish();
+            BubbleService.instance.voice();
+        } else listen();
+    }
+
+    private void listen() {
         Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
                 .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                 .putExtra(RecognizerIntent.EXTRA_PROMPT, "Tell Bisi what to save");
@@ -47,10 +70,7 @@ public class VoiceActivity extends Activity {
                 .setTitle("🐝 Save this as…")
                 .setMessage("“" + text + "”" + (when == 0 ? "" : "\n\n⏰ " + whenLabel))
                 .setNeutralButton("Opportunity", (d, w) -> {
-                    Tracker.capture(app, "Voice note", null, "Spoken note: " + text, null, text, (ok, msg) -> {
-                        Toast.makeText(app, msg, Toast.LENGTH_SHORT).show();
-                        if (ok) Tracker.sortNow(app, (sorted, what) -> { if (sorted) Toast.makeText(app, what, Toast.LENGTH_LONG).show(); });
-                    });
+                    VoiceCard.saveOpportunity(app, text);
                     finish();
                 })
                 .setOnCancelListener(d -> finish());
@@ -64,14 +84,5 @@ public class VoiceActivity extends Activity {
         b.show();
     }
 
-    private void saveNote(String text, long when) {
-        try {
-            org.json.JSONObject n = new org.json.JSONObject()
-                    .put("text", text.substring(0, 1).toUpperCase() + text.substring(1))
-                    .put("items", new org.json.JSONArray()).put("color", when != 0 ? "honey" : "mint")
-                    .put("pinned", false).put("remindAt", when).put("done", false).put("voice", true);
-            Notes.save(getApplicationContext(), n);
-            Nag.markActive(getApplicationContext());
-        } catch (Exception ignored) {}
-    }
+    private void saveNote(String text, long when) { VoiceCard.saveNote(this, text, when); }
 }

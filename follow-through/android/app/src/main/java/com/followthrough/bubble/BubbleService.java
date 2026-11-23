@@ -151,8 +151,19 @@ public class BubbleService extends AccessibilityService {
         Tracker.prefs(this).edit().putInt("bx", lp.x).putInt("by", lp.y).apply();
     }
 
-    private void voice() {
-        Intent i = new Intent(this, VoiceActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    private VoiceCard voiceCard;
+
+    /** Listen right here, over whatever app is open. Needs the microphone permission once. */
+    void voice() {
+        boolean mic = checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED;
+        if (mic && android.speech.SpeechRecognizer.isRecognitionAvailable(this)) {
+            if (voiceCard == null) voiceCard = new VoiceCard(this, wm);
+            voiceCard.start();
+            return;
+        }
+        // First time (asks for the microphone), or no on-device speech service: the small voice popup.
+        Intent i = new Intent(this, VoiceActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .putExtra("fromBubble", true);
         try { startActivity(i); } catch (Exception e) { Toast.makeText(this, "Couldn't start voice.", Toast.LENGTH_SHORT).show(); }
     }
 

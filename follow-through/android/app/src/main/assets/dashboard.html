@@ -184,6 +184,8 @@ section{margin-top:28px}
 .sheet-head{display:flex;gap:10px;align-items:flex-start;padding:10px 16px 12px;border-bottom:2px dashed var(--line)}
 .sheet-head h3{font-size:1.6rem;line-height:1.15;flex:1;min-width:0}
 .sheet-body{overflow-y:auto;padding:14px 16px 26px;display:flex;flex-direction:column;gap:14px}
+.sheet-body>*{flex-shrink:0}
+#ne-text{min-height:120px;max-height:45vh;resize:none;line-height:1.4;font-size:1rem}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:.9rem}
 .kv dt{color:var(--muted);font-weight:700} .kv dd{margin:0;overflow-wrap:anywhere}
 .reqs{margin:0;padding-left:20px;font-size:.92rem;display:flex;flex-direction:column;gap:4px}
@@ -902,6 +904,9 @@ function openNote(id){
       </div>
       <button class="btn primary" id="ne-save">Save note</button>
     </div>`);
+  const ta = $('#ne-text'), fit = () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight + 4, innerHeight * .45) + 'px'; };
+  ta.addEventListener('input', fit); fit();
+  const body = sheet.querySelector('.sheet-body'); if (body) body.scrollTop = 0;
 }
 function collectNote(){
   const n = editingNote; if (!n) return null;
