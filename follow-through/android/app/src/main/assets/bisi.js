@@ -145,8 +145,61 @@
     return arr[i].replace(/\{(\w+)\}/g, function (_, k) { return vars && vars[k] != null ? vars[k] : ''; });
   }
 
+
+  /* ---------- Hive decorations ---------- */
+  function hiveSvg(size) {
+    size = size || 120;
+    var bands = '';
+    var widths = [34, 46, 54, 58, 58];
+    for (var i = 0; i < widths.length; i++) {
+      var w = widths[i], y = 22 + i * 15;
+      bands += '<rect x="' + (60 - w) + '" y="' + y + '" width="' + (w * 2) + '" height="16" rx="8" fill="' + (i % 2 ? '#F3B33D' : '#F6C343') + '" stroke="' + INK + '" stroke-width="2.6"/>';
+    }
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="' + size + '" height="' + size + '" role="img" aria-label="A beehive">' +
+      '<rect x="56" y="6" width="8" height="12" rx="3" fill="' + INK + '"/>' +
+      '<ellipse cx="60" cy="20" rx="20" ry="9" fill="#F6C343" stroke="' + INK + '" stroke-width="2.6"/>' +
+      bands +
+      '<rect x="6" y="96" width="108" height="10" rx="5" fill="#C98A1B" stroke="' + INK + '" stroke-width="2.6"/>' +
+      '<path d="M50 96 Q50 80 60 80 Q70 80 70 96 Z" fill="' + INK + '"/>' +
+      '<circle cx="96" cy="30" r="3" fill="' + INK + '"/><ellipse cx="94" cy="26" rx="4" ry="2.5" fill="' + WING + '" stroke="' + WING_EDGE + '" stroke-width="1"/>' +
+      '<path d="M96 30 q8 6 2 12 q-6 6 4 12" stroke="' + INK + '" stroke-width="1.4" stroke-dasharray="2 3" fill="none"/>' +
+      '</svg>';
+  }
+  function honeycombSvg(size, color) {
+    size = size || 40; color = color || '#F3B33D';
+    function hex(cx, cy, r, fill) {
+      var pts = [];
+      for (var k = 0; k < 6; k++) { var a = Math.PI / 180 * (60 * k - 30); pts.push((cx + r * Math.cos(a)).toFixed(1) + ',' + (cy + r * Math.sin(a)).toFixed(1)); }
+      return '<polygon points="' + pts.join(' ') + '" fill="' + fill + '" stroke="' + INK + '" stroke-width="2"/>';
+    }
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 52" width="' + size + '" height="' + (size * 52 / 60) + '" aria-hidden="true">' +
+      hex(18, 15, 12, color) + hex(39, 15, 12, '#FFE9A8') + hex(28.5, 34, 12, '#FFE9A8') + hex(49.5, 34, 12, color) +
+      '<path d="M24 41 q0 6 3 6 q3 0 3 -6" fill="' + color + '" stroke="' + INK + '" stroke-width="1.6"/></svg>';
+  }
+  function flowerSvg(size, petal) {
+    size = size || 22; petal = petal || '#F29B8B';
+    var p = '';
+    for (var k = 0; k < 5; k++) { var a = k * 72 * Math.PI / 180; p += '<circle cx="' + (12 + 6 * Math.cos(a)).toFixed(1) + '" cy="' + (12 + 6 * Math.sin(a)).toFixed(1) + '" r="4.6" fill="' + petal + '" stroke="' + INK + '" stroke-width="1.4"/>'; }
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="' + size + '" height="' + size + '" aria-hidden="true">' + p + '<circle cx="12" cy="12" r="4" fill="#F6C343" stroke="' + INK + '" stroke-width="1.4"/></svg>';
+  }
+  /** Honey drips along the bottom of a band: width-filling, deterministic. */
+  function dripSvg(color) {
+    color = color || '#F3B33D';
+    var d = 'M0 0 H400 V6', xs = [380, 341, 318, 270, 236, 190, 152, 118, 72, 40, 14], lens = [10, 18, 7, 22, 9, 15, 24, 8, 17, 11, 6];
+    for (var i = 0; i < xs.length; i++) {
+      var x = xs[i], L = lens[i], w = 7 + (L % 5);
+      d += ' H' + (x + w) + ' C' + (x + w) + ' ' + (6 + L) + ' ' + (x - w) + ' ' + (6 + L) + ' ' + (x - w) + ' 6';
+    }
+    d += ' H0 Z';
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 34" preserveAspectRatio="none" width="100%" height="26" aria-hidden="true"><path d="' + d + '" fill="' + color + '"/></svg>';
+  }
+
+  root.hiveSvg = hiveSvg;
+  root.honeycombSvg = honeycombSvg;
+  root.flowerSvg = flowerSvg;
+  root.dripSvg = dripSvg;
   root.bisiSvg = bisiSvg;
   root.bisiLine = pickLine;
   root.BISI_LINES = LINES;
-  if (typeof module !== 'undefined') module.exports = { bisiSvg: bisiSvg, bisiLine: pickLine, LINES: LINES };
+  if (typeof module !== 'undefined') module.exports = { bisiSvg: bisiSvg, bisiLine: pickLine, LINES: LINES, hiveSvg: hiveSvg, honeycombSvg: honeycombSvg, flowerSvg: flowerSvg, dripSvg: dripSvg };
 })(typeof window !== 'undefined' ? window : globalThis);

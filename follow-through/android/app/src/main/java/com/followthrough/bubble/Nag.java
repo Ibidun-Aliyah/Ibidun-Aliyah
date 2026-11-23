@@ -342,6 +342,12 @@ final class Nag {
             boolean hot = top.kind.equals("overdue") || ((top.kind.equals("due") || top.kind.equals("event")) && top.days <= 1);
             bg = hot ? R.drawable.widget_bg_hot : (top.kind.equals("due") || top.kind.equals("event")) ? R.drawable.widget_bg_warn : R.drawable.widget_bg_calm;
         }
+        boolean hive = !"garden".equals(prefs(c).getString("skin", "hive"));
+        if (hive) {
+            bg = bg == R.drawable.widget_bg_hot ? R.drawable.widget_bg_hive_hot
+                    : bg == R.drawable.widget_bg_warn ? R.drawable.widget_bg_hive_warn : R.drawable.widget_bg_hive_calm;
+        }
+        v.setViewVisibility(R.id.w_comb, hive ? android.view.View.VISIBLE : android.view.View.GONE);
         v.setInt(R.id.w_root, "setBackgroundResource", bg);
         v.setImageViewResource(R.id.w_bisi, faceRes);
         v.setTextViewText(R.id.w_headline, headline);

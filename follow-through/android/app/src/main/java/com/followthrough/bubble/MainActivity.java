@@ -195,6 +195,15 @@ public class MainActivity extends Activity {
         public void markActive() { Nag.markActive(MainActivity.this); }
 
         @JavascriptInterface
+        public String getSkin() { return Nag.prefs(MainActivity.this).getString("skin", "hive"); }
+
+        @JavascriptInterface
+        public void setSkin(String skin) {
+            Nag.prefs(MainActivity.this).edit().putString("skin", "garden".equals(skin) ? "garden" : "hive").apply();
+            Nag.updateWidget(MainActivity.this);
+        }
+
+        @JavascriptInterface
         public int streak() { return Nag.streak(MainActivity.this); }
 
         @JavascriptInterface

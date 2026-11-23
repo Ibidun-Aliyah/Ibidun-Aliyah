@@ -58,6 +58,10 @@ Follow-Through's mascot, with six moods (happy, worried, sassy, sleepy, party, c
 Bisi talks on the dashboard, the widget, notifications and emails: mostly passive-aggressive, occasionally sweet.
 Source: `android/app/src/main/assets/bisi.js` (SVG + lines); PNGs in `res/drawable-nodpi/`.
 
+## Looks
+Tap 🎨 on the dashboard to switch between **Hive** (honey yellow and bee black, honeycomb background, honey drips,
+a little beehive in empty spaces, the default) and **Garden** (the original calm greens). The widget follows along.
+
 ## Emails
 Your daily streak is your **nectar** 🍯: any real action collects a day of it, and Bisi cries if you spill the jar.
 

@@ -4,7 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Follow-Through</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<script>
+  // Apply the saved look (garden or hive) before anything paints.
+  (function(){ var s = null; try { s = window.Android && Android.getSkin ? Android.getSkin() : localStorage.getItem('ft-skin'); } catch(e){}
+    document.documentElement.setAttribute('data-skin', s || 'hive'); })();
+</script>
 <style>
 :root{
   --bg:#F1F4F0; --card:#FFFFFF; --sunk:#E6ECE7; --ink:#13231C; --muted:#5D6D65; --line:#DBE3DD;
@@ -18,6 +23,60 @@
   --accent:#62C79A; --accent-ink:#08140F; --accent-soft:#1C3A2D;
   --sun:#E9B44C; --sun-soft:#3A2F15; --rose:#F08068; --rose-soft:#3D221C; --sky:#7FAEDD; --sky-soft:#1B2B3B;
   --plum:#B993DA; --plum-soft:#2E2338; color-scheme:dark}}
+
+/* ---------- Hive look: honey, bee black, honeycomb ---------- */
+:root[data-skin="hive"]{
+  --bg:#FFF5D6; --card:#FFFDF6; --sunk:#FBE8AE; --ink:#1E1606; --muted:#6E5A2C; --line:#F0D88A;
+  --accent:#1E1606; --accent-ink:#FFD23F; --accent-soft:#FFE7A0;
+  --sun:#F5B700; --sun-soft:#FFF0C0; --sky:#E39B1B; --sky-soft:#FFE2AE; --rose:#D9533B; --rose-soft:#FFDCCF;
+  --plum:#9461C4; --plum-soft:#F2E4FB; --honey:#F5B700; --honey-deep:#E39B1B;
+  --f-d:"Fredoka","Bricolage Grotesque",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root[data-skin="hive"]{
+  --bg:#17120A; --card:#221A0D; --sunk:#2D2312; --ink:#FFF1C9; --muted:#CBB37A; --line:#3C2F16;
+  --accent:#FFC629; --accent-ink:#1E1606; --accent-soft:#3B2D0F;
+  --sun:#FFC629; --sun-soft:#3B2D0F; --sky:#F0A93A; --sky-soft:#3A2911; --rose:#FF8A6E; --rose-soft:#43231A;
+  --plum:#C9A0F0; --plum-soft:#2F2240; --honey:#F5B700; --honey-deep:#C98A1B; color-scheme:dark}}
+.hive-only{display:none}
+:root[data-skin="hive"] .hive-only{display:block}
+:root[data-skin="hive"] body{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100' fill='none' stroke='%23E39B1B' stroke-opacity='0.16' stroke-width='2'/%3E%3Cpath d='M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34' fill='none' stroke='%23E39B1B' stroke-opacity='0.10' stroke-width='2'/%3E%3C/svg%3E");
+  background-size:56px 100px}
+.hive-head{position:absolute;top:0;left:0;right:0;z-index:0;pointer-events:none}
+.hive-head .band{height:calc(env(safe-area-inset-top) + 66px);background:var(--honey)}
+.hive-head svg{display:block;margin-top:-1px}
+.wrap{position:relative;z-index:1}
+:root[data-skin="hive"] .top h1{color:#1E1606}
+:root[data-skin="hive"] .top h1 span{color:#FFFDF6}
+:root[data-skin="hive"] .top .icon{border-color:#1E1606;border-width:2px;background:#FFFDF6;color:#1E1606}
+:root[data-skin="hive"] .sub{margin-top:34px}
+:root[data-skin="hive"] .card,:root[data-skin="hive"] .item{border-width:2px;border-radius:20px}
+:root[data-skin="hive"] .sh h2::before{content:"";display:inline-block;width:14px;height:16px;margin-right:8px;background:var(--honey);
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);vertical-align:-1px}
+:root[data-skin="hive"] .tile{position:relative;overflow:hidden;border:2px solid var(--line)}
+:root[data-skin="hive"] .tile::after{content:"";position:absolute;right:-10px;bottom:-14px;width:52px;height:60px;background:rgba(255,255,255,.45);
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+:root[data-skin="hive"] .t1{background:#FFE7A0} :root[data-skin="hive"] .t2{background:#FFD9C9}
+:root[data-skin="hive"] .t3{background:#FFEFC9} :root[data-skin="hive"] .t4{background:#F2E4FB}
+@media (prefers-color-scheme:dark){
+  :root[data-skin="hive"] .t1{background:#3B2D0F} :root[data-skin="hive"] .t2{background:#43231A}
+  :root[data-skin="hive"] .t3{background:#33280F} :root[data-skin="hive"] .t4{background:#2F2240}
+  :root[data-skin="hive"] .tile::after{background:rgba(255,255,255,.05)}}
+:root[data-skin="hive"] .btn.primary{box-shadow:0 3px 0 var(--honey-deep)}
+:root[data-skin="hive"] .views{background:var(--sunk);border:2px solid var(--line)}
+:root[data-skin="hive"] .bisi .say{border-width:2px;border-radius:20px 20px 20px 6px}
+:root[data-skin="hive"] .bisi{position:relative}
+:root[data-skin="hive"] .bisi::before{content:"";position:absolute;left:62px;top:-18px;width:70px;height:30px;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 30'%3E%3Cpath d='M2 26 C18 2 34 30 50 10 S66 6 68 4' fill='none' stroke='%23E39B1B' stroke-width='2' stroke-dasharray='3 4' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat}
+:root[data-skin="hive"] .empty{background:var(--hive-img) center 14px/58px no-repeat;padding-top:84px;border-color:var(--line);border-width:2px}
+.meadow{margin:34px 0 0;text-align:center;color:var(--muted);font-size:.8rem}
+.meadow .row{display:flex;justify-content:center;align-items:flex-end;gap:10px;margin-bottom:6px}
+.skin-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.skin-opt{border:2px solid var(--line);border-radius:18px;padding:10px;background:var(--card);text-align:left;cursor:pointer}
+.skin-opt[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink)}
+.skin-opt .pv{height:74px;border-radius:12px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px}
+.skin-opt b{display:block;font-family:var(--f-d)} .skin-opt span{font-size:.8rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){svg animateTransform{display:none}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-b)}
 h1,h2,h3,h4{font-family:var(--f-d);margin:0;letter-spacing:-.01em}
@@ -110,9 +169,11 @@ svg text{fill:var(--muted);font-size:10px;font-family:var(--f-b)}
 </style>
 </head>
 <body>
+<div class="hive-head hive-only" aria-hidden="true"><div class="band"></div><div id="drip"></div></div>
 <div class="wrap">
   <div class="top">
     <h1>Follow<span>·</span>Through</h1>
+    <button class="icon" id="skin" aria-label="Change look">🎨</button>
     <button class="icon" id="refresh" aria-label="Refresh">↻</button>
     <button class="icon" id="settings" aria-label="Settings">⚙</button>
   </div>
@@ -164,6 +225,7 @@ svg text{fill:var(--muted);font-size:10px;font-family:var(--f-b)}
     </div>
   </section>
   </div>
+  <div class="meadow hive-only" id="meadow" aria-hidden="true"></div>
 </div>
 
 <div class="scrim" id="scrim" hidden></div>
@@ -610,6 +672,37 @@ $('#cv-add-btn').onclick = async () => {
   else out.textContent = j.error === 'no_key' ? 'Add your Gemini key in Settings first.' : 'Didn\'t work: ' + String(j.error).slice(0,140);
 };
 window.__onResume = () => load(true);
+
+/* ---------- looks: garden or hive ---------- */
+function decorate(){
+  if (!window.hiveSvg) return;
+  $('#drip').innerHTML = dripSvg('#F5B700');
+  document.documentElement.style.setProperty('--hive-img', 'url("data:image/svg+xml,' + encodeURIComponent(hiveSvg(58)) + '")');
+  $('#meadow').innerHTML = `<div class="row">${flowerSvg(22)}${honeycombSvg(46)}${hiveSvg(64)}${flowerSvg(26,'#CFEAF6')}${bisiSvg('sleepy',40)}${flowerSvg(20)}</div>Made with honey by Bisi 🐝`;
+}
+function setSkin(k){
+  document.documentElement.setAttribute('data-skin', k);
+  try { localStorage.setItem('ft-skin', k); } catch(e){}
+  if (window.Android && Android.setSkin) Android.setSkin(k);
+  render(); if (view === 'history') history(D ? D.rows : []);
+}
+$('#skin').onclick = () => {
+  const cur = document.documentElement.getAttribute('data-skin');
+  openSheet(`<div class="sheet-head"><h3>Choose your look</h3><button class="btn small ghost" data-close>Close</button></div>
+    <div class="sheet-body">
+      <div class="skin-opts">
+        <button class="skin-opt" data-skin="hive" aria-pressed="${cur==='hive'}"><div class="pv" style="background:#F5B700">${honeycombSvg(40)}${bisiSvg('happy',46)}</div><b>Hive</b><span>Honey, bee black, honeycombs. Bisi's home.</span></button>
+        <button class="skin-opt" data-skin="garden" aria-pressed="${cur==='garden'}"><div class="pv" style="background:#D9EEE4">${flowerSvg(26)}${bisiSvg('happy',46)}</div><b>Garden</b><span>Calm greens. The original.</span></button>
+      </div>
+      <div class="note">Your widget follows the look you pick.</div>
+    </div>`);
+};
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-skin]'); if (!b || b === document.documentElement) return;
+  const k = b.dataset.skin; setSkin(k); closeSheet();
+  toast(k === 'hive' ? '🐝 Welcome home. Excellent taste, honestly.' : '🌿 The garden. Calm. I\'ll still nag you.');
+});
+decorate();
 function active_(){ if (window.Android && Android.markActive) Android.markActive(); }
 
 /* ---------- preview data (only when opened outside the app) ---------- */
