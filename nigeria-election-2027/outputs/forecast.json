@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-22",
+ "generated": "2026-11-23",
  "election_date": "2027-01-16",
  "n_simulations": 20000,
  "candidates_meta": {
@@ -2485,9 +2485,40 @@
    },
    "runoff": 0.1754,
    "atiku_off_prob": 0.25
+  },
+  {
+   "date": "2026-11-23",
+   "win": {
+    "tinubu": 0.7457,
+    "atiku": 0.1287,
+    "obi": 0.1257
+   },
+   "share": {
+    "tinubu": 0.39,
+    "atiku": 0.2185,
+    "obi": 0.329
+   },
+   "runoff": 0.1754,
+   "atiku_off_prob": 0.25
   }
  ],
  "news": [
+  {
+   "date": "2026-11-22",
+   "headline": "Atiku says he will not step down for any candidate; ADC to launch his campaign in Jigawa on 27 Nov",
+   "source": "The Sun",
+   "url": "https://thesun.ng/2027-i-wont-step-down-for-anyone-atiku-declares-as-adc-launches-jigawa-campaign-friday/",
+   "impact": "low",
+   "model_change": "No model change. The opposition stays split three ways. No Court of Appeal ruling yet, so the chance he is removed from the ballot stays at 25%."
+  },
+  {
+   "date": "2026-11-22",
+   "headline": "Reports of opposition talks on a common front and power-sharing deal, to be unveiled 30 Nov",
+   "source": "Opinion Nigeria",
+   "url": "https://www.opinionnigeria.com/2027-opposition-parties-plot-common-front-to-challenge-apc-consider-power-sharing-deal/",
+   "impact": "low",
+   "model_change": "Not used: a single report not confirmed by a major outlet. The model will change only if a ticket actually changes."
+  },
   {
    "date": "2026-11-07",
    "headline": "ADC files a 17-ground appeal and a stay of execution; INEC keeps Atiku on its list",
