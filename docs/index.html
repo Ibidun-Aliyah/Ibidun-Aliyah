@@ -338,6 +338,9 @@ section{margin-top:28px}
 .g-ex.ok{background:var(--ok-soft)}.g-ex.no{background:var(--rose-soft)}.g-next{align-self:flex-end}
 .g-end{text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center}.g-score{font-family:var(--f-d);font-size:3rem;line-height:1}.g-lv{font-size:1.05rem}
 .g-end .g-rev{text-align:left;width:100%}
+.inv-make{display:flex;flex-direction:column;gap:6px}
+.inv-make input,.inv-make textarea{width:100%;box-sizing:border-box;border:2.5px solid var(--stroke);border-radius:var(--r2);padding:9px 12px;background:var(--card);color:var(--ink);font:inherit}
+.inv-make .row{margin-top:6px}
 .colors{display:flex;gap:8px;flex-wrap:wrap}
 .colors button{width:34px;height:34px;border-radius:50%;border:2.5px solid var(--stroke);cursor:pointer}
 .colors button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--card),0 0 0 5.5px var(--stroke)}
@@ -444,6 +447,19 @@ section{margin-top:28px}
       </div>
     </section>
     <button class="card g-entry" data-go="games"><span class="g-ico">🎮</span><span><b>Brain break</b><small>Learning games for when you're bored</small></span><span aria-hidden="true">→</span></button>
+    <section>
+      <div class="sh"><h2>Invite a friend 💌</h2><small>works on iPhone too</small></div>
+      <div class="card inv-make">
+        <label class="note" for="iv-from">Your name</label>
+        <input id="iv-from" maxlength="30" placeholder="e.g. Aliyah" autocomplete="given-name">
+        <label class="note" for="iv-to">Their name</label>
+        <input id="iv-to" maxlength="30" placeholder="e.g. Tolu">
+        <label class="note" for="iv-msg">A little note (optional)</label>
+        <textarea id="iv-msg" rows="2" maxlength="220" placeholder="e.g. Let's both apply to more stuff this semester. Bisi will make sure 😂"></textarea>
+        <div class="row"><button class="btn primary" id="iv-send">Send invite 💌</button><button class="btn" id="iv-preview">Preview</button></div>
+        <div class="note">They open a cute envelope with your note, then set up their own private tracker.</div>
+      </div>
+    </section>
     <section>
       <div class="sh"><h2>Scroll guard</h2><small id="fg-today"></small></div>
       <div class="card fg">
@@ -1063,6 +1079,24 @@ $('#fg-apps').addEventListener('click', e => { const b = e.target.closest('[data
   const on = b.getAttribute('aria-pressed') !== 'true'; const apps = {}; apps[b.dataset.fg] = on;
   if (!window.Android){ const a = fgCache.apps.find(x => x.pkg === b.dataset.fg); a.on = on; b.setAttribute('aria-pressed', on); return; }
   fgSave({ apps }); });
+
+/* ---------- invite a friend ---------- */
+const INVITE_BASE = 'https://ibidun-aliyah.github.io/Ibidun-Aliyah/';
+try { $('#iv-from').value = localStorage.getItem('ft-myname') || ''; } catch(e){}
+function inviteLink(){
+  const from = $('#iv-from').value.trim(), to = $('#iv-to').value.trim(), msg = $('#iv-msg').value.trim();
+  try { localStorage.setItem('ft-myname', from); } catch(e){}
+  const q = new URLSearchParams(); q.set('from', from || 'A friend'); if (to) q.set('to', to); if (msg) q.set('msg', msg);
+  return { url: INVITE_BASE + '?' + q.toString(), to, from };
+}
+$('#iv-send').onclick = () => {
+  const { url, to } = inviteLink();
+  const text = `${to ? 'Hey ' + to + '! ' : ''}I saved you a spot in the hive 🐝 It's the app I use to track scholarships & internships. Open this in Safari (on iPhone) and tap the envelope:`;
+  if (window.Android && Android.share) Android.share(text, url);
+  else if (navigator.share) navigator.share({ text, url }).catch(() => {});
+  else { navigator.clipboard && navigator.clipboard.writeText(text + ' ' + url); toast('Invite copied. Paste it to your friend 💌'); }
+};
+$('#iv-preview').onclick = () => open(inviteLink().url);
 
 /* ---------- tabs ---------- */
 function go(name){

@@ -284,6 +284,14 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public void share(String text, String url) {
+            runOnUiThread(() -> {
+                Intent send = new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text + "\n" + url);
+                startActivity(Intent.createChooser(send, "Send your invite"));
+            });
+        }
+
+        @JavascriptInterface
         public int queued() { return Tracker.queued(MainActivity.this); }
 
         @JavascriptInterface

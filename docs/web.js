@@ -313,6 +313,10 @@
       if (!w) { download('follow-through.html', 'text/html', html); return; }
       w.document.write(html); w.document.close(); setTimeout(function () { w.print(); }, 400);
     },
+    share: function (text, url) {
+      if (navigator.share) { navigator.share({ text: text, url: url }).catch(function () {}); return; }
+      if (navigator.clipboard) navigator.clipboard.writeText(text + ' ' + url).then(function () { toast('Invite copied. Paste it in WhatsApp 💌'); });
+    },
     openSettings: function () { settings(false); }
   };
   window.Android = api;
@@ -321,10 +325,68 @@
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible') { flush(); if (window.__onResume) window.__onResume(); }
   });
+  /* ---------- the invitation (link like ?from=Aliyah&to=Tolu&msg=…) ---------- */
+  function inviteParams() {
+    try { var q = new URLSearchParams(location.search); return { from: (q.get('from') || '').slice(0, 30), to: (q.get('to') || '').slice(0, 30), msg: (q.get('msg') || '').slice(0, 220) }; }
+    catch (e) { return { from: '' }; }
+  }
+  var invCss = document.createElement('style');
+  invCss.textContent = '.inv{position:fixed;inset:0;z-index:70;display:flex;align-items:flex-start;justify-content:center;padding:24px 18px;overflow:auto;' +
+    'background:radial-gradient(circle at 30% 20%,#FFF3C4,#FFE08A 55%,#F5C04A);font-family:var(--f-b,sans-serif);color:#1E1606}' +
+    '.inv-hc{position:absolute;inset:0;opacity:.35;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2756%27 height=%2797%27%3E%3Cpath d=%27M28 0l28 16v32L28 64 0 48V16zM28 64v33%27 fill=%27none%27 stroke=%27%23C98A0B%27 stroke-width=%271.5%27/%3E%3C/svg%3E")}' +
+    '.inv-wrap{position:relative;width:min(360px,100%);text-align:center;margin:auto}' +
+    '.inv-env{position:relative;width:100%;aspect-ratio:1.45;cursor:pointer;border:0;background:none;padding:0;filter:drop-shadow(5px 7px 0 rgba(30,22,6,.85))}' +
+    '.inv-env svg{width:100%;height:100%;display:block}.inv-env .flap{transform-origin:50% 0;transition:transform .6s ease}' +
+    '.inv.open .inv-env .flap{transform:rotateX(180deg)}.inv-env:focus-visible{outline:3px dashed #1E1606;outline-offset:6px}' +
+    '.inv-tap{font-family:var(--f-d,cursive);font-size:1.5rem;margin-top:18px;animation:invBob 1.6s ease-in-out infinite}' +
+    '@keyframes invBob{50%{transform:translateY(-6px)}}' +
+    '.inv-letter{display:none;background:#FFFDF4;border:2.5px solid #1E1606;border-radius:22px 18px 24px 16px;box-shadow:5px 7px 0 #1E1606;padding:22px 20px 20px;position:relative;animation:invUp .6s cubic-bezier(.2,1.4,.4,1)}' +
+    '.inv.open .inv-letter{display:block}.inv.open .inv-env,.inv.open .inv-tap{display:none}' +
+    '@keyframes invUp{from{transform:translateY(80px) scale(.9);opacity:0}}' +
+    '.inv-letter::before{content:"";position:absolute;top:-12px;left:50%;width:70px;height:20px;margin-left:-35px;background:rgba(255,226,122,.85);border:1px solid rgba(0,0,0,.15);transform:rotate(-3deg)}' +
+    '.inv-bisi{margin:-6px auto 4px;width:120px}.inv-letter h2{font-family:var(--f-d,cursive);font-size:2rem;line-height:1.1;margin:4px 0 8px}' +
+    '.inv-note{font-family:var(--f-d,cursive);font-size:1.3rem;background:#FFF0C0;border:2px dashed #C98A0B;border-radius:14px;padding:10px 12px;margin:12px 0;transform:rotate(-1deg)}' +
+    '.inv-note small{display:block;font-family:var(--f-b,sans-serif);font-size:.8rem;color:#6E5A2C;margin-top:4px}' +
+    '.inv-perks{text-align:left;margin:12px 0 16px;padding:0;list-style:none}.inv-perks li{margin:7px 0;display:flex;gap:10px;align-items:flex-start;line-height:1.35}' +
+    '.inv-perks b{font-weight:800}.inv-go{width:100%;font-size:1.25rem;padding:12px}.inv-sign{font-family:var(--f-d,cursive);font-size:1.1rem;color:#6E5A2C;margin-top:12px}';
+  document.head.appendChild(invCss);
+  function showInvite(p) {
+    var from = esc(p.from), to = esc(p.to);
+    var env = '<svg viewBox="0 0 290 200" aria-hidden="true"><rect x="4" y="4" width="282" height="192" rx="14" fill="#FFFDF4" stroke="#1E1606" stroke-width="4"/>' +
+      '<path d="M6 190 L120 100 M284 190 L170 100" stroke="#1E1606" stroke-width="3" fill="none" stroke-linecap="round" opacity=".55"/>' +
+      '<g class="flap"><path d="M6 8 L145 118 L284 8 Z" fill="#FFE27A" stroke="#1E1606" stroke-width="4" stroke-linejoin="round"/></g>' +
+      '<g transform="translate(145 118)"><path d="M0-26l22.5 13v26L0 26-22.5 13v-26z" fill="#E39B1B" stroke="#1E1606" stroke-width="3.5"/>' +
+      '<path d="M0-14l12 7v14L0 14-12 7V-7z" fill="#F5B700" stroke="#7A4A05" stroke-width="2"/><text y="5" text-anchor="middle" font-size="14">🐝</text></g>' +
+      '<text x="145" y="176" text-anchor="middle" font-family="Patrick Hand, cursive" font-size="19" fill="#1E1606">' + (to ? 'For ' + to : 'For you') + ' 💌</text></svg>';
+    var d = document.createElement('div'); d.className = 'inv'; d.id = 'inv';
+    d.innerHTML = '<div class="inv-hc"></div><div class="inv-wrap">' +
+      '<button class="inv-env" aria-label="Open your invitation">' + env + '</button>' +
+      '<div class="inv-tap">' + (from ? from + ' sent you something' : 'You’ve got mail') + '. Tap to open ✨</div>' +
+      '<div class="inv-letter" role="dialog" aria-label="Invitation">' +
+        '<div class="inv-bisi">' + (window.bisiSvg ? bisiSvg('party', 120, true) : '🐝') + '</div>' +
+        '<h2>' + (to ? 'Hey ' + to + '!' : 'Hey you!') + '<br>Welcome to the hive 🍯</h2>' +
+        '<p>' + (from ? '<b>' + from + '</b> saved you a spot' : 'You’ve been saved a spot') + ' in <b>Follow-Through</b>: the app that catches every scholarship, internship and deadline you scroll past, then nags you (lovingly) until you apply.</p>' +
+        (p.msg ? '<div class="inv-note">“' + esc(p.msg) + '”<small>— ' + (from || 'your friend') + '</small></div>' : '') +
+        '<ul class="inv-perks"><li>📌<span><b>Save anything</b> from Safari, Instagram or X in one tap</span></li>' +
+        '<li>🤖<span><b>Sorted for you</b>: deadlines, requirements, even essay drafts and a tailored CV</span></li>' +
+        '<li>🐝<span><b>Bisi the bee</b> reminds you before every deadline. You will not escape.</span></li>' +
+        '<li>🔒<span><b>All yours</b>: everything lives in your own Google account</span></li></ul>' +
+        '<button class="btn primary inv-go">Let’s go 🐝</button>' +
+        '<div class="inv-sign">— Bisi, on behalf of ' + (from || 'the hive') + '</div></div></div>';
+    document.body.appendChild(d);
+    d.querySelector('.inv-env').onclick = function () { d.classList.add('open'); };
+    d.querySelector('.inv-go').onclick = function () {
+      LS.set('ftw-invited', '1'); d.remove();
+      if (!webUrl()) { LS.set('ftw-welcomed', '1'); settings(true); }
+    };
+  }
+
   /* first visit: the welcome / setup screen */
   window.addEventListener('load', function () {
     document.documentElement.setAttribute('data-platform', 'web');
-    if (!webUrl() && !LS.get('ftw-welcomed', '')) { LS.set('ftw-welcomed', '1'); settings(true); }
+    var inv = inviteParams();
+    if (inv.from && !webUrl()) showInvite(inv);
+    else if (!webUrl() && !LS.get('ftw-welcomed', '')) { LS.set('ftw-welcomed', '1'); settings(true); }
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
   });
 })();
