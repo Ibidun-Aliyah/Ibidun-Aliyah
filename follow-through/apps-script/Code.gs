@@ -788,13 +788,13 @@ ${cv.slice(0, 12000)}`;
  * Bisi's emails — sent from your own Gmail by an hourly timer
  * ===================================================================== */
 const BISI = {
-  dueToday: ["{t} closes TODAY. I'm not mad. I'm just… hovering. 🐝", "Today. {t}. Today. Bee-lieve me, tomorrow is too late.", "It's deadline day for {t}. I cleared my whole schedule to watch you do this."],
-  due: ["{t} closes in {d} days. Just thought you'd want to know. Again.", "Bee honest: have you even opened {t}?", "{d} days left for {t}. I'm sure you have a plan. Right? 🙂"],
+  dueToday: ["{t} closes TODAY. I'm not mad. I'm just… hovering. 🐝", "This is a hive-priority situation. {t} closes TODAY.", "Today. {t}. Today. Bee-lieve me, tomorrow is too late.", "It's deadline day for {t}. I cleared my whole schedule to watch you do this."],
+  due: ["{t} closes in {d} days. Just thought you'd want to know. Again.", "Don't let {t} buzz off. {d} days left.", "Bee honest: have you even opened {t}?", "{d} days left for {t}. I'm sure you have a plan. Right? 🙂"],
   ignored: ["Okay. I'll just keep reminding you then. I have nothing but time. 🐝", "Fun fact: applications don't submit themselves. I checked.", "I'm not saying I'm disappointed. I'm just saying I'm a bee and I'm sad."],
   check: ["It's been two weeks since you applied to {t}. Any news, or are we pretending it didn't happen?", "Heard back from {t}? I'm asking for a friend. The friend is me."],
   morning: ["Good morning. I've already been up for hours worrying about your deadlines. ☀️", "Rise and shine. Mostly shine. The deadlines aren't going anywhere. 🐝", "Morning! Small steps today. I'll be watching. Lovingly."],
   clear: ["Nothing urgent today. Look at you being responsible. 🥹", "All clear. I'm genuinely proud. Don't make it weird."],
-  sunday: ["Here's your week. I made it pretty so you'd actually read it. 💛", "Weekly report from your favourite bee. Grades are… let's just read it."],
+  sunday: ["Here's your week. I made it pretty so you'd actually read it. 💛", "Bee-hold: your week, in one email. 🍯", "Weekly report from your favourite bee. Grades are… let's just read it."],
 };
 function bisiLine_(kind, vars) {
   const arr = BISI[kind] || BISI.morning;
@@ -957,7 +957,7 @@ function morningEmail_(rows, today) {
   const streak = props.getProperty('STREAK_AT') >= addDays_(today, -1) ? Number(props.getProperty('STREAK') || 0) : 0;
   const n = due.length + overdue.length + remind.length;
   const mood = overdue.length ? 'sassy' : due.some(r => daysBetween_(today, String(r['Deadline'])) <= 1) ? 'worried' : n ? 'happy' : 'sleepy';
-  let body = `<p style="margin:0 0 6px">${streak ? `🔥 <b>${streak}-day streak.</b> ` : ''}${n ? `<b>${n} ${n === 1 ? 'thing needs' : 'things need'} you.</b>` : bisiLine_('clear')}</p>`;
+  let body = `<p style="margin:0 0 6px">${streak ? `🍯 <b>${streak} ${streak === 1 ? 'day' : 'days'} of nectar.</b> ` : ''}${n ? `<b>${n} ${n === 1 ? 'thing needs' : 'things need'} you.</b>` : bisiLine_('clear')}</p>`;
   if (overdue.length) body += `<h3 style="margin:16px 0 4px;font-size:15px;color:#C2412B">Deadline passed (did you apply?)</h3>` + overdue.map(r => itemHtml_(r, 'closed ' + String(r['Deadline'])) + button_(r['ID'], 'applied', true)).join('');
   if (due.length) body += `<h3 style="margin:16px 0 4px;font-size:15px">Due this week</h3>` + due.map(r => { const d = daysBetween_(today, String(r['Deadline'])); return itemHtml_(r, d === 0 ? 'due TODAY' : d === 1 ? 'due tomorrow' : `${d} days left`); }).join('');
   if (remind.length) body += `<h3 style="margin:16px 0 4px;font-size:15px">You asked me to remind you</h3>` + remind.map(r => itemHtml_(r, r['Deadline'] ? 'due ' + r['Deadline'] : '')).join('');

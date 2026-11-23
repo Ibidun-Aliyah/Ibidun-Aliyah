@@ -112,16 +112,17 @@ final class Nag {
                     t + " is " + when(it.days) + ". I already picked my outfit. Did you register?");
             case "due":
                 if (it.days == 0) return pick(t + " closes TODAY. I'm not mad. I'm just… hovering. 🐝",
+                        "This is a hive-priority situation. " + t + " closes TODAY.",
                         "Today. " + t + ". Today. Bee-lieve me, tomorrow is too late.",
                         "It's deadline day for " + t + ". I cleared my whole schedule to watch you do this.");
                 if (level == 0) return pick(t + " closes " + when(it.days) + ". Just thought you'd want to know.",
                         "Bee honest: have you even opened " + t + "?");
-                if (level == 1) return pick("Me again. " + t + ". " + when(it.days) + ". 👀", t + " closes " + when(it.days) + ". Just thought you'd want to know. Again.");
+                if (level == 1) return pick("Me again. " + t + ". " + when(it.days) + ". 👀", "Don't let " + t + " buzz off. " + when(it.days).substring(0, 1).toUpperCase() + when(it.days).substring(1) + ".", t + " closes " + when(it.days) + ". Just thought you'd want to know. Again.");
                 if (level == 2) return pick("Okay. I'll just keep reminding you about " + t + ". I have nothing but time. 🐝",
                         "Fun fact: " + t + " doesn't apply for itself. I checked.");
                 return pick("I'm not saying I'm disappointed about " + t + ". I'm just saying I'm a bee and I'm sad.",
                         "Still " + t + ". Still " + when(it.days) + ". Still me. 🐝");
-            case "soon": return pick(t + " closes " + when(it.days) + ". Starting now would be very mature of you.",
+            case "soon": return pick(t + " closes " + when(it.days) + ". Starting now would be very mature of you.", "Early bee gets the nectar. " + t + " closes " + when(it.days) + ".",
                     "One week until " + t + ". Future you is begging. I can hear her.");
             case "reminder": return pick("You asked me to remind you about " + t + ". So. Here I am. Reminding.",
                     "Remember " + t + "? It remembers you.");
@@ -259,9 +260,10 @@ final class Nag {
         // Streak at risk
         int streak = streak(c);
         if (hour >= 19 && streak > 0 && !activeToday(c) && !p.getBoolean("streakSent", false)) {
-            notify(c, 3, "🔥 Your " + streak + "-day streak ends at midnight",
-                    pick("No pressure. (Pressure.) One small step keeps it alive: save something, update a status, tailor your CV. 🐝",
-                         streak + " days. It'd be a shame if something happened to them."), null, R.drawable.bisi_worried);
+            notify(c, 3, "🌼 Your nectar run ends at midnight",
+                    pick(streak + (streak == 1 ? " day" : " days") + " of nectar collected. It'd be a shame to spill it. One small step keeps the honey flowing. 🐝",
+                         "No pressure. (Pressure.) Do one thing today or " + streak + " days of nectar go sticky-side down. 🍯",
+                         "The flowers close at midnight. Save something, update a status, tailor your CV. Anything. 🌼"), null, R.drawable.bisi_worried);
             p.edit().putBoolean("streakSent", true).apply();
             return;
         }
@@ -322,13 +324,13 @@ final class Nag {
         JSONObject dash = cached(c);
         List<Item> items = urgent(dash);
         int streak = streak(c);
-        v.setTextViewText(R.id.w_streak, streak > 0 ? "🔥 " + streak : "🔥 0");
+        v.setTextViewText(R.id.w_streak, "🍯 " + streak);
 
         String headline; int bg; int faceRes;
         int lost = lostStreak(c);
         if (!dash.has("rows")) { headline = "Hi, I'm Bisi. Open Follow-Through once to wake me up. 🐝"; bg = R.drawable.widget_bg_calm; faceRes = R.drawable.bisi_sleepy; }
         else if (lost >= 2 && !activeToday(c)) {
-            headline = "Your " + lost + "-day streak… it's gone. I'm fine. 😭"; bg = R.drawable.widget_bg_warn; faceRes = R.drawable.bisi_crying;
+            headline = "You dropped " + lost + " days of nectar. It's everywhere. I'm fine. 😭"; bg = R.drawable.widget_bg_warn; faceRes = R.drawable.bisi_crying;
         } else if (items.isEmpty()) {
             headline = activeToday(c) ? pick("All clear. Look at you being responsible. 🥹", "Nothing urgent. I'm genuinely proud. Don't make it weird.")
                     : pick("Nothing urgent. Go find something new to apply for. 👀", "Quiet day. Perfect time to polish your CV. Just saying.");

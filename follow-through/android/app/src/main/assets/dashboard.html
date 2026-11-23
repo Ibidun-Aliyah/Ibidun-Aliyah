@@ -116,7 +116,7 @@ svg text{fill:var(--muted);font-size:10px;font-family:var(--f-b)}
     <button class="icon" id="refresh" aria-label="Refresh">↻</button>
     <button class="icon" id="settings" aria-label="Settings">⚙</button>
   </div>
-  <div class="sub" id="today"></div>
+  <div class="sub"><span id="today"></span> <span class="chip c-sun" id="nectar" hidden></span></div>
   <div class="views" role="tablist"><button data-view="home" aria-pressed="true">Today</button><button data-view="history" aria-pressed="false">Applied history</button></div>
   <div id="v-home">
   <div class="bisi" id="bisi"><div class="face" id="bisi-face"></div><div class="say"><b>Bisi</b><span id="bisi-say">Buzzing in…</span></div></div>
@@ -313,7 +313,7 @@ function bisiSay(rows, need){
   let mood = 'happy', line;
   const top = need[0];
   if (recentWin){ mood = 'party'; line = bisiLine('accepted', {}, seed).replace('YOU GOT IN?!', recentWin.Outcome === 'Accepted' ? 'YOU GOT IN?!' : 'SHORTLISTED?!'); }
-  else if (lost >= 2){ mood = 'crying'; line = `Your ${lost}-day streak… it's gone. I'm fine. I'm totally fine. 😭 Do one thing today and we start again.`; }
+  else if (lost >= 2){ mood = 'crying'; line = `You dropped ${lost} days of nectar. It's everywhere. I'm fine. I'm totally fine. 😭 Do one thing today and we start a new jar.`; }
   else if (top && top.u.why.startsWith('Deadline passed')){ mood = 'sassy'; line = bisiLine('overdue', { t: top.r.Title }, seed); }
   else if (top && /today|tomorrow|Event/.test(top.u.why)){ mood = 'worried'; line = top.r.Category === 'Event' ? bisiLine('event', { t: top.r.Title, when: top.u.why.replace('Event ','') }, seed) : (days(top.r.Deadline) === 0 ? bisiLine('dueToday', { t: top.r.Title }, seed) : bisiLine('due', { t: top.r.Title, d: 1 }, seed).replace('1 days','1 day')); }
   else if (top && top.u.tone === 'rose'){ mood = 'sassy'; line = bisiLine('due', { t: top.r.Title, d: days(top.r.Deadline) }, seed); }
@@ -323,7 +323,9 @@ function bisiSay(rows, need){
   else if (idle >= 3 && idle < 99){ mood = 'sleepy'; line = bisiLine('idle', { n: idle }, seed); }
   else if (seed % 4 === 0){ line = bisiLine('sweet', {}, seed); }
   else line = rows.length ? bisiLine('clear', {}, seed) : 'Hi, I\'m Bisi. 🐝 Tap the bubble on your next opportunity and I\'ll take it from there. And by "take it from there" I mean nag you.';
-  if (streak >= 3 && mood === 'happy') line += ` (Also: ${streak}-day streak 🔥)`;
+  if (streak >= 3 && mood === 'happy') line += ` (Also: ${streak} days of nectar 🍯 Un-bee-lievable.)`;
+  $('#nectar').textContent = streak > 0 ? `🍯 ${streak} ${streak===1?'day':'days'} of nectar` : (lost >= 2 ? '🍯 jar spilled' : '🍯 start a jar today');
+  $('#nectar').hidden = !(window.Android && Android.streak);
   $('#bisi-face').innerHTML = bisiSvg(mood, 76, true);
   $('#bisi-say').textContent = line;
 }

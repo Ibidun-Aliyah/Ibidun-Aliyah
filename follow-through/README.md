@@ -59,6 +59,8 @@ Bisi talks on the dashboard, the widget, notifications and emails: mostly passiv
 Source: `android/app/src/main/assets/bisi.js` (SVG + lines); PNGs in `res/drawable-nodpi/`.
 
 ## Emails
+Your daily streak is your **nectar** 🍯: any real action collects a day of it, and Bisi cries if you spill the jar.
+
 Sent from your own Gmail by the script's hourly timer (installed by running `authorize`), so they arrive even when
 the phone is off: ☀️ morning brief (7:00), ⏳ deadline countdown at 7/3/1/0 days (9:00), 📬 results check (10:00),
 😤 "you ignored me" for untouched deadlines ≤ 2 days away (18:00), 📊 Sunday digest (20:00). Buttons in emails
