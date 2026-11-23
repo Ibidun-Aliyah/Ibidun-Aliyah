@@ -86,6 +86,15 @@ in"), getting sassier each time. Buttons: **🔒 Lock in** (opens your tasks), *
 break, or opening Follow-Through, resets the clock. Set it up in **Me → Scroll guard** (WhatsApp and Telegram are off by
 default). It uses the bubble's accessibility service and only sees which app is open, never what's on screen.
 
+## iPhone, iPad and laptop (web version)
+`docs/` is a web version of the same dashboard (built from the Android assets by `web/build.py`, plus `web/web.js`,
+which stands in for the Android app). Served by GitHub Pages, it installs to an iPhone Home Screen with Bisi's icon and
+works offline. Each person connects their **own** script (the welcome screen walks through it, with a Copy button for
+`Code.gs`), adds a free Gemini key, and can set up iPhone Shortcuts for "Share → Save to Follow-Through" and Back Tap
+screenshots. Notes with a time offer **Add to Calendar** (a web app can't ring on its own); the script's emails do the
+rest of the nagging. Not on iPhone: the floating bubble and Scroll guard (iOS doesn't allow them).
+After changing the dashboard, run `python3 follow-through/web/build.py` and commit `docs/`.
+
 ## Brain break (games)
 Four quick learning games, all offline, on **Today → Bored? Brain break** (or Me). **Word Hive** (vocabulary from
 academic to rare; missed words come back until you learn them), **Number Sprint** (60-second mental maths, up to logs,

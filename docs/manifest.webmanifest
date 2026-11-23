@@ -1,0 +1,23 @@
+{
+ "name": "Follow-Through",
+ "short_name": "Follow-Through",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#FFF8E1",
+ "theme_color": "#F5B700",
+ "description": "Save opportunities, track deadlines, and let Bisi the bee nag you until you apply.",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
+ ]
+}

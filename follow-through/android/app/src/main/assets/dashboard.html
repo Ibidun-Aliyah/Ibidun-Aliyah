@@ -957,7 +957,7 @@ function renderNotes(){
       ${(n.items||[]).length > 5 ? `<div class="nb">+${n.items.length-5} more</div>` : ''}
       <div class="nf">${n.remindAt ? `<span class="rem ${late?'late':''}">⏰ ${esc(fmtWhen(n.remindAt))}</span>` : ''}${n.voice ? '<span class="rem">🎤</span>' : ''}<span class="nact"><button class="nbtn" data-note-edit="${esc(n.id)}" aria-label="Edit note">✎</button><button class="nbtn" data-act="delete" data-kind="note" data-id="${esc(n.id)}" aria-label="Delete note">${ICON_DEL}</button></span></div>
     </div>`);
-  }).join('') : `<div class="empty" style="grid-column:1/-1">${nq ? 'No notes match.' : 'No notes yet. Tap “New note”, or hold Bisi\'s bubble and say something like “Call mum at 6pm”.'}</div>`;
+  }).join('') : `<div class="empty" style="grid-column:1/-1">${nq ? 'No notes match.' : 'No notes yet. Tap “New note”, or ' + (window.Android && Android.web ? 'tap “Say it”' : 'hold Bisi\'s bubble') + ' and say something like “Call mum at 6pm”.'}</div>`;
 }
 const NCOLORS = ['honey','mint','rose','sky','lilac','paper'];
 function openNote(id){
@@ -1032,6 +1032,7 @@ window.__openNote = id => { go('notes'); renderNotes(); openNote(id); };
 /* ---------- scroll guard (settings live on the phone) ---------- */
 let fgCache = null;
 function fgLoad(){
+  if (window.Android && !Android.focusGet){ $('#fg-on').closest('section').hidden = true; return; }   // web: phones don't let a web page see other apps
   try { fgCache = window.Android && Android.focusGet ? JSON.parse(Android.focusGet()) : null; } catch(e){ fgCache = null; }
   if (!fgCache) fgCache = { on:true, limit:60, every:15, todayMins:72, bubble:true, apps:[
     {pkg:'com.zhiliaoapp.musically',name:'TikTok',on:true,installed:true},{pkg:'com.instagram.android',name:'Instagram',on:true,installed:true},
