@@ -4,7 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Follow-Through</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Nunito:wght@500;600;700;800&display=swap">
+<style>/* fonts bundled in the app so it looks the same offline (SIL Open Font Licence) */
+@font-face{font-family:"Patrick Hand";src:url(fonts/patrickhand.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Nunito";src:url(fonts/nunito.woff2) format("woff2");font-weight:200 1000;font-display:swap}</style>
 <script>
   // Apply the saved look (hive or garden) and light/dark choice before anything paints.
   (function(){
@@ -302,6 +304,31 @@ section{margin-top:28px}
 .chips button{border:2px solid var(--stroke);border-radius:999px;padding:5px 12px;background:var(--card);color:var(--ink);font:inherit;font-size:.9rem;cursor:pointer}
 .chips button[aria-pressed="true"]{background:var(--sun);color:#1E1606;box-shadow:2px 2px 0 var(--sh)}
 .chips button .dim{opacity:.55;font-size:.78rem}
+.banner.off{background:var(--card);border-style:dashed}
+/* brain break games */
+.g-entry{display:flex;align-items:center;gap:12px;width:100%;margin-top:18px;text-align:left;cursor:pointer;color:var(--ink);font:inherit;background:var(--sun-soft)}
+.g-entry b{display:block;font-family:var(--f-d);font-size:1.25rem}.g-entry small{color:var(--muted)}.g-entry>span:last-child{margin-left:auto;font-size:1.4rem}
+.g-ico{font-size:1.8rem;line-height:1}
+.pill{display:inline-block;border:1.5px solid var(--stroke);border-radius:999px;padding:1px 9px;font-size:.78rem;font-weight:700;background:var(--card);white-space:nowrap}
+.g-intro{color:var(--muted);margin:0 0 12px}
+.g-hub{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.g-card{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;cursor:pointer;color:var(--ink);font:inherit}
+.g-card b{font-family:var(--f-d);font-size:1.25rem}.g-card small{color:var(--muted);font-size:.8rem;line-height:1.3}
+.g-meta{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto}
+.g-rev{margin-top:14px;display:flex;flex-direction:column;gap:6px;font-size:.9rem}.g-rev .pill{display:inline-block;margin:2px}
+.g-top{display:flex;align-items:center;gap:8px;margin:6px 0 10px}.g-top b{font-family:var(--f-d);font-size:1.2rem}.g-top .pill{margin-left:auto}
+.g-time{height:12px;border:2px solid var(--stroke);border-radius:8px;overflow:hidden;background:var(--card)}.g-time i{display:block;height:100%;width:100%;background:var(--sun)}
+.g-prog{display:flex;gap:4px}.g-prog i{flex:1;height:8px;border:1.5px solid var(--stroke);border-radius:5px;background:var(--card)}.g-prog i.d{background:var(--sun)}.g-prog i.c{background:var(--sun-soft)}
+.g-stats{display:flex;justify-content:space-between;margin:10px 2px;font-size:.92rem;color:var(--muted)}.g-stats b{color:var(--ink)}
+.g-q{min-height:130px;display:grid;place-items:center;text-align:center;font-size:1.1rem;line-height:1.5;padding:20px 14px}
+.g-big{font-family:var(--f-d);font-size:2.1rem;line-height:1.2;overflow-wrap:anywhere}.g-mid{font-size:1.3rem;font-weight:700}
+.g-ch{display:grid;gap:10px;margin-top:14px}.g-ch.two{grid-template-columns:1fr 1fr}
+.g-c{text-align:left;font-family:var(--f-b);font-size:1rem;line-height:1.3;padding:12px 14px;min-height:52px;color:var(--ink)}.g-ch.two .g-c{text-align:center;font-size:1.6rem}
+.g-c.ok{background:var(--ok-soft);border-color:var(--ok)}.g-c.no{background:var(--rose-soft);opacity:.85}
+.g-ex{margin-top:12px;padding:12px 14px;border:2.5px solid var(--stroke);border-radius:var(--r2);display:flex;flex-direction:column;gap:8px;line-height:1.4}
+.g-ex.ok{background:var(--ok-soft)}.g-ex.no{background:var(--rose-soft)}.g-next{align-self:flex-end}
+.g-end{text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center}.g-score{font-family:var(--f-d);font-size:3rem;line-height:1}.g-lv{font-size:1.05rem}
+.g-end .g-rev{text-align:left;width:100%}
 .colors{display:flex;gap:8px;flex-wrap:wrap}
 .colors button{width:34px;height:34px;border-radius:50%;border:2.5px solid var(--stroke);cursor:pointer}
 .colors button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--card),0 0 0 5.5px var(--stroke)}
@@ -347,7 +374,10 @@ section{margin-top:28px}
       <div class="sh"><h2>Needs you</h2><small>swipe left to archive</small></div>
       <div class="list" id="needs"></div>
     </section>
+    <button class="card g-entry" data-go="games"><span class="g-ico">🎮</span><span><b>Bored? Brain break</b><small>Vocabulary, maths, circuits and patterns. Works offline.</small></span><span aria-hidden="true">→</span></button>
   </div>
+
+  <div class="pane" id="p-games" hidden></div>
 
   <div class="pane" id="p-tracker" hidden>
     <section>
@@ -404,6 +434,7 @@ section{margin-top:28px}
         <div class="result" id="cv-result" hidden></div>
       </div>
     </section>
+    <button class="card g-entry" data-go="games"><span class="g-ico">🎮</span><span><b>Brain break</b><small>Learning games for when you're bored</small></span><span aria-hidden="true">→</span></button>
     <section>
       <div class="sh"><h2>Scroll guard</h2><small id="fg-today"></small></div>
       <div class="card fg">
@@ -453,6 +484,7 @@ section{margin-top:28px}
 <div class="toast" id="toast" hidden></div>
 
 <script src="bisi.js"></script>
+<script src="games.js"></script>
 <script>
 (() => {
 /* ---------- bridge to the Android app ---------- */
@@ -464,10 +496,27 @@ window.__fromApp = (id, text) => {
 function call(req){
   return new Promise(res => {
     if (!window.Android){ res(demo(req)); return; }
-    const id = 'r' + (++seq); pending[id] = res;
+    const id = 'r' + (++seq);
+    pending[id] = j => {
+      if (j && j.queued) offlinePatch(req);
+      if (j && j.error === 'network') j.error = "you're offline. This part needs internet; connect and try again";
+      res(j);
+    };
     Android.request(JSON.stringify(req), id);
   });
 }
+/* offline: show the change straight away; the phone sends it when you're back online */
+function offlinePatch(req){
+  if (!D) return;
+  const list = req.action === 'tipUpdate' ? (D.tips || []) : (D.rows || []);
+  if (req.action === 'delete'){ D.rows = (D.rows || []).filter(r => r.ID !== req.id); D.tips = (D.tips || []).filter(t => t.ID !== req.id); }
+  else if (req.fields){ const r = list.find(x => x.ID === req.id); if (r) Object.assign(r, req.fields); }
+  try { localStorage.setItem('ft-dash', JSON.stringify(D)); } catch(e){}
+  offline = true;
+  toast('Saved on your phone. I\'ll sync it when you\'re back online. 📴');
+}
+let offline = false;
+window.addEventListener('online', () => { if (offline) load(true); });
 const open = url => { if (!url) return; window.Android ? Android.openUrl(url) : window.open(url, '_blank'); };
 
 /* ---------- helpers ---------- */
@@ -494,8 +543,15 @@ async function load(quiet){
   if (!quiet) $('#refresh').innerHTML = '<span class="spin"></span>';
   const j = await call({ action:'dashboard' });
   $('#refresh').textContent = '↻';
-  if (!j.ok){ banner('err', j.error === 'not_connected' ? 'Connect your Google Sheet in Settings to see your tracker.' : 'Couldn\'t reach your sheet. Showing the last saved copy.', j.error === 'not_connected' ? 'Settings' : 'Retry'); render(); return; }
-  D = j; try { localStorage.setItem('ft-dash', JSON.stringify(j)); } catch(e){}
+  if (!j.ok){
+    if (j.error === 'not_connected') banner('err', 'Connect your Google Sheet in Settings to see your tracker.', 'Settings');
+    else { offline = true; let at = 0; try { at = +localStorage.getItem('ft-dash-at') || 0; } catch(e){}
+      const ago = !at ? '' : (Date.now() - at < 36e5 ? ' from ' + Math.max(1, Math.round((Date.now() - at) / 6e4)) + ' min ago' : Date.now() - at < 864e5 ? ' from ' + Math.round((Date.now() - at) / 36e5) + 'h ago' : ' from ' + new Date(at).toLocaleDateString('en-GB', {day:'numeric', month:'short'}));
+      const q = window.Android && Android.queued ? Android.queued() : 0;
+      banner('off', `📴 Offline: showing your saved copy${ago}. Notes, games, reminders and the bubble still work${q ? `; ${q} change${q === 1 ? '' : 's'} waiting to sync` : ''}. Connect for sorting, AI help and live updates.`, 'Retry'); }
+    render(); return; }
+  offline = false; sticky = '';
+  D = j; try { localStorage.setItem('ft-dash', JSON.stringify(j)); localStorage.setItem('ft-dash-at', String(Date.now())); } catch(e){}
   if (window.Android && Android.saveDashboard) Android.saveDashboard(JSON.stringify(j));
   if (window.Android && Android.streak && !statsSent){ statsSent = true; call({ action:'stats', streak: Android.streak(), url: Android.webAppUrl() }); }
   if (j.today){ TODAY = parse(j.today); }
@@ -557,8 +613,10 @@ function nextStep(r){
 }
 
 /* ---------- render ---------- */
+let sticky = '';
 function banner(kind, text, action){
-  $('#banners').innerHTML = `<div class="banner ${kind}"><span>${esc(text)}</span>${action?`<button class="btn small" data-banner="${esc(action)}">${esc(action)}</button>`:''}</div>`;
+  sticky = `<div class="banner ${kind}"><span>${esc(text)}</span>${action?`<button class="btn small" data-banner="${esc(action)}">${esc(action)}</button>`:''}</div>`;
+  $('#banners').innerHTML = sticky;
 }
 function render(){
   $('#today').textContent = TODAY.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
@@ -576,7 +634,7 @@ function render(){
   if (!D.ai.hasKey) b.push(`<div class="banner warn"><span>Turn on instant sorting, essays and CV tailoring: add your free Gemini key.</span><button class="btn small" data-banner="Settings">Set up</button></div>`);
   if (sorting) b.push(`<div class="banner info"><span class="spin"></span><span>Sorting ${newCount} new ${newCount===1?'capture':'captures'}…</span></div>`);
   else if (newCount && D.ai.hasKey) b.push(`<div class="banner info"><span>${newCount} new ${newCount===1?'capture':'captures'} waiting.</span><button class="btn small" data-banner="Sort now">Sort now</button></div>`);
-  $('#banners').innerHTML = b.join('');
+  $('#banners').innerHTML = sticky + b.join('');
 
   const week = act.filter(r => { const d = days(r.Deadline); return d !== null && d >= 0 && d <= 7; }).length;
   $('#tiles').innerHTML = [
@@ -1001,6 +1059,7 @@ function go(name){
   pane = name;
   if (name === 'notes'){ notesLoad(); renderNotes(); }
   if (name === 'me') fgLoad();
+  if (name === 'games' && window.FTGames) FTGames.mount($('#p-games'), { toast });
   document.querySelectorAll('.pane').forEach(p => p.hidden = p.id !== 'p-' + name);
   document.querySelectorAll('.tabbar button').forEach(b => b.toggleAttribute('aria-current', b.dataset.go === name));
   document.querySelectorAll('.tabbar button[aria-current]').forEach(b => b.setAttribute('aria-current', 'page'));
@@ -1009,6 +1068,7 @@ function go(name){
 window.__back = () => {
   if (!$('#sheet').hidden){ closeSheet(); return 1; }
   if (document.querySelector('.swipe.open')){ closeSwipes(); return 1; }
+  if (pane === 'games' && window.FTGames && FTGames.back()) return 1;
   if (pane !== 'today'){ go('today'); return 1; }
   return 0;
 };

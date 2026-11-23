@@ -164,6 +164,7 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         Focus.reset(this);   // you came back: the scrolling session is over
+        if (Tracker.queued(this) > 0) Tracker.flushQueue(this, null);
         if (loaded && web != null) web.evaluateJavascript("window.__onResume && window.__onResume()", null);
     }
 
@@ -281,6 +282,9 @@ public class MainActivity extends Activity {
         public String notesSave(String json) {
             try { return Notes.save(MainActivity.this, new JSONObject(json)).toString(); } catch (Exception e) { return "{}"; }
         }
+
+        @JavascriptInterface
+        public int queued() { return Tracker.queued(MainActivity.this); }
 
         @JavascriptInterface
         public String focusGet() { return Focus.settingsJson(MainActivity.this); }

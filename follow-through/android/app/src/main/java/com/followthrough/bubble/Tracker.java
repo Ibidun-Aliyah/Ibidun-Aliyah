@@ -37,6 +37,8 @@ final class Tracker {
     private static final ExecutorService SLOW = Executors.newCachedThreadPool();
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
     private static final String PREFS = "follow_through";
+    /** Actions that can wait in the queue when there's no internet. */
+    private static final java.util.Set<String> OFFLINE_OK = new java.util.HashSet<>(Arrays.asList("update", "tipUpdate", "delete", "capture"));
 
     private Tracker() {}
 
@@ -116,10 +118,20 @@ final class Tracker {
         SLOW.execute(() -> {
             String out;
             String[] conn = connection(ctx);
+            String action = "";
+            try { action = new JSONObject(json).optString("action"); } catch (Exception ignored) {}
             if (conn == null) out = "{\"ok\":false,\"error\":\"not_connected\"}";
             else {
+                // Send anything done offline first, so the dashboard shows it.
+                if (action.equals("dashboard") && queued(ctx) > 0) flushQueueNow(ctx);
                 try { out = http(conn[0], json, 330000); }
-                catch (Exception e) { out = "{\"ok\":false,\"error\":\"network\"}"; }
+                catch (Exception e) {
+                    out = "{\"ok\":false,\"error\":\"network\"}";
+                    // Offline: keep simple edits on the phone and send them later.
+                    if (OFFLINE_OK.contains(action)) {
+                        try { enqueue(ctx, new JSONObject(json)); out = "{\"ok\":true,\"queued\":true}"; } catch (Exception ignored) {}
+                    }
+                }
             }
             final String fOut = out;
             MAIN.post(() -> cb.result(fOut));
@@ -173,7 +185,7 @@ final class Tracker {
         });
     }
 
-    private static int flushQueueNow(Context c) {
+    private static synchronized int flushQueueNow(Context c) {
         File[] files = queueDir(c).listFiles();
         if (files == null) return 0;
         Arrays.sort(files);

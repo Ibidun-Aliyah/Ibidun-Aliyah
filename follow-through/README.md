@@ -86,6 +86,18 @@ in"), getting sassier each time. Buttons: **🔒 Lock in** (opens your tasks), *
 break, or opening Follow-Through, resets the clock. Set it up in **Me → Scroll guard** (WhatsApp and Telegram are off by
 default). It uses the bubble's accessibility service and only sees which app is open, never what's on screen.
 
+## Brain break (games)
+Four quick learning games, all offline, on **Today → Bored? Brain break** (or Me). **Word Hive** (vocabulary from
+academic to rare; missed words come back until you learn them), **Number Sprint** (60-second mental maths, up to logs,
+derivatives, determinants and integrals), **Bit Buzz** (binary/hex, logic gates, Ohm's law, dividers, RC, ADCs, two's
+complement) and **Pattern Hunt** (sequences). Levels go Freshman → Professor: three right in a row moves you up, two
+wrong moves you down, and your level is kept.
+
+## Offline
+Without internet the app shows your last saved tracker, and notes, reminders, games, Scroll guard and the bubble all
+keep working. Status changes, edits, deletes and captures are saved on the phone and sent when you're back online.
+Sorting, AI help (essays, CV, eligibility…) and live updates need a connection.
+
 ## Applied history
 The dashboard's **Applied history** tab lists everything you've applied to by month, with results (Accepted,
 Shortlisted, Interview, Rejected, No response, Waiting), your success rate, applications per month, and a
