@@ -120,7 +120,7 @@
         <TextView
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="• Tap the bubble: saves what's on screen (text, link, screenshot).\n• Drag it: move it anywhere; it tucks into the edge.\n• Hold it: hides it for an hour.\n• No bubble? Use Share → “Save to Follow-Through” from any app." />
+            android:text="• Tap the bubble: saves what's on screen (text, link, screenshot).\n• Hold it: say what to save, e.g. “MTN scholarship, deadline Friday”.\n• Drag it: move it anywhere; drag it to the bottom edge to hide it for an hour.\n• Copied a link? Open the app and it offers to save it.\n• No bubble? Use Share → “Save to Follow-Through” from any app." />
         <TextView
             android:id="@+id/queue"
             android:layout_width="match_parent" android:layout_height="wrap_content"

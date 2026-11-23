@@ -1,6 +1,7 @@
 package com.followthrough.bubble;
 
 import android.accessibilityservice.AccessibilityService;
+import android.content.Intent;
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -31,7 +32,8 @@ import java.util.regex.Pattern;
  *
  * Tap      → capture what's on screen (text, link, screenshot) and send it to the sheet.
  * Drag     → move it; it tucks against the nearest edge.
- * Hold     → hide it for an hour (open the app to bring it back sooner).
+ * Hold     → say what to save (voice note).
+ * Drag it to the bottom edge → hide it for an hour (open the app to bring it back sooner).
  *
  * The screen is only read at the moment of a tap.
  */
@@ -123,8 +125,12 @@ public class BubbleService extends AccessibilityService {
                         return true;
                     case MotionEvent.ACTION_UP:
                         bubble.setAlpha(0.8f);
-                        if (dragging) snapToEdge();
-                        else if (e.getEventTime() - downAt > holdMs) hideForAWhile();
+                        if (dragging) {
+                            DisplayMetrics m = getResources().getDisplayMetrics();
+                            if (lp.y > m.heightPixels - size * 1.8) { lp.x = startX; lp.y = startY; wm.updateViewLayout(bubble, lp); hideForAWhile(); }
+                            else snapToEdge();
+                        }
+                        else if (e.getEventTime() - downAt > holdMs) voice();
                         else capture();
                         return true;
                     case MotionEvent.ACTION_CANCEL:
@@ -143,6 +149,11 @@ public class BubbleService extends AccessibilityService {
         lp.y = Math.max(0, Math.min(lp.y, dm.heightPixels - size));
         wm.updateViewLayout(bubble, lp);
         Tracker.prefs(this).edit().putInt("bx", lp.x).putInt("by", lp.y).apply();
+    }
+
+    private void voice() {
+        Intent i = new Intent(this, VoiceActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        try { startActivity(i); } catch (Exception e) { Toast.makeText(this, "Couldn't start voice.", Toast.LENGTH_SHORT).show(); }
     }
 
     private void hideForAWhile() {

@@ -62,7 +62,7 @@ public class MainActivity extends Activity {
                 openExternal(r.getUrl().toString());
                 return true;
             }
-            @Override public void onPageFinished(WebView v, String url) { loaded = true; }
+            @Override public void onPageFinished(WebView v, String url) { loaded = true; v.postDelayed(MainActivity.this::checkClipboard, 1500); }
 
             @Override
             public boolean onRenderProcessGone(WebView v, android.webkit.RenderProcessGoneDetail detail) {
@@ -127,6 +127,34 @@ public class MainActivity extends Activity {
         box.addView(settings);
         setContentView(box);
     }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus && loaded) checkClipboard();
+    }
+
+    /** Android only lets the app read the clipboard while it's on screen: offer to save a copied link. */
+    private void checkClipboard() {
+        String url = clipLink();
+        if (url == null) return;
+        android.content.SharedPreferences p = Tracker.prefs(this);
+        if (url.equals(p.getString("lastClip", ""))) return;
+        p.edit().putString("lastClip", url).apply();
+        if (web != null && web.getParent() != null) web.evaluateJavascript("window.__clip && window.__clip(" + JSONObject.quote(url) + ")", null);
+    }
+
+    private String clipLink() {
+        try {
+            android.content.ClipboardManager cm = getSystemService(android.content.ClipboardManager.class);
+            if (cm == null || !cm.hasPrimaryClip() || cm.getPrimaryClip().getItemCount() == 0) return null;
+            CharSequence t = cm.getPrimaryClip().getItemAt(0).coerceToText(this);
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("https?://\\S+").matcher(t == null ? "" : t);
+            return m.find() ? m.group() : null;
+        } catch (Exception e) { return null; }
+    }
+
+    private WebView printView;
 
     @Override
     protected void onResume() {
@@ -229,6 +257,52 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> {
                 android.content.ClipboardManager cm = getSystemService(android.content.ClipboardManager.class);
                 cm.setPrimaryClip(android.content.ClipData.newPlainText("Applied history", text));
+            });
+        }
+
+        @JavascriptInterface
+        public void voice() { runOnUiThread(() -> startActivity(new Intent(MainActivity.this, VoiceActivity.class))); }
+
+        @JavascriptInterface
+        public void pasteLink() {
+            runOnUiThread(() -> {
+                String url = clipLink();
+                if (url == null) android.widget.Toast.makeText(MainActivity.this, "Copy a link first, then tap Paste a link.", android.widget.Toast.LENGTH_SHORT).show();
+                else web.evaluateJavascript("window.__clip && window.__clip(" + JSONObject.quote(url) + ")", null);
+            });
+        }
+
+        /** Saves a text file (e.g. the CSV export) into Downloads. */
+        @JavascriptInterface
+        public void saveFile(String name, String mime, String content) {
+            runOnUiThread(() -> {
+                try {
+                    android.content.ContentValues v = new android.content.ContentValues();
+                    v.put(android.provider.MediaStore.Downloads.DISPLAY_NAME, name);
+                    v.put(android.provider.MediaStore.Downloads.MIME_TYPE, mime);
+                    Uri uri = getContentResolver().insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, v);
+                    try (java.io.OutputStream os = getContentResolver().openOutputStream(uri)) {
+                        os.write(content.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    }
+                    android.widget.Toast.makeText(MainActivity.this, "Saved to Downloads: " + name, android.widget.Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    android.widget.Toast.makeText(MainActivity.this, "Couldn't save the file.", android.widget.Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
+        /** Opens Android's print screen, where "Save as PDF" is one of the printers. */
+        @JavascriptInterface
+        public void printHtml(String html, String title) {
+            runOnUiThread(() -> {
+                printView = new WebView(MainActivity.this);
+                printView.setWebViewClient(new WebViewClient() {
+                    @Override public void onPageFinished(WebView v, String url) {
+                        android.print.PrintManager pm = getSystemService(android.print.PrintManager.class);
+                        pm.print(title, v.createPrintDocumentAdapter(title), new android.print.PrintAttributes.Builder().build());
+                    }
+                });
+                printView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null);
             });
         }
 

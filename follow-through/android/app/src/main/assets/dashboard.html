@@ -229,6 +229,47 @@ section{margin-top:28px}
 .swipe:not(.open):not(.dragging) .acts{visibility:hidden}
 .toast .undo{margin-left:12px;background:transparent;border:2px solid var(--bg);color:var(--bg);border-radius:10px 8px 9px 7px;font-family:var(--f-d);font-size:1rem;padding:0 10px;cursor:pointer}
 
+/* checklist + progress ring */
+.chk{display:flex;gap:10px;align-items:flex-start;padding:7px 4px;border-bottom:1.5px dashed var(--line);cursor:pointer;font-size:.95rem}
+.chk:last-child{border-bottom:0}
+.chk input{appearance:none;-webkit-appearance:none;flex:none;width:24px;height:24px;margin:0;border:2.5px solid var(--stroke);border-radius:8px 6px 7px 5px;background:var(--card);display:grid;place-items:center;cursor:pointer}
+.chk input:checked{background:var(--sun)}
+.chk input:checked::after{content:"";width:11px;height:6px;border:solid var(--stroke);border-width:0 0 3px 3px;transform:rotate(-45deg) translate(1px,-1px)}
+.chk.done span{text-decoration:line-through;text-decoration-thickness:2px;color:var(--muted)}
+.ring{flex:none}
+/* search + for you */
+.gsearch{margin:16px 0 0}
+.gres-h{font-family:var(--f-d);font-size:1.15rem;color:var(--muted);margin:12px 0 6px}
+.foryou{margin-top:22px}
+.fy{background:var(--card);border:2.5px dashed var(--stroke);border-radius:var(--r1);padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.fy + .fy{margin-top:10px}
+.fy .t{font-weight:800}
+/* calendar */
+.calhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center}
+.cal .dow{font-family:var(--f-d);font-size:.95rem;color:var(--muted)}
+.cal .d{position:relative;aspect-ratio:1/1;border-radius:10px 8px 9px 7px;border:1.5px solid var(--line);font-size:.8rem;font-weight:700;display:flex;align-items:flex-start;justify-content:center;padding-top:3px;background:transparent;color:var(--ink);cursor:pointer;max-width:100%}
+.cal .d.today{border:2.5px solid var(--stroke);background:var(--sunk)}
+.cal .d.other{opacity:.35}
+.cal .d.sel{box-shadow:2px 3px 0 var(--sh);border-color:var(--stroke)}
+.cal .drops{position:absolute;bottom:3px;left:0;right:0;display:flex;justify-content:center;gap:1px}
+/* stickers */
+.badges{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 6px}
+.badge{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;font-family:var(--f-d);font-size:.95rem;line-height:1.1;background:none;border:0;cursor:pointer;color:var(--ink)}
+.badge .st{width:62px;height:62px}
+.badge.locked .st{filter:grayscale(1);opacity:.35}
+.badge.locked{color:var(--muted)}
+/* celebration */
+.celebrate{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(20,14,4,.55)}
+.celebrate canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.cel-card{position:relative;background:var(--card);border:3px solid var(--stroke);border-radius:26px 20px 28px 18px / 20px 28px 18px 26px;box-shadow:6px 7px 0 var(--sh);
+  padding:18px 20px 16px;max-width:320px;margin:0 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+.cel-card .st{width:92px;height:92px;margin-bottom:-26px;transform:rotate(-8deg);position:relative;z-index:1}
+.cel-card h3{font-size:2rem;line-height:1}
+.cel-card p{margin:0;font-family:var(--f-d);font-size:1.2rem;line-height:1.25}
+@keyframes pop{from{transform:scale(.4) rotate(-8deg);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.cel-card{animation:none}}
+
 /* footer meadow */
 .meadow{margin:38px 0 0;text-align:center;color:var(--muted);font-family:var(--f-d);font-size:1rem}
 .meadow .row{justify-content:center;align-items:flex-end;gap:10px;margin-bottom:4px}
@@ -257,6 +298,9 @@ section{margin-top:28px}
     <div class="hello" id="hello">Loading your tracker…</div>
     <div id="banners"></div>
     <div class="tiles" id="tiles"></div>
+    <input class="search gsearch" id="gq" type="search" placeholder="Search everything: opportunities, tips, notes…" aria-label="Search everything">
+    <div id="gresults"></div>
+    <div id="foryou"></div>
     <section>
       <div class="sh"><h2>Needs you</h2><small>swipe left to archive</small></div>
       <div class="list" id="needs"></div>
@@ -266,6 +310,10 @@ section{margin-top:28px}
   <div class="pane" id="p-tracker" hidden>
     <section>
       <div class="sh"><h2>Everything</h2><small>swipe left to archive or delete</small></div>
+      <div class="row" style="margin-bottom:12px">
+        <button class="btn small" id="add-voice"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="vertical-align:-3px"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg> Save by voice</button>
+        <button class="btn small" id="add-paste"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="vertical-align:-3px"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg> Paste a link</button>
+      </div>
       <div class="tabs" id="tabs"></div>
       <input class="search" id="q" type="search" placeholder="Search titles, organisations, tips" aria-label="Search">
       <div class="list" id="all"></div>
@@ -277,6 +325,7 @@ section{margin-top:28px}
       <div class="sh"><h2>How it's going</h2><small id="chartnote"></small></div>
       <div class="charts">
         <div class="card chart"><h4 id="pipe-title">Your honey jars</h4><div id="pipe"></div></div>
+        <div class="card chart"><div class="calhead"><h4 id="cal-title">Deadline calendar</h4><span class="row"><button class="btn small" id="cal-prev" aria-label="Previous month">‹</button><button class="btn small" id="cal-next" aria-label="Next month">›</button></span></div><div id="cal"></div><div id="cal-day"></div></div>
         <div class="card chart"><h4>Next 30 days</h4><div id="timeline"></div></div>
         <div class="card chart"><h4>Saved per week</h4><div id="weeks"></div></div>
       </div>
@@ -302,6 +351,17 @@ section{margin-top:28px}
       </div>
     </section>
     <section>
+      <div class="sh"><h2>Stickers</h2><small id="badge-count"></small></div>
+      <div class="card"><div class="badges" id="badges"></div></div>
+    </section>
+    <section>
+      <div class="sh"><h2>Export</h2><small>for your portfolio</small></div>
+      <div class="card row">
+        <button class="btn" id="exp-csv">Download CSV</button>
+        <button class="btn" id="exp-pdf">Save as PDF</button>
+      </div>
+    </section>
+    <section>
       <div class="sh"><h2>Look &amp; settings</h2></div>
       <div class="card row">
         <button class="btn" id="me-look">Change look</button>
@@ -321,6 +381,7 @@ section{margin-top:28px}
   <button data-go="me"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M6 2.5h9l4 4V21H6z"/><path d="M15 2.5V7h4"/><circle cx="12.5" cy="11" r="2.5"/><path d="M8.5 18c.8-2.3 2.3-3.3 4-3.3s3.2 1 4 3.3"/></svg><span>Me</span></button>
 </nav>
 
+<div class="celebrate" id="celebrate" hidden><canvas id="confetti"></canvas><div class="cel-card" id="cel-card"></div></div>
 <div class="scrim" id="scrim" hidden></div>
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true"></div>
 <div class="toast" id="toast" hidden></div>
@@ -407,13 +468,24 @@ function urgency(r){
   if (r.Status === 'Submitted' && rem !== null && rem <= 0) return { tone:'ok', score:40, why:'Check for a response' };
   return null;
 }
+/* requirements as a checklist: done lines start with ✓ */
+const reqs = r => String(r.Requirements || '').split('\n').map(x => x.trim()).filter(Boolean).map(x => ({ done: /^✓\s*/.test(x), text: x.replace(/^✓\s*/, '') }));
+const reqString = list => list.map(x => (x.done ? '✓ ' : '') + x.text).join('\n');
+function ring(r, size){
+  const l = reqs(r); if (!l.length) return '';
+  const d = l.filter(x => x.done).length, f = d / l.length, R = 11, C = 2 * Math.PI * R;
+  return `<svg class="ring" width="${size||34}" height="${size||34}" viewBox="0 0 30 30" role="img" aria-label="${d} of ${l.length} done"><circle cx="15" cy="15" r="${R}" fill="none" stroke="var(--line)" stroke-width="4"/><circle cx="15" cy="15" r="${R}" fill="none" stroke="var(--sun)" stroke-width="4" stroke-linecap="round" stroke-dasharray="${(f*C).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 15 15)"/><text x="15" y="19" text-anchor="middle" font-family="Patrick Hand, cursive" font-size="11" fill="var(--ink)">${d}/${l.length}</text></svg>`;
+}
 function nextStep(r){
   if (r.Status === 'New') return 'Sorting…';
+  if (r.Status === 'Suggested') return 'Suggested by Bisi';
   if (r.Status === 'Submitted') return 'Submitted · waiting';
   if (r.Status === 'Closed') return r.Outcome || 'Closed';
-  const req = String(r.Requirements||'').split('\n').filter(Boolean);
+  const l = reqs(r), todo = l.filter(x => !x.done);
+  if (l.length && !todo.length) return 'Everything ticked · submit it!';
+  if (todo.length) return 'Next: ' + todo[0].text + (l.length > 1 ? ` (${l.length - todo.length}/${l.length})` : '');
   if (r.Status === 'Preparing') return r['Essay doc'] || r['CV doc'] ? 'Drafts ready · finish and submit' : 'Preparing · write essays & CV';
-  return req.length ? 'Next: ' + req[0] : 'Read the requirements';
+  return 'Read the requirements';
 }
 
 /* ---------- render ---------- */
@@ -449,6 +521,10 @@ function render(){
     `<div class="empty">${rows.length ? 'All clear. Reminders and close deadlines show up here.' : 'Your follow-ups will show up here.'}</div>`;
 
   charts(rows, tips);
+  calendar(rows);
+  searchAll(rows, tips);
+  forYou(rows);
+  badges(rows, tips);
   listing(rows, tips);
   history(rows);
 }
@@ -459,6 +535,7 @@ function itemRow(r, tone, why){
     <div class="main"><div class="t">${esc(r.Title || 'New capture')}</div>
       <div class="m">${esc([r.Organisation, nextStep(r)].filter(Boolean).join(' · '))}</div></div>
     ${why ? `<span class="chip c-${tone}">${esc(why)}</span>` : r.Deadline ? `<span class="chip ${cat}">${esc(fmt(r.Deadline))}</span>` : ''}
+    ${active(r) ? ring(r) : ''}
   </div>`);
 }
 
@@ -467,7 +544,7 @@ const ICON_ARCH = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" s
 const ICON_DEL = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>';
 function swipeWrap(id, kind, noArchive, inner){
   return `<div class="swipe" data-sid="${esc(id)}" data-kind="${kind}"><div class="acts">
-    ${noArchive ? '' : `<button class="act arch" data-act="archive" aria-label="Archive">${ICON_ARCH}Archive</button>`}
+    ${kind === 'row' && noArchive ? `<button class="act arch" data-act="restore" aria-label="Restore">${ICON_ARCH}Restore</button>` : noArchive ? '' : `<button class="act arch" data-act="archive" aria-label="Archive">${ICON_ARCH}Archive</button>`}
     <button class="act del" data-act="delete" aria-label="Delete">${ICON_DEL}Delete</button></div>${inner}</div>`;
 }
 function closeSwipes(except){ document.querySelectorAll('.swipe.open').forEach(w => { if (w !== except){ w.classList.remove('open'); w.querySelector('.item').style.transform = ''; } }); }
@@ -504,13 +581,23 @@ document.addEventListener('pointercancel', endSwipe);
 async function rowAction(id, act){
   const r = (D.rows || []).find(x => x.ID === id); if (!r) return;
   const prev = { Status: r.Status, Outcome: r.Outcome || '', 'Remind on': r['Remind on'] || '' };
-  const fields = act === 'delete' ? { Status: 'Closed', Outcome: 'Deleted', 'Remind on': '' } : { Status: 'Closed', Outcome: 'Archived', 'Remind on': '' };
+  const fields = act === 'delete' ? { Status: 'Closed', Outcome: 'Deleted', 'Remind on': '' }
+    : act === 'restore' ? { Status: 'Saved', Outcome: '', 'Remind on': addDays(1) }
+    : act === 'dismiss' ? { Status: 'Closed', Outcome: 'Dismissed', 'Remind on': '' }
+    : act === 'accept' ? { Status: 'Saved', 'Remind on': addDays(1) }
+    : { Status: 'Closed', Outcome: 'Archived', 'Remind on': '' };
   closeSheet(); Object.assign(r, fields); render(); active_();
-  toast(act === 'delete' ? `Deleted "${(r.Title || 'capture').slice(0, 28)}"` : 'Archived. It lives in Submitted & closed now.', async () => {
-    Object.assign(r, prev); render(); await call({ action: 'update', id, fields: prev });
-  });
+  let undone = false;
+  const msg = { delete: `Deleted "${(r.Title || 'capture').slice(0, 28)}"`, restore: 'Restored. It\'s back in your to-dos.', dismiss: 'Okay, not for you. Noted.',
+    accept: 'Added to your tracker. Good pick. 🐝', archive: 'Archived. Find it under Tracker → Archived.' }[act] || 'Done.';
+  toast(msg, async () => { undone = true; Object.assign(r, prev); render(); await call({ action: 'update', id, fields: prev }); });
   const j = await call({ action: 'update', id, fields });
-  if (!j.ok){ Object.assign(r, prev); render(); toast("Couldn't reach your sheet. Nothing changed."); }
+  if (!j.ok){ Object.assign(r, prev); render(); toast("Couldn't reach your sheet. Nothing changed."); return; }
+  if (act === 'delete') setTimeout(async () => {
+    if (undone) return;
+    const d = await call({ action: 'delete', id });       // real delete once the script supports it
+    if (d.ok) D.rows = D.rows.filter(x => x.ID !== id);
+  }, 5500);
 }
 async function tipDelete(id){
   const t = (D.tips || []).find(x => x.ID === id); if (!t) return;
@@ -520,6 +607,186 @@ async function tipDelete(id){
   const j = await call({ action: 'tipUpdate', id, fields: { 'In digest': 'deleted' } });
   if (!j.ok){ t['In digest'] = prev; render(); toast("Couldn't reach your sheet. Nothing changed."); }
 }
+
+/* ---------- search everything ---------- */
+let gq = '';
+function searchAll(rows, tips){
+  const out = $('#gresults');
+  if (!gq){ out.innerHTML = ''; ['#needs','#hello','#tiles','#banners','#foryou'].forEach(x => { const el = $(x); if (el) el.closest('section') ? el.closest('section').hidden = false : el.hidden = false; }); return; }
+  const hit = o => JSON.stringify(o).toLowerCase().includes(gq);
+  const rs = rows.filter(r => hit([r.Title, r.Organisation, r.Type, r.Category, r.Notes, r.Requirements, r['What it offers'], r.Outcome]));
+  const ts = tips.filter(t => hit([t.Title, t.Topic, t['Key points']]));
+  out.innerHTML = (rs.length ? `<div class="gres-h">Opportunities &amp; events · ${rs.length}</div><div class="list">${rs.slice(0, 20).map(r => { const u = urgency(r); return itemRow(r, u ? u.tone : 'sky', u ? u.why : ''); }).join('')}</div>` : '') +
+    (ts.length ? `<div class="gres-h">Tips · ${ts.length}</div><div class="list">${ts.slice(0, 20).map(t => `<div class="item" data-tip="${esc(t.ID)}"><span class="dot d-sun"></span><div class="main"><div class="t">${esc(t.Title)}</div><div class="m">${esc(t.Topic)}</div></div></div>`).join('')}</div>` : '') +
+    (!rs.length && !ts.length ? `<div class="empty">Nothing matches “${esc(gq)}”. Bisi looked everywhere. Twice.</div>` : '');
+  const needs = $('#needs').closest('section'); if (needs) needs.hidden = true; $('#foryou').hidden = true;
+}
+$('#gq').addEventListener('input', e => { gq = e.target.value.trim().toLowerCase(); if (!gq){ const n = $('#needs').closest('section'); if (n) n.hidden = false; $('#foryou').hidden = false; } render(); });
+
+/* ---------- Bisi's picks (Status = Suggested) ---------- */
+function forYou(rows){
+  const s = rows.filter(r => r.Status === 'Suggested');
+  $('#foryou').innerHTML = s.length ? `<section class="foryou"><div class="sh"><h2>Bisi found these for you</h2><small>${s.length} new</small></div>
+    ${s.slice(0, 4).map(r => `<div class="fy"><div class="t">${esc(r.Title)}</div>
+      <div class="note">${esc([r.Organisation, r.Type, r.Deadline ? 'due ' + fmt(r.Deadline) : ''].filter(Boolean).join(' · '))}</div>
+      ${r['What it offers'] ? `<div class="note">${esc(String(r['What it offers']).slice(0, 160))}</div>` : ''}
+      <div class="row"><button class="btn small primary" data-act="accept" data-kind="row" data-id="${esc(r.ID)}">Add to my tracker</button>
+      <button class="btn small" data-open="${esc(r.ID)}">Details</button>
+      <button class="btn small ghost" data-act="dismiss" data-kind="row" data-id="${esc(r.ID)}">Not for me</button></div></div>`).join('')}</section>` : '';
+}
+
+/* ---------- deadline calendar ---------- */
+let calOffset = 0, calSel = null;
+function calendar(rows){
+  const base = new Date(TODAY.getFullYear(), TODAY.getMonth() + calOffset, 1);
+  $('#cal-title').textContent = base.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  const start = new Date(base); start.setDate(1 - ((base.getDay() + 6) % 7));     // weeks start Monday
+  const byDay = {};
+  rows.filter(r => r.Deadline && r.Status !== 'Suggested' && r.Outcome !== 'Deleted').forEach(r => { (byDay[r.Deadline] = byDay[r.Deadline] || []).push(r); });
+  const garden = skinNow() === 'garden';
+  const drop = c => garden
+    ? `<svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="4" fill="${c}" stroke="var(--stroke)" stroke-width="1"/></svg>`
+    : `<svg width="8" height="10" viewBox="0 0 8 10" aria-hidden="true"><path d="M4 0 C6 4 8 5 8 7 A4 4 0 0 1 0 7 C0 5 2 4 4 0Z" fill="${c}" stroke="var(--stroke)" stroke-width="1"/></svg>`;
+  let html = ['M','T','W','T','F','S','S'].map(d => `<div class="dow">${d}</div>`).join('');
+  for (let i = 0; i < 42; i++){
+    const d = new Date(start); d.setDate(start.getDate() + i);
+    const k = iso(d), items = byDay[k] || [];
+    const cls = ['d', d.getMonth() !== base.getMonth() ? 'other' : '', k === iso(TODAY) ? 'today' : '', k === calSel ? 'sel' : ''].join(' ');
+    const colors = items.slice(0, 3).map(r => r.Category === 'Event' ? 'var(--plum)' : active(r) ? (days(k) <= 3 ? 'var(--rose)' : days(k) <= 7 ? 'var(--sun)' : 'var(--sky)') : 'var(--ok)');
+    html += `<button class="${cls}" data-cal="${k}" aria-label="${d.getDate()} ${items.length ? '(' + items.length + ' deadline' + (items.length > 1 ? 's' : '') + ')' : ''}">${d.getDate()}<span class="drops">${colors.map(drop).join('')}</span></button>`;
+    if (i === 34 && d.getMonth() !== base.getMonth()) break;
+  }
+  $('#cal').className = 'cal'; $('#cal').innerHTML = html;
+  const sel = calSel && byDay[calSel];
+  $('#cal-day').innerHTML = calSel ? `<div class="gres-h">${esc(fmt(calSel))}</div>` + (sel ? `<div class="list">${sel.map(r => { const u = urgency(r); return itemRow(r, u ? u.tone : 'sky', u ? u.why : ''); }).join('')}</div>` : '<div class="note">Nothing due that day.</div>') : '';
+}
+$('#cal-prev').onclick = () => { calOffset--; calendar((D && D.rows) || []); };
+$('#cal-next').onclick = () => { calOffset++; calendar((D && D.rows) || []); };
+
+/* ---------- stickers (badges) ---------- */
+const STICK = {
+  bee: '<ellipse cx="32" cy="35" rx="13" ry="11" fill="#F6C343" stroke="#1E1606" stroke-width="2.5"/><path d="M27 25v20M36 25v20" stroke="#1E1606" stroke-width="3"/><ellipse cx="25" cy="22" rx="7" ry="4.5" fill="#fff" stroke="#1E1606" stroke-width="2"/><ellipse cx="39" cy="22" rx="7" ry="4.5" fill="#fff" stroke="#1E1606" stroke-width="2"/>',
+  env: '<rect x="17" y="22" width="30" height="21" rx="3" fill="#fff" stroke="#1E1606" stroke-width="2.5"/><path d="M18 24l14 10 14-10" fill="none" stroke="#1E1606" stroke-width="2.5"/>',
+  star: '<path d="M32 16l4.6 9.4 10.4 1.5-7.5 7.3 1.8 10.3-9.3-4.9-9.3 4.9 1.8-10.3-7.5-7.3 10.4-1.5z" fill="#FFD23F" stroke="#1E1606" stroke-width="2.5" stroke-linejoin="round"/>',
+  trophy: '<path d="M23 18h18v9a9 9 0 0 1-18 0z" fill="#FFD23F" stroke="#1E1606" stroke-width="2.5"/><path d="M23 21h-5a5 5 0 0 0 6 7M41 21h5a5 5 0 0 1-6 7M32 36v5M26 45h12" fill="none" stroke="#1E1606" stroke-width="2.5"/>',
+  jar: '<rect x="24" y="16" width="16" height="5" rx="1.5" fill="#C98A1B" stroke="#1E1606" stroke-width="2"/><path d="M22 22h20v18a4 4 0 0 1-4 4H26a4 4 0 0 1-4-4z" fill="#fff" stroke="#1E1606" stroke-width="2.5"/><path d="M23 31c6-2 12-2 18 0v9a3 3 0 0 1-3 3H26a3 3 0 0 1-3-3z" fill="#F5B700"/>',
+  comb: '<path d="M25 18l7 4v8l-7 4-7-4v-8zM39 18l7 4v8l-7 4-7-4v-8zM32 30l7 4v8l-7 4-7-4v-8z" fill="#F5B700" stroke="#1E1606" stroke-width="2.2" stroke-linejoin="round"/>',
+  flower: '<g stroke="#1E1606" stroke-width="2"><circle cx="32" cy="23" r="6" fill="#F29B8B"/><circle cx="41" cy="31" r="6" fill="#F29B8B"/><circle cx="32" cy="39" r="6" fill="#F29B8B"/><circle cx="23" cy="31" r="6" fill="#F29B8B"/><circle cx="32" cy="31" r="4.5" fill="#FFD23F"/></g>',
+  doc: '<path d="M22 15h14l7 7v26H22z" fill="#fff" stroke="#1E1606" stroke-width="2.5" stroke-linejoin="round"/><path d="M27 28h11M27 33h11M27 38h7" stroke="#1E6A4E" stroke-width="2.5"/>',
+  pen: '<path d="M20 42l18-18 5 5-18 18-7 2z" fill="#FFD23F" stroke="#1E1606" stroke-width="2.5" stroke-linejoin="round"/><path d="M38 24l3-3 5 5-3 3" fill="#F29B8B" stroke="#1E1606" stroke-width="2.5"/>',
+  clock: '<circle cx="32" cy="31" r="13" fill="#fff" stroke="#1E1606" stroke-width="2.5"/><path d="M32 23v8l6 4" fill="none" stroke="#1E1606" stroke-width="2.5" stroke-linecap="round"/>',
+  list: '<rect x="19" y="16" width="26" height="30" rx="3" fill="#fff" stroke="#1E1606" stroke-width="2.5"/><path d="M24 24l2 2 4-4M24 32l2 2 4-4M24 40l2 2 4-4M33 25h7M33 33h7M33 41h7" fill="none" stroke="#1E1606" stroke-width="2.2" stroke-linecap="round"/>',
+};
+function sticker(icon, tint){
+  return `<svg class="st" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 3c9 0 13 4 19 7s9 9 9 20-3 16-9 21-11 9-19 9-14-4-19-8-10-11-10-21 4-16 9-21 11-7 20-7z" fill="${tint}" stroke="var(--stroke)" stroke-width="2.5"/><path d="M50 10c3 4 6 8 6 15" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"/>${STICK[icon]}</svg>`;
+}
+function badgeList(rows, tips){
+  const real = rows.filter(r => r.Category !== 'Other' && r.Status !== 'Suggested');
+  const appliedN = real.filter(applied).length;
+  const streak = window.Android && Android.streak ? Android.streak() : 0;
+  const early = real.some(r => r['Applied on'] && r.Deadline && days(r.Deadline) - days(r['Applied on']) >= 3);
+  const ticked = real.some(r => { const l = reqs(r); return l.length >= 3 && l.every(x => x.done); });
+  return [
+    ['first', 'First find', 'bee', '#FFE7A0', real.length >= 1, 'Save your first opportunity'],
+    ['busy', 'Busy bee', 'comb', '#FFE7A0', real.length >= 10, 'Save 10 things'],
+    ['shot', 'Shot your shot', 'env', '#DDEFCF', appliedN >= 1, 'Submit your first application'],
+    ['five', 'High five', 'list', '#DDEFCF', appliedN >= 5, 'Submit 5 applications'],
+    ['early', 'Early bee', 'clock', '#E4EEF9', early, 'Apply 3+ days before a deadline'],
+    ['ticked', 'Every box', 'list', '#E4EEF9', ticked, 'Tick off a whole checklist'],
+    ['short', 'On the list', 'star', '#F0E2FA', real.some(r => r.Outcome === 'Shortlisted' || r.Outcome === 'Interview'), 'Get shortlisted'],
+    ['sweet', 'Sweet success', 'trophy', '#FFD3C2', real.some(r => r.Outcome === 'Accepted'), 'Get accepted somewhere'],
+    ['nectar7', 'Nectar week', 'jar', '#FFE7A0', streak >= 7, '7 days of nectar'],
+    ['nectar30', 'Honey month', 'jar', '#FFD3C2', streak >= 30, '30 days of nectar'],
+    ['wise', 'Wise bee', 'flower', '#F0E2FA', tips.length >= 5, 'Save 5 tips'],
+    ['words', 'Wordsmith', 'pen', '#DDEFCF', real.some(r => r['Essay doc']), 'Get your first essay drafted'],
+    ['cv', 'CV ready', 'doc', '#E4EEF9', !!(D.docs && D.docs['master-cv']), 'Upload your CV'],
+  ];
+}
+let badgesSeen = null;
+function badges(rows, tips){
+  const list = badgeList(rows, tips), got = list.filter(b => b[4]);
+  $('#badges').innerHTML = list.map(([k, name, icon, tint, on, how]) =>
+    `<button class="badge ${on ? '' : 'locked'}" data-badge="${k}" aria-label="${esc(name)}: ${on ? 'earned' : esc(how)}">${sticker(icon, tint)}<span>${esc(name)}</span></button>`).join('');
+  $('#badge-count').textContent = `${got.length} of ${list.length} collected`;
+  let seen = null; try { seen = JSON.parse(localStorage.getItem('ft-badges') || 'null'); } catch(e){}
+  const now = got.map(b => b[0]);
+  if (seen === null){ try { localStorage.setItem('ft-badges', JSON.stringify(now)); } catch(e){} return; }   // first run: no fanfare
+  const fresh = got.filter(b => seen.indexOf(b[0]) < 0);
+  if (fresh.length){
+    try { localStorage.setItem('ft-badges', JSON.stringify(now)); } catch(e){}
+    const b = fresh[0];
+    setTimeout(() => celebrate('party', 'New sticker!', `<b style="font-size:1.4rem">${esc(b[1])}</b><br>Bisi stuck it in your collection.`, sticker(b[2], b[3])), 400);
+  }
+}
+
+/* ---------- celebrations ---------- */
+let confettiRun = 0;
+const celQueue = [];
+function celebrate(mood, title, html, extra){
+  const box = $('#celebrate');
+  if (!box.hidden){ celQueue.push([mood, title, html, extra]); return; }
+  $('#cel-card').innerHTML = `${extra || ''}${bisiSvg(mood, extra ? 90 : 130, true)}<h3>${esc(title)}</h3><p>${html}</p><button class="btn primary" data-cel-close>${mood === 'crying' ? 'Thanks, Bisi' : 'Yay!'}</button>`;
+  box.hidden = false;
+  if (mood === 'crying' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cv = $('#confetti'), ctx = cv.getContext('2d'), W = cv.width = innerWidth, H = cv.height = innerHeight, run = ++confettiRun;
+  const cols = ['#F5B700','#FFD23F','#E39B1B','#F29B8B','#8CC66F','#9461C4','#FFFFFF'];
+  const bits = Array.from({ length: 90 }, () => ({ x: Math.random() * W, y: -20 - Math.random() * H * .6, r: 5 + Math.random() * 7, vy: 2 + Math.random() * 3, vx: -1.5 + Math.random() * 3, a: Math.random() * 6, va: -.1 + Math.random() * .2, c: cols[(Math.random() * cols.length) | 0], hex: Math.random() < .5 }));
+  (function frame(){
+    if (run !== confettiRun || box.hidden) return;
+    ctx.clearRect(0, 0, W, H);
+    let alive = 0;
+    bits.forEach(b => { b.y += b.vy; b.x += b.vx; b.a += b.va; if (b.y < H + 20) alive++;
+      ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.a); ctx.fillStyle = b.c; ctx.strokeStyle = '#1E1606'; ctx.lineWidth = 1.5; ctx.beginPath();
+      if (b.hex){ for (let k = 0; k < 6; k++){ const t = Math.PI / 3 * k; ctx.lineTo(Math.cos(t) * b.r, Math.sin(t) * b.r); } } else ctx.ellipse(0, 0, b.r, b.r * .55, 0, 0, Math.PI * 2);
+      ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); });
+    if (alive) requestAnimationFrame(frame);
+  })();
+}
+document.addEventListener('click', e => {
+  if (e.target.closest('[data-cel-close]') || e.target.id === 'celebrate'){ $('#celebrate').hidden = true; confettiRun++;
+    if (celQueue.length) setTimeout(() => celebrate.apply(null, celQueue.shift()), 250); }
+  const bd = e.target.closest('[data-badge]');
+  if (bd && D){ const b = badgeList((D.rows||[]).filter(r => r.Outcome !== 'Deleted'), D.tips || []).find(x => x[0] === bd.dataset.badge);
+    if (b) toast(b[4] ? `${b[1]}: earned! 🐝` : `${b[1]}: ${b[5]}`); }
+  const cd = e.target.closest('[data-cal]'); if (cd){ calSel = calSel === cd.dataset.cal ? null : cd.dataset.cal; calendar((D && D.rows) || []); }
+});
+
+/* ---------- a link you copied (sent by the app when it opens) ---------- */
+window.__clip = url => {
+  if (!url || !D) return;
+  const known = (D.rows || []).some(r => r.Link && (r.Link === url || url.indexOf(r.Link) === 0));
+  if (known) return;
+  const b = document.createElement('div');
+  b.className = 'banner info'; b.innerHTML = `<span>You copied a link: <b>${esc(url.replace(/^https?:\/\//, '').slice(0, 40))}…</b> Save it?</span><button class="btn small primary">Save</button><button class="btn small ghost">No</button>`;
+  const [yes, no] = b.querySelectorAll('button');
+  yes.onclick = async () => { b.remove(); toast('Saving…'); active_();
+    const j = await call({ action: 'capture', app: 'Copied link', url, screenText: url });
+    if (j.ok){ toast('Saved. Bisi is sorting it. 🐝'); await load(true); autoSort(); } else toast("Couldn't reach your sheet."); };
+  no.onclick = () => b.remove();
+  go('today'); $('#banners').prepend(b);
+};
+
+/* ---------- export ---------- */
+function csvCell(v){ v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+$('#exp-csv').onclick = () => {
+  if (!D) return;
+  const cols = ['Title','Organisation','Category','Type','Status','Outcome','Deadline','Applied on','Link','Requirements','What it offers','Notes'];
+  const rows = (D.rows || []).filter(r => r.Outcome !== 'Deleted' && r.Status !== 'Suggested');
+  const csv = [cols.join(',')].concat(rows.map(r => cols.map(c => csvCell(r[c])).join(','))).join('\n');
+  if (window.Android && Android.saveFile){ Android.saveFile('follow-through-' + iso(TODAY) + '.csv', 'text/csv', csv); }
+  else toast('Export works inside the app.');
+};
+$('#exp-pdf').onclick = () => {
+  if (!D) return;
+  const list = (D.rows || []).filter(r => r.Outcome !== 'Deleted' && r.Status !== 'Suggested' && applied(r)).sort((a, b) => appliedDate(b).localeCompare(appliedDate(a)));
+  const tr = list.map(r => `<tr><td><b>${esc(r.Title)}</b><br><span>${esc(r.Organisation || '')}</span></td><td>${esc(r.Type || '')}</td><td>${esc(fmt(appliedDate(r)))} ${esc(appliedDate(r).slice(0,4))}</td><td>${esc(outcomeOf(r))}</td></tr>`).join('');
+  const html = `<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Georgia,serif;color:#1E1606;margin:32px}h1{font-size:26px;margin:0}p{color:#6E5A2C}
+    table{width:100%;border-collapse:collapse;margin-top:18px;font-size:13px}th,td{text-align:left;padding:8px;border-bottom:1px solid #E8D08A;vertical-align:top}th{background:#FFF3CC}span{color:#6E5A2C}</style></head>
+    <body><h1>Applications &amp; results</h1><p>${list.length} applications · exported ${esc(fmt(iso(TODAY)))} ${TODAY.getFullYear()} from Follow-Through</p>
+    <table><tr><th>Opportunity</th><th>Type</th><th>Applied</th><th>Result</th></tr>${tr || '<tr><td colspan="4">No applications yet.</td></tr>'}</table></body></html>`;
+  if (window.Android && Android.printHtml) Android.printHtml(html, 'Follow-Through applications');
+  else toast('Save as PDF works inside the app.');
+};
 
 /* ---------- tabs ---------- */
 function go(name){
@@ -608,12 +875,13 @@ function charts(rows, tips){
 /* ---------- full list ---------- */
 function listing(rows, tips){
   const groups = {
-    opps: rows.filter(r => r.Category !== 'Event' && r.Category !== 'Other' && r.Status !== 'Closed'),
-    events: rows.filter(r => r.Category === 'Event' && r.Status !== 'Closed'),
+    opps: rows.filter(r => r.Category !== 'Event' && r.Category !== 'Other' && r.Status !== 'Closed' && r.Status !== 'Suggested'),
+    events: rows.filter(r => r.Category === 'Event' && r.Status !== 'Closed' && r.Status !== 'Suggested'),
     tips: tips,
-    done: rows.filter(r => r.Status === 'Closed' || r.Status === 'Submitted'),
+    done: rows.filter(r => (r.Status === 'Closed' || r.Status === 'Submitted') && r.Outcome !== 'Archived' && r.Outcome !== 'Dismissed'),
+    archived: rows.filter(r => r.Outcome === 'Archived'),
   };
-  const labels = [['opps','Opportunities'],['events','Events'],['tips','Tips'],['done','Submitted & closed']];
+  const labels = [['opps','Opportunities'],['events','Events'],['tips','Tips'],['done','Submitted & closed'],['archived','Archived']];
   $('#tabs').innerHTML = labels.map(([k,l]) => `<button data-tab="${k}" aria-pressed="${tab===k}">${l} · ${groups[k].length}</button>`).join('');
   let list = groups[tab];
   if (query) list = list.filter(r => JSON.stringify([r.Title,r.Organisation,r.Topic,r['Key points'],r.Type]).toLowerCase().includes(query));
@@ -725,7 +993,8 @@ function openItem(id){
         ${r['Saved from']?`<dt>Saved from</dt><dd>${esc(r['Saved from'])}</dd>`:''}
         ${r.Notes?`<dt>Notes</dt><dd style="white-space:pre-wrap">${esc(r.Notes)}</dd>`:''}
       </dl>
-      ${req.length?`<div><div class="note" style="margin-bottom:4px">What you need</div><ul class="reqs">${req.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
+      ${req.length?`<div><div class="row" style="justify-content:space-between;margin-bottom:4px"><div class="note">What you need</div>${ring(r, 40)}</div>
+        <div>${reqs(r).map((x,i)=>`<label class="chk ${x.done?'done':''}"><input type="checkbox" data-req="${i}" ${x.done?'checked':''} aria-label="${esc(x.text)}"><span>${esc(x.text)}</span></label>`).join('')}</div></div>`:''}
       ${isOpp && r.Status!=='New' ? `<div class="ai">
         <h4>Get it written</h4>
         <div class="row">
@@ -746,7 +1015,7 @@ function openItem(id){
       ${active(r)?`<div><div class="note" style="margin-bottom:6px">Remind me</div><div class="row">
         <button class="btn small" data-snooze="1">Tomorrow</button><button class="btn small" data-snooze="3">In 3 days</button><button class="btn small" data-snooze="7">Next week</button></div></div>`:''}
       <div class="row" style="border-top:2px dashed var(--line);padding-top:12px">
-        ${r.Outcome === 'Archived' ? '' : `<button class="btn small" data-act="archive" data-kind="row" data-id="${esc(r.ID)}">${ICON_ARCH} Archive</button>`}
+        ${r.Outcome === 'Archived' ? `<button class="btn small" data-act="restore" data-kind="row" data-id="${esc(r.ID)}">Restore</button>` : `<button class="btn small" data-act="archive" data-kind="row" data-id="${esc(r.ID)}">${ICON_ARCH} Archive</button>`}
         <button class="btn small" data-act="delete" data-kind="row" data-id="${esc(r.ID)}" style="color:var(--rose)">${ICON_DEL} Delete</button>
       </div>
     </div>`);
@@ -791,7 +1060,12 @@ document.addEventListener('click', async e => {
     if (f.Status === 'Closed') f['Remind on'] = '';
     if (!current['Applied on'] && DECIDED.indexOf(o) >= 0) f['Applied on'] = iso(TODAY);
     active_();
-    return setFields(current.ID, f, o==='Accepted' ? '🐝 YOU GOT IN?! I\'m telling every flower I know. 🎉' : o==='Rejected' ? '🐝 Their loss. Genuinely. On to the next one. 💛' : 'Saved to your history.');
+    const title = current.Title;
+    await setFields(current.ID, f, o==='Accepted' || o==='Rejected' ? '' : 'Saved to your history.');
+    if (o === 'Accepted') celebrate('party', 'YOU GOT IN!', `<b>${esc(title)}</b>. I'm telling every flower in Lagos. I always believed in you. (Mostly.)`);
+    else if (o === 'Shortlisted' || o === 'Interview') celebrate('party', o === 'Interview' ? 'An interview!' : 'Shortlisted!', `<b>${esc(title)}</b> wants to know you better. Breathe. Then prepare.`);
+    else if (o === 'Rejected') celebrate('crying', 'Their loss.', `<b>${esc(title)}</b> said no. That stings, and it's allowed to. You applied, and that's the brave part. Next one's ours. 💛`);
+    return;
   }
   if (t.dataset.open) return openItem(t.dataset.open);
   if (t.dataset.tip) return openTip(t.dataset.tip);
@@ -826,6 +1100,15 @@ document.addEventListener('click', async e => {
       sheet.querySelectorAll('[data-ai]').forEach(b => b.disabled = false);
     }
   }
+});
+document.addEventListener('change', async e => {
+  const cb = e.target.closest('[data-req]'); if (!cb || !current) return;
+  const id = current.ID, r = D.rows.find(x => x.ID === id); if (!r) return;
+  const l = reqs(r); l[+cb.dataset.req].done = cb.checked;
+  const all = l.every(x => x.done);
+  active_();
+  await setFields(id, { Requirements: reqString(l) }, all ? '' : (cb.checked ? 'Ticked. ' + (l.filter(x => !x.done).length) + ' to go. 🐝' : 'Unticked.'));
+  if (all && cb.checked) celebrate('party', 'Every box ticked!', `Everything for <b>${esc(r.Title)}</b> is ready. Now hit submit, and tell me when you have.`);
 });
 $('#q').addEventListener('input', e => { query = e.target.value.trim().toLowerCase(); render(); });
 $('#refresh').onclick = () => load();
@@ -905,6 +1188,8 @@ function lookSheet(){
 }
 $('#skin').onclick = lookSheet;
 $('#me-look').onclick = lookSheet;
+$('#add-voice').onclick = () => window.Android && Android.voice ? Android.voice() : toast('Voice works inside the app.');
+$('#add-paste').onclick = () => window.Android && Android.pasteLink ? Android.pasteLink() : toast('Paste works inside the app.');
 $('#me-settings').onclick = () => window.Android ? Android.openSettings() : toast('Settings open in the app.');
 $('#me-sheet').onclick = () => { if (D && D.sheetUrl) open(D.sheetUrl); else toast('Connect your sheet in Settings first.'); };
 document.addEventListener('click', e => {
@@ -922,7 +1207,8 @@ function demo(req){
   if (req.action !== 'dashboard') return { ok:true };
   const d = n => addDays(n);
   return { ok:true, today: iso(TODAY), ai:{hasKey:true}, docs:{}, rows:[
-    {ID:'a',Title:'Example: Engineering Scholarship',Organisation:'Example Foundation',Category:'Opportunity',Type:'Scholarship',Status:'Preparing',Deadline:d(2),'Remind on':d(0),Requirements:'Essay: "Why engineering?" (500 words)\nCV\nTranscript',Captured:d(-3)},
+    {ID:'a',Title:'Example: Engineering Scholarship',Organisation:'Example Foundation',Category:'Opportunity',Type:'Scholarship',Status:'Preparing',Deadline:d(2),'Remind on':d(0),Requirements:'Essay: "Why engineering?" (500 words)\n✓ CV\nTranscript',Captured:d(-3)},
+    {ID:'s1',Title:'Example: Women in STEM Scholarship 2027',Organisation:'Example Trust',Type:'Scholarship',Category:'Opportunity',Status:'Suggested',Deadline:d(20),'What it offers':'Full tuition for women in engineering at Nigerian universities.',Captured:d(0)},
     {ID:'b',Title:'Example: Robotics internship',Organisation:'Example Labs',Category:'Opportunity',Type:'Internship',Status:'Saved',Deadline:d(12),'Remind on':d(5),Requirements:'CV',Captured:d(-9)},
     {ID:'c',Title:'Example: AI for Africa webinar',Organisation:'Example Hub',Category:'Event',Type:'Event',Status:'Saved',Deadline:d(1),Captured:d(-1)},
     {ID:'d',Title:'Example: Hackathon',Organisation:'Example Org',Type:'Hackathon',Category:'Opportunity',Status:'Submitted',Deadline:d(-2),'Remind on':d(0),Captured:d(-20),'Applied on':d(-3)},
