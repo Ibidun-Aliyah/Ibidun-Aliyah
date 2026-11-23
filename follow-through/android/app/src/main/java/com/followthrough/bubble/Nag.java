@@ -313,6 +313,7 @@ final class Nag {
     /* ---------- widget ---------- */
 
     static void updateWidget(Context c) {
+        Widgets.updateAll(c);
         AppWidgetManager m = AppWidgetManager.getInstance(c);
         int[] ids = m.getAppWidgetIds(new ComponentName(c, WidgetProvider.class));
         if (ids.length == 0) return;

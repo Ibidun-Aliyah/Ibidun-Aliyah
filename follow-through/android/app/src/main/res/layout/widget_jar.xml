@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/j_root"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"
+    android:gravity="center" android:padding="10dp" android:background="@drawable/wcard_jar">
+    <ImageView android:id="@+id/j_jar" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:scaleType="fitCenter" android:contentDescription="Nectar jar" />
+    <TextView android:id="@+id/j_days" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:fontFamily="@font/patrick_hand" android:textColor="#1E1606" android:textSize="28sp" android:text="0 days" />
+    <TextView android:id="@+id/j_line" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textColor="#1E1606" android:textSize="12sp" android:textStyle="bold" android:gravity="center" android:maxLines="2" android:text="of nectar" />
+</LinearLayout>

@@ -95,6 +95,17 @@ screenshots. Notes with a time offer **Add to Calendar** (a web app can't ring o
 rest of the nagging. Not on iPhone: the floating bubble and Scroll guard (iOS doesn't allow them).
 After changing the dashboard, run `python3 follow-through/web/build.py` and commit `docs/`.
 
+## More widgets
+Long-press the home screen → Widgets → Follow-Through: **Nectar jar** (your streak as a honey jar that tips and drips at
+7 pm if you haven't acted), **Brain snack** (a word, maths or circuits question a day; tap to reveal, Play opens the
+games), **Sticky note** (your pinned note, or the next reminder; tick checklist items right there) and **Quick save**
+(Say it · Paste link · Note, without opening the app).
+
+## Updates
+The Android app checks `docs/version.json` on the website and shows "Follow-Through x.y is out" with an **Update**
+button that downloads the newest APK. The web version updates itself. `web/build.py` writes `version.json` from
+`build.gradle` and `android/whatsnew.txt`.
+
 ## Brain break (games)
 Four quick learning games, all offline, on **Today → Bored? Brain break** (or Me). **Word Hive** (vocabulary from
 academic to rare; missed words come back until you learn them), **Number Sprint** (60-second mental maths, up to logs,

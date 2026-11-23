@@ -50,6 +50,7 @@ final class Notes {
             if (!found) out.put(n);
             store(c, out);
             schedule(c, n);
+            Widgets.updateNote(c);
         } catch (Exception ignored) {}
         return n;
     }
@@ -59,6 +60,7 @@ final class Notes {
             JSONArray a = all(c), out = new JSONArray();
             for (int i = 0; i < a.length(); i++) { JSONObject x = a.getJSONObject(i); if (!x.optString("id").equals(id)) out.put(x); else cancel(c, x); }
             store(c, out);
+            Widgets.updateNote(c);
         } catch (Exception ignored) {}
     }
 

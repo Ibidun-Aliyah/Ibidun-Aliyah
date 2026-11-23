@@ -16,6 +16,14 @@ public class VoiceActivity extends Activity {
     @Override
     protected void onCreate(Bundle saved) {
         super.onCreate(saved);
+        // From the Quick save widget: use Bisi's floating card when the bubble is running.
+        if (getIntent().getBooleanExtra("fromWidget", false) && BubbleService.instance != null
+                && checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                && android.speech.SpeechRecognizer.isRecognitionAvailable(this)) {
+            finish();
+            BubbleService.instance.voice();
+            return;
+        }
         // From the bubble: ask for the microphone once, then listen in the floating card from now on.
         if (getIntent().getBooleanExtra("fromBubble", false)
                 && checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) != android.content.pm.PackageManager.PERMISSION_GRANTED) {

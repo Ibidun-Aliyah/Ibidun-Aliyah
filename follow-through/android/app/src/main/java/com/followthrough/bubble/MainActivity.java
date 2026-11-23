@@ -64,8 +64,7 @@ public class MainActivity extends Activity {
             }
             @Override public void onPageFinished(WebView v, String url) {
                 loaded = true; v.postDelayed(MainActivity.this::checkClipboard, 1500);
-                String note = getIntent() != null ? getIntent().getStringExtra("openNote") : null;
-                if (note != null) { getIntent().removeExtra("openNote"); v.evaluateJavascript("window.__openNote && window.__openNote(" + JSONObject.quote(note) + ")", null); }
+                handleExtras(getIntent());
             }
 
             @Override
@@ -168,12 +167,20 @@ public class MainActivity extends Activity {
         if (loaded && web != null) web.evaluateJavascript("window.__onResume && window.__onResume()", null);
     }
 
+    /** Widgets and notifications open the app on a particular screen. */
+    private void handleExtras(Intent intent) {
+        if (intent == null || web == null) return;
+        String note = intent.getStringExtra("openNote");
+        if (note != null) { intent.removeExtra("openNote"); web.evaluateJavascript("window.__openNote && window.__openNote(" + JSONObject.quote(note) + ")", null); }
+        if (intent.hasExtra("newNote")) { intent.removeExtra("newNote"); web.evaluateJavascript("window.__newNote && window.__newNote()", null); }
+        if (intent.hasExtra("openGames")) { intent.removeExtra("openGames"); web.evaluateJavascript("window.__openGames && window.__openGames()", null); }
+    }
+
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        String note = intent.getStringExtra("openNote");
-        if (note != null && loaded && web != null) web.evaluateJavascript("window.__openNote && window.__openNote(" + JSONObject.quote(note) + ")", null);
+        if (loaded && web != null) handleExtras(intent);
     }
 
     @Override
@@ -289,6 +296,11 @@ public class MainActivity extends Activity {
                 Intent send = new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text + "\n" + url);
                 startActivity(Intent.createChooser(send, "Send your invite"));
             });
+        }
+
+        @JavascriptInterface
+        public long appVersion() {
+            try { return getPackageManager().getPackageInfo(getPackageName(), 0).getLongVersionCode(); } catch (Exception e) { return 0; }
         }
 
         @JavascriptInterface

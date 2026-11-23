@@ -51,4 +51,10 @@ for f in sorted(os.listdir(OUT)):
     if os.path.isfile(p) and f != 'sw.js': h.update(open(p, 'rb').read())
 open(os.path.join(OUT, 'sw.js'), 'w').write(open(os.path.join(HERE, 'sw.js')).read().replace('__VERSION__', h.hexdigest()[:10]))
 open(os.path.join(OUT, '.nojekyll'), 'w').write('')
+# the Android app checks this to offer updates
+g = open(os.path.join(FT, 'android/app/build.gradle')).read()
+code = int(re.search(r'versionCode (\d+)', g).group(1)); name = re.search(r'versionName "([^"]+)"', g).group(1)
+wn = os.path.join(FT, 'android/whatsnew.txt')
+json.dump({'versionCode': code, 'versionName': name, 'whatsNew': open(wn).read().strip() if os.path.exists(wn) else ''},
+          open(os.path.join(OUT, 'version.json'), 'w'))
 print('built', OUT, sorted(os.listdir(OUT)))

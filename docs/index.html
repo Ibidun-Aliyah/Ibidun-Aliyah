@@ -578,10 +578,21 @@ async function load(quiet){
   offline = false; sticky = '';
   D = j; try { localStorage.setItem('ft-dash', JSON.stringify(j)); localStorage.setItem('ft-dash-at', String(Date.now())); } catch(e){}
   if (window.Android && Android.saveDashboard) Android.saveDashboard(JSON.stringify(j));
+  checkUpdate();
   if (window.Android && Android.streak && !statsSent){ statsSent = true; call({ action:'stats', streak: Android.streak(), url: Android.webAppUrl() }); }
   if (j.today){ TODAY = parse(j.today); }
   render();
   autoSort();
+}
+/* the Android app checks the website for a newer version (friends get updates this way too) */
+let updateChecked = false;
+async function checkUpdate(){
+  if (updateChecked || !window.Android || Android.web || !Android.appVersion) return;
+  updateChecked = true;
+  try {
+    const v = await fetch(INVITE_BASE + 'version.json', { cache:'no-store' }).then(r => r.json());
+    if (v && v.versionCode > Android.appVersion()) banner('info', `🐝 Follow-Through ${v.versionName} is out: ${v.whatsNew || 'new things from Bisi'}.`, 'Update');
+  } catch(e){}
 }
 async function autoSort(){
   if (sorting || !D || !D.ai.hasKey) return;
@@ -1053,6 +1064,8 @@ $('#nq').addEventListener('input', e => { nq = e.target.value.trim().toLowerCase
 $('#note-new').onclick = () => openNote(null);
 $('#note-voice').onclick = () => window.Android && Android.voice ? Android.voice() : toast('Voice works inside the app.');
 window.__openNote = id => { go('notes'); renderNotes(); openNote(id); };
+window.__newNote = () => { go('notes'); renderNotes(); openNote(null); };
+window.__openGames = () => go('games');
 
 /* ---------- scroll guard (settings live on the phone) ---------- */
 let fgCache = null;
@@ -1414,6 +1427,7 @@ document.addEventListener('click', async e => {
     const a = t.dataset.banner;
     if (a === 'Settings') return window.Android && Android.openSettings();
     if (a === 'Retry') return load();
+    if (a === 'Update'){ open(INVITE_BASE + 'follow-through.apk'); toast('Downloading… open it when it finishes, then tap Update.'); return; }
     if (a === 'Sort now'){ closeSheet(); return autoSort(); }
   }
   if (t.dataset.status && current){
