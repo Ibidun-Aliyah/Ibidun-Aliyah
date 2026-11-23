@@ -208,6 +208,27 @@ section{margin-top:28px}
 .modes button{min-height:44px;background:transparent;border:2px solid transparent;border-radius:12px;font-family:var(--f-d);font-size:1.12rem;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:6px}
 .modes button[aria-pressed="true"]{background:var(--card);border-color:var(--stroke);color:var(--ink);box-shadow:2px 3px 0 var(--sh)}
 
+/* tab bar */
+.wrap{padding-bottom:calc(110px + env(safe-area-inset-bottom))}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:15;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;
+  padding:6px max(8px,env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-right));
+  background:var(--card);border-top:2.5px solid var(--stroke);border-radius:22px 18px 0 0 / 14px 18px 0 0;box-shadow:0 -3px 0 var(--sh)}
+.tabbar button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 2px 3px;border-radius:14px 10px 12px 9px;
+  color:var(--muted);font-family:var(--f-d);font-size:.98rem;min-height:52px;cursor:pointer;position:relative}
+.tabbar button[aria-current="page"]{color:var(--ink);background:var(--accent-soft);border:2px solid var(--stroke);box-shadow:2px 3px 0 var(--sh);transform:translateY(-3px) rotate(-1deg)}
+.tabbar svg{flex:none}
+.see-all{margin-top:12px;align-self:flex-start}
+
+/* swipe to archive / delete */
+.swipe{position:relative}
+.swipe .acts{position:absolute;inset:3px 2px 3px auto;display:flex;gap:6px;align-items:stretch;padding-left:8px}
+.swipe .act{border:2.5px solid var(--stroke);border-radius:var(--r2);font-family:var(--f-d);font-size:1.02rem;width:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;box-shadow:2px 3px 0 var(--sh);color:#1E1606}
+.swipe .act.arch{background:#FFE27A} .swipe .act.del{background:#FFB199}
+.swipe .item{transition:transform .22s ease;touch-action:pan-y;will-change:transform;-webkit-user-select:none;user-select:none}
+.swipe.dragging .item{transition:none}
+.swipe:not(.open):not(.dragging) .acts{visibility:hidden}
+.toast .undo{margin-left:12px;background:transparent;border:2px solid var(--bg);color:var(--bg);border-radius:10px 8px 9px 7px;font-family:var(--f-d);font-size:1rem;padding:0 10px;cursor:pointer}
+
 /* footer meadow */
 .meadow{margin:38px 0 0;text-align:center;color:var(--muted);font-family:var(--f-d);font-size:1rem}
 .meadow .row{justify-content:center;align-items:flex-end;gap:10px;margin-bottom:4px}
@@ -231,55 +252,74 @@ section{margin-top:28px}
     </button>
   </div>
   <div class="sub"><span id="today"></span> <span class="sticker" id="nectar" hidden></span></div>
-  <div class="views" role="tablist"><button data-view="home" aria-pressed="true">Today</button><button data-view="history" aria-pressed="false">Applied history</button></div>
-  <div id="v-home">
-  <div class="bisi" id="bisi"><div class="face" id="bisi-face"></div><div class="say"><b>Bisi</b><span id="bisi-say">Buzzing in…</span></div></div>
-  <div class="hello" id="hello">Loading your tracker…</div>
-  <div id="banners"></div>
-  <div class="tiles" id="tiles"></div>
-
-  <section>
-    <div class="sh"><h2>Needs you</h2><small>deadlines · reminders · events</small></div>
-    <div class="list" id="needs"></div>
-  </section>
-
-  <section>
-    <div class="sh"><h2>How it's going</h2><small id="chartnote"></small></div>
-    <div class="charts">
-      <div class="card chart"><h4 id="pipe-title">Your honey jars</h4><div id="pipe"></div></div>
-      <div class="card chart"><h4>Next 30 days</h4><div id="timeline"></div></div>
-      <div class="card chart"><h4>Saved per week</h4><div id="weeks"></div></div>
-    </div>
-  </section>
-
-  <section>
-    <div class="sh"><h2>Everything</h2><small id="count"></small></div>
-    <div class="tabs" id="tabs"></div>
-    <input class="search" id="q" type="search" placeholder="Search titles, organisations, tips" aria-label="Search">
-    <div class="list" id="all"></div>
-  </section>
-
+  <div class="pane" id="p-today">
+    <div class="bisi" id="bisi"><div class="face" id="bisi-face"></div><div class="say"><b>Bisi</b><span id="bisi-say">Buzzing in…</span></div></div>
+    <div class="hello" id="hello">Loading your tracker…</div>
+    <div id="banners"></div>
+    <div class="tiles" id="tiles"></div>
+    <section>
+      <div class="sh"><h2>Needs you</h2><small>swipe left to archive</small></div>
+      <div class="list" id="needs"></div>
+    </section>
   </div>
-  <div id="v-history" hidden></div>
-  <div id="v-cv">
-  <section>
-    <div class="sh"><h2>My CV</h2><small>used for every tailored CV</small></div>
-    <div class="card cv">
-      <div class="row">
-        <button class="btn" id="cv-open">Open Master CV</button>
-        <label class="btn primary" for="cv-file">Upload my current CV</label>
-        <input id="cv-file" type="file" accept=".pdf,.docx,.txt,image/*" hidden>
+
+  <div class="pane" id="p-tracker" hidden>
+    <section>
+      <div class="sh"><h2>Everything</h2><small>swipe left to archive or delete</small></div>
+      <div class="tabs" id="tabs"></div>
+      <input class="search" id="q" type="search" placeholder="Search titles, organisations, tips" aria-label="Search">
+      <div class="list" id="all"></div>
+    </section>
+  </div>
+
+  <div class="pane" id="p-progress" hidden>
+    <section>
+      <div class="sh"><h2>How it's going</h2><small id="chartnote"></small></div>
+      <div class="charts">
+        <div class="card chart"><h4 id="pipe-title">Your honey jars</h4><div id="pipe"></div></div>
+        <div class="card chart"><h4>Next 30 days</h4><div id="timeline"></div></div>
+        <div class="card chart"><h4>Saved per week</h4><div id="weeks"></div></div>
       </div>
-      <div class="note" id="cv-status">PDF, Word (.docx) or a photo. Every fact is kept exactly as written.</div>
-      <label class="note" for="cv-add">Did something new? Describe it and it goes into your CV.</label>
-      <textarea id="cv-add" rows="3" placeholder="e.g. Won 2nd place at the LASUSTECH Robotics Hackathon in March 2027 with a line-following robot"></textarea>
-      <div class="row"><button class="btn primary" id="cv-add-btn">Add to my CV</button></div>
-      <div class="result" id="cv-result" hidden></div>
-    </div>
-  </section>
+    </section>
   </div>
-  <div class="meadow" id="meadow" aria-hidden="true"></div>
+
+  <div class="pane" id="p-history" hidden><div id="v-history"></div></div>
+
+  <div class="pane" id="p-me" hidden>
+    <section>
+      <div class="sh"><h2>My CV</h2><small>used for every tailored CV</small></div>
+      <div class="card cv">
+        <div class="row">
+          <button class="btn" id="cv-open">Open Master CV</button>
+          <label class="btn primary" for="cv-file">Upload my current CV</label>
+          <input id="cv-file" type="file" accept=".pdf,.docx,.txt,image/*" hidden>
+        </div>
+        <div class="note" id="cv-status">PDF, Word (.docx) or a photo. Every fact is kept exactly as written.</div>
+        <label class="note" for="cv-add">Did something new? Describe it and it goes into your CV.</label>
+        <textarea id="cv-add" rows="3" placeholder="e.g. Won 2nd place at the LASUSTECH Robotics Hackathon in March 2027 with a line-following robot"></textarea>
+        <div class="row"><button class="btn primary" id="cv-add-btn">Add to my CV</button></div>
+        <div class="result" id="cv-result" hidden></div>
+      </div>
+    </section>
+    <section>
+      <div class="sh"><h2>Look &amp; settings</h2></div>
+      <div class="card row">
+        <button class="btn" id="me-look">Change look</button>
+        <button class="btn" id="me-settings">Settings</button>
+        <button class="btn" id="me-sheet">Open my sheet</button>
+      </div>
+    </section>
+    <div class="meadow" id="meadow" aria-hidden="true"></div>
+  </div>
 </div>
+
+<nav class="tabbar" aria-label="Sections">
+  <button data-go="today" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><ellipse cx="12" cy="14" rx="7" ry="6" fill="#F6C343" stroke="currentColor" stroke-width="2"/><path d="M8 13h8M9 16.5h6" stroke="currentColor" stroke-width="2"/><ellipse cx="8" cy="6.5" rx="3.5" ry="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><ellipse cx="16" cy="6.5" rx="3.5" ry="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Today</span></button>
+  <button data-go="tracker"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>Tracker</span></button>
+  <button data-go="progress"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="3" rx="1"/><path d="M6 7h12v11a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3z"/><path d="M6.5 13c3-1.5 8-1.5 11 0V18a2.5 2.5 0 0 1-2.5 2.5H9A2.5 2.5 0 0 1 6.5 18z" fill="#F5B700" stroke="none"/></svg><span>Progress</span></button>
+  <button data-go="history"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10v6a5 5 0 0 1-10 0z" fill="#FFD23F"/><path d="M7 5H4a3 3 0 0 0 3 4M17 5h3a3 3 0 0 1-3 4M12 14v3M8 21h8M9 17h6v4H9z"/></svg><span>History</span></button>
+  <button data-go="me"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M6 2.5h9l4 4V21H6z"/><path d="M15 2.5V7h4"/><circle cx="12.5" cy="11" r="2.5"/><path d="M8.5 18c.8-2.3 2.3-3.3 4-3.3s3.2 1 4 3.3"/></svg><span>Me</span></button>
+</nav>
 
 <div class="scrim" id="scrim" hidden></div>
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true"></div>
@@ -312,10 +352,15 @@ let TODAY = new Date(); TODAY.setHours(0,0,0,0);
 const days = s => { const d = parse(s); return d ? Math.round((d - TODAY)/864e5) : null; };
 const addDays = n => { const d = new Date(TODAY); d.setDate(d.getDate()+n); return iso(d); };
 const fmt = s => { const d = parse(s); return d ? d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : ''; };
-let toastT; const toast = m => { const t=$('#toast'); t.textContent=m; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,2800); };
+let toastT, toastUndo = null;
+const toast = (m, undo) => {
+  const t = $('#toast'); t.textContent = m; toastUndo = undo || null;
+  if (undo){ const b = document.createElement('button'); b.className = 'undo'; b.textContent = 'Undo'; b.onclick = () => { const u = toastUndo; toastUndo = null; t.hidden = true; if (u) u(); }; t.appendChild(b); }
+  t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; toastUndo = null; }, undo ? 5000 : 2800);
+};
 
 /* ---------- state ---------- */
-let D = null, tab = 'opps', query = '', sorting = false, view = 'home', statsSent = false;
+let D = null, tab = 'opps', query = '', sorting = false, view = 'home', statsSent = false, pane = 'today';
 try { const c = localStorage.getItem('ft-dash'); if (c) D = JSON.parse(c); } catch(e){}
 
 async function load(quiet){
@@ -378,7 +423,7 @@ function banner(kind, text, action){
 function render(){
   $('#today').textContent = TODAY.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
   if (!D){ return; }
-  const rows = D.rows || [], tips = D.tips || [];
+  const rows = (D.rows || []).filter(r => r.Outcome !== 'Deleted'), tips = (D.tips || []).filter(t => t['In digest'] !== 'deleted');
   const act = rows.filter(active);
   const need = rows.map(r => ({ r, u: urgency(r) })).filter(x => x.u).sort((a,b) => a.u.score - b.u.score);
   const newCount = rows.filter(r => r.Status === 'New').length;
@@ -399,22 +444,97 @@ function render(){
     ['t3', rows.filter(r => r.Status === 'Submitted').length, 'submitted'], ['t4', tips.length, 'tips saved'],
   ].map(([c,n,l]) => `<div class="tile ${c}"><b>${n}</b><span>${l}</span></div>`).join('');
 
-  $('#needs').innerHTML = need.length ? need.slice(0,8).map(({r,u}) => itemRow(r, u.tone, u.why)).join('') :
+  $('#needs').innerHTML = need.length ? need.slice(0,5).map(({r,u}) => itemRow(r, u.tone, u.why)).join('') +
+      (need.length > 5 ? `<button class="btn small see-all" data-go="tracker">See all ${need.length} in Tracker →</button>` : '') :
     `<div class="empty">${rows.length ? 'All clear. Reminders and close deadlines show up here.' : 'Your follow-ups will show up here.'}</div>`;
 
   charts(rows, tips);
   listing(rows, tips);
-  if (view === 'history') history(rows);
+  history(rows);
 }
 function itemRow(r, tone, why){
   const cat = r.Category === 'Event' ? 'c-plum' : '';
-  return `<div class="item" data-open="${esc(r.ID)}">
+  return swipeWrap(r.ID, 'row', r.Outcome === 'Archived', `<div class="item" data-open="${esc(r.ID)}">
     <span class="dot d-${tone||'sky'}"></span>
     <div class="main"><div class="t">${esc(r.Title || 'New capture')}</div>
       <div class="m">${esc([r.Organisation, nextStep(r)].filter(Boolean).join(' · '))}</div></div>
     ${why ? `<span class="chip c-${tone}">${esc(why)}</span>` : r.Deadline ? `<span class="chip ${cat}">${esc(fmt(r.Deadline))}</span>` : ''}
-  </div>`;
+  </div>`);
 }
+
+/* ---------- swipe to archive / delete ---------- */
+const ICON_ARCH = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v10h14V9M10 13h4"/></svg>';
+const ICON_DEL = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>';
+function swipeWrap(id, kind, noArchive, inner){
+  return `<div class="swipe" data-sid="${esc(id)}" data-kind="${kind}"><div class="acts">
+    ${noArchive ? '' : `<button class="act arch" data-act="archive" aria-label="Archive">${ICON_ARCH}Archive</button>`}
+    <button class="act del" data-act="delete" aria-label="Delete">${ICON_DEL}Delete</button></div>${inner}</div>`;
+}
+function closeSwipes(except){ document.querySelectorAll('.swipe.open').forEach(w => { if (w !== except){ w.classList.remove('open'); w.querySelector('.item').style.transform = ''; } }); }
+let sw = null;
+document.addEventListener('pointerdown', e => {
+  const item = e.target.closest('.swipe .item'); if (!item) return;
+  const wrap = item.parentNode;
+  sw = { wrap, item, x: e.clientX, y: e.clientY, dx: 0, base: wrap.classList.contains('open') ? -wrap.querySelector('.acts').offsetWidth : 0, moved: false, horiz: null };
+});
+document.addEventListener('pointermove', e => {
+  if (!sw) return;
+  const dx = e.clientX - sw.x, dy = e.clientY - sw.y;
+  if (sw.horiz === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) sw.horiz = Math.abs(dx) > Math.abs(dy);
+  if (!sw.horiz) return;
+  sw.moved = true; sw.dx = dx; sw.wrap.classList.add('dragging');
+  const w = sw.wrap.querySelector('.acts').offsetWidth + 8;
+  const x = Math.max(-w - 30, Math.min(0, sw.base + dx));
+  sw.item.style.transform = `translateX(${x}px) rotate(${x/w*1.2}deg)`;
+});
+const endSwipe = () => {
+  if (!sw) return;
+  const s0 = sw; sw = null; s0.wrap.classList.remove('dragging');
+  if (!s0.moved) return;
+  const w = s0.wrap.querySelector('.acts').offsetWidth + 8;
+  const open = s0.base + s0.dx < -w / 2;
+  closeSwipes(open ? s0.wrap : null);
+  s0.wrap.classList.toggle('open', open);
+  s0.item.style.transform = open ? `translateX(${-w}px)` : '';
+  s0.wrap.dataset.justSwiped = '1'; setTimeout(() => { delete s0.wrap.dataset.justSwiped; }, 50);
+};
+document.addEventListener('pointerup', endSwipe);
+document.addEventListener('pointercancel', endSwipe);
+
+async function rowAction(id, act){
+  const r = (D.rows || []).find(x => x.ID === id); if (!r) return;
+  const prev = { Status: r.Status, Outcome: r.Outcome || '', 'Remind on': r['Remind on'] || '' };
+  const fields = act === 'delete' ? { Status: 'Closed', Outcome: 'Deleted', 'Remind on': '' } : { Status: 'Closed', Outcome: 'Archived', 'Remind on': '' };
+  closeSheet(); Object.assign(r, fields); render(); active_();
+  toast(act === 'delete' ? `Deleted "${(r.Title || 'capture').slice(0, 28)}"` : 'Archived. It lives in Submitted & closed now.', async () => {
+    Object.assign(r, prev); render(); await call({ action: 'update', id, fields: prev });
+  });
+  const j = await call({ action: 'update', id, fields });
+  if (!j.ok){ Object.assign(r, prev); render(); toast("Couldn't reach your sheet. Nothing changed."); }
+}
+async function tipDelete(id){
+  const t = (D.tips || []).find(x => x.ID === id); if (!t) return;
+  const prev = t['In digest'] || '';
+  closeSheet(); t['In digest'] = 'deleted'; render();
+  toast('Tip deleted.', async () => { t['In digest'] = prev; render(); await call({ action: 'tipUpdate', id, fields: { 'In digest': prev } }); });
+  const j = await call({ action: 'tipUpdate', id, fields: { 'In digest': 'deleted' } });
+  if (!j.ok){ t['In digest'] = prev; render(); toast("Couldn't reach your sheet. Nothing changed."); }
+}
+
+/* ---------- tabs ---------- */
+function go(name){
+  pane = name;
+  document.querySelectorAll('.pane').forEach(p => p.hidden = p.id !== 'p-' + name);
+  document.querySelectorAll('.tabbar button').forEach(b => b.toggleAttribute('aria-current', b.dataset.go === name));
+  document.querySelectorAll('.tabbar button[aria-current]').forEach(b => b.setAttribute('aria-current', 'page'));
+  closeSwipes(); window.scrollTo(0, 0);
+}
+window.__back = () => {
+  if (!$('#sheet').hidden){ closeSheet(); return 1; }
+  if (document.querySelector('.swipe.open')){ closeSwipes(); return 1; }
+  if (pane !== 'today'){ go('today'); return 1; }
+  return 0;
+};
 
 /* ---------- Bisi ---------- */
 function bisiSay(rows, need){
@@ -497,11 +617,10 @@ function listing(rows, tips){
   $('#tabs').innerHTML = labels.map(([k,l]) => `<button data-tab="${k}" aria-pressed="${tab===k}">${l} · ${groups[k].length}</button>`).join('');
   let list = groups[tab];
   if (query) list = list.filter(r => JSON.stringify([r.Title,r.Organisation,r.Topic,r['Key points'],r.Type]).toLowerCase().includes(query));
-  $('#count').textContent = '';
   if (tab === 'tips'){
-    $('#all').innerHTML = list.length ? list.slice().reverse().map(t => `<div class="item" data-tip="${esc(t.ID)}">
+    $('#all').innerHTML = list.length ? list.slice().reverse().map(t => swipeWrap(t.ID, 'tip', true, `<div class="item" data-tip="${esc(t.ID)}">
       <span class="dot d-sun"></span><div class="main"><div class="t">${esc(t.Title)}</div>
-      <div class="m">${esc(t.Topic)} · ${esc(String(t['Key points']||'').split('\n')[0].replace(/^•\s*/,''))}</div></div></div>`).join('')
+      <div class="m">${esc(t.Topic)} · ${esc(String(t['Key points']||'').split('\n')[0].replace(/^•\s*/,''))}</div></div></div>`)).join('')
       : `<div class="empty">Tips you save (CV advice, interview tricks…) land here and in your Sunday digest.</div>`;
     return;
   }
@@ -626,6 +745,10 @@ function openItem(id){
       </div>
       ${active(r)?`<div><div class="note" style="margin-bottom:6px">Remind me</div><div class="row">
         <button class="btn small" data-snooze="1">Tomorrow</button><button class="btn small" data-snooze="3">In 3 days</button><button class="btn small" data-snooze="7">Next week</button></div></div>`:''}
+      <div class="row" style="border-top:2px dashed var(--line);padding-top:12px">
+        ${r.Outcome === 'Archived' ? '' : `<button class="btn small" data-act="archive" data-kind="row" data-id="${esc(r.ID)}">${ICON_ARCH} Archive</button>`}
+        <button class="btn small" data-act="delete" data-kind="row" data-id="${esc(r.ID)}" style="color:var(--rose)">${ICON_DEL} Delete</button>
+      </div>
     </div>`);
 }
 function openTip(id){
@@ -634,7 +757,8 @@ function openTip(id){
     <div class="sheet-body"><div class="row"><span class="chip c-sun">${esc(t.Topic||'Tip')}</span>${t['In digest']?'<span class="chip">In a digest</span>':''}</div>
     <ul class="reqs">${String(t['Key points']||'').split('\n').filter(Boolean).map(x=>`<li>${esc(x.replace(/^•\s*/,''))}</li>`).join('')}</ul>
     <div class="row">${t.Link?`<button class="btn" data-url="${esc(t.Link)}">Open source ↗</button>`:''}${t.Screenshot?`<button class="btn" data-url="${esc(t.Screenshot)}">Screenshot</button>`:''}
-    ${D.docs && D.docs.digest?`<button class="btn" data-url="${esc(D.docs.digest)}">Weekly digest</button>`:''}</div></div>`);
+    ${D.docs && D.docs.digest?`<button class="btn" data-url="${esc(D.docs.digest)}">Weekly digest</button>`:''}</div>
+    <div class="row" style="border-top:2px dashed var(--line);padding-top:12px"><button class="btn small" data-act="delete" data-kind="tip" data-id="${esc(t.ID)}" style="color:var(--rose)">${ICON_DEL} Delete tip</button></div></div>`);
 }
 
 async function setFields(id, fields, msg){
@@ -646,6 +770,13 @@ async function setFields(id, fields, msg){
 
 /* ---------- events ---------- */
 document.addEventListener('click', async e => {
+  const goBtn = e.target.closest('[data-go]'); if (goBtn){ go(goBtn.dataset.go); return; }
+  const actBtn = e.target.closest('[data-act]');
+  if (actBtn){ const w = actBtn.closest('.swipe'); const id = w ? w.dataset.sid : (current && current.ID); const kind = w ? w.dataset.kind : actBtn.dataset.kind;
+    if (kind === 'tip') return tipDelete(id || actBtn.dataset.id); return rowAction(id || actBtn.dataset.id, actBtn.dataset.act); }
+  const wrap = e.target.closest('.swipe');
+  if (wrap && (wrap.dataset.justSwiped || wrap.classList.contains('open'))){ if (!wrap.dataset.justSwiped) closeSwipes(); return; }
+  if (!wrap) closeSwipes();
   const t = e.target.closest('[data-open],[data-tip],[data-tab],[data-close],[data-url],[data-status],[data-snooze],[data-ai],[data-banner],[data-view],[data-outcome]');
   if (!t) return;
   if (t.dataset.view){
@@ -773,6 +904,9 @@ function lookSheet(){
     </div>`);
 }
 $('#skin').onclick = lookSheet;
+$('#me-look').onclick = lookSheet;
+$('#me-settings').onclick = () => window.Android ? Android.openSettings() : toast('Settings open in the app.');
+$('#me-sheet').onclick = () => { if (D && D.sheetUrl) open(D.sheetUrl); else toast('Connect your sheet in Settings first.'); };
 document.addEventListener('click', e => {
   const md = e.target.closest('[data-mode-set]');
   if (md){ setMode(md.dataset.modeSet); lookSheet(); return; }

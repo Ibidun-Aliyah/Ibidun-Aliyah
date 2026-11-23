@@ -148,7 +148,7 @@ public class MainActivity extends Activity {
     @Override
     public void onBackPressed() {
         if (web == null || web.getParent() == null) { super.onBackPressed(); return; }
-        web.evaluateJavascript("(function(){var s=document.getElementById('sheet');if(s&&!s.hidden){document.getElementById('scrim').click();return 1}return 0})()",
+        web.evaluateJavascript("(function(){return window.__back?window.__back():0})()",
                 v -> { if (!"1".equals(v)) MainActivity.super.onBackPressed(); });
     }
 
