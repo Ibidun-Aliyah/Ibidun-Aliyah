@@ -12,6 +12,7 @@
   var URL_KEY = 'ftw-url', QUEUE_KEY = 'ftw-queue', NOTES_KEY = 'ft-notes';
   var OFFLINE_OK = { update: 1, tipUpdate: 1, delete: 1, capture: 1 };
   var isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var isAndroid = /Android/i.test(navigator.userAgent);
   var standalone = window.navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
 
   function webUrl() { return LS.get(URL_KEY, ''); }
@@ -130,11 +131,18 @@
 
   function settings(first) {
     var url = webUrl();
+    var androidTip = isAndroid
+      ? '<div class="ftw-sec"><h4>🤖 On Android? Get the full app</h4><p>The Android app adds Bisi’s <b>floating bubble</b> (tap to save anything on screen), <b>Scroll guard</b>, and reminders that really ring. Set up your tracker script below first, then:</p><ol>' +
+        '<li>' + btn('📲 Download the app', 'data-ftw="apk"', true) + '</li>' +
+        '<li>Open the download. If asked, allow your browser to <b>install unknown apps</b>. If Play Protect warns you, tap <b>More details → Install anyway</b> (it’s a homemade app, not from the Play Store).</li>' +
+        '<li>Open <b>Follow-Through</b>, paste your script link (step 1), tap <b>Save &amp; test</b>.</li>' +
+        '<li>Tap <b>Open settings</b> → Downloaded apps → <b>Follow-Through bubble</b> → on. Greyed out? App info → ⋮ → <b>Allow restricted settings</b>, then try again.</li></ol>' +
+        '<p class="ftw-small">Prefer not to install anything? This browser version works too: Chrome ⋮ → <b>Add to Home screen</b>.</p></div>' : '';
     var installTip = isIOS && !standalone
       ? '<div class="ftw-sec"><h4>📲 Put it on your Home Screen</h4><p>In Safari tap <b>Share</b> <span aria-hidden="true">⬆️</span> → <b>Add to Home Screen</b>. Then open Follow-Through from your Home Screen and connect it there (the Home Screen app keeps its own settings).</p></div>' : '';
     modal('<h3>' + (first ? 'Welcome to Follow-Through 🐝' : 'Settings') + '</h3>' +
       (first ? '<p>Your opportunities live in <b>your own</b> Google Sheet, run by a small script in <b>your</b> Google account. Nobody else can see them. Setup takes about 10 minutes, once.</p>' : '') +
-      installTip +
+      installTip + androidTip +
       '<div class="ftw-sec"><h4>1. Your tracker script</h4>' +
       '<details' + (url ? '' : ' open') + '><summary>How to make one (first time)</summary><ol>' +
       '<li>Tap <b>Copy the script</b> below.</li>' +
@@ -168,6 +176,7 @@
       root.addEventListener('click', function (e) {
         var a = e.target.closest('[data-ftw]'); if (!a) return;
         var act = a.getAttribute('data-ftw');
+        if (act === 'apk') { location.href = 'follow-through.apk'; a.textContent = 'Downloading… check your notifications'; return; }
         if (act === 'copycode') {
           a.textContent = 'Copying…';
           fetch('Code.gs', { cache: 'no-cache' }).then(function (r) { return r.text(); }).then(function (code) {
@@ -370,7 +379,8 @@
         '<ul class="inv-perks"><li>📌<span><b>Save anything</b> from Safari, Instagram or X in one tap</span></li>' +
         '<li>🤖<span><b>Sorted for you</b>: deadlines, requirements, even essay drafts and a tailored CV</span></li>' +
         '<li>🐝<span><b>Bisi the bee</b> reminds you before every deadline. You will not escape.</span></li>' +
-        '<li>🔒<span><b>All yours</b>: everything lives in your own Google account</span></li></ul>' +
+        '<li>🔒<span><b>All yours</b>: everything lives in your own Google account</span></li>' +
+        (isAndroid ? '<li>🫧<span><b>On Android</b> you also get Bisi’s floating bubble: tap it on any screen to save what you’re looking at</span></li>' : '') + '</ul>' +
         '<button class="btn primary inv-go">Let’s go 🐝</button>' +
         '<div class="inv-sign">— Bisi, on behalf of ' + (from || 'the hive') + '</div></div></div>';
     document.body.appendChild(d);

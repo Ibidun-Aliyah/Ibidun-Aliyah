@@ -14,6 +14,7 @@ for f in ['bisi.js', 'games.js', 'fonts/nunito.woff2', 'fonts/patrickhand.woff2'
     shutil.copy(os.path.join(ASSETS, f), os.path.join(OUT, f))
 shutil.copy(os.path.join(HERE, 'web.js'), os.path.join(OUT, 'web.js'))
 shutil.copy(os.path.join(FT, 'apps-script/Code.gs'), os.path.join(OUT, 'Code.gs'))
+shutil.copy(os.path.join(FT, 'android/releases/follow-through.apk'), os.path.join(OUT, 'follow-through.apk'))  # Android friends download it here
 
 # icons: Bisi on honeycomb (same art as the Android launcher icon)
 bg = Image.open(os.path.join(RES, 'ic_bg.png')).convert('RGBA')
