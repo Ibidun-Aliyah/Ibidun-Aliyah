@@ -1,0 +1,8 @@
+<resources>
+    <color name="brand">#1B6B4F</color>
+    <color name="brand_light">#E3F1EA</color>
+    <color name="widget_bg">#F7FAF8</color>
+    <color name="widget_text">#1B1F1D</color>
+    <color name="widget_muted">#5D6662</color>
+    <color name="urgent">#B3261E</color>
+</resources>

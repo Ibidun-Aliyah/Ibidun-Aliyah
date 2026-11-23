@@ -1,0 +1,50 @@
+name: AppTracker Android build
+
+on:
+  push:
+    paths:
+      - "app-tracker/**"
+      - ".github/workflows/apptracker-android.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      HAS_KEY: ${{ secrets.APPTRACKER_KEYSTORE_B64 != '' }}
+    defaults:
+      run:
+        working-directory: app-tracker/android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Restore signing key (optional)
+        if: env.HAS_KEY == 'true'
+        env:
+          KEYSTORE_B64: ${{ secrets.APPTRACKER_KEYSTORE_B64 }}
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/apptracker.jks"
+          echo "APPTRACKER_KEYSTORE=$RUNNER_TEMP/apptracker.jks" >> "$GITHUB_ENV"
+      - name: Build APK
+        env:
+          APPTRACKER_KEYSTORE_PASSWORD: ${{ secrets.APPTRACKER_KEYSTORE_PASSWORD }}
+          APPTRACKER_KEY_ALIAS: ${{ secrets.APPTRACKER_KEY_ALIAS }}
+          APPTRACKER_KEY_PASSWORD: ${{ secrets.APPTRACKER_KEY_PASSWORD }}
+        run: ./gradlew assembleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AppTracker-apk
+          path: app-tracker/android/app/build/outputs/apk/release/*.apk
+
+  apps-script-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node app-tracker/apps-script/test/run-tests.js
