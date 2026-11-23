@@ -110,9 +110,20 @@ textarea#emails:focus{border-color:var(--ink);outline:none}
 .err{color:var(--stamp);font-size:14px;margin-top:10px;min-height:1em}
 
 /* ---------- story ---------- */
-.story{position:fixed;inset:0;z-index:50;overflow:hidden;overflow:clip;background:var(--bg);color:var(--fg);transition:--bg .9s cubic-bezier(.4,0,.2,1),--fg .6s ease,--acc .9s ease,--b1 1.4s ease,--b2 1.4s ease,--b3 1.4s ease;user-select:none;-webkit-user-select:none}
-.story::before{content:"L";position:absolute;right:-8vh;bottom:-28vh;font:800 120vh/1 var(--display);color:var(--fg);opacity:.07;transform:rotate(-8deg);pointer-events:none;transition:transform 6s linear}
-.story.on-slide::before{transform:rotate(-4deg) scale(1.06)}
+.story{position:fixed;inset:0;z-index:50;overflow:hidden;overflow:clip;display:grid;grid-template-columns:1fr;place-items:center;background:radial-gradient(60% 55% at 18% 22%,var(--b1),transparent 70%),radial-gradient(55% 60% at 85% 80%,var(--b2),transparent 70%),color-mix(in srgb,var(--bg) 28%,#0c0709);color:var(--fg);transition:--bg .9s cubic-bezier(.4,0,.2,1),--fg .6s ease,--acc .9s ease,--b1 1.4s ease,--b2 1.4s ease,--b3 1.4s ease;user-select:none;-webkit-user-select:none}
+.stage{position:relative;width:100%;height:100%;overflow:hidden;overflow:clip;background:var(--bg);isolation:isolate}
+.stage::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.16;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.navbtn{display:none}
+@media (min-width:700px) and (min-aspect-ratio:4/5){
+  .story{grid-template-columns:1fr auto 1fr;gap:28px;padding:24px}
+  .stage{height:min(calc(100vh - 48px),940px);width:auto;aspect-ratio:9/16;border-radius:30px;box-shadow:0 40px 90px -30px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.08)}
+  .navbtn{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;border:0;cursor:pointer;background:rgba(255,244,232,.12);color:#fff4e8;transition:background .2s,transform .2s}
+  .navbtn:hover{background:rgba(255,244,232,.22);transform:scale(1.06)}
+  .navbtn.prev{justify-self:end}.navbtn.next{justify-self:start}
+  .navbtn[hidden]{display:grid!important;visibility:hidden}
+}
+.stage::before{content:"L";position:absolute;right:-8vh;bottom:-28vh;font:800 120vh/1 var(--display);color:var(--fg);opacity:.07;transform:rotate(-8deg);pointer-events:none;transition:transform 6s linear}
+.story.on-slide .stage::before{transform:rotate(-4deg) scale(1.06)}
 .story.shake{animation:shake .45s cubic-bezier(.36,.07,.19,.97)}
 @keyframes shake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(4px,-2px)}30%,50%,70%{transform:translate(-7px,3px)}40%,60%{transform:translate(7px,-3px)}}
 .t-red{--bg:var(--stamp);--fg:#fff4e8;--acc:var(--ink)}
@@ -139,7 +150,7 @@ textarea#emails:focus{border-color:var(--ink);outline:none}
 .slide .interactive{pointer-events:auto}
 .tapnote{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);left:0;right:0;text-align:center;font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;opacity:.6;z-index:2;pointer-events:none}
 .eyebrow{font:700 13px var(--mono);letter-spacing:.16em;text-transform:uppercase;opacity:.8;margin:0 0 14px}
-.big{font:800 clamp(52px,12.5vw,108px)/.9 var(--display);letter-spacing:-.04em;margin:0 0 18px;text-wrap:balance;overflow-wrap:anywhere}
+.big{font:800 clamp(52px,12.5vw,108px)/.9 var(--display);letter-spacing:-.04em;margin:0 0 18px;text-wrap:balance;overflow-wrap:normal}
 .huge{font:800 clamp(140px,40vw,260px)/.8 var(--display);letter-spacing:-.06em;margin:0;font-variant-numeric:tabular-nums}
 .say{font:600 clamp(23px,5.4vw,34px)/1.12 var(--display);letter-spacing:-.015em;margin:0 0 14px;text-wrap:balance}
 .sub{font-size:clamp(16px,3.8vw,19px);opacity:.9;margin:0;max-width:40ch}
@@ -253,7 +264,7 @@ textarea#emails:focus{border-color:var(--ink);outline:none}
 .sheet-panel{display:grid;gap:14px;justify-items:center;max-width:420px;width:100%;max-height:100%;overflow-y:auto}
 .sheet img{max-height:58vh;width:auto}
 .toast{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 60px);transform:translateX(-50%);background:#fff4e8;color:var(--ink);padding:10px 16px;border-radius:999px;font:700 14px var(--body);z-index:30;box-shadow:0 10px 30px -10px rgba(0,0,0,.5)}
-.fluid{position:absolute;inset:-15%;z-index:0;pointer-events:none;filter:blur(70px);opacity:.6;transform:translate(calc(var(--px,0) * -40px),calc(var(--py,0) * -40px));transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+.fluid{position:absolute;inset:-15%;z-index:0;pointer-events:none;filter:blur(80px);opacity:.75;transform:translate(calc(var(--px,0) * -40px),calc(var(--py,0) * -40px));transition:transform .8s cubic-bezier(.2,.8,.2,1)}
 .fluid i{position:absolute;width:62vmax;height:62vmax;border-radius:50%}
 .fluid i:nth-child(1){background:var(--b1);left:-12%;top:-14%;animation:drift1 21s ease-in-out infinite alternate}
 .fluid i:nth-child(2){background:var(--b2);right:-18%;top:22%;animation:drift2 26s ease-in-out infinite alternate}
@@ -321,6 +332,32 @@ textarea#emails:focus{border-color:var(--ink);outline:none}
 .yoy span{font:700 14px var(--mono);opacity:.8}
 #vidprev{width:min(100%,260px);border-radius:14px;background:#000}
 .remember{font-size:13px}
+.marquee{position:absolute;left:-10%;right:-10%;bottom:calc(env(safe-area-inset-bottom,0px) + 104px);z-index:1;transform:rotate(-4deg);background:var(--fg);color:var(--bg);overflow:hidden;white-space:nowrap;padding:9px 0;pointer-events:none;box-shadow:0 12px 30px -14px rgba(0,0,0,.45)}
+.marquee div{display:inline-flex;animation:marq 16s linear infinite}
+.marquee span{font:800 22px/1 var(--display);letter-spacing:.02em;text-transform:uppercase;padding-right:22px}
+.marquee span b{color:var(--acc);font-weight:800}
+@keyframes marq{to{transform:translateX(-50%)}}
+.slide.has-marquee{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 168px)}
+.huge{text-shadow:.045em .045em 0 var(--acc)}
+.slide.scroll{-webkit-mask-image:linear-gradient(to bottom,transparent 0,transparent 58px,#000 92px);mask-image:linear-gradient(to bottom,transparent 0,transparent 58px,#000 92px)}
+/* landing preview fan */
+.fan{position:relative;height:250px;margin:4px 0 30px;max-width:420px}
+.fan .cap{position:absolute;top:-2px;right:0;font:700 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.pcard{position:absolute;top:18px;width:clamp(124px,38%,156px);aspect-ratio:9/13;border-radius:18px;padding:14px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 24px 40px -20px rgba(0,0,0,.7);transition:transform .5s cubic-bezier(.2,.8,.2,1);overflow:hidden}
+.pcard span{font:700 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;opacity:.85}
+.pcard b{font:800 clamp(30px,9vw,46px)/.9 var(--display);letter-spacing:-.04em}
+.pcard b.sm{font-size:clamp(20px,5.6vw,26px);line-height:1}
+.pcard i{font-style:normal;font-size:12px;line-height:1.3;opacity:.9}
+.pcard em{align-self:flex-start;font:700 12px var(--mono);font-style:normal;letter-spacing:.08em;border:2.5px solid currentColor;border-radius:6px;padding:2px 6px;transform:rotate(-10deg)}
+.pcard.m1{left:0;background:var(--stamp);color:#fff4e8;transform:rotate(-8deg)}
+.pcard.m2{left:31%;background:var(--violet);color:#f5f0ff;transform:rotate(-1deg) translateY(-8px);z-index:2}
+.pcard.m3{left:62%;background:var(--legal);color:var(--ink);transform:rotate(7deg)}
+.pcard.m3{align-items:flex-end;text-align:right}
+.pcard.m3 em{align-self:flex-end}
+@media (max-width:360px){.pcard{width:118px}.pcard.m2{left:28%}.pcard.m3{left:56%}}
+.fan:hover .m1{transform:rotate(-12deg) translateX(-10px)}.fan:hover .m3{transform:rotate(11deg) translateX(10px)}
+.jump{display:none}
+@media (max-width:860px){.jump{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:999px;background:var(--stamp);color:var(--paper);padding:13px 20px;font:800 17px var(--display);cursor:pointer;margin:0 0 26px}}
 canvas.confetti{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
 @media (max-width:360px){.slide{padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}.topbar>span:first-child{font-size:10px;letter-spacing:.1em}.legend b{font-size:28px}.toplist li{grid-template-columns:36px 1fr auto;gap:10px}.toplist .n{font-size:34px}}
 @media (max-height:700px){.huge{font-size:clamp(110px,30vw,180px)}.months{height:140px}.aura{width:min(100%,200px)}}
@@ -334,6 +371,12 @@ canvas.confetti{position:absolute;inset:0;width:100%;height:100%;z-index:5;point
     <div class="brand"><span class="mark">L</span>L Wrapped · <span id="yr">2026</span></div>
     <h1>Your year in <em>rejections,</em> wrapped.</h1>
     <p class="lede">LinkedIn shows the wins. This shows the rest: every no, every ghost, every final round that didn't land.</p>
+    <button class="jump" id="jump" type="button">Make mine <span aria-hidden="true">↓</span></button>
+    <div class="fan" aria-hidden="true"><span class="cap">Example cards</span>
+      <div class="pcard m1"><span>Total Ls taken</span><b>14</b><em>REJECTED</em></div>
+      <div class="pcard m2"><span>Your L club</span><b class="sm">Club Final Round</b><i>Role: Closer. You keep making it into the room.</i></div>
+      <div class="pcard m3"><span>L-to-W ratio</span><b>14:1</b><i>It took 14 Ls to get 1 W.</i></div>
+    </div>
     <p class="manifesto">Behind every "thrilled to announce" is a pile of Ls nobody posts. Post yours. Someone scrolling past everyone's wins today needs to see it.</p>
     <ol class="how">
       <li><span><b>Search your inbox</b> for rejections, interviews and offers from this year.
@@ -412,6 +455,8 @@ From: ...
 </main>
 
 <section class="story" id="story" lang="en" hidden aria-roledescription="story">
+  <button class="navbtn prev" id="navprev" type="button" aria-label="Previous slide"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <div class="stage" id="stage">
   <div class="fluid" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="bars" id="bars"></div>
   <div class="topbar"><span>L Wrapped · <span id="yr2">2026</span></span>
@@ -436,6 +481,8 @@ From: ...
     </div>
   </div>
   <div class="toast" id="toast" hidden></div>
+  </div>
+  <button class="navbtn next" id="navnext" type="button" aria-label="Next slide"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
 </section>
 
 <script>
@@ -1054,7 +1101,9 @@ function makePalette(S){
     const cands = [bgs.pop, bgs.bold, bgs.alt, hsl(h3, 95, 72), bgs.soft, hsl(h1, 85, 38), bgs.deep].filter(c => c !== bg);
     const acc = cands.find(c => contrast(c, bg) >= 3.2) || fg;
     const others = [bgs.alt, bgs.pop, bgs.bold, bgs.soft].filter(c => c !== bg).slice(0, 3);
-    P[k] = { bg, fg, acc, dark: fg === CREAM, b: others.map(c => c + (fg === CREAM ? '99' : '66')) };
+    const [bh, bs, bl] = hex2hsl(bg), clampL = v => Math.max(6, Math.min(94, v));
+    const fam = [hsl(bh + 28, Math.min(96, bs + 8), clampL(bl + (bl > 60 ? -14 : 16))), hsl(bh - 32, bs, clampL(bl + (bl > 60 ? -24 : -10))), acc];
+    P[k] = { bg, fg, acc, dark: fg === CREAM, b: fam.map((c, i) => c + (i === 2 ? '38' : 'b3')) };
   }
   P.colors = [bgs.bold, bgs.alt, bgs.pop];
   return P;
@@ -1138,6 +1187,7 @@ function tickLaunch(){
 }
 tickLaunch(); setInterval(tickLaunch, 30000);
 if (CHALLENGER) { const ch = $('#challenge'); ch.innerHTML = `<b>⚔️ ${esc(CHALLENGER.name)} challenged you</b>They took ${plural(CHALLENGER.nL, 'L')} this year${CHALLENGER.ghosted ? ` and got ghosted ${CHALLENGER.ghosted} times` : ''}. Make yours to see who took more.`; ch.hidden = false; }
+$('#jump').addEventListener('click', () => $('#form').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' }));
 $('#tab-emails').addEventListener('click', () => setMode('emails'));
 $('#tab-quick').addEventListener('click', () => setMode('quick'));
 function refreshGo(){
@@ -1269,7 +1319,7 @@ function buildSlides(S){
   const add = s => L.push(Object.assign({ dur: 6500 }, s));
   const N = (ng, en) => S.naija ? ng : en;
 
-  add({ t: 't-ink', dur: null, gate: true, h: () => `<p class="eyebrow rise">${who ? who + ', your' : 'Your'} ${yr} L Wrapped is ready</p><p class="big rise">LinkedIn saw your <span class="acc">wins.</span></p><p class="say rise">This is everything else.</p>${CHALLENGER ? `<p class="sub rise" style="margin-top:6px">${esc(CHALLENGER.name)} challenged you. Stay to the end to see who took more Ls.</p>` : ''}<div class="actions interactive rise" style="justify-content:flex-start;margin-top:18px"><button class="btn" id="start-sound" type="button">Start</button></div>`,
+  add({ t: 't-ink', dur: null, gate: true, marquee: [`L Wrapped ${yr}`, 'Your year in Ls', 'No filter', 'Real reel only'], h: () => `<p class="eyebrow rise">${who ? who + ', your' : 'Your'} ${yr} L Wrapped is ready</p><p class="big rise">LinkedIn saw your <span class="acc">wins.</span></p><p class="say rise">This is everything else.</p>${CHALLENGER ? `<p class="sub rise" style="margin-top:6px">${esc(CHALLENGER.name)} challenged you. Stay to the end to see who took more Ls.</p>` : ''}<div class="actions interactive rise" style="justify-content:flex-start;margin-top:18px"><button class="btn" id="start-sound" type="button">Start</button></div>`,
     card: { eyebrow: `My ${yr} L Wrapped`, big: 'LinkedIn saw my wins.', line: 'This is everything else.' } });
 
   add({ t: 't-legal', dur: null, h: () => `<p class="eyebrow rise">Quick question</p><p class="say rise">How many Ls do you think you took in ${yr}?</p><div class="guess interactive">${guessBuckets(nL).map((b, i) => `<button type="button" class="rise" data-i="${i}">${b.label}</button>`).join('')}</div><p class="verdict" id="verdict" aria-live="polite"></p>`,
@@ -1281,7 +1331,7 @@ function buildSlides(S){
       setTimeout(() => { if (slides[cur] && slides[cur].after === this.after) show(cur + 1); }, 1500);
     })); } });
 
-  add({ t: 't-red', hit: 1000, h: () => `<p class="eyebrow rise">Total Ls taken${state.guess ? ` · you guessed ${esc(state.guess)}` : ''}</p><p class="huge rise">${count(nL)}</p><div class="stamp">REJECTED</div><p class="say rise">${nL === 0 ? N('Zero Ls? Who dey breet?! Abeg share the secret.', 'Not a single one. Suspicious.') : nL < 5 ? N('Small Ls. Light work. No dulling.', 'A light year. Barely a bruise.') : nL < 15 ? N('Omo. You were really outside this year.', 'Respectable. You were busy.') : nL < 30 ? N('Omo. That\'s a lot of "unfortunately". God abeg.', 'That\'s a lot of "unfortunately".') : N('You almost fra this year alone. Any other person for don fra.', 'At this point you could write these emails yourself.')}</p>`,
+  add({ t: 't-red', hit: 1000, marquee: ['Unfortunately', 'Rejected', 'Other candidates', 'At this time', 'We regret'], h: () => `<p class="eyebrow rise">Total Ls taken${state.guess ? ` · you guessed ${esc(state.guess)}` : ''}</p><p class="huge rise">${count(nL)}</p><div class="stamp">REJECTED</div><p class="say rise">${nL === 0 ? N('Zero Ls? Who dey breet?! Abeg share the secret.', 'Not a single one. Suspicious.') : nL < 5 ? N('Small Ls. Light work. No dulling.', 'A light year. Barely a bruise.') : nL < 15 ? N('Omo. You were really outside this year.', 'Respectable. You were busy.') : nL < 30 ? N('Omo. That\'s a lot of "unfortunately". God abeg.', 'That\'s a lot of "unfortunately".') : N('You almost fra this year alone. Any other person for don fra.', 'At this point you could write these emails yourself.')}</p>`,
     card: { eyebrow: `Total Ls taken in ${yr}`, big: String(nL), line: nL === 1 ? 'rejection. And I\'m still here.' : 'rejections. And I\'m still here.', stamp: 'REJECTED' } });
 
   const segs = [['Ls', nL, PAL.night.bg], ['Interviews', S.nI, PAL.pop.bg], ['Offers', S.nO, '#fff4e8'], ['Still pending', S.nP, PAL.soft.bg], ['Ghosted', S.ghosted, 'color-mix(in srgb,var(--fg) 35%,transparent)']].filter(s => s[1]);
@@ -1385,7 +1435,7 @@ function buildSlides(S){
     card: { eyebrow: 'My L aura', big: auraName, line: `${a1[3][0].toUpperCase() + a1[3].slice(1)}.`, bg: 'aura' } });
 
   const p = S.persona;
-  add({ t: p.theme, dur: 8000, confetti: 1000, hit: 500, h: () => `<p class="eyebrow rise">Your ${yr} L personality</p><div class="badge">${iconSvg(p.icon)}</div><p class="big rise"><span class="acc">${esc(p.name)}</span></p><p class="say rise">${esc(p.line)}</p>${S.rising ? `<p class="rising rise">Rising sign: ${esc(S.rising.name)}</p>` : ''}`,
+  add({ t: p.theme, dur: 8000, confetti: 1000, hit: 500, marquee: [p.name, p.name, p.name], h: () => `<p class="eyebrow rise">Your ${yr} L personality</p><div class="badge">${iconSvg(p.icon)}</div><p class="big rise"><span class="acc">${esc(p.name)}</span></p><p class="say rise">${esc(p.line)}</p>${S.rising ? `<p class="rising rise">Rising sign: ${esc(S.rising.name)}</p>` : ''}`,
     card: { eyebrow: `My ${yr} L personality`, big: p.name, line: p.line, theme: p.theme, icon: p.icon } });
 
   const cl = S.club;
@@ -1413,7 +1463,7 @@ function buildSlides(S){
       card: { eyebrow: `Me: ${yr - 1} vs ${yr}`, big: `${prev.nL} → ${nL} Ls`, line: msg } });
   }
 
-  add({ t: 't-ink', dur: 9000, confetti: 1400, h: () => `<p class="eyebrow rise">The beauty of no</p><p class="big">${words('Every no is proof you tried.')}</p><p class="say rise">Most people never apply. You did${S.total ? `, ${S.total} times` : ''}.</p><p class="sub rise">${nL ? `${plural(nL, 'no', 'no\'s')}, and you kept going anyway. ` : ''}${N(`Here's to the Ls of ${yr}. No gree for anybody in ${yr + 1}.`, `Here's to the Ls of ${yr}, and to applying again in ${yr + 1}.`)}</p>`,
+  add({ t: 't-ink', dur: 9000, confetti: 1400, marquee: ['Every no is proof you tried', `Ls of ${yr}`, 'Still applying'], h: () => `<p class="eyebrow rise">The beauty of no</p><p class="big">${words('Every no is proof you tried.')}</p><p class="say rise">Most people never apply. You did${S.total ? `, ${S.total} times` : ''}.</p><p class="sub rise">${nL ? `${plural(nL, 'no', 'no\'s')}, and you kept going anyway. ` : ''}${N(`Here's to the Ls of ${yr}. No gree for anybody in ${yr + 1}.`, `Here's to the Ls of ${yr}, and to applying again in ${yr + 1}.`)}</p>`,
     card: { eyebrow: 'The beauty of no', big: 'Every no is proof I tried.', line: `${plural(nL, 'L')} in ${yr}. Still applying.` } });
 
   const core = L.filter(x => !x.bonus), extras = L.filter(x => x.bonus);
@@ -1691,7 +1741,8 @@ function show(i){
   const old = slideEl, el = document.createElement('div');
   el.className = 'slide on-screen entering' + (back ? ' back' : '') + (s.final ? ' scroll' : '');
   el.setAttribute('aria-live', 'polite');
-  el.innerHTML = `<div>${typeof s.h === 'function' ? s.h() : s.h}</div>`;
+  el.innerHTML = `<div>${typeof s.h === 'function' ? s.h() : s.h}</div>` + (s.marquee ? `<div class="marquee" aria-hidden="true"><div>${('<span>' + s.marquee.map(w => esc(w)).join(' <b>✦</b> ') + ' <b>✦</b></span>').repeat(6)}</div></div>` : '');
+  if (s.marquee) el.classList.add('has-marquee');
   old.removeAttribute('id'); old.removeAttribute('aria-live');
   old.parentNode.insertBefore(el, old);
   el.id = 'slide'; slideEl = el;
@@ -1701,6 +1752,7 @@ function show(i){
   [...barsEl.children].forEach((b, j) => { b.firstChild.style.width = j < cur ? '100%' : '0%'; });
   $('#tapnote').hidden = !!(s.final || s.gate || s.dur === null);
   $('#next').hidden = !!s.final; $('#prev').hidden = !!s.final;
+  $('#navnext').hidden = !!s.final || s.dur === null; $('#navprev').hidden = cur === 0;
   $('#share').hidden = !(s.card || s.final);
   $('#cardshare').hidden = !s.card || !!s.final || !!s.gate;
   animateCounts(slideEl);
@@ -1716,9 +1768,18 @@ function show(i){
   if (T.dur) T.raf = requestAnimationFrame(tick);
 }
 // Scale a slide's content down when it is taller than the screen (small phones, landscape).
+function fitWidth(root){
+  root.querySelectorAll('.big,.huge').forEach(h => {
+    h.style.fontSize = '';
+    let fs = parseFloat(getComputedStyle(h).fontSize), guard = 0;
+    while (h.scrollWidth > h.clientWidth + 1 && fs > 18 && guard++ < 40) { fs *= .93; h.style.fontSize = fs.toFixed(1) + 'px'; }
+  });
+}
 function fitSlide(el){
   const inner = el && el.firstElementChild;
-  if (!inner || el.classList.contains('scroll')) return;
+  if (!inner) return;
+  fitWidth(inner);
+  if (el.classList.contains('scroll')) return;
   inner.style.zoom = '';
   const cs = getComputedStyle(el), avail = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom), need = inner.scrollHeight;
   if (need > avail && avail > 0) inner.style.zoom = Math.max(.5, (avail / need) * .98).toFixed(3);
@@ -1733,6 +1794,8 @@ function applyTheme(t){
 }
 story.addEventListener('pointermove', e => { if (REDUCED) return; story.style.setProperty('--px', (e.clientX / innerWidth - .5).toFixed(3)); story.style.setProperty('--py', (e.clientY / innerHeight - .5).toFixed(3)); });
 $('#close').addEventListener('click', closeStory);
+$('#navprev').addEventListener('click', () => show(cur - 1));
+$('#navnext').addEventListener('click', () => show(cur + 1));
 
 // tap / hold / swipe
 let down = null, holdT;
