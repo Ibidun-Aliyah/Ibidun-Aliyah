@@ -297,6 +297,30 @@ textarea#emails:focus{border-color:var(--ink);outline:none}
 .proj input,.proj select{border:2px solid #d9cdbb;border-radius:10px;background:#fffaf2;padding:8px 10px;color:var(--ink);min-width:0;font-size:14px;width:100%}
 .proj input:focus,.proj select:focus{border-color:var(--ink);outline:none}
 .prm{border:0;background:transparent;cursor:pointer;font-size:18px;line-height:1;color:#6d5960;padding:6px}
+.launch{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-radius:12px;padding:10px 14px;margin-bottom:22px;background:var(--legal);color:var(--ink);font:600 14px/1.4 var(--body)}
+.launch b{font:800 15px var(--display)}
+.launch .cd{font:700 13px var(--mono);letter-spacing:.04em;background:var(--ink);color:var(--legal);border-radius:8px;padding:3px 8px;font-variant-numeric:tabular-nums}
+.challenge{border-radius:14px;background:var(--ink);color:var(--paper);padding:14px 16px;margin-bottom:18px;font-size:14px;line-height:1.45}
+.challenge b{font:800 18px/1.2 var(--display);display:block;margin-bottom:4px;color:var(--legal)}
+.vs{display:grid;grid-template-columns:1fr auto auto;gap:8px 14px;align-items:baseline;margin:14px 0 18px;font-variant-numeric:tabular-nums}
+.vs .h{font:700 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:9ch}
+.vs span{font-size:15px}
+.vs b{font:800 clamp(24px,6vw,34px)/1 var(--display);text-align:right}
+.vs b.win{color:var(--acc)}
+.club{display:inline-flex;align-items:center;gap:10px;border-radius:999px;padding:6px 14px 6px 6px;background:var(--fg);color:var(--bg);font:700 14px var(--body);margin-bottom:16px}
+.club i{width:30px;height:30px;border-radius:50%;background:var(--acc);display:grid;place-items:center;font:800 16px var(--display);font-style:normal;color:var(--bg)}
+.insights{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:14px}
+.insights li{display:grid;grid-template-columns:minmax(84px,auto) 1fr;gap:14px;align-items:baseline;border-top:1.5px solid color-mix(in srgb,var(--fg) 25%,transparent);padding-top:12px}
+.insights b{font:800 clamp(26px,7vw,38px)/1 var(--display);color:var(--acc)}
+.insights span{font-size:clamp(15px,3.8vw,18px);line-height:1.4}
+.plan{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:12px;counter-reset:p}
+.plan li{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:start;font:600 clamp(16px,4vw,20px)/1.35 var(--body)}
+.plan li::before{counter-increment:p;content:counter(p);width:36px;height:36px;border-radius:50%;background:var(--acc);color:var(--bg);display:grid;place-items:center;font:800 18px var(--display)}
+.yoy{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:8px 0 16px}
+.yoy b{font:800 clamp(64px,18vw,120px)/.9 var(--display);letter-spacing:-.04em}
+.yoy span{font:700 14px var(--mono);opacity:.8}
+#vidprev{width:min(100%,260px);border-radius:14px;background:#000}
+.remember{font-size:13px}
 canvas.confetti{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
 @media (max-width:360px){.slide{padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}.topbar>span:first-child{font-size:10px;letter-spacing:.1em}.legend b{font-size:28px}.toplist li{grid-template-columns:36px 1fr auto;gap:10px}.toplist .n{font-size:34px}}
 @media (max-height:700px){.huge{font-size:clamp(110px,30vw,180px)}.months{height:140px}.aura{width:min(100%,200px)}}
@@ -306,6 +330,7 @@ canvas.confetti{position:absolute;inset:0;width:100%;height:100%;z-index:5;point
 <body>
 <main class="intake" id="intake">
   <section class="intro">
+    <div class="launch" id="launch" hidden></div>
     <div class="brand"><span class="mark">L</span>L Wrapped · <span id="yr">2026</span></div>
     <h1>Your year in <em>rejections,</em> wrapped.</h1>
     <p class="lede">LinkedIn shows the wins. This shows the rest: every no, every ghost, every final round that didn't land.</p>
@@ -324,6 +349,7 @@ canvas.confetti{position:absolute;inset:0;width:100%;height:100%;z-index:5;point
   </section>
 
   <form class="card" id="form" autocomplete="off" novalidate>
+    <div class="challenge" id="challenge" hidden></div>
     <div class="tabs" role="tablist" aria-label="How do you want to make your Wrapped?">
       <button type="button" role="tab" id="tab-emails" aria-selected="true" aria-controls="mode-emails">Paste emails<small>full story</small></button>
       <button type="button" role="tab" id="tab-quick" aria-selected="false" aria-controls="mode-quick">Just my numbers<small>30 seconds</small></button>
@@ -378,6 +404,7 @@ From: ...
       <div class="projlist" id="projlist"></div>
       <button type="button" class="ghost" id="addproj">+ Add a project</button>
     </details>
+    <label class="check remember"><input type="checkbox" id="remember"><span><b>Remember my numbers on this device</b> so next year's Wrapped can compare. Only the numbers are kept, never your emails.</span></label>
     <div class="orbrow" aria-live="polite"><span class="orb" id="orb" aria-hidden="true"></span><div><b id="orbname">Your colours</b><span id="orbtxt">Your Wrapped gets its own colours from your numbers. Add some Ls to see them.</span></div></div>
     <button class="go" id="go" type="submit" disabled>Wrap my Ls <span aria-hidden="true">→</span></button>
     <div class="err" id="err"></div>
@@ -789,6 +816,9 @@ function statsFromEmails(text, total, hide){
   const hb = Ls.filter(e => e.heartbreak);
   S.heart = hb.length; S.heartCo = hb[0] ? co(hb[0].company) : null;
   S.bingoHits = new Set(S.cliches.map(c => c.label));
+  const tally = arr => { const m = {}; arr.forEach(k => { if (!k) return; const key = k.toLowerCase().replace(/\s+/g, ' '); m[key] = m[key] || { name: k, n: 0 }; m[key].n++; }); return Object.values(m).sort((a, b) => b.n - a.n).slice(0, 5); };
+  S.topRoles = tally(Ls.map(e => e.role));
+  S.topCompanies = hide ? [] : tally(Ls.map(e => e.company));
   S.projects = readProjects(); S.naija = true;
   return S;
 }
@@ -804,7 +834,7 @@ function statsFromQuick(){
   S.picked = [...document.querySelectorAll('#q-phrases input:checked')].map(i => i.value);
   S.cliches = S.picked.map(label => ({ label, n: null }));
   S.bingoHits = new Set(S.picked);
-  S.kinds = []; S.bot = null; S.Lwords = null; S.unf = 0; S.peakDay = -1; S.weekendL = 0;
+  S.kinds = []; S.bot = null; S.Lwords = null; S.unf = 0; S.peakDay = -1; S.weekendL = 0; S.topRoles = []; S.topCompanies = [];
   S.projects = readProjects(); S.naija = true;
   return S;
 }
@@ -867,8 +897,57 @@ function enrich(S){
   S.bingoLines = lines.filter(l => l.every(g)).length;
   S.bingoCount = cells.filter(c => c.hit && !c.free).length;
   S.readMins = S.Lwords ? S.Lwords / 230 : null;
+  // club: one of six, with a role that grows with your thick-skin tier
+  const ck = S.nO ? 'testimony' : nProj >= 2 ? 'builders' : (S.heart >= 2 || (nL >= 4 && S.heart / nL >= .3)) ? 'final' : (S.ghosted >= 5 && S.ghosted >= nL) ? 'ghosted' : ((S.total || 0) >= 30 || nL >= 15) ? 'motion' : 'fresh';
+  const C = CLUBS[ck];
+  S.club = { key: ck, ...C, role: C.roles[S.tier >= 3 ? 2 : S.tier >= 2 ? 1 : 0] };
+  // takeaways and next year's plan
+  const I = [], PL = [], rooms = (S.nI || 0) + (S.heart || 0), nextYr = (S.year || NOW_YEAR) + 1;
+  if (S.total && rooms) { const r = Math.round(rooms / S.total * 100); I.push({ big: `${r}%`, text: `of your applications got you into an interview (${rooms} of ${S.total}).` }); if (r < 10) PL.push('Send fewer, sharper applications. Rewrite the top third of your CV for each role.'); }
+  if (rooms && S.nO) I.push({ big: `1 in ${Math.max(1, Math.round(rooms / S.nO))}`, text: 'of your interviews turned into an offer.' });
+  if (S.heart >= 2 || (rooms && S.heart / rooms >= .5)) { I.push({ big: String(S.heart), text: 'Ls came after the interview. You get into the room; closing is the next skill.' }); PL.push('After every interview L, ask for feedback. One honest reply is worth ten applications.'); PL.push('Practise five stories (a win, a failure, a conflict, a time you led, a lesson) until they are tight.'); }
+  if (S.total && S.ghosted / S.total >= .3) { I.push({ big: `${Math.round(S.ghosted / S.total * 100)}%`, text: 'of your applications never got a reply. Cold applying is mostly silence.' }); PL.push('Get referrals: message two people at a company before you apply there.'); }
+  if (S.bot && nL && S.bot / nL >= .4) { I.push({ big: `${Math.round(S.bot / nL * 100)}%`, text: 'of your Ls were automated. Software is screening you before a human reads you.' }); PL.push('Mirror the keywords in each job description so the screening software lets you through.'); }
+  if (S.kinds && S.kinds.length > 1) I.push({ big: S.kinds[0][0], text: `brought you the most replies (${S.kinds[0][1]}). That is where you are most visible.` });
+  if (S.peakMonth >= 0) { I.push({ big: MONTH_NAMES[S.peakMonth].slice(0, 3), text: 'was your heaviest month for Ls.' }); PL.push(`Start your ${nextYr} applications a month before ${MONTH_NAMES[S.peakMonth]}, so you are early, not rushed.`); }
+  if (nProj) { I.push({ big: String(nProj), text: `project${nProj > 1 ? 's' : ''} built. That is proof of work most applicants don't have.` }); PL.push(`Put ${projects[0].name} at the top of your CV with a link, not at the bottom.`); }
+  if (!I.length) I.push({ big: String(nL), text: `Ls in ${S.year || NOW_YEAR}. Every one of them is data about what to change next.` });
+  ['Track every application in one sheet, so next year\'s Wrapped is even sharper.', 'Post your Ls. Someone in your network might have the referral you need.', 'Keep applying. The Ls are the price of the W.'].forEach(x => PL.push(x));
+  S.insights = I.slice(0, 3); S.plan = [...new Set(PL)].slice(0, 3);
   return S;
 }
+
+/* ================= clubs ================= */
+const CLUBS = {
+  motion: { name: 'Club Motion', roles: ['Runner', 'Executor', 'Captain'], theme: 't-red', line: 'For people who apply like it is a full-time job. Executions only.' },
+  ghosted: { name: 'Club Ghosted', roles: ['Waiter', 'Lookout', 'Night Watch'], theme: 't-violet', line: 'Seen, no reply. You check your inbox like it owes you money.' },
+  final: { name: 'Club Final Round', roles: ['Contender', 'Closer', 'Almost Champion'], theme: 't-pink', line: 'You keep making it into the room. The door is next.' },
+  builders: { name: 'Club Builders', roles: ['Tinkerer', 'Architect', 'Founder Energy'], theme: 't-moss', line: 'Rejected by day, shipping by night.' },
+  fresh: { name: 'Club Fresh Start', roles: ['Recruit', 'Rookie', 'Rising'], theme: 't-paper', line: 'Just getting started. Everyone in Club Motion started here.' },
+  testimony: { name: 'Club Testimony', roles: ['Headliner', 'Headliner', 'Main Stage'], theme: 't-legal', line: 'The Ls came, then the W landed. Testimony.' },
+};
+
+/* ================= L Party: compare with a friend (numbers only, carried in the link) ================= */
+const VS_FIELDS = ['nL', 'nI', 'nO', 'ghosted', 'heart', 'total', 'nProj'];
+const vsName = S => ((S.name || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 16)) || 'Friend';
+function encodeVs(S){ return `vs-${vsName(S)}-${VS_FIELDS.map(k => Math.max(0, Math.round(S[k] || 0)).toString(36)).join('-')}-${S.persona.key}`; }
+function decodeVs(h){
+  const m = /^#?vs-([A-Za-z0-9]{1,16})-((?:[0-9a-z]{1,4}-){7})([a-z]{2,12})$/.exec(h || '');
+  if (!m) return null;
+  const nums = m[2].split('-').filter(Boolean).map(x => parseInt(x, 36));
+  const c = { name: m[1] === 'Friend' ? 'Your friend' : m[1], personaKey: m[3] };
+  VS_FIELDS.forEach((k, i) => c[k] = nums[i] || 0);
+  return c;
+}
+const CHALLENGER = decodeVs(location.hash);
+
+/* ================= launch countdown ================= */
+const LAUNCH = new Date('2026-12-01T00:00:00+01:00'); // L Wrapped drop day (WAT)
+
+/* ================= last year's numbers (this device only, opt-in) ================= */
+const HISTORY_KEY = 'lwrapped-history';
+function readHistory(){ try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}') || {}; } catch { return {}; } }
+function saveHistory(S){ try { const h = readHistory(); h[S.year] = { nL: S.nL, nI: S.nI, nO: S.nO, ghosted: S.ghosted, heart: S.heart, total: S.total, nProj: S.nProj || 0 }; localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); } catch {} }
 
 /* ================= posts ================= */
 function posts(S){
@@ -1047,6 +1126,18 @@ function setMode(m){
   $('#mode-emails').hidden = m !== 'emails'; $('#mode-quick').hidden = m !== 'quick';
   err.textContent = ''; refreshGo();
 }
+function tickLaunch(){
+  const el = $('#launch'), now = new Date(), ms = LAUNCH - now;
+  if (ms > 0) {
+    const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60;
+    el.innerHTML = `<b>L Wrapped ${LAUNCH.getFullYear()} drops Dec 1</b><span class="cd">${d}d ${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m</span><span>Early access is open. Get yours before your timeline fills with wins.</span>`;
+    el.hidden = false;
+  } else if (now.getMonth() === 11 && now.getFullYear() === LAUNCH.getFullYear()) {
+    el.innerHTML = `<b>L Wrapped ${LAUNCH.getFullYear()} is live.</b><span>Everyone's posting their Ls this week. Add yours.</span>`; el.hidden = false;
+  } else el.hidden = true;
+}
+tickLaunch(); setInterval(tickLaunch, 30000);
+if (CHALLENGER) { const ch = $('#challenge'); ch.innerHTML = `<b>⚔️ ${esc(CHALLENGER.name)} challenged you</b>They took ${plural(CHALLENGER.nL, 'L')} this year${CHALLENGER.ghosted ? ` and got ghosted ${CHALLENGER.ghosted} times` : ''}. Make yours to see who took more.`; ch.hidden = false; }
 $('#tab-emails').addEventListener('click', () => setMode('emails'));
 $('#tab-quick').addEventListener('click', () => setMode('quick'));
 function refreshGo(){
@@ -1161,7 +1252,9 @@ $('#form').addEventListener('submit', e => {
     S.name = $('#name').value.trim();
   }
   err.textContent = '';
-  startStory(enrich(S));
+  enrich(S);
+  if ($('#remember').checked) saveHistory(S);
+  startStory(S);
 });
 
 /* ================= slides ================= */
@@ -1176,7 +1269,7 @@ function buildSlides(S){
   const add = s => L.push(Object.assign({ dur: 6500 }, s));
   const N = (ng, en) => S.naija ? ng : en;
 
-  add({ t: 't-ink', dur: null, gate: true, h: () => `<p class="eyebrow rise">${who ? who + ', your' : 'Your'} ${yr} L Wrapped is ready</p><p class="big rise">LinkedIn saw your <span class="acc">wins.</span></p><p class="say rise">This is everything else.</p><div class="actions interactive rise" style="justify-content:flex-start;margin-top:18px"><button class="btn" id="start-sound" type="button">Start</button></div>`,
+  add({ t: 't-ink', dur: null, gate: true, h: () => `<p class="eyebrow rise">${who ? who + ', your' : 'Your'} ${yr} L Wrapped is ready</p><p class="big rise">LinkedIn saw your <span class="acc">wins.</span></p><p class="say rise">This is everything else.</p>${CHALLENGER ? `<p class="sub rise" style="margin-top:6px">${esc(CHALLENGER.name)} challenged you. Stay to the end to see who took more Ls.</p>` : ''}<div class="actions interactive rise" style="justify-content:flex-start;margin-top:18px"><button class="btn" id="start-sound" type="button">Start</button></div>`,
     card: { eyebrow: `My ${yr} L Wrapped`, big: 'LinkedIn saw my wins.', line: 'This is everything else.' } });
 
   add({ t: 't-legal', dur: null, h: () => `<p class="eyebrow rise">Quick question</p><p class="say rise">How many Ls do you think you took in ${yr}?</p><div class="guess interactive">${guessBuckets(nL).map((b, i) => `<button type="button" class="rise" data-i="${i}">${b.label}</button>`).join('')}</div><p class="verdict" id="verdict" aria-live="polite"></p>`,
@@ -1197,13 +1290,13 @@ function buildSlides(S){
   add({ t: 't-violet', h: () => `<p class="eyebrow rise">Your inbox, broken down</p><p class="say rise">${bdLine}</p><div class="split rise">${segs.map(s => `<span style="width:${s[1] / sum * 100}%;background:${s[2]}"></span>`).join('')}</div><div class="legend rise">${segs.map(s => `<div><span class="sw" style="background:${s[2]}"></span><b>${s[1]}</b><i>${s[0]}</i></div>`).join('')}</div>`,
     card: { eyebrow: 'My inbox, broken down', big: bdLine, rows: segs.slice(0, 4).map(s => [s[1], s[0]]) } });
 
-  if (S.kinds.length > 1) add({ t: 't-pink', h: () => `<p class="eyebrow rise">Your top genres</p><p class="say rise">You didn't just get rejected from jobs. You diversified.</p><ol class="toplist">${S.kinds.slice(0, 5).map(([k, n], i) => `<li class="rise"><span class="n">${i + 1}</span><span class="p">${esc(k)}</span><span class="c">${n} email${n === 1 ? '' : 's'}</span></li>`).join('')}</ol>`,
+  if (S.kinds.length > 1) add({ bonus: true, t: 't-pink', h: () => `<p class="eyebrow rise">Your top genres</p><p class="say rise">You didn't just get rejected from jobs. You diversified.</p><ol class="toplist">${S.kinds.slice(0, 5).map(([k, n], i) => `<li class="rise"><span class="n">${i + 1}</span><span class="p">${esc(k)}</span><span class="c">${n} email${n === 1 ? '' : 's'}</span></li>`).join('')}</ol>`,
     card: { eyebrow: 'My top rejection genres', big: S.kinds[0][0], line: 'I didn\'t just get rejected from jobs. I diversified.', rows: S.kinds.slice(0, 4).map(([k, n]) => [n, k]) } });
 
   const counted = S.cliches.filter(c => c.n);
   if (counted.length >= 3) {
     const opts = counted.slice(0, 3).map(c => c.label).sort(() => Math.random() - .5);
-    add({ t: 't-pink', dur: null, h: () => `<p class="eyebrow rise">Guess the phrase</p><p class="say rise">Which line did recruiters send you the most?</p><div class="guess interactive">${opts.map(o => `<button type="button" class="rise" data-o="${esc(o)}">“${esc(o)}”</button>`).join('')}</div><p class="verdict" id="verdict" aria-live="polite"></p>`,
+    add({ bonus: true, t: 't-pink', dur: null, h: () => `<p class="eyebrow rise">Guess the phrase</p><p class="say rise">Which line did recruiters send you the most?</p><div class="guess interactive">${opts.map(o => `<button type="button" class="rise" data-o="${esc(o)}">“${esc(o)}”</button>`).join('')}</div><p class="verdict" id="verdict" aria-live="polite"></p>`,
       card: { eyebrow: 'Guess the phrase', big: 'Which line did recruiters send me the most?', line: opts.map(o => `“${o}”`).join(' · ') },
       after(el){ el.querySelectorAll('.guess button').forEach(btn => btn.addEventListener('click', () => {
         if (state.guessed2) return; state.guessed2 = true; const right = btn.dataset.o === counted[0].label;
@@ -1213,50 +1306,50 @@ function buildSlides(S){
       })); } });
   }
   if (counted.length) {
-    add({ t: 't-legal', h: () => `<p class="eyebrow rise">Your top phrases of ${yr}</p><ol class="toplist">${counted.slice(0, 5).map((c, i) => `<li class="rise"><span class="n">${i + 1}</span><span class="p">“${esc(c.label)}”</span><span class="c">${c.n}×</span></li>`).join('')}</ol>`,
+    add({ bonus: true, t: 't-legal', h: () => `<p class="eyebrow rise">Your top phrases of ${yr}</p><ol class="toplist">${counted.slice(0, 5).map((c, i) => `<li class="rise"><span class="n">${i + 1}</span><span class="p">“${esc(c.label)}”</span><span class="c">${c.n}×</span></li>`).join('')}</ol>`,
       card: { eyebrow: `My top rejection phrases of ${yr}`, big: `“${counted[0].label}”`, rows: counted.slice(0, 4).map(c => [c.n + '×', c.label]) } });
     const top = counted[0];
     add({ t: 't-ink', hit: 600, h: () => `<p class="eyebrow rise">Your #1 phrase</p><p class="big"><span class="acc">${words('“' + top.label + '”')}</span></p><p class="sub rise">showed up in ${plural(top.n, 'rejection')}${nL ? `, ${Math.round(top.n / nL * 100)}% of your Ls` : ''}. ${S.unf ? `You read the word “unfortunately” ${plural(S.unf, 'time')} this year.` : ''}</p>`,
       card: { eyebrow: 'My #1 rejection phrase', big: `“${top.label}”`, line: `${plural(top.n, 'time')} this year.` } });
   }
 
-  if (S.bingoCount >= 2) add({ t: 't-moss', dur: 8000, confetti: S.bingoLines ? 1100 : 0, h: () => `<p class="eyebrow rise">Rejection bingo</p><p class="say rise">${S.bingoLines ? `BINGO! ${S.bingoLines > 1 ? S.bingoLines + ' lines.' : ''}` : `${S.bingoCount} of 15 squares.`} ${S.bingoLines ? 'You completed the rejection starter pack.' : 'No bingo yet. Next year, maybe.'}</p><div class="bingo">${S.bingo.map((c, i) => `<div class="${c.hit ? 'hit' : ''}${c.free ? ' free' : ''}" style="animation-delay:${.3 + i * .06}s">${esc(c.label)}</div>`).join('')}</div>`,
+  if (S.bingoCount >= 2) add({ bonus: true, t: 't-moss', dur: 8000, confetti: S.bingoLines ? 1100 : 0, h: () => `<p class="eyebrow rise">Rejection bingo</p><p class="say rise">${S.bingoLines ? `BINGO! ${S.bingoLines > 1 ? S.bingoLines + ' lines.' : ''}` : `${S.bingoCount} of 15 squares.`} ${S.bingoLines ? 'You completed the rejection starter pack.' : 'No bingo yet. Next year, maybe.'}</p><div class="bingo">${S.bingo.map((c, i) => `<div class="${c.hit ? 'hit' : ''}${c.free ? ' free' : ''}" style="animation-delay:${.3 + i * .06}s">${esc(c.label)}</div>`).join('')}</div>`,
     card: { eyebrow: `My ${yr} rejection bingo`, big: S.bingoLines ? 'BINGO!' : `${S.bingoCount}/15`, bingo: S.bingo } });
 
   if (S.peakMonth >= 0) {
     if (S.months) {
       const max = Math.max(...S.months, 1);
-      add({ t: 't-moss', h: () => `<p class="eyebrow rise">Rejection season</p><p class="big rise"><span class="acc">${MONTH_NAMES[S.peakMonth]}</span></p><p class="sub rise">was your worst month, with ${plural(S.months[S.peakMonth], 'L')}.</p><div class="months rise">${S.months.map((m, i) => `<div><em>${m || ''}</em><span class="${i === S.peakMonth ? 'peak' : ''}" style="height:${Math.max(m / max * 100, m ? 6 : 2)}%;animation-delay:${.3 + i * .04}s"></span><small>${MONTH_NAMES[i][0]}</small></div>`).join('')}</div>`,
+      add({ bonus: true, t: 't-moss', h: () => `<p class="eyebrow rise">Rejection season</p><p class="big rise"><span class="acc">${MONTH_NAMES[S.peakMonth]}</span></p><p class="sub rise">was your worst month, with ${plural(S.months[S.peakMonth], 'L')}.</p><div class="months rise">${S.months.map((m, i) => `<div><em>${m || ''}</em><span class="${i === S.peakMonth ? 'peak' : ''}" style="height:${Math.max(m / max * 100, m ? 6 : 2)}%;animation-delay:${.3 + i * .04}s"></span><small>${MONTH_NAMES[i][0]}</small></div>`).join('')}</div>`,
         card: { eyebrow: 'My rejection season', big: MONTH_NAMES[S.peakMonth], line: `My worst month, with ${plural(S.months[S.peakMonth], 'L')}.` } });
-    } else add({ t: 't-moss', h: () => `<p class="eyebrow rise">Rejection season</p><p class="big rise"><span class="acc">${MONTH_NAMES[S.peakMonth]}</span></p><p class="sub rise">was the month the Ls came hardest. You got through it anyway.</p>`,
+    } else add({ bonus: true, t: 't-moss', h: () => `<p class="eyebrow rise">Rejection season</p><p class="big rise"><span class="acc">${MONTH_NAMES[S.peakMonth]}</span></p><p class="sub rise">was the month the Ls came hardest. You got through it anyway.</p>`,
       card: { eyebrow: 'My rejection season', big: MONTH_NAMES[S.peakMonth], line: 'The month the Ls came hardest.' } });
   }
 
-  if (S.eras && S.eras.length >= 2) add({ t: 't-violet', dur: 8000, h: () => `<p class="eyebrow rise">Your ${yr}, in eras</p><ul class="eras">${S.eras.map(e => `<li class="rise"><span class="when">${MONTH_NAMES[e.from].slice(0, 3)}${e.to !== e.from ? '–' + MONTH_NAMES[e.to].slice(0, 3) : ''}</span><div><b>${e.name}</b><span>${e.desc}</span></div></li>`).join('')}</ul>`,
+  if (S.eras && S.eras.length >= 2) add({ bonus: true, t: 't-violet', dur: 8000, h: () => `<p class="eyebrow rise">Your ${yr}, in eras</p><ul class="eras">${S.eras.map(e => `<li class="rise"><span class="when">${MONTH_NAMES[e.from].slice(0, 3)}${e.to !== e.from ? '–' + MONTH_NAMES[e.to].slice(0, 3) : ''}</span><div><b>${e.name}</b><span>${e.desc}</span></div></li>`).join('')}</ul>`,
     card: { eyebrow: `My ${yr}, in eras`, big: S.eras[S.eras.length - 1].name, rows: S.eras.slice(-4).map(e => [MONTH_NAMES[e.from].slice(0, 3), e.name.replace(' Era', '')]) } });
 
   if (S.oddHour) {
     const d = S.oddHour.date, h = d.getHours(), time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }), late = h < 6 || h >= 22;
-    add({ t: 't-ink', h: () => `<p class="eyebrow rise">${late ? 'The late-night L' : 'Prime-time rejection'}</p><p class="huge rise" style="font-size:clamp(84px,22vw,150px)"><span class="acc">${esc(time)}</span></p><p class="say rise">${S.oddHour.company ? esc(S.oddHour.company) : 'Someone'} rejected you at ${esc(time)} on a ${DAYS[d.getDay()]}.</p><p class="sub rise">${late ? 'Who sends these at that hour? A robot. It\'s always a robot.' : 'Right in the middle of your day. Rude.'}${S.peakDay >= 0 ? ` Your Ls hit hardest on ${DAYS[S.peakDay]}s.` : ''}</p>`,
+    add({ bonus: true, t: 't-ink', h: () => `<p class="eyebrow rise">${late ? 'The late-night L' : 'Prime-time rejection'}</p><p class="huge rise" style="font-size:clamp(84px,22vw,150px)"><span class="acc">${esc(time)}</span></p><p class="say rise">${S.oddHour.company ? esc(S.oddHour.company) : 'Someone'} rejected you at ${esc(time)} on a ${DAYS[d.getDay()]}.</p><p class="sub rise">${late ? 'Who sends these at that hour? A robot. It\'s always a robot.' : 'Right in the middle of your day. Rude.'}${S.peakDay >= 0 ? ` Your Ls hit hardest on ${DAYS[S.peakDay]}s.` : ''}</p>`,
       card: { eyebrow: late ? 'My late-night L' : 'My prime-time rejection', big: time, line: `Rejected at ${time} on a ${DAYS[d.getDay()]}.` } });
   }
 
   if (S.bot && nL >= 2) {
     const pct = Math.round(S.bot / nL * 100);
-    add({ t: 't-paper', h: () => `<p class="eyebrow rise">Sent by a robot</p><p class="huge rise">${count(pct)}<span style="font-size:.4em">%</span></p><p class="say rise">of your Ls came from a no-reply inbox or an applicant tracking system.</p><p class="sub rise">You were rejected by software ${plural(S.bot, 'time')}. It never even said its name.</p>`,
+    add({ bonus: true, t: 't-paper', h: () => `<p class="eyebrow rise">Sent by a robot</p><p class="huge rise">${count(pct)}<span style="font-size:.4em">%</span></p><p class="say rise">of your Ls came from a no-reply inbox or an applicant tracking system.</p><p class="sub rise">You were rejected by software ${plural(S.bot, 'time')}. It never even said its name.</p>`,
       card: { eyebrow: 'Rejected by a robot', big: pct + '%', line: 'of my Ls came from a no-reply inbox.' } });
   }
   if (S.heart) add({ t: 't-pink', h: () => `<p class="eyebrow rise">So close</p><p class="huge rise">${count(S.heart)}</p><p class="say rise">${S.heart === 1 ? 'time you made it to the interview and still took the L.' : 'times you made it to the interview and still took the L.'}</p><p class="sub rise">${S.heartCo ? `${esc(S.heartCo)} was the one that stung.` : 'Those ones sting.'} But getting the interview means the application worked.</p>`,
     card: { eyebrow: 'So close', big: String(S.heart), line: S.heart === 1 ? 'time I made it to the interview and still took the L.' : 'times I made it to the interview and still took the L.' } });
-  if (S.repeat) add({ t: 't-violet', h: () => `<p class="eyebrow rise">Your most loyal rejector</p><p class="big rise"><span class="acc">${S.repeat.name ? esc(S.repeat.name) : 'One company'}</span></p><p class="say rise">said no ${plural(S.repeat.n, 'time')}.</p><p class="sub rise">You kept shooting. They kept missing.</p>`,
+  if (S.repeat) add({ bonus: true, t: 't-violet', h: () => `<p class="eyebrow rise">Your most loyal rejector</p><p class="big rise"><span class="acc">${S.repeat.name ? esc(S.repeat.name) : 'One company'}</span></p><p class="say rise">said no ${plural(S.repeat.n, 'time')}.</p><p class="sub rise">You kept shooting. They kept missing.</p>`,
     card: { eyebrow: 'My most loyal rejector', big: S.repeat.name || 'One company', line: `said no ${plural(S.repeat.n, 'time')}. I kept applying.` } });
-  if (S.coldest) add({ t: 't-legal', dur: 8000, h: () => `<p class="eyebrow rise">The coldest L</p><p class="say rise">${S.coldest.company ? esc(S.coldest.company) : 'One company'} needed just ${S.coldest.words} words.</p><p class="quote rise">“${esc(S.coldest.quote)}”</p><p class="meta rise">${S.coldest.role ? esc(S.coldest.role) + ' · ' : ''}${S.coldest.date ? S.coldest.date.toLocaleDateString([], { month: 'short', day: 'numeric' }) : ''}</p>`,
+  if (S.coldest) add({ bonus: true, t: 't-legal', dur: 8000, h: () => `<p class="eyebrow rise">The coldest L</p><p class="say rise">${S.coldest.company ? esc(S.coldest.company) : 'One company'} needed just ${S.coldest.words} words.</p><p class="quote rise">“${esc(S.coldest.quote)}”</p><p class="meta rise">${S.coldest.role ? esc(S.coldest.role) + ' · ' : ''}${S.coldest.date ? S.coldest.date.toLocaleDateString([], { month: 'short', day: 'numeric' }) : ''}</p>`,
     card: { eyebrow: 'My coldest L', big: `${S.coldest.words} words.`, line: `“${S.coldest.quote}”` } });
-  if (S.warmest) add({ t: 't-moss', dur: 8000, h: () => `<p class="eyebrow rise">The kindest L</p><p class="say rise">${S.warmest.company ? esc(S.warmest.company) : 'Someone'} let you down gently.</p><p class="quote rise">“${esc(S.warmest.quote)}”</p><p class="sub rise">${S.warmest.words} words and ${plural(S.warmest.warm, 'kind word')}. We'll take it.</p>`,
+  if (S.warmest) add({ bonus: true, t: 't-moss', dur: 8000, h: () => `<p class="eyebrow rise">The kindest L</p><p class="say rise">${S.warmest.company ? esc(S.warmest.company) : 'Someone'} let you down gently.</p><p class="quote rise">“${esc(S.warmest.quote)}”</p><p class="sub rise">${S.warmest.words} words and ${plural(S.warmest.warm, 'kind word')}. We'll take it.</p>`,
     card: { eyebrow: 'My kindest L', big: 'Let down gently.', line: `“${S.warmest.quote}”` } });
   if (S.readMins) {
     const sec = S.readMins < 1, v = sec ? Math.round(S.readMins * 60) : Math.round(S.readMins);
-    add({ t: 't-red', h: () => `<p class="eyebrow rise">Time spent reading rejections</p><p class="huge rise">${count(v)}</p><p class="say rise">${sec ? 'seconds' : v === 1 ? 'minute' : 'minutes'} of “we regret to inform you”.</p><p class="sub rise">${S.Lwords.toLocaleString()} words of no. ${S.readMins >= 10 ? 'That\'s a whole lunch break.' : 'Short, but it adds up.'}</p>`,
+    add({ bonus: true, t: 't-red', h: () => `<p class="eyebrow rise">Time spent reading rejections</p><p class="huge rise">${count(v)}</p><p class="say rise">${sec ? 'seconds' : v === 1 ? 'minute' : 'minutes'} of “we regret to inform you”.</p><p class="sub rise">${S.Lwords.toLocaleString()} words of no. ${S.readMins >= 10 ? 'That\'s a whole lunch break.' : 'Short, but it adds up.'}</p>`,
       card: { eyebrow: 'Time spent reading rejections', big: `${v} ${sec ? 'sec' : 'min'}`, line: `${S.Lwords.toLocaleString()} words of no.` } });
   }
   if (S.ghosted) add({ t: 't-ink', h: () => `<p class="eyebrow rise">Left on read</p><p class="huge rise">${count(S.ghosted)}</p><p class="say rise">${S.ghosted === 1 ? 'application got' : 'applications got'} no reply at all.</p><p class="sub rise">${N('Seen, no reply. E choke. Each one is an L you never got to read.', 'Not even a template. Each one is an L you never got to read.')}</p>`,
@@ -1268,6 +1361,11 @@ function buildSlides(S){
       card: { eyebrow: `What I built in ${yr}`, big: `${plural(pr.length, 'project')}${S.shipped ? `, ${S.shipped} shipped` : ''}`, line: N('Ls dey land, I dey build.', 'The Ls kept landing. I kept building.'), rows: pr.slice(0, 4).map(p => [STAT[p.status].split(' ')[0], p.url ? `${p.name} · ${shortUrl(p.url)}` : p.name]) } });
   }
 
+  if (S.topRoles.length >= 3) add({ t: 't-legal', h: () => `<p class="eyebrow rise">Your top 5 rejected roles</p><ol class="toplist">${S.topRoles.map((r, i) => `<li class="rise"><span class="n">${i + 1}</span><span class="p">${esc(r.name)}</span><span class="c">${r.n} L${r.n === 1 ? '' : 's'}</span></li>`).join('')}</ol>`,
+    card: { eyebrow: `My top rejected roles of ${yr}`, big: S.topRoles[0].name, rows: S.topRoles.slice(0, 4).map(r => [r.n + ' L' + (r.n === 1 ? '' : 's'), r.name]) } });
+  if (S.topCompanies.length >= 3) add({ bonus: true, t: 't-violet', h: () => `<p class="eyebrow rise">Your top 5 rejectors</p><ol class="toplist">${S.topCompanies.map((r, i) => `<li class="rise"><span class="n">${i + 1}</span><span class="p">${esc(r.name)}</span><span class="c">${r.n} L${r.n === 1 ? '' : 's'}</span></li>`).join('')}</ol>`,
+    card: { eyebrow: `My top 5 rejectors of ${yr}`, big: S.topCompanies[0].name, rows: S.topCompanies.slice(0, 4).map(r => [r.n + ' L' + (r.n === 1 ? '' : 's'), r.name]) } });
+
   // L-to-W ratio
   add({ t: S.nO ? 't-legal' : 't-ink', confetti: S.nO ? 900 : 0, hit: S.nO ? 700 : 0, h: () => `<p class="eyebrow rise">Your L-to-W ratio</p><p class="huge rise" style="font-size:clamp(110px,30vw,220px)">${nL}<span class="acc">:</span>${S.nO}</p>${S.nO ? `<p class="say rise">It took ${plural(nL, 'L')} to get ${S.nO === 1 ? '1 W' : S.nO + ' Ws'}.</p><p class="sub rise">Nobody posts the ratio. They post the W. But the W only exists because of the Ls before it.</p>` : `<p class="say rise">${N('W loading… We move.', 'W loading…')}</p><div class="loadbar rise"><i></i></div><p class="sub rise">${N(`${plural(nL, 'rep')} in. No gree for anybody. You're still in the game.`, `${plural(nL, 'rep')} in. You're still in the game, and that's the part that counts.`)}</p>`}`,
     card: { eyebrow: 'My L-to-W ratio', big: `${nL}:${S.nO}`, line: S.nO ? `It took ${plural(nL, 'L')} to get ${S.nO === 1 ? '1 W' : S.nO + ' Ws'}.` : 'W loading…' } });
@@ -1278,23 +1376,50 @@ function buildSlides(S){
   add({ t: 't-paper', dur: 9000, h: () => `<p class="eyebrow rise">Highlight reel vs real reel</p><div class="reel"><div class="post rise"><span class="tag">What they saw</span><div class="ph"><span class="av"></span><div><b>${who || 'You'}</b><small>1d · Edited</small></div></div><p>${postText}</p><div class="react">♥ 👏 💡 248 · 31 comments</div></div><div class="real rise"><span class="tag">What actually happened</span><ul>${realRows.map(([v, l]) => `<li><b>${v}</b><span>${esc(l)}</span></li>`).join('')}</ul></div></div><p class="say rise">Social media is the highlight reel. This is the real reel.</p>`,
     card: { eyebrow: 'Highlight reel vs real reel', big: S.nO ? `1 post. ${plural(nL, 'L')}.` : `0 posts. ${plural(nL, 'L')}.`, line: 'Social media is the highlight reel. This is the real reel.', rows: realRows.map(([v, l]) => [v, l]) } });
 
-  add({ t: 't-paper', h: () => `<p class="eyebrow rise">Thick skin rating</p><p class="big rise"><span class="acc">${TIERS[S.tier]}</span></p><div class="tier rise">${TIERS.map((_, i) => `<span class="${i <= S.tier ? 'lit' : ''}"></span>`).join('')}</div><div class="tiernames rise">${TIERS.map(t => `<span>${t}</span>`).join('')}</div><p class="sub rise" style="margin-top:18px">${S.tier >= 3 ? N('Rejection no fit touch you again.', 'Rejection bounces off you now.') : S.tier >= 1 ? 'You\'re building armour one email at a time.' : 'Still soft. Give it a few more applications.'}</p>`,
+  add({ bonus: true, t: 't-paper', h: () => `<p class="eyebrow rise">Thick skin rating</p><p class="big rise"><span class="acc">${TIERS[S.tier]}</span></p><div class="tier rise">${TIERS.map((_, i) => `<span class="${i <= S.tier ? 'lit' : ''}"></span>`).join('')}</div><div class="tiernames rise">${TIERS.map(t => `<span>${t}</span>`).join('')}</div><p class="sub rise" style="margin-top:18px">${S.tier >= 3 ? N('Rejection no fit touch you again.', 'Rejection bounces off you now.') : S.tier >= 1 ? 'You\'re building armour one email at a time.' : 'Still soft. Give it a few more applications.'}</p>`,
     card: { eyebrow: 'My thick skin rating', big: TIERS[S.tier], line: `${TIERS.slice(0, S.tier + 1).join(' → ')}` } });
 
   const [a1, a2, a3] = S.aura;
   const auraName = a1[0] === a2[0] ? a1[0] : `${a1[0]} & ${a2[0]}`;
-  add({ t: 't-ink', dur: 8000, h: () => `<p class="eyebrow rise">Your L aura</p><div class="aura rise" style="--a1:${PAL.colors[0]};background:radial-gradient(circle at 30% 30%,${PAL.colors[0]},transparent 60%),radial-gradient(circle at 70% 40%,${PAL.colors[1]},transparent 60%),radial-gradient(circle at 45% 75%,${PAL.colors[2]},transparent 62%),${PAL.night.bg}"></div><p class="say rise">${esc(auraName)}${a3[0] !== a1[0] && a3[0] !== a2[0] ? `, with a hint of ${esc(a3[0])}` : ''}.</p><p class="sub rise">That means ${a1[3]}${a2[0] !== a1[0] ? `, and ${a2[3]}` : ''}.</p>`,
+  add({ bonus: true, t: 't-ink', dur: 8000, h: () => `<p class="eyebrow rise">Your L aura</p><div class="aura rise" style="--a1:${PAL.colors[0]};background:radial-gradient(circle at 30% 30%,${PAL.colors[0]},transparent 60%),radial-gradient(circle at 70% 40%,${PAL.colors[1]},transparent 60%),radial-gradient(circle at 45% 75%,${PAL.colors[2]},transparent 62%),${PAL.night.bg}"></div><p class="say rise">${esc(auraName)}${a3[0] !== a1[0] && a3[0] !== a2[0] ? `, with a hint of ${esc(a3[0])}` : ''}.</p><p class="sub rise">That means ${a1[3]}${a2[0] !== a1[0] ? `, and ${a2[3]}` : ''}.</p>`,
     card: { eyebrow: 'My L aura', big: auraName, line: `${a1[3][0].toUpperCase() + a1[3].slice(1)}.`, bg: 'aura' } });
 
   const p = S.persona;
   add({ t: p.theme, dur: 8000, confetti: 1000, hit: 500, h: () => `<p class="eyebrow rise">Your ${yr} L personality</p><div class="badge">${iconSvg(p.icon)}</div><p class="big rise"><span class="acc">${esc(p.name)}</span></p><p class="say rise">${esc(p.line)}</p>${S.rising ? `<p class="rising rise">Rising sign: ${esc(S.rising.name)}</p>` : ''}`,
     card: { eyebrow: `My ${yr} L personality`, big: p.name, line: p.line, theme: p.theme, icon: p.icon } });
 
+  const cl = S.club;
+  add({ t: cl.theme, dur: 7500, h: () => `<p class="eyebrow rise">Your L club</p><span class="club rise"><i>L</i>Welcome to the club</span><p class="big rise"><span class="acc">${esc(cl.name)}</span></p><p class="say rise">Your role: ${esc(cl.role)}</p><p class="sub rise">${esc(cl.line)} Share this card and find your clubmates.</p>`,
+    card: { eyebrow: `My ${yr} L club`, big: cl.name, line: `Role: ${cl.role}. ${cl.line}`, theme: cl.theme } });
+
+  add({ t: 't-ink', dur: 10000, h: () => `<p class="eyebrow rise">What your Ls say</p><ul class="insights">${S.insights.map(x => `<li class="rise"><b>${esc(x.big)}</b><span>${esc(x.text)}</span></li>`).join('')}</ul>`,
+    card: { eyebrow: `What my ${yr} Ls taught me`, big: S.insights[0].big, line: S.insights[0].text, rows: S.insights.slice(1, 3).map(x => [x.big, x.text.split(/[.(]/)[0]]) } });
+  add({ t: 't-legal', dur: 10000, h: () => `<p class="eyebrow rise">Your ${yr + 1} game plan</p><p class="say rise">Built from your own Ls.</p><ol class="plan">${S.plan.map(x => `<li class="rise">${esc(x)}</li>`).join('')}</ol>`,
+    card: { eyebrow: `My ${yr + 1} game plan`, big: `${plural(nL, 'L')} in. Here's the plan.`, list: S.plan } });
+
+  if (CHALLENGER) {
+    const c = CHALLENGER, me = S.name || 'You';
+    const rowsVs = [['Ls', nL, c.nL], ['Interviews', S.nI, c.nI], ['Offers', S.nO, c.nO], ['Ghosted', S.ghosted, c.ghosted], ['So close', S.heart, c.heart], ['Projects', S.nProj || 0, c.nProj]].filter(r => r[1] || r[2]);
+    const diff = Math.abs(nL - c.nL);
+    const verdict = nL > c.nL ? N(`Omo. You out-L'd ${c.name} by ${diff}.`, `You out-L'd ${c.name} by ${diff}.`) : nL < c.nL ? `${c.name} took ${diff} more L${diff === 1 ? '' : 's'} than you. Respect the grind.` : 'Dead even. Same Ls, same grind.';
+    add({ t: 't-pink', dur: 10000, confetti: 700, h: () => `<p class="eyebrow rise">L Party</p><p class="big rise">${esc(me)} <span class="acc">vs</span> ${esc(c.name)}</p><div class="vs rise"><span></span><span class="h">${esc(me)}</span><span class="h">${esc(c.name)}</span>${rowsVs.map(r => `<span>${r[0]}</span><b class="${r[1] > r[2] ? 'win' : ''}">${r[1]}</b><b class="${r[2] > r[1] ? 'win' : ''}">${r[2]}</b>`).join('')}</div><p class="say rise">${esc(verdict)}</p>`,
+      card: { eyebrow: 'L Party', big: `${me} ${nL} vs ${c.name} ${c.nL}`, line: verdict, rows: rowsVs.slice(0, 4).map(r => [`${r[1]} · ${r[2]}`, r[0]]) } });
+  }
+  const prev = readHistory()[yr - 1];
+  if (prev) {
+    const d = nL - prev.nL, pct = prev.nL ? Math.round(Math.abs(d) / prev.nL * 100) : 0;
+    const msg = d < 0 ? `${pct}% fewer Ls than ${yr - 1}. Growth.` : d > 0 ? `${d} more Ls than ${yr - 1}. More shots, more Ls. That's motion.` : `Same number of Ls as ${yr - 1}. Consistent.`;
+    add({ t: 't-violet', h: () => `<p class="eyebrow rise">You vs last year</p><div class="yoy rise"><b>${prev.nL}</b><span>${yr - 1}</span><b class="acc">→ ${nL}</b><span>${yr}</span></div><p class="say rise">${msg}</p>${prev.nO !== S.nO ? `<p class="sub rise">Offers: ${prev.nO} → ${S.nO}. Interviews: ${prev.nI + prev.heart} → ${S.nI + S.heart}.</p>` : ''}`,
+      card: { eyebrow: `Me: ${yr - 1} vs ${yr}`, big: `${prev.nL} → ${nL} Ls`, line: msg } });
+  }
+
   add({ t: 't-ink', dur: 9000, confetti: 1400, h: () => `<p class="eyebrow rise">The beauty of no</p><p class="big">${words('Every no is proof you tried.')}</p><p class="say rise">Most people never apply. You did${S.total ? `, ${S.total} times` : ''}.</p><p class="sub rise">${nL ? `${plural(nL, 'no', 'no\'s')}, and you kept going anyway. ` : ''}${N(`Here's to the Ls of ${yr}. No gree for anybody in ${yr + 1}.`, `Here's to the Ls of ${yr}, and to applying again in ${yr + 1}.`)}</p>`,
     card: { eyebrow: 'The beauty of no', big: 'Every no is proof I tried.', line: `${plural(nL, 'L')} in ${yr}. Still applying.` } });
 
-  add({ t: 't-red', dur: null, final: true, h: finalHTML });
-  return L;
+  const core = L.filter(x => !x.bonus), extras = L.filter(x => x.bonus);
+  if (extras.length) core.push({ t: 't-violet', dur: null, bonusGate: true, h: () => `<p class="eyebrow rise">That's your main story</p><p class="big rise">Want the <span class="acc">bonus Ls?</span></p><p class="say rise">${extras.length} more slides: rejection bingo, your worst month, the coldest L, your aura and more.</p><div class="actions interactive rise" style="justify-content:flex-start;margin-top:18px"><button class="btn" id="bonus-go" type="button">Show me the bonus</button><button class="btn alt" id="bonus-skip" type="button">Skip to my card</button></div>`,
+    after(){ $('#bonus-go').onclick = () => show(cur + 1); $('#bonus-skip').onclick = () => show(slides.length - 1); } });
+  return core.concat(extras, [{ t: 't-red', dur: null, final: true, h: finalHTML }]);
 }
 
 /* ================= final slide ================= */
@@ -1311,7 +1436,10 @@ function finalHTML(){
   <div class="composer"><h3>Write my post</h3><div class="fmt" id="tones"><button type="button" data-t="vulnerable" aria-pressed="${tone === 'vulnerable'}">Honest</button><button type="button" data-t="funny" aria-pressed="${tone === 'funny'}">Funny</button><button type="button" data-t="motivational" aria-pressed="${tone === 'motivational'}">Motivating</button></div>
   <label class="small" for="posttext">Edit it however you like. Then attach your image.</label><textarea id="posttext" spellcheck="true"></textarea>
   <div class="actions" style="justify-content:flex-start"><button class="btn" id="copypost" type="button">Copy post</button><a class="btn alt" id="li" target="_blank" rel="noopener">Post on LinkedIn</a><a class="btn alt" id="tw" target="_blank" rel="noopener">Post on X</a></div></div>
-  <div class="composer"><h3>Share with friends</h3><p class="small" style="opacity:.9">Everyone's posting wins right now. Start a chain of Ls instead: send this to the friends who applied alongside you.</p>
+  <div class="composer" id="vidbox"><h3>Make it a video</h3><p class="small" style="opacity:.9">A short clip of your Wrapped for WhatsApp Status, Instagram Reels and TikTok.</p>
+  <div class="actions" style="justify-content:flex-start"><button class="btn" id="mkvid" type="button">Make my video</button></div><p class="small" id="vidstatus" aria-live="polite"></p>
+  <video id="vidprev" playsinline controls muted loop hidden></video><div class="actions" id="vidactions" style="justify-content:flex-start" hidden><button class="btn" id="vidsave" type="button">Save video</button><button class="btn alt" id="vidshare" type="button" hidden>Share video…</button></div></div>
+  <div class="composer"><h3>L Party: challenge your friends</h3><p class="small" style="opacity:.9">Send your link. When a friend makes theirs, they get a side-by-side card of who took more Ls. Only your numbers go in the link, never your emails.</p>
   <label class="small" for="invitetext">Your message</label><textarea id="invitetext" style="min-height:120px"></textarea>
   <div class="actions" style="justify-content:flex-start"><a class="btn" id="inv-wa" target="_blank" rel="noopener">WhatsApp</a><a class="btn alt" id="inv-x" target="_blank" rel="noopener">X</a><a class="btn alt" id="inv-li" target="_blank" rel="noopener">LinkedIn</a><button class="btn alt" id="inv-copy" type="button">Copy message</button><button class="btn alt" id="inv-more" type="button" hidden>More…</button></div></div>
   <p class="small">Saving doesn't work here? Press and hold (or right-click) the card to save it.</p>
@@ -1338,7 +1466,8 @@ async function wireFinal(){
   $('#replay').onclick = () => { state = {}; slides = buildSlides(S); show(1); };
   $('#again').onclick = closeStory;
   const inv = $('#invitetext');
-  inv.value = `I just got my ${S.year} L Wrapped: ${plural(S.nL, 'rejection')}${S.ghosted ? `, ${S.ghosted} ghosted` : ''}, and my L personality is ${S.persona.name}. 😅\n\nBet you took more Ls than me. Get yours, it's private and nothing leaves your browser:\n${appUrl()}`;
+  inv.value = `I took ${plural(S.nL, 'L')} in ${S.year}${S.ghosted ? ` and got ghosted ${S.ghosted} times` : ''}. My L personality is ${S.persona.name} and I'm in ${S.club.name}. 😅\n\nBet you took more Ls than me. Make yours and we'll compare (private, nothing leaves your browser):\n${appUrl()}#${encodeVs(S)}`;
+  wireVideo();
   const invLinks = () => { const l = shareLinks(inv.value); $('#inv-wa').href = l.wa; $('#inv-x').href = l.x; $('#inv-li').href = l.li; };
   inv.addEventListener('input', invLinks); invLinks();
   $('#inv-copy').onclick = async () => { if (await copyText(inv.value)) toast('Message copied'); else { inv.select(); toast('Selected. Copy it with your keyboard'); } };
@@ -1385,8 +1514,11 @@ async function renderCard(spec, format){
   const lineF = `500 ${W > 1000 ? 40 : 34}px ${B}`;
   const lineLines = spec.line ? wrap(spec.line, lineF, CW).slice(0, spec.rows || spec.bingo ? 3 : 6) : [];
   const rowsH = spec.rows ? Math.ceil(spec.rows.length / 2) * 150 + 30 : 0;
+  const listF = `500 ${W > 1000 ? 36 : 32}px ${B}`;
+  const listItems = spec.list ? spec.list.map(t => wrap(t, listF, CW - 90).slice(0, 4)) : [];
+  const listH = listItems.reduce((h, ls) => h + ls.length * 46 + 34, 0);
   const gridSize = spec.bingo ? Math.min(CW, H - 420 - eyeLines.length * 40 - bigLines.length * bigSize) : 0;
-  const total = eyeLines.length * 42 + 20 + bigLines.length * bigSize * .95 + (lineLines.length ? 24 + lineLines.length * 52 : 0) + (rowsH ? 40 + rowsH : 0) + (gridSize ? 30 + gridSize : 0);
+  const total = eyeLines.length * 42 + 20 + bigLines.length * bigSize * .95 + (lineLines.length ? 24 + lineLines.length * 52 : 0) + (rowsH ? 40 + rowsH : 0) + (gridSize ? 30 + gridSize : 0) + (listH ? 30 + listH : 0);
   let y = Math.max(170, (H - 90 - total) / 2 + 40);
 
   x.fillStyle = fg; x.globalAlpha = .85; eyeLines.forEach(l => { x.font = eyeF; x.fillText(l, PAD, y + 30); y += 42; }); x.globalAlpha = 1; y += 20;
@@ -1404,6 +1536,10 @@ async function renderCard(spec, format){
     spec.rows.forEach(([v, l], i) => { const cx = PAD + 36 + (i % 2) * colW, cy = y + 30 + Math.floor(i / 2) * 150; x.fillStyle = i === 1 && spec.bg === 'aura' && S.nO ? '#ffd23f' : tc; let fs = 84; x.font = `800 ${fs}px ${D}`; while (x.measureText(String(v)).width > colW - 60 && fs > 30) { fs -= 4; x.font = `800 ${fs}px ${D}`; } x.fillText(String(v), cx, cy + 78); x.globalAlpha = .75; x.font = `700 22px ${M}`; x.fillText(String(l).toUpperCase().slice(0, 30), cx, cy + 112, colW - 60); x.globalAlpha = 1; });
     y += rowsH;
   }
+  if (listItems.length) {
+    y += 30;
+    listItems.forEach((ls, i) => { x.fillStyle = acc; rr(PAD, y + 4, 56, 56, 28); x.fill(); x.fillStyle = bg; x.font = `800 30px ${D}`; x.textAlign = 'center'; x.fillText(String(i + 1), PAD + 28, y + 43); x.textAlign = 'left'; x.fillStyle = fg; x.font = listF; ls.forEach((l, j) => x.fillText(l, PAD + 84, y + 40 + j * 46)); y += ls.length * 46 + 34; });
+  }
   if (spec.bingo) {
     y += 30; const g = gridSize, cell = (g - 3 * 10) / 4;
     spec.bingo.forEach((cl, i) => { const cx = PAD + (i % 4) * (cell + 10), cy = y + Math.floor(i / 4) * (cell + 10);
@@ -1420,6 +1556,60 @@ async function renderCard(spec, format){
   x.textAlign = 'right'; x.globalAlpha = .75; x.fillText('LINKEDIN SHOWS THE WINS. THIS IS THE REST.', W - PAD, H - 36, W - PAD * 2 - 220); x.globalAlpha = 1; x.textAlign = 'left';
   const blob = await new Promise(r => c.toBlob(r, 'image/png'));
   return { blob, url: URL.createObjectURL(blob) };
+}
+
+/* ================= video export: the share cards as a short clip, recorded in the browser ================= */
+async function makeVideo(onProgress){
+  if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) throw new Error('unsupported');
+  const specs = slides.filter(sl => sl.card && !sl.gate && !/Guess/.test(sl.card.eyebrow)).slice(0, 11).map(sl => ({ theme: sl.t, ...sl.card }));
+  specs.push(summarySpec());
+  const bitmaps = [];
+  for (let i = 0; i < specs.length; i++) { const r = await renderCard(specs[i], 'story'); bitmaps.push(await createImageBitmap(r.blob)); URL.revokeObjectURL(r.url); onProgress(Math.round(i / specs.length * 30)); }
+  const W = 720, H = 1280, c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+  const mime = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm'].find(t => MediaRecorder.isTypeSupported(t)) || '';
+  const rec = new MediaRecorder(c.captureStream(30), mime ? { mimeType: mime, videoBitsPerSecond: 5e6 } : undefined);
+  const chunks = []; rec.ondataavailable = e => e.data.size && chunks.push(e.data);
+  const per = 2.3, fade = .4, total = specs.length * per;
+  const done = new Promise(r => rec.onstop = r);
+  rec.start(250);
+  const t0 = performance.now();
+  await new Promise(resolve => {
+    const frame = () => {
+      const t = (performance.now() - t0) / 1000;
+      const i = Math.min(bitmaps.length - 1, Math.floor(t / per)), local = t - i * per;
+      const draw = (bm, alpha, z) => { x.globalAlpha = alpha; const w = W * z, h = H * z; x.drawImage(bm, (W - w) / 2, (H - h) / 2, w, h); };
+      x.globalAlpha = 1; x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
+      if (i > 0 && local < fade) draw(bitmaps[i - 1], 1, 1.06);
+      draw(bitmaps[i], i > 0 ? Math.min(1, local / fade) : 1, 1.06 - .06 * Math.min(1, local / per));
+      x.globalAlpha = 1;
+      onProgress(30 + Math.round(Math.min(1, t / total) * 70));
+      if (t >= total) resolve(); else requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  });
+  rec.stop(); await done;
+  const type = (rec.mimeType || mime || 'video/webm').split(';')[0];
+  const blob = new Blob(chunks, { type });
+  return { blob, url: URL.createObjectURL(blob), ext: type.includes('mp4') ? 'mp4' : 'webm' };
+}
+function wireVideo(){
+  const st = $('#vidstatus');
+  $('#mkvid').onclick = async () => {
+    $('#mkvid').disabled = true; $('#vidactions').hidden = true; $('#vidprev').hidden = true;
+    pause(true, 'video');
+    try {
+      const v = await makeVideo(p => { st.textContent = `Making your video… ${p}%`; });
+      state.video = v; const el = $('#vidprev'); if (!el) return;
+      el.src = v.url; el.hidden = false; el.play().catch(() => {});
+      st.textContent = v.ext === 'webm' ? 'Done. If your phone won\'t post a .webm file, use Save image instead.' : 'Done. Save it or share it straight to your Status or Reels.';
+      $('#vidactions').hidden = false;
+      const f = new File([v.blob], `l-wrapped.${v.ext}`, { type: v.blob.type });
+      $('#vidshare').hidden = !(navigator.canShare && navigator.canShare({ files: [f] }));
+      $('#vidshare').onclick = () => navigator.share({ files: [f], text: `My ${S.year} L Wrapped #LWrapped ${appUrl()}` }).catch(() => {});
+      $('#vidsave').onclick = () => saveImage(v, `l-wrapped-${S.year}.${v.ext}`);
+    } catch { st.textContent = 'This browser can\'t make videos. Try Chrome, or save the image instead.'; }
+    finally { pause(false, 'video'); const b = $('#mkvid'); if (b) { b.disabled = false; b.textContent = 'Make it again'; } }
+  };
 }
 
 let dlCap = null;

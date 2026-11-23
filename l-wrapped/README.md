@@ -6,6 +6,14 @@ Paste the rejection (and interview, and offer) emails you got this year, or just
 
 **Privacy:** everything runs in the browser. No server, no storage, no tracking. Emails vanish when the tab closes. Company names are hidden by default.
 
+## Settings you might change (in `src/template.html`, then rebuild)
+- `APP_URL`: your public link once hosted, so share and L Party links point to it.
+- `LAUNCH`: the drop date for the countdown banner (default 1 Dec 2026, WAT).
+- `CLUBS`: the six L clubs and their roles.
+
+## How L Party works
+Each Wrapped gets a challenge link like `…#vs-Name-…`. It carries only the numbers (Ls, interviews, offers, ghosted, so close, applications, projects) and the personality, never emails. A friend who opens it sees the challenge and gets a side-by-side slide at the end of their own Wrapped.
+
 ## Files
 - `index.html`: the app. Open it in a browser or host this folder on GitHub Pages / Netlify / Vercel.
 - `og.png`: link preview image. Once hosted, change the `og:image` / `twitter:image` meta tags in `src/template.html` to the full URL (e.g. `https://you.github.io/l-wrapped/og.png`), since LinkedIn and X need an absolute URL.
