@@ -148,6 +148,7 @@ final class Tracker {
                     JSONObject x = done.getJSONObject(i);
                     if (x.has("error")) continue;
                     if (sb.length() > 0) sb.append("; ");
+                    if (x.has("duplicateOf")) { sb.append("Already tracked: ").append(x.optString("duplicateTitle", x.optString("title"))).append(" (merged)"); continue; }
                     sb.append(x.optString("category")).append(": ").append(x.optString("title", ""));
                     if (!x.optString("deadline").isEmpty()) sb.append(" (due ").append(x.optString("deadline")).append(")");
                 }

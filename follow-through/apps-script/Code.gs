@@ -34,9 +34,9 @@ const SHEET_NAME = 'Tracker';
 const HEADERS = [
   'ID', 'Captured', 'Status', 'Title', 'Organisation', 'Type', 'Deadline', 'Remind on',
   'Link', 'Requirements', 'What it offers', 'Saved from', 'Screen text', 'Screenshot',
-  'Notes', 'Outcome', 'Updated', 'Category', 'Essay doc', 'CV doc', 'Applied on'
+  'Notes', 'Outcome', 'Updated', 'Category', 'Essay doc', 'CV doc', 'Applied on', 'Eligibility', 'Interview doc'
 ];
-const STATUSES = ['New', 'Saved', 'Preparing', 'Submitted', 'Closed'];
+const STATUSES = ['New', 'Suggested', 'Saved', 'Preparing', 'Submitted', 'Closed'];
 const OUTCOMES = ['Accepted', 'Shortlisted', 'Interview', 'Rejected', 'No response', 'Missed the deadline', 'Decided not to apply', 'Not an opportunity'];
 const DATE_COLS = ['Deadline', 'Remind on', 'Applied on'];
 const CATEGORIES = ['Opportunity', 'Event', 'Tip', 'Other'];
@@ -44,7 +44,7 @@ const TIPS_NAME = 'Tips & Resources';
 const TIP_HEADERS = ['ID', 'Saved', 'Topic', 'Title', 'Key points', 'Link', 'Saved from', 'Screenshot', 'In digest'];
 const FOLDER_NAME = 'Follow-Through captures';
 const DOCS_FOLDER = 'Follow-Through';
-const SCHEMA = '7';
+const SCHEMA = '8';
 
 /* ---------- one-time setup ---------- */
 function setup() {
@@ -135,7 +135,7 @@ function doPost(e) {
   return handle_(body);
 }
 
-const AI_ACTIONS = ['process', 'essay', 'tailor', 'uploadCv', 'cvAdd', 'setKey'];
+const AI_ACTIONS = ['process', 'essay', 'tailor', 'uploadCv', 'cvAdd', 'setKey', 'eligibility', 'review', 'interview'];
 
 function handle_(p) {
   try {
@@ -148,6 +148,9 @@ function handle_(p) {
         case 'uploadCv': return json_(uploadCv_(p));
         case 'cvAdd': return json_(cvAdd_(p));
         case 'setKey': return json_(setKey_(p));
+        case 'eligibility': return json_(eligibility_(p));
+        case 'review': return json_(review_(p));
+        case 'interview': return json_(interview_(p));
       }
     }
     return json_(withLock_(() => {
@@ -164,6 +167,8 @@ function handle_(p) {
         case 'doc': return doc_(p);
         case 'readDoc': return readDoc_(p);
         case 'docs': return docs_();
+        case 'delete': return deleteRow_(p);
+        case 'suggest': return suggest_(p);
         case 'asset': return asset_(p);
         case 'stats': return stats_(p);
         case 'emailNow': return emailNow_(p);
@@ -634,6 +639,18 @@ ${String(r['Screen text'] || '').slice(0, 8000)}`;
     j.notes || '',
     deadline ? (ans.searched ? 'Sorted instantly (checked online).' : 'Sorted instantly. Deadline not yet confirmed online.') : 'No deadline found yet.',
   ].filter(Boolean).join('\n');
+  const dup = findDuplicate_(r['ID'], j.title, j.organisation, j.link || r['Link']);
+  if (dup) {
+    const fill = {};
+    if (!dup['Deadline'] && deadline) { fill.Deadline = deadline; fill['Remind on'] = remind; }
+    if (!dup['Link'] && (j.link || r['Link'])) fill.Link = j.link || r['Link'];
+    if (!dup['Requirements'] && (j.requirements || []).length) fill.Requirements = j.requirements.join('\n');
+    withLock_(() => {
+      if (Object.keys(fill).length) updateRow_(sheet_(), HEADERS, { id: dup['ID'], fields: fill });
+      updateRow_(sheet_(), HEADERS, { id: r['ID'], fields: { Category: cat, Status: 'Closed', Outcome: 'Duplicate of ' + dup['ID'], Title: j.title || '' } });
+    });
+    return { id: r['ID'], category: cat, title: j.title, duplicateOf: dup['ID'], duplicateTitle: dup['Title'] };
+  }
   withLock_(() => updateRow_(sheet_(), HEADERS, { id: r['ID'], fields: {
     Category: cat, Status: 'Saved', Title: j.title || 'Untitled', Organisation: j.organisation || '',
     Type: j.type || (cat === 'Event' ? 'Event' : 'Other'), Deadline: deadline, 'Remind on': remind,
@@ -1021,4 +1038,122 @@ function emailNow_(p) {
   const rows = rows_(sheet_(), {}).rows, today = today_();
   if (p.kind === 'sunday') sundayEmail_(rows, today); else morningEmail_(rows, today);
   return { ok: true, to: Session.getEffectiveUser().getEmail(), quota: MailApp.getRemainingDailyQuota() };
+}
+
+
+/* =====================================================================
+ * Duplicates, real delete, Bisi's picks, eligibility, essay review, interview prep
+ * ===================================================================== */
+function normUrl_(u) {
+  u = String(u || '').trim().toLowerCase().replace(/^https?:\/\/(www\.|m\.)?/, '').replace(/[?#].*$/, '').replace(/\/+$/, '');
+  return u.length > 8 ? u : '';
+}
+function normTitle_(t) { return String(t || '').toLowerCase().replace(/\b(20\d\d|call for applications|apply now|applications? open)\b/g, '').replace(/[^a-z0-9]+/g, ''); }
+function findDuplicate_(selfId, title, org, link) {
+  const nl = normUrl_(link), nt = normTitle_(title), no = normTitle_(org);
+  if (!nl && nt.length < 8) return null;
+  const rows = rows_(sheet_(), {}).rows.filter(x => x['ID'] !== selfId && x['Status'] !== 'New' && x['Category'] !== 'Other' &&
+    !/^(Deleted|Duplicate)/.test(String(x['Outcome'] || '')));
+  return rows.find(x => {
+    if (nl && normUrl_(x['Link']) === nl) return true;
+    const xt = normTitle_(x['Title']);
+    if (!xt || xt.length < 8) return false;
+    if (xt === nt) return true;
+    const contains = (xt.indexOf(nt) >= 0 || nt.indexOf(xt) >= 0) && Math.min(xt.length, nt.length) >= 12;
+    return contains && (!no || !normTitle_(x['Organisation']) || normTitle_(x['Organisation']) === no);
+  }) || null;
+}
+
+function deleteRow_(p) {
+  const sh = sheet_();
+  const ids = sh.getRange(2, 1, Math.max(sh.getLastRow() - 1, 1), 1).getValues().map(r => r[0]);
+  const idx = ids.indexOf(p.id);
+  if (idx < 0) return { ok: false, error: 'not_found' };
+  sh.deleteRow(idx + 2);
+  return { ok: true, id: p.id };
+}
+
+/** Bisi's picks: a ready-made row with Status "Suggested" (the weekly Claude search adds these). */
+function suggest_(p) {
+  const f = p.fields || {};
+  if (!f.Title) return { ok: false, error: 'missing_title' };
+  const dup = findDuplicate_('', f.Title, f.Organisation, f.Link);
+  if (dup) return { ok: true, skipped: 'already_tracked', id: dup['ID'] };
+  const id = 's' + new Date().getTime().toString(36) + Math.floor(Math.random() * 1296).toString(36);
+  const now = new Date();
+  const row = { 'ID': id, 'Captured': now, 'Status': 'Suggested', 'Category': 'Opportunity', 'Saved from': 'Bisi\'s picks', 'Updated': now };
+  ['Title', 'Organisation', 'Type', 'Link', 'What it offers', 'Notes'].forEach(k => { if (f[k]) row[k] = String(f[k]); });
+  if (Array.isArray(f.Requirements)) row['Requirements'] = f.Requirements.join('\n'); else if (f.Requirements) row['Requirements'] = String(f.Requirements);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(f.Deadline || '')) { const [y, m, d] = f.Deadline.split('-').map(Number); row['Deadline'] = new Date(y, m - 1, d); }
+  sheet_().appendRow(HEADERS.map(h => row[h] !== undefined ? row[h] : ''));
+  return { ok: true, id: id };
+}
+
+function profileText_() {
+  return 'ABOUT ME:\n' + readDocText_('about-me').slice(0, 5000) + '\n\nMY CV:\n' + readDocText_('master-cv').slice(0, 9000);
+}
+
+/** "Am I eligible?" Strong / Possible / Long shot, with reasons, saved in the Eligibility column. */
+function eligibility_(p) {
+  const r = rowById_(sheet_(), p.id);
+  if (!r) return { ok: false, error: 'not_found' };
+  const prompt = `Judge honestly whether I'm a good candidate for this opportunity before I spend time applying.
+Use only facts from my profile; if something important is unknown, say what to check. Reply with ONLY JSON:
+{"verdict": "Strong" | "Possible" | "Long shot", "reasons": [2-4 short strings], "gaps": [0-3 short strings: what's missing or to check], "tip": "one sentence on how to strengthen the application"}
+
+${oppContext_(r)}
+
+${profileText_()}`;
+  const ans = gemini_([{ text: prompt }], { json: true, temperature: 0.2, fast: true });
+  const j = parseJson_(ans.text);
+  if (!j || !j.verdict) return { ok: false, error: 'Could not read the answer. Try again.' };
+  const summary = j.verdict + ' · ' + (j.reasons || []).join('; ') + ((j.gaps || []).length ? ' · Check: ' + j.gaps.join('; ') : '') + (j.tip ? ' · Tip: ' + j.tip : '');
+  withLock_(() => updateRow_(sheet_(), HEADERS, { id: p.id, fields: { Eligibility: summary } }));
+  return { ok: true, verdict: j.verdict, reasons: j.reasons || [], gaps: j.gaps || [], tip: j.tip || '', summary: summary };
+}
+
+/** Feedback on a draft I wrote myself. */
+function review_(p) {
+  const draft = String(p.draft || '').trim();
+  if (draft.split(/\s+/).length < 20) return { ok: false, error: 'Paste at least a paragraph of your draft.' };
+  const r = p.id ? rowById_(sheet_(), p.id) : null;
+  const words = draft.split(/\s+/).filter(String).length;
+  const prompt = `Review my application essay draft like a kind but honest mentor. Plain text with short headings in CAPS, no markdown symbols.
+Give, in this order:
+ANSWERS THE QUESTION? yes / partly / no, and why (2 sentences).
+TOP 3 FIXES: numbered, each quoting the sentence to change and giving a rewrite.
+WHAT WORKS: 1-2 things to keep.
+LENGTH: my draft is ${words} words${p.words ? ', limit ' + p.words : ''}; say what to cut or add.
+Never invent facts about me; where a real example would help, say "[add a real example of …]".
+
+${p.question ? 'QUESTION: ' + p.question + '\n' : ''}${r ? oppContext_(r) + '\n' : ''}
+MY DRAFT:
+${draft.slice(0, 12000)}`;
+  const ans = gemini_([{ text: prompt }], { temperature: 0.4 });
+  return { ok: true, text: ans.text, words: words };
+}
+
+/** Likely interview questions with answers built from my real CV, as a Google Doc. */
+function interview_(p) {
+  const r = rowById_(sheet_(), p.id);
+  if (!r) return { ok: false, error: 'not_found' };
+  const prompt = `I've been ${r['Outcome'] === 'Interview' ? 'invited to interview' : 'shortlisted'} for this opportunity. Prepare me.
+Write simple markdown (# ## headings, - bullets, **bold**):
+# Interview prep: <title>
+## What they're probably looking for (3 bullets)
+## Likely questions
+For 8-10 questions (mix of motivation, technical/mechatronics, teamwork/leadership, and one curveball):
+### <question>
+- **Why they ask:** one line
+- **Your answer outline:** 3 bullets using real stories from my CV and profile (never invent; write [ADD: …] if a real example is needed)
+## Questions to ask them (3)
+## The day before (5-point checklist)
+
+${oppContext_(r)}
+
+${profileText_()}`;
+  const ans = gemini_([{ text: prompt }], { temperature: 0.5 });
+  const d = withLock_(() => doc_({ key: 'interview-' + p.id, title: 'Interview prep: ' + r['Title'], body: ans.text, mode: 'replace' }));
+  withLock_(() => updateRow_(sheet_(), HEADERS, { id: p.id, fields: { 'Interview doc': d.url } }));
+  return { ok: true, url: d.url };
 }

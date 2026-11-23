@@ -445,7 +445,9 @@ async function autoSort(){
   sorting = false;
   if (j.ok && j.processed && j.processed.length){
     const ok = j.processed.filter(x => !x.error);
-    if (ok.length) toast(`Sorted ${ok.length}: ` + ok.map(x => x.title || x.category).slice(0,2).join(', '));
+    const dups = ok.filter(x => x.duplicateOf);
+    if (dups.length) toast(`Already tracked: ${dups[0].duplicateTitle || dups[0].title}. I merged them. 🐝`);
+    else if (ok.length) toast(`Sorted ${ok.length}: ` + ok.map(x => x.title || x.category).slice(0,2).join(', '));
     const bad = j.processed.find(x => x.error);
     if (bad && !ok.length) banner('err', 'Instant sorting failed: ' + bad.error.slice(0,120));
     await load(true);
@@ -1007,6 +1009,26 @@ function openItem(id){
         </div>
         <div class="note" id="ai-status">${D.ai.hasKey?'Takes about 20–60 seconds. Opens as a Google Doc you can edit.':'Add your free Gemini key in Settings to use this.'}</div>
       </div>`:''}
+      ${isOpp && r.Status!=='New' ? `<div class="ai">
+        <h4>Am I eligible?</h4>
+        ${r.Eligibility ? `<div><span class="chip ${/^Strong/.test(r.Eligibility)?'c-ok':/^Possible/.test(r.Eligibility)?'c-sun':'c-rose'}">${esc(String(r.Eligibility).split(' · ')[0])}</span></div><div class="note" style="white-space:pre-wrap">${esc(String(r.Eligibility).split(' · ').slice(1).join('\n'))}</div>` : '<div class="note">Bisi compares this opportunity with your CV and tells you your chances before you spend time on it.</div>'}
+        <div class="row"><button class="btn small ${r.Eligibility?'ghost':'primary'}" data-x="eligibility" ${D.ai.hasKey?'':'disabled'}>${r.Eligibility?'Check again':'Check my chances'}</button></div>
+        <div class="note" id="x-eligibility"></div>
+      </div>
+      <div class="ai">
+        <h4>Review my draft</h4>
+        <div class="note">Wrote something yourself? Paste it and Bisi gives honest feedback.</div>
+        <textarea class="search" id="rv-draft" rows="5" placeholder="Paste your essay draft here" style="margin:0"></textarea>
+        <div class="row"><button class="btn small primary" data-x="review" ${D.ai.hasKey?'':'disabled'}>Review it</button></div>
+        <div class="result" id="x-review" hidden></div>
+      </div>`:''}
+      ${(r.Outcome==='Shortlisted'||r.Outcome==='Interview') ? `<div class="ai">
+        <h4>Interview prep</h4>
+        <div class="note">Likely questions with answers built from your real CV, in a Google Doc.</div>
+        <div class="row">${r['Interview doc']?`<button class="btn small" data-url="${esc(r['Interview doc'])}">Open interview prep</button>`:''}
+        <button class="btn small ${r['Interview doc']?'ghost':'primary'}" data-x="interview" ${D.ai.hasKey?'':'disabled'}>${r['Interview doc']?'Redo':'Prep my interview'}</button></div>
+        <div class="note" id="x-interview"></div>
+      </div>`:''}
       <div class="row">
         ${r.Link?`<button class="btn" data-url="${esc(r.Link)}">Open link ↗</button>`:''}
         ${r.Deadline?`<button class="btn" data-url="${esc(gcal(r))}">Add to calendar</button>`:''}
@@ -1063,7 +1085,11 @@ document.addEventListener('click', async e => {
     const title = current.Title;
     await setFields(current.ID, f, o==='Accepted' || o==='Rejected' ? '' : 'Saved to your history.');
     if (o === 'Accepted') celebrate('party', 'YOU GOT IN!', `<b>${esc(title)}</b>. I'm telling every flower in Lagos. I always believed in you. (Mostly.)`);
-    else if (o === 'Shortlisted' || o === 'Interview') celebrate('party', o === 'Interview' ? 'An interview!' : 'Shortlisted!', `<b>${esc(title)}</b> wants to know you better. Breathe. Then prepare.`);
+    else if (o === 'Shortlisted' || o === 'Interview'){
+      celebrate('party', o === 'Interview' ? 'An interview!' : 'Shortlisted!', `<b>${esc(title)}</b> wants to know you better. Breathe. I'm writing your interview prep now.`);
+      const id = current ? current.ID : null;
+      if (id && D.ai.hasKey) call({ action: 'interview', id }).then(j => { if (j.ok){ const r = D.rows.find(q => q.ID === id); if (r) r['Interview doc'] = j.url; toast('Interview prep is ready. Open the item to read it. 🐝'); } });
+    }
     else if (o === 'Rejected') celebrate('crying', 'Their loss.', `<b>${esc(title)}</b> said no. That stings, and it's allowed to. You applied, and that's the brave part. Next one's ours. 💛`);
     return;
   }
@@ -1100,6 +1126,29 @@ document.addEventListener('click', async e => {
       sheet.querySelectorAll('[data-ai]').forEach(b => b.disabled = false);
     }
   }
+});
+const OLD_SCRIPT = 'Update your tracker script (Me → Settings → tracker page) to use this.';
+document.addEventListener('click', async e => {
+  const x = e.target.closest('[data-x]'); if (!x || !current) return;
+  const id = current.ID, kind = x.dataset.x, out = $('#x-' + kind);
+  const firstEssay = reqs(current).map(q => q.text).find(q => /essay|statement|question/i.test(q)) || '';
+  let req = { action: kind, id };
+  if (kind === 'review'){
+    const draft = $('#rv-draft').value.trim();
+    if (draft.split(/\s+/).length < 20) return toast('Paste at least a paragraph first.');
+    const wl = (firstEssay.match(/(\d{2,4})\s*words/i) || [])[1];
+    req = { action: 'review', id, draft, question: firstEssay, words: wl || '' };
+  }
+  x.disabled = true; out.hidden = false;
+  out.innerHTML = `<span class="spin"></span> ${kind === 'eligibility' ? 'Comparing with your CV…' : kind === 'review' ? 'Reading your draft carefully…' : 'Writing your interview prep…'}`;
+  active_();
+  const j = await call(req);
+  x.disabled = false;
+  if (!j.ok){ out.textContent = j.error === 'unknown_action' ? OLD_SCRIPT : j.error === 'no_key' ? 'Add your Gemini key in Settings first.' : 'Didn\'t work: ' + String(j.error).slice(0, 140); return; }
+  const r = D.rows.find(q => q.ID === id);
+  if (kind === 'eligibility'){ r.Eligibility = j.summary; openItem(id); toast(j.verdict === 'Strong' ? 'Strong match. Go for it! 🐝' : j.verdict === 'Possible' ? 'Possible. Worth a shot with a strong essay.' : 'Long shot. Your call, and I respect it.'); }
+  else if (kind === 'review'){ out.textContent = j.text; }
+  else { r['Interview doc'] = j.url; openItem(id); open(j.url); }
 });
 document.addEventListener('change', async e => {
   const cb = e.target.closest('[data-req]'); if (!cb || !current) return;
