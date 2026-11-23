@@ -1,1 +1,1 @@
-4 new home-screen widgets (Nectar jar, Brain snack, Sticky note, Quick save)
+a neater Quick save widget that fits any size
