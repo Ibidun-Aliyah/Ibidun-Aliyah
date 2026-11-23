@@ -60,7 +60,14 @@ public class BubbleService extends AccessibilityService {
         try { Nag.schedule(this); } catch (Throwable e) { android.util.Log.e("FollowThrough", "schedule", e); }
     }
 
-    @Override public void onAccessibilityEvent(AccessibilityEvent event) { /* only reads on tap */ }
+    private Focus focus;
+
+    /** Only the name of the app that's open is used here (for the scroll guard). Screen content is read only on tap. */
+    @Override public void onAccessibilityEvent(AccessibilityEvent event) {
+        if (event == null || event.getEventType() != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED || event.getPackageName() == null) return;
+        if (focus == null) focus = new Focus(this);
+        focus.onApp(event.getPackageName().toString());
+    }
     @Override public void onInterrupt() {}
 
     @Override

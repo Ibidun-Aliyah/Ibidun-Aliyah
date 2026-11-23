@@ -293,6 +293,15 @@ section{margin-top:28px}
 .sticky .nact{margin-left:auto;display:flex;gap:6px}
 .sticky .nbtn{width:34px;height:34px;display:grid;place-items:center;border:2px solid #1E1606;border-radius:10px 8px 11px 7px;background:rgba(255,255,255,.7);color:#1E1606;font-size:1.05rem;cursor:pointer;padding:0}
 .sticky .nbtn svg{width:17px;height:17px}
+.fg{display:flex;flex-direction:column;gap:12px}
+.fg-sw{display:flex;gap:10px;align-items:center;font-weight:600}
+.fg-sw input{width:24px;height:24px;accent-color:var(--sun);flex:none}
+.fg-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.fg-row select{border:2.5px solid var(--stroke);border-radius:12px 9px 11px 8px;background:var(--card);color:var(--ink);padding:6px 10px;font:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{border:2px solid var(--stroke);border-radius:999px;padding:5px 12px;background:var(--card);color:var(--ink);font:inherit;font-size:.9rem;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--sun);color:#1E1606;box-shadow:2px 2px 0 var(--sh)}
+.chips button .dim{opacity:.55;font-size:.78rem}
 .colors{display:flex;gap:8px;flex-wrap:wrap}
 .colors button{width:34px;height:34px;border-radius:50%;border:2.5px solid var(--stroke);cursor:pointer}
 .colors button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--card),0 0 0 5.5px var(--stroke)}
@@ -393,6 +402,17 @@ section{margin-top:28px}
         <textarea id="cv-add" rows="3" placeholder="e.g. Won 2nd place at the LASUSTECH Robotics Hackathon in March 2027 with a line-following robot"></textarea>
         <div class="row"><button class="btn primary" id="cv-add-btn">Add to my CV</button></div>
         <div class="result" id="cv-result" hidden></div>
+      </div>
+    </section>
+    <section>
+      <div class="sh"><h2>Scroll guard</h2><small id="fg-today"></small></div>
+      <div class="card fg">
+        <label class="fg-sw"><input type="checkbox" id="fg-on"> <span>Nudge me when I've been scrolling too long</span></label>
+        <div class="fg-row"><span>Start nudging after</span><select id="fg-limit"><option value="30">30 min</option><option value="45">45 min</option><option value="60">1 hour</option><option value="90">1½ hours</option><option value="120">2 hours</option></select></div>
+        <div class="fg-row"><span>Then nudge every</span><select id="fg-every"><option value="10">10 min</option><option value="15">15 min</option><option value="30">30 min</option></select></div>
+        <div class="note">Apps that count as scrolling (tap to switch):</div>
+        <div class="chips" id="fg-apps"></div>
+        <div class="note" id="fg-note">Bisi only sees which app is open, never what's on the screen. A 5-minute break resets the clock.</div>
       </div>
     </section>
     <section>
@@ -951,10 +971,36 @@ $('#note-new').onclick = () => openNote(null);
 $('#note-voice').onclick = () => window.Android && Android.voice ? Android.voice() : toast('Voice works inside the app.');
 window.__openNote = id => { go('notes'); renderNotes(); openNote(id); };
 
+/* ---------- scroll guard (settings live on the phone) ---------- */
+let fgCache = null;
+function fgLoad(){
+  try { fgCache = window.Android && Android.focusGet ? JSON.parse(Android.focusGet()) : null; } catch(e){ fgCache = null; }
+  if (!fgCache) fgCache = { on:true, limit:60, every:15, todayMins:72, bubble:true, apps:[
+    {pkg:'com.zhiliaoapp.musically',name:'TikTok',on:true,installed:true},{pkg:'com.instagram.android',name:'Instagram',on:true,installed:true},
+    {pkg:'com.twitter.android',name:'X (Twitter)',on:true,installed:true},{pkg:'com.google.android.youtube',name:'YouTube',on:true,installed:true},
+    {pkg:'com.snapchat.android',name:'Snapchat',on:true,installed:false},{pkg:'com.whatsapp',name:'WhatsApp',on:false,installed:true}] };
+  const f = fgCache;
+  $('#fg-on').checked = !!f.on; $('#fg-limit').value = String(f.limit); $('#fg-every').value = String(f.every);
+  const apps = f.apps.slice().sort((a,b) => (b.installed - a.installed));
+  $('#fg-apps').innerHTML = apps.map(a => `<button data-fg="${esc(a.pkg)}" aria-pressed="${!!a.on}">${esc(a.name)}${a.installed ? '' : ' <span class="dim">(not installed)</span>'}</button>`).join('');
+  const m = f.todayMins || 0; $('#fg-today').textContent = m ? `${m >= 60 ? Math.floor(m/60) + 'h ' : ''}${m % 60}m scrolled today` : '';
+  $('#fg-note').textContent = f.bubble === false ? 'Scroll guard needs Bisi\'s bubble switched on (Settings → bubble).' : 'Bisi only sees which app is open, never what\'s on the screen. A 5-minute break resets the clock.';
+  document.querySelectorAll('.fg select, #fg-apps button').forEach(el => el.disabled = !f.on);
+}
+function fgSave(patch){ if (window.Android && Android.focusSet) Android.focusSet(JSON.stringify(patch)); fgLoad(); }
+$('#fg-on').onchange = e => { fgSave({ on: e.target.checked }); toast(e.target.checked ? 'Scroll guard on. I\'m watching. Lovingly. 🐝' : 'Scroll guard off. Bisi will look away.'); };
+$('#fg-limit').onchange = e => fgSave({ limit: +e.target.value });
+$('#fg-every').onchange = e => fgSave({ every: +e.target.value });
+$('#fg-apps').addEventListener('click', e => { const b = e.target.closest('[data-fg]'); if (!b || b.disabled) return;
+  const on = b.getAttribute('aria-pressed') !== 'true'; const apps = {}; apps[b.dataset.fg] = on;
+  if (!window.Android){ const a = fgCache.apps.find(x => x.pkg === b.dataset.fg); a.on = on; b.setAttribute('aria-pressed', on); return; }
+  fgSave({ apps }); });
+
 /* ---------- tabs ---------- */
 function go(name){
   pane = name;
   if (name === 'notes'){ notesLoad(); renderNotes(); }
+  if (name === 'me') fgLoad();
   document.querySelectorAll('.pane').forEach(p => p.hidden = p.id !== 'p-' + name);
   document.querySelectorAll('.tabbar button').forEach(b => b.toggleAttribute('aria-current', b.dataset.go === name));
   document.querySelectorAll('.tabbar button[aria-current]').forEach(b => b.setAttribute('aria-current', 'page'));

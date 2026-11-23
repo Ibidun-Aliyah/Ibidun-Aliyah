@@ -79,6 +79,13 @@ time (they ring even if the app is closed, and come back after a restart; button
 **Hold Bisi's bubble** and talk (a small Bisi card listens right over the app you're in; it asks for the microphone once): “Call mum at 6pm” becomes a reminder, anything else a note, or send it to the
 tracker as an opportunity. Typing a time in a note (“submit form tomorrow at 9am”) sets the reminder for you.
 
+## Scroll guard
+After an hour (you choose 30 min–2 h) in TikTok, Instagram, X, YouTube, Snapchat and similar apps, Bisi starts nudging
+every 15 minutes with your most urgent task and its next step ("You could knock out a chunk in ~15 minutes if you locked
+in"), getting sassier each time. Buttons: **🔒 Lock in** (opens your tasks), **10 more min**, **Not today**. A 5-minute
+break, or opening Follow-Through, resets the clock. Set it up in **Me → Scroll guard** (WhatsApp and Telegram are off by
+default). It uses the bubble's accessibility service and only sees which app is open, never what's on screen.
+
 ## Applied history
 The dashboard's **Applied history** tab lists everything you've applied to by month, with results (Accepted,
 Shortlisted, Interview, Rejected, No response, Waiting), your success rate, applications per month, and a

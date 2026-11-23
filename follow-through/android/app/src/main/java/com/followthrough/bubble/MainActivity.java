@@ -163,6 +163,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        Focus.reset(this);   // you came back: the scrolling session is over
         if (loaded && web != null) web.evaluateJavascript("window.__onResume && window.__onResume()", null);
     }
 
@@ -280,6 +281,12 @@ public class MainActivity extends Activity {
         public String notesSave(String json) {
             try { return Notes.save(MainActivity.this, new JSONObject(json)).toString(); } catch (Exception e) { return "{}"; }
         }
+
+        @JavascriptInterface
+        public String focusGet() { return Focus.settingsJson(MainActivity.this); }
+
+        @JavascriptInterface
+        public void focusSet(String json) { Focus.saveSettings(MainActivity.this, json); }
 
         @JavascriptInterface
         public void notesDelete(String id) { Notes.delete(MainActivity.this, id); }
