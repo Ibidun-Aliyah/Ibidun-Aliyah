@@ -290,6 +290,9 @@ section{margin-top:28px}
 .sticky .pin{position:absolute;top:6px;right:6px}
 .sticky.isdone{opacity:.55}.sticky.isdone .nt{text-decoration:line-through}
 .nc-honey{background:#FFE27A}.nc-mint{background:#CDEBB8}.nc-rose{background:#FFC9BE}.nc-sky{background:#CFE3F7}.nc-lilac{background:#E6D4F7}.nc-paper{background:#FFFDF4}
+.sticky .nact{margin-left:auto;display:flex;gap:6px}
+.sticky .nbtn{width:34px;height:34px;display:grid;place-items:center;border:2px solid #1E1606;border-radius:10px 8px 11px 7px;background:rgba(255,255,255,.7);color:#1E1606;font-size:1.05rem;cursor:pointer;padding:0}
+.sticky .nbtn svg{width:17px;height:17px}
 .colors{display:flex;gap:8px;flex-wrap:wrap}
 .colors button{width:34px;height:34px;border-radius:50%;border:2.5px solid var(--stroke);cursor:pointer}
 .colors button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--card),0 0 0 5.5px var(--stroke)}
@@ -874,7 +877,7 @@ function renderNotes(){
       ${body ? `<div class="nb">${esc(body)}</div>` : ''}
       ${(n.items||[]).slice(0,5).map((it,i) => `<label class="ni ${it.done?'done':''}"><input type="checkbox" data-nitem="${esc(n.id)}:${i}" ${it.done?'checked':''}><span>${esc(it.t)}</span></label>`).join('')}
       ${(n.items||[]).length > 5 ? `<div class="nb">+${n.items.length-5} more</div>` : ''}
-      <div class="nf">${n.remindAt ? `<span class="rem ${late?'late':''}">⏰ ${esc(fmtWhen(n.remindAt))}</span>` : ''}${n.voice ? '<span class="rem">🎤</span>' : ''}</div>
+      <div class="nf">${n.remindAt ? `<span class="rem ${late?'late':''}">⏰ ${esc(fmtWhen(n.remindAt))}</span>` : ''}${n.voice ? '<span class="rem">🎤</span>' : ''}<span class="nact"><button class="nbtn" data-note-edit="${esc(n.id)}" aria-label="Edit note">✎</button><button class="nbtn" data-act="delete" data-kind="note" data-id="${esc(n.id)}" aria-label="Delete note">${ICON_DEL}</button></span></div>
     </div>`);
   }).join('') : `<div class="empty" style="grid-column:1/-1">${nq ? 'No notes match.' : 'No notes yet. Tap “New note”, or hold Bisi\'s bubble and say something like “Call mum at 6pm”.'}</div>`;
 }
@@ -918,7 +921,8 @@ function collectNote(){
 }
 document.addEventListener('click', e => {
   const nt = e.target.closest('[data-note]'); const wrapN = e.target.closest('.swipe');
-  if (nt && !e.target.closest('input') && !(wrapN && (wrapN.dataset.justSwiped || wrapN.classList.contains('open')))) return openNote(nt.dataset.note);
+  const ed = e.target.closest('[data-note-edit]'); if (ed) return openNote(ed.dataset.noteEdit);
+  if (nt && !e.target.closest('input, [data-act]') && !(wrapN && (wrapN.dataset.justSwiped || wrapN.classList.contains('open')))) return openNote(nt.dataset.note);
   if (!editingNote || $('#sheet').hidden) return;
   const q = e.target.closest('[data-ne-quick]');
   if (q){ const d = new Date(); const v = q.dataset.neQuick;
@@ -1222,7 +1226,7 @@ document.addEventListener('click', async e => {
   const goBtn = e.target.closest('[data-go]'); if (goBtn){ go(goBtn.dataset.go); return; }
   const actBtn = e.target.closest('[data-act]');
   if (actBtn){ const w = actBtn.closest('.swipe'); const id = w ? w.dataset.sid : (current && current.ID); const kind = w ? w.dataset.kind : actBtn.dataset.kind;
-    if (kind === 'tip') return tipDelete(id || actBtn.dataset.id); if (kind === 'note') return noteDelete(id || actBtn.dataset.id); return rowAction(id || actBtn.dataset.id, actBtn.dataset.act); }
+    if (kind === 'tip') return tipDelete(id || actBtn.dataset.id); if (kind === 'note') return noteDelete(actBtn.dataset.id || (w && w.dataset.sid)); return rowAction(id || actBtn.dataset.id, actBtn.dataset.act); }
   const wrap = e.target.closest('.swipe');
   if (wrap && (wrap.dataset.justSwiped || wrap.classList.contains('open'))){ if (!wrap.dataset.justSwiped) closeSwipes(); return; }
   if (!wrap) closeSwipes();

@@ -93,13 +93,29 @@ final class VoiceCard {
         face.setScaleX(1f); face.setScaleY(1f);
         setState(R.drawable.bisi_party, "Save this as…", "“" + text + "”" + (when == 0 ? "" : "\n⏰ " + label));
         clearButtons();
-        if (when != 0) addButton("⏰ Reminder", true, () -> { saveNote(ctx, text, when); done("I'll remind you " + label + ". Count on it. 🐝"); });
-        addButton("📝 Note", when == 0, () -> { saveNote(ctx, text, 0); done("Saved to your notes. 📝"); });
+        if (when != 0) addButton("⏰ Reminder", true, () -> saved(saveNote(ctx, text, when), "I'll remind you " + label + ". Count on it."));
+        addButton("📝 Note", when == 0, () -> saved(saveNote(ctx, text, 0), "Saved to your notes."));
         addButton("🎯 Opportunity", false, () -> { saveOpportunity(ctx, text); close(); });
         addButton("✕", false, this::close);
     }
 
-    private void done(String msg) { close(); Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show(); }
+    /** Saved: show Undo / Edit for a few seconds in case Bisi misheard. */
+    private void saved(String id, String msg) {
+        if (id == null) { close(); Toast.makeText(ctx, "Couldn't save that.", Toast.LENGTH_SHORT).show(); return; }
+        setState(R.drawable.bisi_happy, "Saved ✓ 🐝", msg);
+        clearButtons();
+        addButton("Undo", false, () -> { Notes.delete(ctx, id); close(); Toast.makeText(ctx, "Gone. Like it never happened. 🐝", Toast.LENGTH_SHORT).show(); });
+        addButton("✎ Edit", true, () -> { close(); openInApp(id); });
+        addButton("OK", false, this::close);
+        final LinearLayout mine = card;
+        card.postDelayed(() -> { if (card == mine) close(); }, 7000);
+    }
+
+    private void openInApp(String id) {
+        Intent i = new Intent(ctx, MainActivity.class).putExtra("openNote", id)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        try { ctx.startActivity(i); } catch (Exception ignored) {}
+    }
 
     void close() {
         if (sr != null) { try { sr.cancel(); sr.destroy(); } catch (Exception ignored) {} sr = null; }
@@ -108,15 +124,16 @@ final class VoiceCard {
 
     /* ---------- saving (shared with VoiceActivity) ---------- */
 
-    static void saveNote(Context c, String text, long when) {
+    static String saveNote(Context c, String text, long when) {
         try {
             JSONObject n = new JSONObject()
                     .put("text", text.substring(0, 1).toUpperCase(Locale.getDefault()) + text.substring(1))
                     .put("items", new JSONArray()).put("color", when != 0 ? "honey" : "mint")
                     .put("pinned", false).put("remindAt", when).put("done", false).put("voice", true);
-            Notes.save(c.getApplicationContext(), n);
+            JSONObject out = Notes.save(c.getApplicationContext(), n);
             Nag.markActive(c.getApplicationContext());
-        } catch (Exception ignored) {}
+            return out == null ? null : out.optString("id", null);
+        } catch (Exception e) { return null; }
     }
 
     static void saveOpportunity(Context c, String text) {
