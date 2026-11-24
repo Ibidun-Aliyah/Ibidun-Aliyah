@@ -124,6 +124,12 @@ derivatives, determinants and integrals), **Bit Buzz** (binary/hex, logic gates,
 complement) and **Pattern Hunt** (sequences). Levels go Freshman → Professor: three right in a row moves you up, two
 wrong moves you down, and your level is kept.
 
+### Just for fun
+**Bee Chess**: play Bisi with a built-in chess engine (full rules, checked with standard perft tests; four levels:
+Larva, Worker, Soldier, Queen), with undo, your record per level, and trash talk. **Bisi Flight**: tap to fly between
+flowers and grab nectar; a bee fact after each round. **Pollen Pairs**: a memory game matching chemistry symbols, SI units
+or Word Hive words with their meanings. Source: `android/app/src/main/assets/fun.js`.
+
 ## Offline
 Without internet the app shows your last saved tracker, and notes, reminders, games, Scroll guard and the bubble all
 keep working. Status changes, edits, deletes and captures are saved on the phone and sent when you're back online.

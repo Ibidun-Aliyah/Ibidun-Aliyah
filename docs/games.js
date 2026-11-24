@@ -263,6 +263,10 @@ function hub(){
     <div class="g-hub">${Object.entries(GAMES).map(([k, x]) => { const lv = store.get('lv-' + k, 1), best = store.get('best-' + k, 0);
       return `<button class="card g-card" data-game="${k}"><span class="g-ico">${x.icon}</span><b>${x.name}</b><small>${x.blurb}</small>
         <span class="g-meta"><span class="pill">${RANKS[lv - 1]} · L${lv}</span>${best ? `<span class="pill">Best ${best}</span>` : ''}</span></button>`; }).join('')}</div>
+    ${window.FTFun ? `<div class="sh" style="margin-top:22px"><h2>Just for fun</h2><small>no learning, promise (mostly)</small></div>
+    <div class="g-hub">${Object.entries(FTFun.list).map(([k, x]) => { const m = FTFun.meta(k);
+      return `<button class="card g-card g-fun" data-fun="${k}"><span class="g-ico">${x.icon}</span><b>${x.name}</b><small>${x.blurb}</small>
+        <span class="g-meta">${m ? `<span class="pill">${m}</span>` : ''}</span></button>`; }).join('')}</div>` : ''}
     ${store.get('review', []).length ? `<div class="card g-rev"><b>Words to review</b><div>${store.get('review', []).slice(-12).map(w => `<span class="pill">${w}</span>`).join(' ')}</div></div>` : ''}
   </section>`;
 }
@@ -325,7 +329,10 @@ function finish(){
     </div>`;
   if (mood === 'great' && ctx.confetti) ctx.confetti();
 }
+let funActive = null;
 function onClick(e){
+  const fun = e.target.closest('[data-fun]'); if (fun && window.FTFun){ g = null; funActive = fun.dataset.fun; FTFun.start(funActive, root); return; }
+  if (funActive){ if (e.target.closest('[data-gback]')){ FTFun.stop(); funActive = null; hub(); } return; }
   const c = e.target.closest('[data-gc]'); if (c) return answer(+c.dataset.gc);
   if (e.target.closest('[data-gnext]')) return next();
   const s = e.target.closest('[data-game]'); if (s) return start(s.dataset.game);
@@ -333,7 +340,8 @@ function onClick(e){
 }
 window.FTGames = {
   mount(el, c){ root = el; ctx = c || {}; if (!root.dataset.wired){ root.addEventListener('click', onClick); root.dataset.wired = 1; } if (!g) hub(); },
-  back(){ if (g){ g = null; hub(); return true; } return false; },
+  back(){ if (funActive && window.FTFun){ FTFun.stop(); funActive = null; hub(); return true; } if (g){ g = null; hub(); return true; } return false; },
+  _words: () => WORDS.flat(),
   playing(){ return !!g; },
   _gen: { wordGen, mathGen, bitGen, seqGen },
 };

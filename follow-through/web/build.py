@@ -10,7 +10,7 @@ RES = os.path.join(FT, 'android/app/src/main/res/drawable-nodpi')
 OUT = os.path.join(os.path.dirname(FT), 'docs')
 
 os.makedirs(os.path.join(OUT, 'fonts'), exist_ok=True)
-for f in ['bisi.js', 'games.js', 'welcome.js', 'fonts/nunito.woff2', 'fonts/patrickhand.woff2']:
+for f in ['bisi.js', 'games.js', 'welcome.js', 'fun.js', 'fonts/nunito.woff2', 'fonts/patrickhand.woff2']:
     shutil.copy(os.path.join(ASSETS, f), os.path.join(OUT, f))
 shutil.copy(os.path.join(HERE, 'web.js'), os.path.join(OUT, 'web.js'))
 shutil.copy(os.path.join(FT, 'apps-script/Code.gs'), os.path.join(OUT, 'Code.gs'))
