@@ -335,20 +335,32 @@ section{margin-top:28px}
 .g-fun{background:var(--sun-soft)}
 /* Bee Chess */
 .ch-bisi{display:flex;gap:10px;align-items:center;margin:4px 0 8px}.ch-face{width:64px;flex:none}
-.ch-say{flex:1;background:var(--card);border:2.5px solid var(--stroke);border-radius:16px 14px 18px 12px;padding:8px 12px;font-family:var(--f-d);font-size:1.15rem;line-height:1.2;min-height:44px}
-.ch-board{display:grid;grid-template-columns:repeat(8,1fr);border:3px solid var(--stroke);border-radius:10px;overflow:hidden;box-shadow:4px 5px 0 var(--sh);aspect-ratio:1;width:100%;max-width:520px;margin:0 auto}
-.ch-sq{position:relative;border:0;padding:0;margin:0;display:grid;place-items:center;aspect-ratio:1;cursor:pointer;font:inherit}
-.ch-sq.l{background:#FFF3CC}.ch-sq.d{background:#E5A93A}
-.ch-sq.last{box-shadow:inset 0 0 0 100px rgba(108,170,255,.28)}.ch-sq.sel{box-shadow:inset 0 0 0 100px rgba(44,122,75,.42)}.ch-sq.chk{box-shadow:inset 0 0 0 100px rgba(217,83,59,.6)}
-.ch-sq.tgt::after{content:"";width:28%;height:28%;border-radius:50%;background:rgba(30,22,6,.35)}
-.ch-sq.cap::after{content:"";position:absolute;inset:6%;border-radius:50%;border:4px solid rgba(30,22,6,.4)}
-.ch-sq .pc{font-size:min(9vw,46px);line-height:1;z-index:1;font-family:"Segoe UI Symbol","Noto Sans Symbols 2","DejaVu Sans",serif}
-.ch-sq .pc.w{color:#FFFDF4;-webkit-text-stroke:1.6px #1E1606;text-shadow:0 2px 0 rgba(30,22,6,.35)}
-.ch-sq .pc.b{color:#1E1606;text-shadow:0 1px 0 rgba(255,255,255,.35)}
-.ch-sq i{position:absolute;font-style:normal;font-size:.62rem;font-weight:800;opacity:.6;color:#1E1606}.ch-sq i.rk{left:3px;top:2px}.ch-sq i.fl{right:3px;bottom:1px}
-.ch-caps{min-height:24px;font-size:1.25rem;margin:4px 2px;letter-spacing:1px}.ch-caps small{font-size:.75rem;letter-spacing:0;color:var(--muted);font-weight:700}
-.ch-lv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.ch-lv .btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px;min-width:0;white-space:normal;text-align:center}
-.ch-caps .pc{font-family:"Segoe UI Symbol","Noto Sans Symbols 2","DejaVu Sans",serif}.ch-caps .pc.w{color:#FFFDF4;-webkit-text-stroke:1.2px #1E1606}.ch-caps .pc.b{color:#1E1606}.ch-lv small{font-family:var(--f-b);font-size:.75rem;line-height:1.2;opacity:.85}
+.ch-say{flex:1;background:var(--card);border:2.5px solid var(--stroke);border-radius:16px 14px 18px 12px;padding:8px 12px;font-family:var(--f-d);font-size:1.12rem;line-height:1.22;min-height:44px}
+.ch-warn{margin-top:6px;color:var(--rose);font-family:var(--f-b);font-size:.9rem;font-weight:700}
+.ch-goal{text-align:center;font-weight:800;min-height:22px;margin-bottom:6px}
+.ch-frame{max-width:520px;margin:0 auto;padding:10px;background:#8A5A2B;border:3px solid #1E1606;border-radius:18px 16px 20px 14px;box-shadow:4px 5px 0 var(--sh),inset 0 0 0 4px #B07A3E}
+.ch-board{display:grid;grid-template-columns:repeat(8,1fr);border:2.5px solid #1E1606;border-radius:6px;overflow:hidden;aspect-ratio:1;width:100%}
+.ch-sq{position:relative;border:0;padding:0;margin:0;display:grid;place-items:center;aspect-ratio:1;cursor:pointer;font:inherit;background-size:24px 41.6px}
+.ch-sq.l{background-color:#FFF4CF;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='41.6'%3E%3Cpath d='M12 0l12 6.93v13.86L12 27.72 0 20.79V6.93zM12 27.72v13.86' fill='none' stroke='%23EFD9A0' stroke-width='1.3'/%3E%3C/svg%3E")}.ch-sq.d{background-color:#E9A93C;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='41.6'%3E%3Cpath d='M12 0l12 6.93v13.86L12 27.72 0 20.79V6.93zM12 27.72v13.86' fill='none' stroke='%23C98A1B' stroke-width='1.3'/%3E%3C/svg%3E")}
+.ch-sq.last::before{content:"";position:absolute;inset:0;background:rgba(110,170,255,.3)}.ch-sq.sel::before{content:"";position:absolute;inset:0;background:rgba(44,122,75,.45)}
+.ch-sq.chk::before{content:"";position:absolute;inset:0;background:radial-gradient(circle,rgba(217,83,59,.85),rgba(217,83,59,.25) 70%)}
+.ch-sq.hint::before{content:"";position:absolute;inset:0;background:rgba(80,200,120,.5);animation:chPulse 1s ease-in-out infinite}
+@keyframes chPulse{50%{opacity:.35}}
+.ch-sq.thr::after{content:"";position:absolute;inset:5%;border-radius:50%;border:3px dashed #D9533B;z-index:2;pointer-events:none}
+.ch-sq.tgt::after{content:"";position:absolute;width:26%;height:26%;border-radius:50%;background:rgba(30,22,6,.38);z-index:2}
+.ch-sq.cap::after{content:"";position:absolute;inset:4%;border-radius:50%;border:4px solid rgba(30,22,6,.45);z-index:2}
+.ch-sq .pc{width:88%;height:88%;position:relative;z-index:1;filter:drop-shadow(0 2px 0 rgba(30,22,6,.3))}
+.ch-sq i{position:absolute;font-style:normal;font-size:.6rem;font-weight:800;opacity:.65;color:#1E1606;z-index:3}.ch-sq i.rk{left:3px;top:1px}.ch-sq i.fl{right:3px;bottom:0}
+.ch-honey{width:46%;height:46%;position:relative;z-index:1;background:#F5B700;border:3px solid #1E1606;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;transform:rotate(45deg);border-top-left-radius:0;animation:chPulse 1.4s ease-in-out infinite}
+.ch-caps{min-height:26px;margin:4px 2px;display:flex;align-items:center;gap:1px;flex-wrap:wrap}.ch-caps small{font-size:.75rem;color:var(--muted);font-weight:700;margin-right:4px}
+.ch-mini{display:inline-block;width:24px;height:24px;vertical-align:middle}.ch-mini .pc{width:100%;height:100%}.ch-mini.big{width:44px;height:44px}
+.ch-cast{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin:8px 0}.ch-cast div{display:flex;flex-direction:column;align-items:center}.ch-cast small{font-size:.68rem;font-weight:800;line-height:1.1;text-align:center}
+.ch-lv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.ch-lv .btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px;min-width:0;white-space:normal;text-align:center}.ch-lv small{font-family:var(--f-b);font-size:.75rem;line-height:1.2;opacity:.85}
+.ch-tut{display:flex;gap:10px;align-items:flex-start;text-align:left;margin-top:12px;font-size:.9rem;line-height:1.35}.ch-tut input{width:22px;height:22px;flex:none;accent-color:var(--sun);margin-top:2px}
+.ch-legend{margin:10px 0;font-size:.9rem}.ch-legend summary{font-weight:800;cursor:pointer}.ch-legend div{display:flex;gap:8px;align-items:center;margin:4px 0}
+.ch-lessons{display:flex;flex-direction:column;gap:10px}
+.ch-lesson{display:flex;gap:12px;align-items:center;text-align:left;cursor:pointer;color:var(--ink);font:inherit}.ch-lesson b{display:block;font-family:var(--f-d);font-size:1.2rem}.ch-lesson small{color:var(--muted);font-weight:700}
+.ch-lesson .ch-tick{margin-left:auto;font-size:1.4rem;font-weight:800}.ch-lesson.done{background:var(--ok-soft)}
 /* Bisi Flight */
 .fl-wrap{position:relative;border:3px solid var(--stroke);border-radius:16px;overflow:hidden;box-shadow:4px 5px 0 var(--sh);touch-action:manipulation}
 .fl-wrap canvas{display:block}

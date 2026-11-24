@@ -126,7 +126,10 @@ wrong moves you down, and your level is kept.
 
 ### Just for fun
 **Bee Chess**: play Bisi with a built-in chess engine (full rules, checked with standard perft tests; four levels:
-Larva, Worker, Soldier, Queen), with undo, your record per level, and trash talk. **Bisi Flight**: tap to fly between
+Larva, Worker, Soldier, Queen), with undo, your record per level, and trash talk. Bee pieces: Drone King (king), Queen Bee
+(queen), Hive (rook), Flower (bishop), Butterfly (knight), Worker (pawn); Honey team vs Midnight team on a honeycomb board.
+**Learn to play**: 12 interactive lessons (each piece, capturing, check, checkmate, castling, promotion). **Tutor mode**:
+Bisi explains her moves, rings your pieces in danger, warns before blunders, and gives hints. **Bisi Flight**: tap to fly between
 flowers and grab nectar; a bee fact after each round. **Pollen Pairs**: a memory game matching chemistry symbols, SI units
 or Word Hive words with their meanings. Source: `android/app/src/main/assets/fun.js`.
 

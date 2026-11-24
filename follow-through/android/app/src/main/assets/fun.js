@@ -54,7 +54,7 @@ const Chess = (() => {
     return false;
   }
   const kingSq = (s, t) => s.b.indexOf(t === 'w' ? 'K' : 'k');
-  const inCheck = (s, t) => attacked(s, kingSq(s, t), t === 'w' ? 'b' : 'w');
+  const inCheck = (s, t) => { const k = kingSq(s, t); return k >= 0 && attacked(s, k, t === 'w' ? 'b' : 'w'); };
 
   function pseudo(s, capsOnly){
     const out = [], b = s.b, t = s.turn, opp = t === 'w' ? 'b' : 'w';
@@ -175,134 +175,353 @@ const Chess = (() => {
   function material(s){ const n = { w: [], b: [] }; for (const p of s.b) if (p && p.toLowerCase() !== 'k') n[side(p)].push(p.toLowerCase()); return n; }
   function insufficient(s){ const m = material(s), all = m.w.concat(m.b); return all.length === 0 || (all.length === 1 && /[nb]/.test(all[0])); }
   function key(s){ return s.b.map(p => p || '.').join('') + s.turn + s.cas + s.ep; }
-  return { fromFEN, START, legal, make, unmake, inCheck, best, perft, insufficient, key, side, VAL };
+  /* score of a move for the side making it (higher = better), searching `depth` plies */
+  function scoreMove(s, m, depth){ deadline = Date.now() + 3000; make(s, m); const sc = -search(s, Math.max(0, depth - 1), -Infinity, Infinity, 1); unmake(s); return sc; }
+  /* moves `t` could make right now even if it isn't their turn */
+  function movesFor(s, t){ const old = s.turn, oldEp = s.ep; s.turn = t; if (t !== old) s.ep = -1; const ms = legal(s); s.turn = old; s.ep = oldEp; return ms; }
+  return { fromFEN, START, legal, make, unmake, inCheck, best, perft, insufficient, key, side, VAL, attacked, scoreMove, movesFor };
 })();
 
 /* ---------------- Bee Chess UI ---------------- */
 const LEVELS = [['Larva', 'just hatched, very forgiving'], ['Worker', 'knows the rules, makes mistakes'], ['Soldier', 'thinks ahead, punishes blunders'], ['Queen', 'the real deal. Good luck.']];
-const GLYPH = { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' };
+/* the bee cast: [bee name, chess name] */
+const NAMES = { k: ['Drone King', 'king'], q: ['Queen Bee', 'queen'], r: ['Hive', 'rook'], b: ['Flower', 'bishop'], n: ['Butterfly', 'knight'], p: ['Worker', 'pawn'] };
+const sqName = i => 'abcdefgh'[i & 7] + (8 - (i >> 3));
+const sqIdx = n => (8 - +n[1]) * 8 + (n.charCodeAt(0) - 97);
+const pname = p => NAMES[p.toLowerCase()][0];
+
+/* hand-drawn pieces (100×100). Honey team = white, Midnight team = black */
+const TEAM = {
+  w: { body: '#FFC629', stripe: '#1E1606', wing: '#EAF5FF', ink: '#1E1606', crown: '#F5B700', jewel: '#D9533B', skep: '#F2C46B', skepLine: '#A86F12', petal: '#FFFDF4', centre: '#F5B700', bfly: '#FF9F43', spot: '#1E1606', eye: '#FFFFFF' },
+  b: { body: '#3A2D52', stripe: '#C9B4F2', wing: '#B9AADA', ink: '#120C1C', crown: '#C9B4F2', jewel: '#FFC629', skep: '#5D4C7D', skepLine: '#241B37', petal: '#9B79D6', centre: '#3A2D52', bfly: '#7C5CC0', spot: '#E9DEFF', eye: '#E9DEFF' },
+};
+function beeBody(T, cx, cy, r, wings){
+  const w = wings ? `<ellipse cx="${cx - r * .9}" cy="${cy - r * .75}" rx="${r * .62}" ry="${r * .42}" fill="${T.wing}" stroke="${T.ink}" stroke-width="3.5" transform="rotate(-25 ${cx - r * .9} ${cy - r * .75})"/>
+    <ellipse cx="${cx + r * .9}" cy="${cy - r * .75}" rx="${r * .62}" ry="${r * .42}" fill="${T.wing}" stroke="${T.ink}" stroke-width="3.5" transform="rotate(25 ${cx + r * .9} ${cy - r * .75})"/>` : '';
+  const id = 'c' + Math.random().toString(36).slice(2, 8);
+  return `${w}<clipPath id="${id}"><circle cx="${cx}" cy="${cy}" r="${r}"/></clipPath>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="${T.body}"/>
+    <g clip-path="url(#${id})" fill="${T.stripe}"><rect x="${cx - r}" y="${cy + r * .22}" width="${r * 2}" height="${r * .26}"/><rect x="${cx - r}" y="${cy + r * .62}" width="${r * 2}" height="${r * .26}"/></g>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${T.ink}" stroke-width="4"/>
+    <circle cx="${cx - r * .34}" cy="${cy - r * .2}" r="${r * .16}" fill="${T.eye}" stroke="${T.ink}" stroke-width="2"/><circle cx="${cx + r * .34}" cy="${cy - r * .2}" r="${r * .16}" fill="${T.eye}" stroke="${T.ink}" stroke-width="2"/>
+    <circle cx="${cx - r * .3}" cy="${cy - r * .18}" r="${r * .07}" fill="${T.ink}"/><circle cx="${cx + r * .38}" cy="${cy - r * .18}" r="${r * .07}" fill="${T.ink}"/>`;
+}
+function pieceSvg(p){
+  const t = Chess.side(p), T = TEAM[t], k = p.toLowerCase();
+  let g = '';
+  if (k === 'p') g = `<path d="M43 38 Q38 26 32 24 M57 38 Q62 26 68 24" stroke="${T.ink}" stroke-width="3" fill="none" stroke-linecap="round"/>` + beeBody(T, 50, 62, 21, true);
+  if (k === 'k') g = beeBody(T, 50, 64, 26, true) +
+    `<path d="M30 40 L30 22 L40 31 L50 16 L60 31 L70 22 L70 40 Z" fill="${T.crown}" stroke="${T.ink}" stroke-width="3.5" stroke-linejoin="round"/>
+     <path d="M50 2 V14 M44 7 H56" stroke="${T.ink}" stroke-width="4.5" stroke-linecap="round"/><circle cx="50" cy="32" r="3.5" fill="${T.jewel}"/>`;
+  if (k === 'q') g = beeBody(T, 50, 64, 25, true) +
+    `<path d="M28 42 L26 22 L37 33 L43 16 L50 31 L57 16 L63 33 L74 22 L72 42 Z" fill="${T.crown}" stroke="${T.ink}" stroke-width="3.5" stroke-linejoin="round"/>
+     ${[[26, 20], [43, 13], [57, 13], [74, 20]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4.5" fill="${T.jewel}" stroke="${T.ink}" stroke-width="2.5"/>`).join('')}`;
+  if (k === 'r') g = `<path d="M20 84 Q18 42 50 18 Q82 42 80 84 Z" fill="${T.skep}" stroke="${T.ink}" stroke-width="4" stroke-linejoin="round"/>
+     ${[34, 48, 62, 74].map(y => { const half = y < 40 ? 14 : y < 52 ? 24 : 28; return `<path d="M${50 - half} ${y} Q50 ${y + 5} ${50 + half} ${y}" stroke="${T.skepLine}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`; }).join('')}
+     <path d="M41 84 V74 Q50 64 59 74 V84 Z" fill="${T.ink}"/><rect x="14" y="82" width="72" height="9" rx="4" fill="${T.skepLine}" stroke="${T.ink}" stroke-width="3"/>`;
+  if (k === 'b') g = `<path d="M50 88 V46" stroke="#3E7D33" stroke-width="6" stroke-linecap="round"/>
+     <ellipse cx="62" cy="66" rx="12" ry="6" fill="#5FA453" stroke="${T.ink}" stroke-width="3" transform="rotate(-30 62 66)"/>
+     ${[0, 60, 120, 180, 240, 300].map(a => `<ellipse cx="${50 + Math.cos(a * Math.PI / 180) * 15}" cy="${33 + Math.sin(a * Math.PI / 180) * 15}" rx="11" ry="8" fill="${T.petal}" stroke="${T.ink}" stroke-width="3" transform="rotate(${a} ${50 + Math.cos(a * Math.PI / 180) * 15} ${33 + Math.sin(a * Math.PI / 180) * 15})"/>`).join('')}
+     <circle cx="50" cy="33" r="9" fill="${T.centre}" stroke="${T.ink}" stroke-width="3"/><ellipse cx="50" cy="90" rx="20" ry="5" fill="${T.ink}" opacity=".85"/>`;
+  if (k === 'n') g = `<path d="M47 22 Q40 10 33 10 M53 22 Q60 10 67 10" stroke="${T.ink}" stroke-width="3" fill="none" stroke-linecap="round"/>
+     <path d="M48 36 Q20 8 10 30 Q6 52 46 50 Z M52 36 Q80 8 90 30 Q94 52 54 50 Z" fill="${T.bfly}" stroke="${T.ink}" stroke-width="3.5" stroke-linejoin="round"/>
+     <path d="M47 52 Q22 58 24 76 Q34 88 48 64 Z M53 52 Q78 58 76 76 Q66 88 52 64 Z" fill="${T.bfly}" stroke="${T.ink}" stroke-width="3.5" stroke-linejoin="round"/>
+     <circle cx="27" cy="32" r="5" fill="${T.spot}"/><circle cx="73" cy="32" r="5" fill="${T.spot}"/><circle cx="34" cy="70" r="3.5" fill="${T.spot}"/><circle cx="66" cy="70" r="3.5" fill="${T.spot}"/>
+     <ellipse cx="50" cy="52" rx="6" ry="27" fill="${T.body}" stroke="${T.ink}" stroke-width="3.5"/><path d="M45 48 H55 M45 58 H55" stroke="${T.stripe}" stroke-width="3"/>`;
+  return `<svg class="pc" viewBox="0 0 100 100" aria-hidden="true">${g}</svg>`;
+}
+/* the board, shared by games and lessons */
+function boardHTML(s, o){
+  o = o || {};
+  const flip = !!o.flip, checkSq = Chess.inCheck(s, s.turn) ? s.b.indexOf(s.turn === 'w' ? 'K' : 'k') : -1;
+  const targets = new Set((o.moves || []).map(m => m.to)), honey = new Set(o.honey || []), threat = new Set(o.threats || []), hint = o.hint || null;
+  let cells = '';
+  for (let v = 0; v < 64; v++) {
+    const i = flip ? 63 - v : v, r = i >> 3, c = i & 7, p = s.b[i];
+    const cls = ['ch-sq', (r + c) % 2 ? 'd' : 'l', i === o.sel ? 'sel' : '', o.last && (i === o.last.from || i === o.last.to) ? 'last' : '', i === checkSq ? 'chk' : '',
+      targets.has(i) ? (p ? 'cap' : 'tgt') : '', threat.has(i) ? 'thr' : '', hint && (i === hint.from || i === hint.to) ? 'hint' : ''].join(' ');
+    const label = (c === (flip ? 7 : 0) ? `<i class="rk">${8 - r}</i>` : '') + (r === (flip ? 0 : 7) ? `<i class="fl">${'abcdefgh'[c]}</i>` : '');
+    const desc = sqName(i) + (p ? ', ' + (Chess.side(p) === 'w' ? 'Honey ' : 'Midnight ') + NAMES[p.toLowerCase()][0] + ' (' + NAMES[p.toLowerCase()][1] + ')' : '') + (honey.has(i) ? ', honey drop' : '');
+    cells += `<button class="${cls}" data-sq="${i}" aria-label="${desc}">${label}${p ? pieceSvg(p) : honey.has(i) ? '<span class="ch-honey" aria-hidden="true"></span>' : ''}</button>`;
+  }
+  return `<div class="ch-frame"><div class="ch-board">${cells}</div></div>`;
+}
 const SAY = {
   start: ['Let’s dance. I’m the one with the stinger. 🐝', 'Bzz. Your move, genius.', 'I’ve been practising on flowers. They lost.'],
   myCap: ['Yoink. 🐝', 'Mine now. Thanks!', 'Oops, did you need that?', 'Nom.'],
   yourCap: ['Hey! I needed that.', 'Rude. Very rude.', 'Okay, that one hurt.', 'I meant to do that. Strategy.'],
-  check: ['Check! Bzz bzz. 👑', 'Your king looks nervous.', 'Knock knock. Check.'],
+  check: ['Check! Bzz bzz. 👑', 'Your Drone King looks nervous.', 'Knock knock. Check.'],
   checked: ['Check?! How dare you.', 'Ow. Okay. Thinking…', 'Fine. I see you.'],
   think: ['Thinking… 🤔', 'Hmm…', 'Calculating your doom…', 'Hold on, counting petals…'],
   win: ['Checkmate. Bisi wins! Better luck next time 😌', 'Checkmate! The hive is undefeated.'],
   lose: ['Checkmate… you beat me. I’m not crying, it’s pollen. 😭', 'Okay, you win. Rematch. Now.'],
   draw: ['A draw. We’re equally brilliant.', 'Draw! Nobody stings anybody today.'],
 };
-let ch = null;   // current chess game
-function chessNew(level, color){
-  ch = { s: Chess.fromFEN(Chess.START), level, you: color || 'w', sel: -1, moves: [], last: null, over: '', say: pick(SAY.start), mood: 'happy', reps: {}, thinking: false, caps: { w: [], b: [] } };
-  store.set('chess-level', level);
+/* your pieces Bisi could win right now (attacked and not safely defended) */
+function threatsTo(s, me){
+  const opp = me === 'w' ? 'b' : 'w', caps = Chess.movesFor(s, opp).filter(m => m.cap && Chess.side(m.cap) === me);
+  const out = new Map();
+  for (const m of caps) {
+    const victim = Chess.VAL[m.cap.toLowerCase()], attacker = Chess.VAL[m.piece.toLowerCase()];
+    if (m.cap.toLowerCase() === 'k') continue;
+    if (!Chess.attacked(s, m.to, me) || attacker < victim) { const prev = out.get(m.to); if (!prev || Chess.VAL[prev.piece.toLowerCase()] > attacker) out.set(m.to, m); }
+  }
+  return [...out.values()];
+}
+function describeMove(m, who){
+  const nm = pname(m.piece), cn = NAMES[m.piece.toLowerCase()][1];
+  let t = `${who} ${nm} (${cn}) ${m.castle ? 'castled ' + (m.castle === 'k' ? 'kingside' : 'queenside') : 'went from ' + sqName(m.from) + ' to ' + sqName(m.to)}`;
+  if (m.cap) t += `, capturing ${who === 'My' ? 'your' : 'my'} ${pname(m.cap)}`;
+  if (m.promo) t += ` and became a ${pname(m.promo)}`;
+  return t + '.';
+}
+let ch = null;   // current game
+function chessNew(level, color, tutor){
+  ch = { s: Chess.fromFEN(Chess.START), level, you: color || 'w', tutor: !!tutor, sel: -1, moves: [], last: null, over: '', say: pick(SAY.start), mood: 'happy', reps: {}, thinking: false, caps: { w: [], b: [] }, hint: null, pending: null };
+  if (ch.tutor) ch.say = 'Tutor mode on 🎓 I’ll explain my moves, warn you about danger, and you can ask for a hint any time. Tap one of your pieces to see where it can go.';
+  store.set('chess-level', level); store.set('chess-tutor', !!tutor);
   saveChess();
 }
-function saveChess(){ if (!ch) return; store.set('chess-game', { b: ch.s.b, turn: ch.s.turn, cas: ch.s.cas, ep: ch.s.ep, half: ch.s.half, level: ch.level, you: ch.you, over: ch.over, caps: ch.caps, last: ch.last }); }
+function saveChess(){ if (!ch || ch.lesson) return; store.set('chess-game', { b: ch.s.b, turn: ch.s.turn, cas: ch.s.cas, ep: ch.s.ep, half: ch.s.half, level: ch.level, you: ch.you, tutor: ch.tutor, over: ch.over, caps: ch.caps, last: ch.last }); }
 function loadChess(){
   const g = store.get('chess-game', null); if (!g || g.over) return false;
-  ch = { s: { b: g.b, turn: g.turn, cas: g.cas, ep: g.ep, half: g.half || 0, hist: [] }, level: g.level, you: g.you, sel: -1, moves: [], last: g.last, over: '', say: 'Welcome back. I kept your seat warm. 🐝', mood: 'happy', reps: {}, thinking: false, caps: g.caps || { w: [], b: [] } };
+  ch = { s: { b: g.b, turn: g.turn, cas: g.cas, ep: g.ep, half: g.half || 0, hist: [] }, level: g.level, you: g.you, tutor: !!g.tutor, sel: -1, moves: [], last: g.last, over: '', say: 'Welcome back. I kept your seat warm. 🐝', mood: 'happy', reps: {}, thinking: false, caps: g.caps || { w: [], b: [] }, hint: null, pending: null };
   return true;
 }
 function chessView(root){
   if (!ch) { if (!loadChess()) return chessSetup(root); }
-  const s = ch.s, flip = ch.you === 'b', legal = ch.sel >= 0 ? ch.moves.filter(m => m.from === ch.sel) : [];
-  const targets = new Set(legal.map(m => m.to)), checkSq = Chess.inCheck(s, s.turn) ? s.b.indexOf(s.turn === 'w' ? 'K' : 'k') : -1;
-  let cells = '';
-  for (let v = 0; v < 64; v++) {
-    const i = flip ? 63 - v : v, r = i >> 3, c = i & 7, p = s.b[i], dark = (r + c) % 2 === 1;
-    const cls = ['ch-sq', dark ? 'd' : 'l', i === ch.sel ? 'sel' : '', ch.last && (i === ch.last.from || i === ch.last.to) ? 'last' : '', i === checkSq ? 'chk' : '', targets.has(i) ? (p ? 'cap' : 'tgt') : ''].join(' ');
-    const label = (c === (flip ? 7 : 0) ? `<i class="rk">${8 - r}</i>` : '') + (r === (flip ? 0 : 7) ? `<i class="fl">${'abcdefgh'[c]}</i>` : '');
-    cells += `<button class="${cls}" data-sq="${i}" aria-label="${'abcdefgh'[c]}${8 - r}${p ? ' ' + (Chess.side(p) === 'w' ? 'white' : 'black') + ' ' + ({k:'king',q:'queen',r:'rook',b:'bishop',n:'knight',p:'pawn'})[p.toLowerCase()] : ''}">${label}${p ? `<span class="pc ${Chess.side(p)}">${GLYPH[p.toLowerCase()]}︎</span>` : ''}</button>`;
-  }
-  const capRow = side => ch.caps[side].slice().sort((a, b) => Chess.VAL[b] - Chess.VAL[a]).map(p => `<span class="pc ${side === 'w' ? 'b' : 'w'}">${GLYPH[p]}\uFE0E</span>`).join('');
+  if (ch.lesson) return lessonView(root);
+  const s = ch.s, myTurn = s.turn === ch.you && !ch.over && !ch.thinking;
+  const threats = ch.tutor && myTurn && !ch.pending ? threatsTo(s, ch.you).map(m => m.to) : [];
+  const capRow = side => ch.caps[side].slice().sort((a, b) => Chess.VAL[b] - Chess.VAL[a]).map(p => `<span class="ch-mini">${pieceSvg(side === 'w' ? p : p.toUpperCase())}</span>`).join('');
   const bisiSide = ch.you === 'w' ? 'b' : 'w';
-  const stats = store.get('chess-stats', {});
-  const lv = LEVELS[ch.level - 1][0], rec = stats[lv] || { w: 0, l: 0, d: 0 };
-  root.innerHTML = `<div class="g-top"><button class="btn small ghost" data-gback>← Games</button><b>♟️ Bee Chess</b><span class="pill">vs ${lv} Bisi</span></div>
-    <div class="ch-bisi"><div class="ch-face">${bee(ch.mood, 64)}</div><div class="ch-say">${ch.say}</div></div>
+  const stats = store.get('chess-stats', {}), lv = LEVELS[ch.level - 1][0], rec = stats[lv] || { w: 0, l: 0, d: 0 };
+  root.innerHTML = `<div class="g-top"><button class="btn small ghost" data-gback>← Games</button><b>♟️ Bee Chess</b><span class="pill">${ch.tutor ? '🎓 ' : ''}vs ${lv} Bisi</span></div>
+    <div class="ch-bisi"><div class="ch-face">${bee(ch.mood, 64)}</div><div class="ch-say">${ch.say}${ch.pending ? `<div class="row" style="margin-top:8px"><button class="btn small primary" data-ch="takeback">Take it back</button><button class="btn small" data-ch="keep">Keep my move</button></div>` : ''}</div></div>
     <div class="ch-caps">${ch.caps[bisiSide].length ? '<small>Bisi took</small> ' + capRow(bisiSide) : ''}</div>
-    <div class="ch-board">${cells}</div>
+    ${boardHTML(s, { flip: ch.you === 'b', sel: ch.sel, moves: ch.sel >= 0 ? ch.moves.filter(m => m.from === ch.sel) : [], last: ch.last, threats, hint: ch.hint })}
     <div class="ch-caps">${ch.caps[ch.you].length ? '<small>You took</small> ' + capRow(ch.you) : ''}</div>
     <div class="row" style="justify-content:center;margin-top:10px">
-      <button class="btn small" data-ch="undo" ${ch.thinking || !ch.s.hist.length ? 'disabled' : ''}>↶ Undo</button>
+      ${ch.tutor ? `<button class="btn small" data-ch="hint" ${myTurn && !ch.pending ? '' : 'disabled'}>💡 Hint</button>` : ''}
+      <button class="btn small" data-ch="undo" ${ch.thinking || !s.hist.length ? 'disabled' : ''}>↶ Undo</button>
+      <button class="btn small" data-ch="tutor">${ch.tutor ? 'Tutor: on' : '🎓 Tutor'}</button>
       <button class="btn small" data-ch="new">New game</button>
     </div>
+    ${ch.tutor ? `<details class="ch-legend"><summary>Which bee is which?</summary>${Object.values(NAMES).map(([b, c], i) => `<div><span class="ch-mini">${pieceSvg('kqrbnp'[i].toUpperCase())}</span><b>${b}</b> = ${c}</div>`).join('')}</details>` : ''}
     <p class="note" style="text-align:center">Your record vs ${lv} Bisi: ${rec.w} won · ${rec.l} lost · ${rec.d} drawn</p>`;
 }
 function chessSetup(root){
-  const lvl = store.get('chess-level', 2), stats = store.get('chess-stats', {});
+  const lvl = store.get('chess-level', 2), stats = store.get('chess-stats', {}), tutor = store.get('chess-tutor', false), done = store.get('chess-lessons', []);
   root.innerHTML = `<div class="g-top"><button class="btn small ghost" data-gback>← Games</button><b>♟️ Bee Chess</b></div>
     <div class="card" style="text-align:center"><div style="width:110px;margin:0 auto">${bee('sassy', 110)}</div>
       <h3 style="font-family:var(--f-d);font-size:1.6rem;margin:6px 0">Play chess with Bisi</h3>
-      <p class="note">She plays with a real chess engine, never cheats, and talks a lot of trash.</p>
+      <div class="ch-cast">${'kqrbnp'.split('').map(k => `<div><span class="ch-mini big">${pieceSvg(k.toUpperCase())}</span><small>${NAMES[k][0]}</small></div>`).join('')}</div>
+      <button class="btn ${done.length < LESSONS.length ? 'primary' : ''}" data-ch="lessons" style="width:100%;margin:8px 0">📚 Learn to play: ${LESSONS.length} short lessons${done.length ? ` (${done.length}/${LESSONS.length} done)` : ''}</button>
       <div class="ch-lv">${LEVELS.map(([n, d], i) => { const r = stats[n]; return `<button class="btn ${i + 1 === lvl ? 'primary' : ''}" data-chlv="${i + 1}"><b>${n}</b><small>${d}${r ? ` · ${r.w}–${r.l}` : ''}</small></button>`; }).join('')}</div>
-      <div class="row" style="justify-content:center;margin-top:12px"><button class="btn" data-chgo="w">Play white (move first)</button><button class="btn" data-chgo="b">Play black</button></div>
+      <label class="ch-tut"><input type="checkbox" id="ch-tutor" ${tutor ? 'checked' : ''}> <span><b>🎓 Tutor mode</b>: Bisi explains her moves, warns you before blunders, and gives hints</span></label>
+      <div class="row" style="justify-content:center;margin-top:8px"><button class="btn" data-chgo="w">Play Honey (move first)</button><button class="btn" data-chgo="b">Play Midnight</button></div>
     </div>`;
+}
+function endGame(end){
+  ch.over = end;
+  const stats = store.get('chess-stats', {}), lv = LEVELS[ch.level - 1][0]; stats[lv] = stats[lv] || { w: 0, l: 0, d: 0 };
+  stats[lv][end === 'win' ? 'w' : end === 'loss' ? 'l' : 'd']++; store.set('chess-stats', stats);
+  ch.say = (end === 'win' ? pick(SAY.lose) : end === 'loss' ? pick(SAY.win) : pick(SAY.draw)) + `<div class="row" style="margin-top:8px"><button class="btn small primary" data-ch="again">Rematch</button><button class="btn small" data-ch="new">Change level</button></div>`;
+  ch.mood = end === 'win' ? 'crying' : end === 'loss' ? 'party' : 'happy';
+  if (end === 'win') store.set('pollen', store.get('pollen', 0) + 50 * ch.level);
 }
 function chessAfterMove(root, m, byYou){
   const s = ch.s;
-  ch.last = { from: m.from, to: m.to };
+  ch.last = { from: m.from, to: m.to }; ch.hint = null;
   if (m.cap) ch.caps[Chess.side(m.piece)].push(m.cap.toLowerCase());
   const k = Chess.key(s); ch.reps[k] = (ch.reps[k] || 0) + 1;
   const moves = Chess.legal(s), check = Chess.inCheck(s, s.turn);
   let end = '';
   if (!moves.length) end = check ? (byYou ? 'win' : 'loss') : 'draw';
   else if (s.half >= 100 || ch.reps[k] >= 3 || Chess.insufficient(s)) end = 'draw';
-  if (end) {
-    ch.over = end;
-    const stats = store.get('chess-stats', {}), lv = LEVELS[ch.level - 1][0]; stats[lv] = stats[lv] || { w: 0, l: 0, d: 0 };
-    stats[lv][end === 'win' ? 'w' : end === 'loss' ? 'l' : 'd']++; store.set('chess-stats', stats);
-    ch.say = end === 'win' ? pick(SAY.lose) : end === 'loss' ? pick(SAY.win) : pick(SAY.draw);
-    ch.mood = end === 'win' ? 'crying' : end === 'loss' ? 'party' : 'happy';
-    if (end === 'win') store.set('pollen', store.get('pollen', 0) + 50 * ch.level);
-  } else if (check) { ch.say = pick(byYou ? SAY.checked : SAY.check); ch.mood = byYou ? 'worried' : 'sassy'; }
-  else if (m.cap) { ch.say = pick(byYou ? SAY.yourCap : SAY.myCap); ch.mood = byYou ? 'worried' : 'party'; }
+  if (end) endGame(end);
+  else if (byYou) { if (check) { ch.say = pick(SAY.checked); ch.mood = 'worried'; } else if (m.cap) { ch.say = pick(SAY.yourCap); ch.mood = 'worried'; } }
+  else {
+    let say = check ? pick(SAY.check) : m.cap ? pick(SAY.myCap) : pick(['Your move.', 'Bzz. Go on.', 'Take your time. I have all day. (I don’t.)', '🐝']);
+    if (ch.tutor) {
+      say = describeMove(m, 'My') + ' ';
+      const now = Chess.movesFor(s, Chess.side(m.piece)).filter(x => x.from === m.to && x.cap && x.cap.toLowerCase() !== 'k');
+      if (check) say += 'That’s <b>check</b>: your Drone King is attacked, so you must protect him this move. ';
+      if (now.length) say += 'Now it’s eyeing your ' + [...new Set(now.map(x => pname(x.cap) + ' on ' + sqName(x.to)))].join(' and ') + '. ';
+      const thr = threatsTo(s, ch.you);
+      if (thr.length && !now.length) say += 'Careful: your ' + pname(thr[0].cap) + ' on ' + sqName(thr[0].to) + ' is in danger (red ring). ';
+      if (!check && !now.length && !thr.length) say += 'Your move. Tap 💡 if you want a hint.';
+    }
+    ch.say = say; ch.mood = check ? 'sassy' : m.cap ? 'party' : 'happy';
+  }
   saveChess();
   chessView(root);
-  if (end) setTimeout(() => { const say = root.querySelector('.ch-say'); if (say) say.innerHTML += `<div class="row" style="margin-top:8px"><button class="btn small primary" data-ch="again">Rematch</button><button class="btn small" data-ch="new">Change level</button></div>`; }, 50);
-  else if (byYou) bisiMoves(root);
+  if (!end && byYou) bisiMoves(root);
 }
 function bisiMoves(root){
-  ch.thinking = true; ch.say = pick(SAY.think); ch.mood = 'happy'; chessView(root);
+  ch.thinking = true; if (!ch.tutor) ch.say = pick(SAY.think); else ch.say += '<br><small>Bisi is thinking…</small>'; chessView(root);
   setTimeout(() => {
-    if (!ch || ch.over) return;
+    if (!ch || ch.over || ch.lesson) return;
     const m = Chess.best(ch.s, ch.level);
     ch.thinking = false;
     if (!m) return;
     Chess.make(ch.s, m);
-    if (!m.cap && !Chess.inCheck(ch.s, ch.s.turn)) { ch.say = pick(['Your move.', 'Bzz. Go on.', 'Take your time. I have all day. (I don’t.)', '🐝']); ch.mood = 'happy'; }
     chessAfterMove(root, m, false);
   }, 350);
 }
+/* tutor: is your move a blunder? (loses ≥ 2 pawns' worth compared with your best move) */
+function blunderCheck(m){
+  const s = ch.s, best = Chess.best(s, 3);
+  if (!best) return null;
+  const a = Chess.scoreMove(s, m, 2), b = Chess.scoreMove(s, best, 2);
+  if (b - a < 200) return null;
+  Chess.make(s, m);
+  const reply = Chess.best(s, 3);
+  Chess.unmake(s);
+  let why = 'that move gives me a big advantage';
+  if (reply && reply.cap) why = `then my ${pname(reply.piece)} can take your ${pname(reply.cap)} on ${sqName(reply.to)}`;
+  else if (reply) { Chess.make(s, m); Chess.make(s, reply); if (Chess.inCheck(s, s.turn) && !Chess.legal(s).length) why = 'then I have <b>checkmate</b>'; Chess.unmake(s); Chess.unmake(s); }
+  return { why, best };
+}
 function chessClick(root, e){
-  const lv = e.target.closest('[data-chlv]'); if (lv){ store.set('chess-level', +lv.dataset.chlv); chessSetup(root); return true; }
-  const go = e.target.closest('[data-chgo]'); if (go){ chessNew(store.get('chess-level', 2), go.dataset.chgo); chessView(root); if (ch.you === 'b') bisiMoves(root); return true; }
+  if (ch && ch.lesson) return lessonClick(root, e);
+  const ls = e.target.closest('[data-lesson]'); if (ls){ lessonStart(root, +ls.dataset.lesson); return true; }
+  const st = e.target.closest('[data-ch="setup"]'); if (st){ ch = null; chessSetup(root); return true; }
+  const lv = e.target.closest('[data-chlv]'); if (lv){ store.set('chess-level', +lv.dataset.chlv); store.set('chess-tutor', !!(root.querySelector('#ch-tutor') || {}).checked); chessSetup(root); return true; }
+  const go = e.target.closest('[data-chgo]'); if (go){ chessNew(store.get('chess-level', 2), go.dataset.chgo, (root.querySelector('#ch-tutor') || {}).checked); chessView(root); if (ch.you === 'b') bisiMoves(root); return true; }
   const a = e.target.closest('[data-ch]');
   if (a){
     const v = a.dataset.ch;
+    if (v === 'lessons'){ lessonsList(root); return true; }
     if (v === 'new'){ ch = null; store.set('chess-game', null); chessSetup(root); }
-    if (v === 'again'){ chessNew(ch.level, ch.you); chessView(root); if (ch.you === 'b') bisiMoves(root); }
+    if (v === 'again'){ chessNew(ch.level, ch.you, ch.tutor); chessView(root); if (ch.you === 'b') bisiMoves(root); }
+    if (v === 'tutor' && ch){ ch.tutor = !ch.tutor; store.set('chess-tutor', ch.tutor); ch.say = ch.tutor ? 'Tutor mode on 🎓 Red rings = your pieces in danger. 💡 = a hint. I’ll explain my moves.' : 'Tutor off. You’re on your own now. 😈'; saveChess(); chessView(root); }
+    if (v === 'hint' && ch && !ch.thinking){
+      const m = Chess.best(ch.s, 3);
+      if (m){ ch.hint = { from: m.from, to: m.to }; ch.say = `💡 Try your <b>${pname(m.piece)}</b> from ${sqName(m.from)} to ${sqName(m.to)}${m.cap ? ', taking my ' + pname(m.cap) : ''}. (Glowing squares.)`; chessView(root); }
+    }
+    if (v === 'takeback' && ch && ch.pending){ Chess.unmake(ch.s); ch.pending = null; ch.say = 'Good call. Have another look. 👀'; ch.mood = 'happy'; chessView(root); }
+    if (v === 'keep' && ch && ch.pending){ const m = ch.pending; ch.pending = null; chessAfterMove(root, m, true); }
     if (v === 'undo' && ch && !ch.thinking){
+      if (ch.pending){ Chess.unmake(ch.s); ch.pending = null; }
       const back = ch.s.turn === ch.you ? 2 : 1;
       for (let k = 0; k < back && ch.s.hist.length; k++){ const h = ch.s.hist[ch.s.hist.length - 1]; if (h.captured) { const arr = ch.caps[Chess.side(h.m.piece)]; const at = arr.lastIndexOf(h.captured.toLowerCase()); if (at >= 0) arr.splice(at, 1); } Chess.unmake(ch.s); }
-      ch.over = ''; ch.last = null; ch.sel = -1; ch.say = 'Fine, take it back. I saw nothing. 👀'; ch.mood = 'sassy'; saveChess(); chessView(root);
+      ch.over = ''; ch.last = null; ch.sel = -1; ch.hint = null; ch.say = 'Fine, take it back. I saw nothing. 👀'; ch.mood = 'sassy'; saveChess(); chessView(root);
     }
     return true;
   }
   const sq = e.target.closest('[data-sq]');
-  if (sq && ch && !ch.over && !ch.thinking && ch.s.turn === ch.you){
+  if (sq && ch && !ch.over && !ch.thinking && !ch.pending && ch.s.turn === ch.you){
     const i = +sq.dataset.sq, p = ch.s.b[i];
     if (ch.sel >= 0){
       const m = ch.moves.find(x => x.from === ch.sel && x.to === i && (!x.promo || x.promo === 'q'));
-      if (m){ ch.sel = -1; Chess.make(ch.s, m); chessAfterMove(root, m, true); return true; }
+      if (m){
+        ch.sel = -1;
+        const bl = ch.tutor ? blunderCheck(m) : null;
+        Chess.make(ch.s, m);
+        if (bl){ ch.pending = m; ch.mood = 'worried'; ch.say = `Hmm, wait! 🤔 If you do that, ${bl.why}. A better idea: your ${pname(bl.best.piece)} from ${sqName(bl.best.from)} to ${sqName(bl.best.to)}.`; ch.last = { from: m.from, to: m.to }; chessView(root); return true; }
+        chessAfterMove(root, m, true); return true;
+      }
     }
-    if (p && Chess.side(p) === ch.you){ ch.sel = i; ch.moves = Chess.legal(ch.s); }
-    else ch.sel = -1;
+    if (p && Chess.side(p) === ch.you){
+      ch.sel = i; ch.moves = Chess.legal(ch.s);
+      if (ch.tutor){ const n = ch.moves.filter(m => m.from === i).length; ch.say = `Your <b>${pname(p)}</b> (${NAMES[p.toLowerCase()][1]}): ${TIPS[p.toLowerCase()]} ${n ? `It has ${n} move${n === 1 ? '' : 's'} (dots).` : 'It can’t move right now.'}`; }
+    } else ch.sel = -1;
     chessView(root);
     return true;
   }
   return false;
+}
+const TIPS = { k: 'moves one square any way. Keep him safe: if he’s trapped, you lose.', q: 'goes any distance in straight lines or diagonals. Your strongest piece!', r: 'goes any distance up, down or sideways.', b: 'goes any distance diagonally, so it stays on one colour.', n: 'hops in an L shape (2 then 1) and can jump over pieces.', p: 'walks forward one square (two on its first move) and captures diagonally.' };
+
+/* ---------------- lessons ---------------- */
+const LESSONS = [
+  { t: 'The Worker (pawn)', p: 'p', fen: '8/8/3p4/8/8/8/4P3/8 w - - 0 1', honey: ['e4', 'e5'], goal: 'collect',
+    txt: 'Workers walk <b>forward</b>. On their first move they may step <b>two</b> squares. They <b>capture diagonally</b>, one square forward. Collect both honey drops, then capture the Midnight Worker.', extra: 'd6' },
+  { t: 'The Hive (rook)', p: 'r', fen: '8/8/8/8/8/8/8/R7 w - - 0 1', honey: ['a6', 'f6', 'f2'], goal: 'collect',
+    txt: 'A Hive slides <b>any distance</b> up, down, left or right, but can’t jump over pieces. Collect all the honey.' },
+  { t: 'The Flower (bishop)', p: 'b', fen: '8/8/8/8/8/8/8/2B5 w - - 0 1', honey: ['f4', 'd6', 'g3'], goal: 'collect',
+    txt: 'A Flower slides <b>diagonally</b>, any distance. It always stays on the same colour of square. Collect the honey.' },
+  { t: 'The Queen Bee (queen)', p: 'q', fen: '8/8/8/8/8/8/8/3Q4 w - - 0 1', honey: ['d6', 'h2', 'a2'], goal: 'collect',
+    txt: 'The Queen Bee is the strongest piece: she moves like a Hive <b>and</b> a Flower, any distance in a straight line or diagonal. Collect the honey.' },
+  { t: 'The Drone King (king)', p: 'k', fen: '8/8/8/8/8/8/8/4K3 w - - 0 1', honey: ['e2', 'f3', 'g3'], goal: 'collect',
+    txt: 'The Drone King moves <b>one square</b> in any direction. He’s slow but he’s the whole point: if he gets trapped, you lose. Collect the honey.' },
+  { t: 'The Butterfly (knight)', p: 'n', fen: '8/8/8/8/8/8/PPPP4/1N6 w - - 0 1', honey: ['c3', 'd5', 'f6'], goal: 'collect',
+    txt: 'Butterflies hop in an <b>L shape</b>: two squares one way, then one square sideways. They’re the only piece that can <b>jump over</b> others. Collect the honey.', blockers: true },
+  { t: 'Capturing', p: 'q', fen: '4b3/8/8/3p3n/8/8/8/3Q4 w - - 0 1', goal: 'captureAll',
+    txt: 'Move onto an enemy piece to <b>capture</b> it. It leaves the board. Use your Queen Bee to capture all three Midnight pieces.' },
+  { t: 'Check', p: 'k', fen: '4k3/8/8/8/8/8/8/R3K3 w - - 0 1', goal: 'check',
+    txt: 'When a piece attacks the enemy Drone King, that’s <b>check</b>. The other side must get out of it straight away. Put the Midnight Drone King in check with your Hive.' },
+  { t: 'Checkmate', p: 'k', fen: '6k1/5ppp/8/8/8/8/8/R5K1 w - - 0 1', goal: 'mate',
+    txt: '<b>Checkmate</b> = check with no escape. That’s how you win! The Midnight Drone King is boxed in by his own Workers. Find the move that checkmates him.' },
+  { t: 'Checkmate with the Queen Bee', p: 'q', fen: '7k/8/6K1/8/8/8/8/5Q2 w - - 0 1', goal: 'mate',
+    txt: 'Your Drone King guards the squares next to him. Team up with your Queen Bee to give checkmate in one move.' },
+  { t: 'Castling', p: 'r', fen: 'r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1', goal: 'castle',
+    txt: '<b>Castling</b> tucks your Drone King safely behind a wall: he moves <b>two squares</b> towards a Hive, and the Hive hops over to his other side. Allowed only if neither has moved, nothing is between them, and he isn’t in check. Tap your Drone King, then the square two to the right (g1).' },
+  { t: 'Promotion', p: 'p', fen: '7k/4P3/8/8/8/8/8/K7 w - - 0 1', goal: 'promo',
+    txt: 'A Worker that reaches the far side gets <b>promoted</b>, usually to a Queen Bee! Walk your Worker to the last row.' },
+];
+function lessonsList(root){
+  const done = new Set(store.get('chess-lessons', []));
+  ch = null;
+  root.innerHTML = `<div class="g-top"><button class="btn small ghost" data-ch="setup">← Bee Chess</button><b>📚 Learn to play</b><span class="pill">${done.size}/${LESSONS.length}</span></div>
+    <p class="g-intro">Twelve tiny lessons. Each one teaches a piece or rule; you try it right away on the board.</p>
+    <div class="ch-lessons">${LESSONS.map((l, i) => `<button class="card ch-lesson ${done.has(i) ? 'done' : ''}" data-lesson="${i}"><span class="ch-mini big">${pieceSvg(l.p.toUpperCase())}</span><span><small>Lesson ${i + 1}</small><b>${l.t}</b></span><span class="ch-tick">${done.has(i) ? '✓' : '›'}</span></button>`).join('')}</div>`;
+}
+function lessonStart(root, i){
+  const L = LESSONS[i];
+  ch = { lesson: true, li: i, s: Chess.fromFEN(L.fen), sel: -1, moves: [], honey: (L.honey || []).map(sqIdx), extra: L.extra ? sqIdx(L.extra) : -1, last: null, done: false, msg: '', mood: 'happy' };
+  lessonView(root);
+}
+function lessonGoalText(){
+  const L = LESSONS[ch.li];
+  if (L.goal === 'collect') return ch.honey.length ? `🍯 Honey left: ${ch.honey.length}` : (ch.extra >= 0 ? '⚔️ Now capture the Midnight Worker' : '');
+  if (L.goal === 'captureAll') return `⚔️ Midnight pieces left: ${ch.s.b.filter(p => p && Chess.side(p) === 'b').length}`;
+  return '';
+}
+function lessonView(root){
+  const L = LESSONS[ch.li], last = ch.li === LESSONS.length - 1;
+  root.innerHTML = `<div class="g-top"><button class="btn small ghost" data-ch="lessons">← Lessons</button><b>Lesson ${ch.li + 1}</b><span class="pill">${L.t}</span></div>
+    <div class="ch-bisi"><div class="ch-face">${bee(ch.done ? 'party' : ch.mood, 64)}</div><div class="ch-say">${ch.done ? `<b>${pick(['You got it! 🎉', 'Perfect! 🐝', 'Look at you go!', 'Nailed it!'])}</b> ${ch.msg}` : L.txt}${ch.msg && !ch.done ? `<div class="ch-warn">${ch.msg}</div>` : ''}</div></div>
+    <div class="ch-goal">${ch.done ? '' : lessonGoalText()}</div>
+    ${boardHTML(ch.s, { sel: ch.sel, moves: ch.sel >= 0 ? ch.moves.filter(m => m.from === ch.sel) : [], last: ch.last, honey: ch.honey })}
+    <div class="row" style="justify-content:center;margin-top:10px">
+      <button class="btn small" data-lesson="${ch.li}">↺ Restart</button>
+      ${ch.done ? (last ? `<button class="btn small primary" data-ch="setup">Play Bisi now →</button>` : `<button class="btn small primary" data-lesson="${ch.li + 1}">Next lesson →</button>`) : ''}
+    </div>`;
+}
+function lessonClick(root, e){
+  const l = e.target.closest('[data-lesson]'); if (l){ lessonStart(root, +l.dataset.lesson); return true; }
+  const a = e.target.closest('[data-ch]');
+  if (a){ if (a.dataset.ch === 'lessons') lessonsList(root); else if (a.dataset.ch === 'setup'){ ch = null; chessSetup(root); } return true; }
+  const sq = e.target.closest('[data-sq]'); if (!sq || ch.done) return true;
+  const i = +sq.dataset.sq, p = ch.s.b[i], L = LESSONS[ch.li];
+  if (ch.sel >= 0){
+    const m = ch.moves.find(x => x.from === ch.sel && x.to === i && (!x.promo || x.promo === 'q'));
+    if (m){
+      ch.sel = -1; ch.msg = '';
+      Chess.make(ch.s, m); ch.last = { from: m.from, to: m.to };
+      let ok = false, undo = '';
+      if (L.goal === 'collect'){ ch.honey = ch.honey.filter(h => h !== m.to); ok = !ch.honey.length && (ch.extra < 0 || m.to === ch.extra); }
+      else if (L.goal === 'captureAll') ok = !ch.s.b.some(x => x && Chess.side(x) === 'b');
+      else if (L.goal === 'check'){ ok = Chess.inCheck(ch.s, 'b'); if (!ok) undo = 'Not check yet. Find a square where your Hive attacks the Midnight Drone King along a straight line.'; }
+      else if (L.goal === 'mate'){ ok = Chess.inCheck(ch.s, 'b') && !Chess.legal(ch.s).length; if (!ok) undo = 'Not quite: after that, the Midnight Drone King could still escape or capture. Try again!'; }
+      else if (L.goal === 'castle'){ ok = !!m.castle; if (!ok) undo = 'That’s a normal move. Tap your Drone King (e1), then g1 or c1 to castle.'; }
+      else if (L.goal === 'promo') ok = !!m.promo;
+      if (undo){ Chess.unmake(ch.s); ch.last = null; ch.msg = undo; ch.mood = 'worried'; }
+      else if (!ok && ch.s.turn === 'b'){ ch.s.turn = 'w'; ch.s.ep = -1; }   // lessons only move your pieces
+      if (ok){
+        ch.done = true;
+        ch.msg = { collect: 'That’s exactly how it moves.', captureAll: 'Capturing is just moving onto an enemy piece.', check: 'The Midnight Drone King is in check. In a real game, Midnight must escape now.', mate: 'Checkmate! In a real game, that’s the win.', castle: 'Your Drone King is tucked safely in the corner with a Hive beside him.', promo: 'Your Worker became a Queen Bee! 👑' }[L.goal];
+        const d = new Set(store.get('chess-lessons', [])); d.add(ch.li); store.set('chess-lessons', [...d]);
+        store.set('pollen', store.get('pollen', 0) + 10);
+      }
+      lessonView(root); return true;
+    }
+  }
+  if (p && Chess.side(p) === 'w'){ ch.sel = i; ch.moves = Chess.legal(ch.s); } else ch.sel = -1;
+  lessonView(root);
+  return true;
 }
 
 /* ---------------- Bisi Flight (arcade) ---------------- */
@@ -433,7 +652,7 @@ function pairsWin(){
 /* ---------------- registry ---------------- */
 let active = null, root = null;
 const FUN = {
-  chess:  { name: 'Bee Chess', icon: '♟️', blurb: 'Play chess against Bisi: four levels from Larva to Queen. She talks trash.', start: r => chessView(r) },
+  chess:  { name: 'Bee Chess', icon: '♟️', blurb: 'Bee-themed chess against Bisi, from Larva to Queen. New to chess? There are lessons and a tutor.', start: r => chessView(r) },
   flight: { name: 'Bisi Flight', icon: '🐝', blurb: 'Tap to fly between the flowers and grab nectar. Harder the longer you last.', start: r => flightStart(r) },
   pairs:  { name: 'Pollen Pairs', icon: '🃏', blurb: 'Flip cards to match symbols, units and words with their meanings.', start: r => pairsSetup(r) },
 };
@@ -450,7 +669,7 @@ function onClick(e){
 }
 window.FTFun = {
   list: FUN,
-  meta(k){ if (k === 'chess'){ const s = store.get('chess-stats', {}); const w = Object.values(s).reduce((a, x) => a + x.w, 0); return w ? `${w} win${w === 1 ? '' : 's'}` : ''; }
+  meta(k){ if (k === 'chess'){ const s = store.get('chess-stats', {}); const w = Object.values(s).reduce((a, x) => a + x.w, 0); const l = store.get('chess-lessons', []).length; return w ? `${w} win${w === 1 ? '' : 's'}` : l ? `${l}/12 lessons` : 'New: lessons'; }
            if (k === 'flight'){ const b = store.get('flight-best', 0); return b ? 'Best ' + b : ''; }
            if (k === 'pairs'){ const b = Object.values(store.get('pairs-best', {})); return b.length ? 'Best ' + Math.min(...b) + ' moves' : ''; } return ''; },
   start(k, el){ stop(); active = k; root = el; if (!el.dataset.funWired){ el.addEventListener('click', onClick); el.dataset.funWired = 1; } FUN[k].start(el); },

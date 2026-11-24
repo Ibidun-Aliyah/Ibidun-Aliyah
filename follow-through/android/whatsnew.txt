@@ -1,1 +1,1 @@
-new games: Bee Chess against Bisi, Bisi Flight and Pollen Pairs
+Bee Chess gets bee pieces, a honeycomb board, 12 lessons and a tutor mode
