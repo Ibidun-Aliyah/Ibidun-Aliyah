@@ -487,6 +487,11 @@ section{margin-top:28px}
         <button class="btn" id="me-sheet">Open my sheet</button>
       </div>
     </section>
+    <section>
+      <div class="sh"><h2>App version</h2></div>
+      <div class="card"><p id="app-version" style="margin:0 0 10px"></p>
+        <div class="row"><button class="btn small" id="me-update">Check for updates</button></div></div>
+    </section>
     <div class="meadow" id="meadow" aria-hidden="true"></div>
   </div>
 </div>
@@ -577,21 +582,22 @@ async function load(quiet){
   if (window.FTWelcome) FTWelcome.syncProfile().then(renderProfileCard);
   D = j; try { localStorage.setItem('ft-dash', JSON.stringify(j)); localStorage.setItem('ft-dash-at', String(Date.now())); } catch(e){}
   if (window.Android && Android.saveDashboard) Android.saveDashboard(JSON.stringify(j));
-  checkUpdate();
   if (window.Android && Android.streak && !statsSent){ statsSent = true; call({ action:'stats', streak: Android.streak(), url: Android.webAppUrl() }); }
   if (j.today){ TODAY = parse(j.today); }
   render();
   autoSort();
 }
-/* the Android app checks the website for a newer version (friends get updates this way too) */
-let updateChecked = false;
-async function checkUpdate(){
-  if (updateChecked || !window.Android || Android.web || !Android.appVersion) return;
-  updateChecked = true;
-  try {
-    const v = await fetch(INVITE_BASE + 'version.json', { cache:'no-store' }).then(r => r.json());
-    if (v && v.versionCode > Android.appVersion()) banner('info', `🐝 Follow-Through ${v.versionName} is out: ${v.whatsNew || 'new things from Bisi'}.`, 'Update');
-  } catch(e){}
+/* newer app version (the Android app checks the website and calls this) — stays until you update */
+let updateBanner = '';
+window.__update = (v, asked) => {
+  updateBanner = v ? `<div class="banner info"><span>🐝 Follow-Through ${esc(v.versionName)} is out: ${esc(v.whatsNew || 'new things from Bisi')}.</span><button class="btn small" data-banner="Update">Update</button></div>` : '';
+  if (asked) toast(v ? `Version ${v.versionName} is ready. Tap Update on Today.` : 'You have the latest version 🐝');
+  render(); renderVersion();
+};
+function renderVersion(){
+  const el = $('#app-version'); if (!el) return;
+  if (!window.Android || Android.web || !Android.appVersionName){ el.closest('section').hidden = true; return; }
+  el.innerHTML = `You have <b>version ${esc(Android.appVersionName())}</b>.` + (updateBanner ? ' A newer one is ready.' : '');
 }
 async function autoSort(){
   if (sorting || !D || !D.ai.hasKey) return;
@@ -651,7 +657,7 @@ function nextStep(r){
 let sticky = '';
 function banner(kind, text, action){
   sticky = `<div class="banner ${kind}"><span>${esc(text)}</span>${action?`<button class="btn small" data-banner="${esc(action)}">${esc(action)}</button>`:''}</div>`;
-  $('#banners').innerHTML = sticky;
+  $('#banners').innerHTML = updateBanner + sticky;
 }
 function render(){
   $('#today').textContent = TODAY.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
@@ -670,7 +676,7 @@ function render(){
   if (!D.ai.hasKey) b.push(`<div class="banner warn"><span>Turn on instant sorting, essays and CV tailoring: add your free Gemini key.</span><button class="btn small" data-banner="Settings">Set up</button></div>`);
   if (sorting) b.push(`<div class="banner info"><span class="spin"></span><span>Sorting ${newCount} new ${newCount===1?'capture':'captures'}…</span></div>`);
   else if (newCount && D.ai.hasKey) b.push(`<div class="banner info"><span>${newCount} new ${newCount===1?'capture':'captures'} waiting.</span><button class="btn small" data-banner="Sort now">Sort now</button></div>`);
-  $('#banners').innerHTML = sticky + b.join('');
+  $('#banners').innerHTML = updateBanner + sticky + b.join('');
 
   const week = act.filter(r => { const d = days(r.Deadline); return d !== null && d >= 0 && d <= 7; }).length;
   $('#tiles').innerHTML = [
@@ -1128,6 +1134,8 @@ document.addEventListener('click', e => {
   if (b.dataset.prof === 'edit') FTWelcome.editProfile(); else FTWelcome.start(true);
 });
 renderProfileCard();
+renderVersion();
+$('#me-update').onclick = () => { if (window.Android && Android.checkUpdate){ toast('Checking…'); Android.checkUpdate(); } };
 
 /* ---------- upload screenshots (iPhone and Android) ---------- */
 function shrinkToJpeg(file){

@@ -65,6 +65,7 @@ public class MainActivity extends Activity {
             @Override public void onPageFinished(WebView v, String url) {
                 loaded = true; v.postDelayed(MainActivity.this::checkClipboard, 1500);
                 handleExtras(getIntent());
+                pushUpdateInfo(false);
             }
 
             @Override
@@ -171,6 +172,17 @@ public class MainActivity extends Activity {
         Focus.reset(this);   // you came back: the scrolling session is over
         if (Tracker.queued(this) > 0) Tracker.flushQueue(this, null);
         if (loaded && web != null) web.evaluateJavascript("window.__onResume && window.__onResume()", null);
+        pushUpdateInfo(false);
+    }
+
+    /** Tells the dashboard about a newer version (checked natively: no web restrictions, cached for 30 min). */
+    private void pushUpdateInfo(boolean force) {
+        final android.content.Context app = getApplicationContext();
+        new Thread(() -> {
+            JSONObject j = Updates.check(app, force);
+            final String js = "window.__update && window.__update(" + (j == null ? "null" : j.toString()) + "," + force + ")";
+            runOnUiThread(() -> { if (loaded && web != null) web.evaluateJavascript(js, null); });
+        }).start();
     }
 
     /** Widgets and notifications open the app on a particular screen. */
@@ -310,6 +322,12 @@ public class MainActivity extends Activity {
                 startActivity(Intent.createChooser(send, "Send your invite"));
             });
         }
+
+        @JavascriptInterface
+        public String appVersionName() { return Updates.currentName(MainActivity.this); }
+
+        @JavascriptInterface
+        public void checkUpdate() { pushUpdateInfo(true); }
 
         @JavascriptInterface
         public long appVersion() {

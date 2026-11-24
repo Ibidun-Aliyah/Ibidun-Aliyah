@@ -9,6 +9,7 @@ public class NagJob extends JobService {
     public boolean onStartJob(JobParameters params) {
         new Thread(() -> {
             Nag.refresh(getApplicationContext(), true);
+            try { Updates.notifyIfNew(getApplicationContext()); } catch (Exception ignored) {}
             jobFinished(params, false);
         }).start();
         return true;
