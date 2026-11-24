@@ -244,7 +244,6 @@ const GAMES = {
   words: { name:'Word Hive', icon:'📖', blurb:'Vocabulary from academic to rare. Missed words come back until you learn them.', gen:wordGen, mode:'round' },
   math:  { name:'Number Sprint', icon:'🧮', blurb:'60 seconds of mental maths: arithmetic up to logs, derivatives and determinants.', gen:mathGen, mode:'sprint' },
   bits:  { name:'Bit Buzz', icon:'⚡', blurb:'Binary, hex, logic gates, Ohm\'s law, dividers, RC circuits. Mechatronics brain food.', gen:bitGen, mode:'round' },
-  seq:   { name:'Pattern Hunt', icon:'🔢', blurb:'What comes next? Sequences from easy to properly sneaky.', gen:seqGen, mode:'round' },
 };
 
 const LINES = {

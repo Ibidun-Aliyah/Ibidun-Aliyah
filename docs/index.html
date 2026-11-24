@@ -375,11 +375,15 @@ section{margin-top:28px}
 .fl-wrap canvas{display:block}
 .fl-over{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:20px;background:rgba(255,253,244,.88)}
 .fl-over h3{font-family:var(--f-d);font-size:1.8rem;margin:0}.fl-over p{margin:0}
+/* Honey Drop */
+.hd-bar{display:flex;justify-content:space-between;align-items:center;margin:0 2px 8px;font-weight:700}.hd-bar b{font-family:var(--f-d);font-size:1.4rem}
+.hd-next span{font-size:1.4rem;vertical-align:middle}.hd-wrap{touch-action:none}.hd-chain{font-size:1.15rem;line-height:1.6}
 /* Pollen Pairs */
 .pp-grid{display:grid;gap:8px}
-.pp-card{aspect-ratio:3/4;border:2.5px solid var(--stroke);border-radius:12px 10px 13px 9px;background:var(--sun);box-shadow:3px 3px 0 var(--sh);display:grid;place-items:center;padding:4px;cursor:pointer;color:#1E1606;font:inherit;transition:transform .2s}
+.pp-card{min-height:92px;min-width:0;border:2.5px solid var(--stroke);border-radius:12px 10px 13px 9px;background:var(--sun);box-shadow:3px 3px 0 var(--sh);display:grid;place-items:center;padding:8px 6px;cursor:pointer;color:#1E1606;font:inherit;transition:transform .2s}
 .pp-card.up{background:#FFFDF4;transform:rotateY(0)}.pp-card.ok{background:#DDEFCF;opacity:.85}
-.pp-back{font-size:1.6rem}.pp-big{font-family:var(--f-d);font-size:1.9rem}.pp-sm{font-size:.82rem;font-weight:700;line-height:1.15;text-align:center;overflow-wrap:anywhere}
+.pp-card.tall{min-height:118px}
+.pp-back{font-size:1.6rem}.pp-big{font-family:var(--f-d);font-size:1.8rem;line-height:1.05;text-align:center;overflow-wrap:anywhere;hyphens:auto}.pp-sm{font-size:.9rem;font-weight:700;line-height:1.2;text-align:center;overflow-wrap:break-word;hyphens:auto;max-width:100%}
 .trsort{margin-top:-4px}.trsort button{font-size:.85rem;padding:3px 10px}
 .effort{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.92rem}
 .fab{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:14;width:58px;height:58px;border-radius:50% 46% 52% 44%;border:3px solid var(--stroke);background:var(--sun);color:#1E1606;font-size:2rem;line-height:1;box-shadow:4px 5px 0 var(--sh);cursor:pointer}
@@ -389,7 +393,7 @@ section{margin-top:28px}
 .qa .sos{flex-direction:row;align-items:flex-start;gap:10px;background:var(--rose-soft);border:2px dashed var(--rose);border-radius:14px;padding:10px 12px;font-weight:700}
 .qa .sos input{width:22px;height:22px;flex:none;accent-color:var(--rose);margin-top:1px}
 .qa .sos small{display:block;font-weight:600;color:var(--muted)}
-.misfiled{margin-top:12px}.misfiled .row{margin-top:6px}
+.misfiled{margin-top:12px;display:flex;flex-direction:column;gap:4px}.mis-item{padding:10px 0;border-top:2px dashed var(--line)}.mis-item:first-of-type{border-top:0}.mis-t{font-weight:800;font-size:1rem;line-height:1.3;overflow-wrap:anywhere}.misfiled .row{margin-top:8px;flex-wrap:wrap}
 .colors{display:flex;gap:8px;flex-wrap:wrap}
 .colors button{width:34px;height:34px;border-radius:50%;border:2.5px solid var(--stroke);cursor:pointer}
 .colors button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--card),0 0 0 5.5px var(--stroke)}
@@ -1116,8 +1120,10 @@ function renderMisfiled(rows){
   const gone = new Set(misDismissed()), since = Date.now() - 3 * 864e5;
   const mis = rows.filter(r => r.Status === 'Closed' && /not an opportunity/i.test(r.Outcome || '') && !gone.has(r.ID) && new Date(r.Captured).getTime() > since && r.Link);
   el.innerHTML = mis.length ? `<div class="card misfiled"><b>🙈 Bisi filed ${mis.length === 1 ? 'this' : 'these'} as “not an opportunity”</b>
-    ${mis.slice(0, 3).map(r => `<div class="row" style="align-items:center"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.Title || r.Link)}</span>
-      <button class="btn small primary" data-mis="track" data-id="${esc(r.ID)}">Wrong, track it</button><button class="btn small ghost" data-mis="junk" data-id="${esc(r.ID)}">Junk</button></div>`).join('')}</div>` : '';
+    ${mis.slice(0, 3).map(r => { let host = ''; try { host = new URL(r.Link).hostname.replace(/^www\./, ''); } catch(e){}
+      return `<div class="mis-item"><div class="mis-t">${esc(r.Title || r.Link)}</div>
+        <div class="note">${esc([host, r['Saved from'] ? 'saved from ' + r['Saved from'] : '', r.Captured ? new Date(r.Captured).toLocaleString('en-GB', { weekday:'short', hour:'numeric', minute:'2-digit' }) : ''].filter(Boolean).join(' · '))}</div>
+        <div class="row"><button class="btn small primary" data-mis="track" data-id="${esc(r.ID)}">Wrong, track it</button><button class="btn small" data-url="${esc(r.Link)}">Open link</button><button class="btn small ghost" data-mis="junk" data-id="${esc(r.ID)}">Junk</button></div></div>`; }).join('')}</div>` : '';
 }
 async function trackIt(id){
   const r = (D.rows || []).find(x => x.ID === id); if (!r) return;

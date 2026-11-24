@@ -137,7 +137,7 @@ button that downloads the newest APK. The web version updates itself. `web/build
 Four quick learning games, all offline, on **Today → Bored? Brain break** (or Me). **Word Hive** (vocabulary from
 academic to rare; missed words come back until you learn them), **Number Sprint** (60-second mental maths, up to logs,
 derivatives, determinants and integrals), **Bit Buzz** (binary/hex, logic gates, Ohm's law, dividers, RC, ADCs, two's
-complement) and **Pattern Hunt** (sequences). Levels go Freshman → Professor: three right in a row moves you up, two
+complement) and Levels go Freshman → Professor: three right in a row moves you up, two
 wrong moves you down, and your level is kept.
 
 ### Just for fun
@@ -146,7 +146,8 @@ Larva, Worker, Soldier, Queen), with undo, your record per level, and trash talk
 (queen), Hive (rook), Flower (bishop), Butterfly (knight), Worker (pawn); Honey team vs Midnight team on a honeycomb board.
 **Learn to play**: 12 interactive lessons (each piece, capturing, check, checkmate, castling, promotion). **Tutor mode**:
 Bisi explains her moves, rings your pieces in danger, warns before blunders, and gives hints. **Bisi Flight**: tap to fly between
-flowers and grab nectar; a bee fact after each round. **Pollen Pairs**: a memory game matching chemistry symbols, SI units
+flowers and grab nectar; a bee fact after each round. **Honey Drop**: drop pollen, honey, flowers… into a jar; two of the same merge into the next one up (ten levels, up to
+a crown); don't let it overflow. **Pollen Pairs**: a memory game matching chemistry symbols, SI units
 or Word Hive words with their meanings. Source: `android/app/src/main/assets/fun.js`.
 
 ## Offline
@@ -199,3 +200,8 @@ cd android
 echo "sdk.dir=/path/to/Android/sdk" > local.properties
 ./gradlew assembleDebug        # → app/build/outputs/apk/debug/app-debug.apk
 ```
+
+## Ideas for later
+- **Dark theme with Bisi as a beetle**, full of beetle puns (paused until there's a mood board for the alt/gothic look).
+- Gothic/alt look for a friend: earlier directions on the design canvas weren't right; waiting for her mood board.
+- Semester planner (timetable, course deadlines, exams, CGPA).

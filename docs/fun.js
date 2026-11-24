@@ -622,11 +622,12 @@ function pairsGo(root, deck){
   pairsView();
 }
 function pairsView(){
-  const cols = pp.cards.length > 16 ? 4 : pp.cards.length > 12 ? 4 : 3;
+  const cols = 3, tall = pp.deck === 'words';
   pp.root.innerHTML = `<div class="g-top"><button class="btn small ghost" data-gback>← Games</button><b>🃏 ${DECKS[pp.deck].name}</b><span class="pill">${pp.moves} moves</span></div>
     <div class="pp-grid" style="grid-template-columns:repeat(${cols},minmax(0,1fr))">${pp.cards.map((c, i) => {
       const up = pp.open.includes(i) || pp.done.has(c.id);
-      return `<button class="pp-card ${up ? 'up' : ''} ${pp.done.has(c.id) ? 'ok' : ''}" data-ppc="${i}" aria-label="${up ? c.t : 'Hidden card'}">${up ? `<span class="${c.big ? 'pp-big' : 'pp-sm'}">${c.t}</span>` : '<span class="pp-back">🐝</span>'}</button>`; }).join('')}</div>`;
+      const len = String(c.t).length, size = c.big ? (len > 9 ? 1.05 : len > 5 ? 1.35 : 1.8) : (len > 26 ? .74 : len > 16 ? .82 : .92);
+      return `<button class="pp-card ${up ? 'up' : ''} ${pp.done.has(c.id) ? 'ok' : ''} ${tall ? 'tall' : ''}" data-ppc="${i}" aria-label="${up ? c.t : 'Hidden card'}">${up ? `<span class="${c.big ? 'pp-big' : 'pp-sm'}" style="font-size:${size}rem">${c.t}</span>` : '<span class="pp-back">🐝</span>'}</button>`; }).join('')}</div>`;
 }
 function pairsFlip(i){
   if (pp.lock || pp.open.includes(i) || pp.done.has(pp.cards[i].id)) return;
@@ -649,17 +650,129 @@ function pairsWin(){
       <div class="row" style="justify-content:center"><button class="btn primary" data-pp="${pp.deck}">Play again</button><button class="btn" data-ppback>Other decks</button></div></div>`;
 }
 
+/* ---------------- Honey Drop (drop & merge) ---------------- */
+const HD_LV = [
+  { n:'Pollen',    e:'✨', c:'#FFF6C2' }, { n:'Honey',     e:'🍯', c:'#FFD36E' }, { n:'Daisy',     e:'🌼', c:'#FFFFFF' },
+  { n:'Clover',    e:'🍀', c:'#C9EBB2' }, { n:'Ladybug',   e:'🐞', c:'#FFB3A7' }, { n:'Sunflower', e:'🌻', c:'#FFC629' },
+  { n:'Butterfly', e:'🦋', c:'#BFD9FF' }, { n:'Bee',       e:'🐝', c:'#FFE08A' }, { n:'Hibiscus',  e:'🌺', c:'#FFC1D6' },
+  { n:'Queen',     e:'👑', c:'#F5B700' },
+];
+const HD_PTS = [1, 3, 6, 10, 15, 21, 28, 36, 45, 55];
+let hd = null;
+function hdStart(root){
+  const best = store.get('drop-best', 0);
+  root.innerHTML = `<div class="g-top"><button class="btn small ghost" data-gback>← Games</button><b>🍯 Honey Drop</b><span class="pill">Best ${best}</span></div>
+    <div class="hd-bar"><span>Score <b id="hd-score">0</b></span><span class="hd-next">Next <span id="hd-next"></span></span></div>
+    <div class="fl-wrap hd-wrap"><canvas id="hd-cv" aria-label="Honey Drop. Tap where to drop."></canvas>
+      <div class="fl-over" id="hd-over"><div style="width:90px;margin:0 auto">${bee('happy', 90)}</div><h3>Honey Drop</h3>
+        <p>Tap to drop. Two of the same touch → they merge into the next one up.</p>
+        <p class="hd-chain">${HD_LV.map(l => l.e).join(' → ')}</p><button class="btn primary" data-hd="go">Play</button></div></div>
+    <p class="note" style="text-align:center">Don’t let the jar overflow past the dashed line.</p>`;
+  const cv = root.querySelector('#hd-cv'), wrap = cv.parentElement, dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W = wrap.clientWidth, H = Math.min(600, Math.max(420, Math.round(innerHeight * 0.62)));
+  cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  const g = cv.getContext('2d'); g.scale(dpr, dpr);
+  const unit = Math.min(W, 420) / 26;
+  hd = { root, cv, g, W, H, unit, balls: [], state: 'ready', raf: 0, aim: W / 2, cur: 0, next: 0, score: 0, cool: 0, danger: 0, top: 96 };
+  const aimAt = e => { const r = cv.getBoundingClientRect(); hd.aim = Math.max(14, Math.min(W - 14, e.clientX - r.left)); };
+  cv.addEventListener('pointerdown', e => { if (hd && hd.state === 'play'){ aimAt(e); hd.holding = true; } });
+  cv.addEventListener('pointermove', e => { if (hd && hd.state === 'play') aimAt(e); });
+  cv.addEventListener('pointerup', e => { if (hd && hd.state === 'play'){ aimAt(e); hdDrop(); hd.holding = false; } });
+  hdDraw();
+}
+const hdR = lv => hd.unit * (0.95 + lv * 0.42);
+const hdRand = () => [0, 0, 1, 1, 2, 3][Math.floor(Math.random() * 6)];
+function hdGo(){
+  Object.assign(hd, { state: 'play', balls: [], score: 0, cur: hdRand(), next: hdRand(), cool: 0, danger: 0 });
+  hd.root.querySelector('#hd-over').hidden = true;
+  hdUi();
+  const step = () => { if (!hd || hd.state !== 'play') return; for (let k = 0; k < 3; k++) hdTick(); hdDraw(); hd.raf = requestAnimationFrame(step); };
+  hd.raf = requestAnimationFrame(step);
+}
+function hdUi(){ const s = hd.root.querySelector('#hd-score'), n = hd.root.querySelector('#hd-next'); if (s) s.textContent = hd.score; if (n) n.textContent = HD_LV[hd.next].e; }
+function hdDrop(){
+  if (hd.cool > 0) return;
+  const r = hdR(hd.cur), x = Math.max(r + 4, Math.min(hd.W - r - 4, hd.aim));
+  hd.balls.push({ x, y: hd.top - 40, vx: 0, vy: 0, lv: hd.cur, r, age: 0 });
+  hd.cur = hd.next; hd.next = hdRand(); hd.cool = 45; hdUi();
+}
+function hdTick(){
+  const B = hd.balls, W = hd.W, floor = hd.H - 8, grav = 0.12;
+  if (hd.cool > 0) hd.cool--;
+  for (const b of B){ b.age++; b.vy += grav; b.x += b.vx; b.y += b.vy; b.vx *= 0.995;
+    if (b.x - b.r < 6){ b.x = 6 + b.r; b.vx = Math.abs(b.vx) * 0.3; }
+    if (b.x + b.r > W - 6){ b.x = W - 6 - b.r; b.vx = -Math.abs(b.vx) * 0.3; }
+    if (b.y + b.r > floor){ b.y = floor - b.r; b.vy *= -0.15; b.vx *= 0.92; } }
+  for (let i = 0; i < B.length; i++) for (let j = i + 1; j < B.length; j++){
+    const a = B[i], b = B[j]; if (a.dead || b.dead) continue;
+    const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 0.01, min = a.r + b.r;
+    if (d >= min) continue;
+    if (a.lv === b.lv){
+      a.dead = b.dead = true;
+      hd.score += HD_PTS[a.lv] * 2;
+      if (a.lv < HD_LV.length - 1){ const lv = a.lv + 1; B.push({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, vx: 0, vy: -1, lv, r: hdR(lv), age: 60, pop: 12 }); }
+      else hd.score += 200;
+      hdUi(); continue;
+    }
+    const nx = dx / d, ny = dy / d, over = min - d, ma = a.r * a.r, mb = b.r * b.r, tot = ma + mb;
+    a.x -= nx * over * (mb / tot); a.y -= ny * over * (mb / tot); b.x += nx * over * (ma / tot); b.y += ny * over * (ma / tot);
+    const rel = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
+    if (rel < 0){ const imp = -(1.1) * rel / (1 / ma + 1 / mb); a.vx -= imp * nx / ma; a.vy -= imp * ny / ma; b.vx += imp * nx / mb; b.vy += imp * ny / mb; }
+  }
+  hd.balls = B.filter(b => !b.dead);
+  const over = hd.balls.some(b => b.age > 120 && b.y - b.r < hd.top && Math.abs(b.vy) < 0.6);
+  hd.danger = over ? hd.danger + 1 : Math.max(0, hd.danger - 2);
+  if (hd.danger > 240) hdOver();
+}
+function hdBall(g, x, y, lv, r, pop){
+  const L = HD_LV[lv], rr = r * (pop ? 1 + pop / 40 : 1);
+  g.fillStyle = L.c; g.strokeStyle = '#1E1606'; g.lineWidth = 2.5;
+  g.beginPath(); g.arc(x, y, rr, 0, Math.PI * 2); g.fill(); g.stroke();
+  g.fillStyle = 'rgba(255,255,255,.55)'; g.beginPath(); g.ellipse(x - rr * .35, y - rr * .4, rr * .28, rr * .18, -.5, 0, Math.PI * 2); g.fill();
+  g.font = `${Math.round(rr * 1.05)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText(L.e, x, y + rr * .06);
+}
+function hdDraw(){
+  const g = hd.g, W = hd.W, H = hd.H;
+  g.fillStyle = '#FFF8E1'; g.fillRect(0, 0, W, H);
+  g.strokeStyle = 'rgba(201,138,11,.16)'; g.lineWidth = 1;
+  for (let y = 0; y < H; y += 28) for (let x = (y / 28) % 2 ? 0 : 16; x < W; x += 32){ g.beginPath(); for (let k = 0; k < 6; k++){ const a = Math.PI / 3 * k + Math.PI / 6; g[k ? 'lineTo' : 'moveTo'](x + 14 * Math.cos(a), y + 14 * Math.sin(a)); } g.closePath(); g.stroke(); }
+  g.setLineDash([8, 7]); g.strokeStyle = hd.danger > 60 ? '#D9533B' : 'rgba(30,22,6,.35)'; g.lineWidth = 2;
+  g.beginPath(); g.moveTo(6, hd.top); g.lineTo(W - 6, hd.top); g.stroke(); g.setLineDash([]);
+  if (hd.state === 'play'){
+    const r = hdR(hd.cur), x = Math.max(r + 4, Math.min(W - r - 4, hd.aim));
+    g.strokeStyle = 'rgba(30,22,6,.18)'; g.lineWidth = 2; g.beginPath(); g.moveTo(x, hd.top - 40 + r); g.lineTo(x, H); g.stroke();
+    if (hd.cool <= 0) hdBall(g, x, hd.top - 40, hd.cur, r);
+  }
+  for (const b of hd.balls){ if (b.pop) b.pop--; hdBall(g, b.x, b.y, b.lv, b.r, b.pop); }
+  g.strokeStyle = '#1E1606'; g.lineWidth = 4; g.beginPath(); g.moveTo(4, hd.top - 20); g.lineTo(4, H - 4); g.lineTo(W - 4, H - 4); g.lineTo(W - 4, hd.top - 20); g.stroke();
+}
+function hdOver(){
+  hd.state = 'over'; cancelAnimationFrame(hd.raf);
+  const prev = store.get('drop-best', 0), top = Math.max(...hd.balls.map(b => b.lv), 0);
+  if (hd.score > prev) store.set('drop-best', hd.score);
+  store.set('pollen', store.get('pollen', 0) + Math.round(hd.score / 5));
+  const o = hd.root.querySelector('#hd-over'); o.hidden = false;
+  o.innerHTML = `<div style="width:80px;margin:0 auto">${bee(hd.score > prev && prev ? 'party' : 'worried', 80)}</div>
+    <h3>${hd.score > prev && prev ? 'New best! 🎉' : 'The jar overflowed!'}</h3>
+    <p>Score <b>${hd.score}</b> · you reached <b>${HD_LV[top].e} ${HD_LV[top].n}</b></p>
+    <p class="note">${top >= 9 ? 'A Queen?! Bisi bows. 👑' : 'Next goal: ' + HD_LV[Math.min(9, top + 1)].e + ' ' + HD_LV[Math.min(9, top + 1)].n}</p>
+    <button class="btn primary" data-hd="go">Play again</button>`;
+}
+
 /* ---------------- registry ---------------- */
 let active = null, root = null;
 const FUN = {
   chess:  { name: 'Bee Chess', icon: '♟️', blurb: 'Bee-themed chess against Bisi, from Larva to Queen. New to chess? There are lessons and a tutor.', start: r => chessView(r) },
   flight: { name: 'Bisi Flight', icon: '🐝', blurb: 'Tap to fly between the flowers and grab nectar. Harder the longer you last.', start: r => flightStart(r) },
+  drop:   { name: 'Honey Drop', icon: '🍯', blurb: 'Drop and merge: two of the same become the next one up, from pollen all the way to a crown.', start: r => hdStart(r) },
   pairs:  { name: 'Pollen Pairs', icon: '🃏', blurb: 'Flip cards to match symbols, units and words with their meanings.', start: r => pairsSetup(r) },
 };
 function onClick(e){
   if (!active) return;
   if (active === 'chess' && chessClick(root, e)) return;
   if (active === 'flight'){ const b = e.target.closest('[data-fl]'); if (b) flightGo(); return; }
+  if (active === 'drop'){ const b = e.target.closest('[data-hd]'); if (b) hdGo(); return; }
   if (active === 'pairs'){
     const d = e.target.closest('[data-pp]'); if (d) return pairsGo(root, d.dataset.pp);
     const n = e.target.closest('[data-ppn]'); if (n){ store.set('pairs-n', +n.dataset.ppn); return pairsSetup(root); }
@@ -671,11 +784,12 @@ window.FTFun = {
   list: FUN,
   meta(k){ if (k === 'chess'){ const s = store.get('chess-stats', {}); const w = Object.values(s).reduce((a, x) => a + x.w, 0); const l = store.get('chess-lessons', []).length; return w ? `${w} win${w === 1 ? '' : 's'}` : l ? `${l}/12 lessons` : 'New: lessons'; }
            if (k === 'flight'){ const b = store.get('flight-best', 0); return b ? 'Best ' + b : ''; }
+           if (k === 'drop'){ const b = store.get('drop-best', 0); return b ? 'Best ' + b : 'New!'; }
            if (k === 'pairs'){ const b = Object.values(store.get('pairs-best', {})); return b.length ? 'Best ' + Math.min(...b) + ' moves' : ''; } return ''; },
   start(k, el){ stop(); active = k; root = el; if (!el.dataset.funWired){ el.addEventListener('click', onClick); el.dataset.funWired = 1; } FUN[k].start(el); },
   stop,
   _chess: Chess,
 };
-function stop(){ if (fl){ cancelAnimationFrame(fl.raf); fl.state = 'over'; fl = null; } if (ch) saveChess(); ch = null; pp = null; active = null; }
+function stop(){ if (hd){ cancelAnimationFrame(hd.raf); hd.state = 'over'; hd = null; } if (fl){ cancelAnimationFrame(fl.raf); fl.state = 'over'; fl = null; } if (ch) saveChess(); ch = null; pp = null; active = null; }
 if (typeof module !== 'undefined') module.exports = { Chess };
 })();
