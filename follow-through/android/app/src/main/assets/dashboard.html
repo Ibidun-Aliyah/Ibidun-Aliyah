@@ -373,6 +373,14 @@ section{margin-top:28px}
 .pp-back{font-size:1.6rem}.pp-big{font-family:var(--f-d);font-size:1.9rem}.pp-sm{font-size:.82rem;font-weight:700;line-height:1.15;text-align:center;overflow-wrap:anywhere}
 .trsort{margin-top:-4px}.trsort button{font-size:.85rem;padding:3px 10px}
 .effort{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.92rem}
+.fab{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:14;width:58px;height:58px;border-radius:50% 46% 52% 44%;border:3px solid var(--stroke);background:var(--sun);color:#1E1606;font-size:2rem;line-height:1;box-shadow:4px 5px 0 var(--sh);cursor:pointer}
+.qa{display:flex;flex-direction:column;gap:12px}
+.qa label{display:flex;flex-direction:column;gap:5px;font-weight:800;font-size:.92rem}
+.qa input[type=url],.qa input[type=date],.qa textarea{border:2.5px solid var(--stroke);border-radius:var(--r2);padding:10px 12px;background:var(--card);color:var(--ink);font:inherit;font-weight:600}
+.qa .sos{flex-direction:row;align-items:flex-start;gap:10px;background:var(--rose-soft);border:2px dashed var(--rose);border-radius:14px;padding:10px 12px;font-weight:700}
+.qa .sos input{width:22px;height:22px;flex:none;accent-color:var(--rose);margin-top:1px}
+.qa .sos small{display:block;font-weight:600;color:var(--muted)}
+.misfiled{margin-top:12px}.misfiled .row{margin-top:6px}
 .colors{display:flex;gap:8px;flex-wrap:wrap}
 .colors button{width:34px;height:34px;border-radius:50%;border:2.5px solid var(--stroke);cursor:pointer}
 .colors button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--card),0 0 0 5.5px var(--stroke)}
@@ -410,6 +418,7 @@ section{margin-top:28px}
     <div class="bisi" id="bisi"><div class="face" id="bisi-face"></div><div class="say"><b>Bisi</b><span id="bisi-say">Buzzing in…</span></div></div>
     <div class="hello" id="hello">Loading your tracker…</div>
     <div id="banners"></div>
+    <div id="misfiled"></div>
     <div class="tiles" id="tiles"></div>
     <input class="search gsearch" id="gq" type="search" placeholder="Search everything: opportunities, tips, notes…" aria-label="Search everything">
     <div id="gresults"></div>
@@ -427,6 +436,7 @@ section{margin-top:28px}
     <section>
       <div class="sh"><h2>Everything</h2><small>swipe left to archive or delete</small></div>
       <div class="row" style="margin-bottom:12px">
+        <button class="btn small primary" id="add-quick">＋ Quick add</button>
         <button class="btn small" id="add-voice"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="vertical-align:-3px"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg> Save by voice</button>
         <button class="btn small" id="add-paste"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="vertical-align:-3px"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg> Paste a link</button>
         <label class="btn small" for="add-shots"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px"><rect x="3" y="5" width="18" height="15" rx="3"/><circle cx="12" cy="12.5" r="3.5"/><path d="M8 5l1.5-2h5L16 5"/></svg> Upload screenshots</label>
@@ -538,6 +548,7 @@ section{margin-top:28px}
   </div>
 </div>
 
+<button class="fab" id="fab" aria-label="Quick add: paste a link">＋</button>
 <nav class="tabbar" aria-label="Sections">
   <button data-go="today" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><ellipse cx="12" cy="14" rx="7" ry="6" fill="#F6C343" stroke="currentColor" stroke-width="2"/><path d="M8 13h8M9 16.5h6" stroke="currentColor" stroke-width="2"/><ellipse cx="8" cy="6.5" rx="3.5" ry="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><ellipse cx="16" cy="6.5" rx="3.5" ry="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Today</span></button>
   <button data-go="tracker"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>Tracker</span></button>
@@ -755,6 +766,7 @@ function render(){
   const newCount = rows.filter(r => r.Status === 'New').length;
 
   bisiSay(rows, need);
+  renderMisfiled(D.rows || []);
   const nick = window.FTWelcome ? (FTWelcome.profile().nickname || '') : '';
   $('#hello').innerHTML = (nick ? `Hi ${esc(nick)}! ` : '') + (need.length ? `<em>${need.length} ${need.length===1?'thing needs':'things need'} you</em> today.` :
     rows.length ? 'You\'re on top of it. <em>Nothing urgent today.</em>' : 'Nothing saved yet. <em>Tap the bubble on your next find.</em>');
@@ -1012,14 +1024,113 @@ window.__clip = url => {
   const known = (D.rows || []).some(r => r.Link && (r.Link === url || url.indexOf(r.Link) === 0));
   if (known) return;
   const b = document.createElement('div');
-  b.className = 'banner info'; b.innerHTML = `<span>You copied a link: <b>${esc(url.replace(/^https?:\/\//, '').slice(0, 40))}…</b> Save it?</span><button class="btn small primary">Save</button><button class="btn small ghost">No</button>`;
+  b.className = 'banner info'; b.innerHTML = `<span>You copied a link: <b>${esc(url.replace(/^https?:\/\//, '').slice(0, 40))}…</b> Add it?</span><button class="btn small primary">Add</button><button class="btn small ghost">No</button>`;
   const [yes, no] = b.querySelectorAll('button');
-  yes.onclick = async () => { b.remove(); toast('Saving…'); active_();
-    const j = await call({ action: 'capture', app: 'Copied link', url, screenText: url });
-    if (j.ok){ toast('Saved. Bisi is sorting it. 🐝'); await load(true); autoSort(); } else toast("Couldn't reach your sheet."); };
+  yes.onclick = () => { b.remove(); quickAdd(url); };
   no.onclick = () => b.remove();
   go('today'); $('#banners').prepend(b);
 };
+
+/* ---------- quick add: paste a link (or describe it) and Bisi does the rest ---------- */
+function fetchPage(url){
+  return new Promise(res => {
+    if (!window.Android || !Android.fetchPage){ res({ ok:false }); return; }
+    const id = 'p' + (++seq); pending[id] = res; Android.fetchPage(url, id);
+    setTimeout(() => { if (pending[id]){ delete pending[id]; res({ ok:false }); } }, 25000);
+  });
+}
+function quickAdd(prefill, sos){
+  openSheet(`<div class="sheet-head"><h3>Quick add</h3><button class="btn small ghost" data-close>Close</button></div>
+    <div class="sheet-body qa">
+      <label>Link <input id="qa-url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" placeholder="Paste a link to the post or page" value="${esc(prefill || '')}"></label>
+      <button class="btn small" id="qa-paste" style="align-self:flex-start">📋 Paste from clipboard</button>
+      <label>Anything Bisi should know? <small style="font-weight:600;color:var(--muted)">Optional, or use this instead of a link</small>
+        <textarea id="qa-note" rows="3" placeholder="e.g. Jim Ovia scholarship for undergrads, closes tomorrow"></textarea></label>
+      <label>Deadline, if you know it <input id="qa-dl" type="date"></label>
+      <label class="sos"><input type="checkbox" id="qa-sos" ${sos ? 'checked' : ''}><span>🚨 SOS: I'm applying in a rush<small>Bisi checks your eligibility straight away, turns the requirements into a checklist, and puts it in Preparing so essay drafts and a tailored CV follow.</small></span></label>
+      <button class="btn primary" id="qa-go">Add it 🐝</button>
+      <div class="note" id="qa-status" aria-live="polite"></div>
+    </div>`);
+  const u = $('#qa-url'); if (!prefill) setTimeout(() => u.focus(), 50);
+  $('#qa-paste').onclick = async () => {
+    let t = '';
+    try { t = window.Android && Android.clipText ? Android.clipText() : (navigator.clipboard ? await navigator.clipboard.readText() : ''); } catch(e){}
+    const m = /https?:\/\/\S+/.exec(t || '');
+    if (m) u.value = m[0]; else if (t) $('#qa-note').value = t.slice(0, 1500); else toast('Your clipboard is empty. Copy the link first.');
+  };
+  $('#qa-go').onclick = async () => {
+    const url = u.value.trim(), note = $('#qa-note').value.trim(), dl = $('#qa-dl').value, isSos = $('#qa-sos').checked;
+    if (!url && !note){ toast('Paste a link or write what it is.'); return; }
+    if (url && !/^https?:\/\//.test(url)){ toast('That link should start with https://'); return; }
+    const btn = $('#qa-go'); btn.disabled = true;
+    const st = m => { const el = $('#qa-status'); if (el) el.innerHTML = `<span class="spin"></span> ${m}`; };
+    const out = await addFlow({ url, note, deadline: dl, sos: isSos }, st);
+    btn.disabled = false;
+    if (out.error){ const el = $('#qa-status'); if (el) el.textContent = out.error === 'not_connected' ? 'Connect your tracker in Settings first.' : "Couldn't reach your tracker. Try again?"; return; }
+    if (out.queued){ closeSheet(); toast("Saved on your phone. It'll go in when you're online."); return; }
+    afterAdd(out, isSos);
+  };
+}
+/* save → let Gemini sort it → fix it if Gemini wrongly binned it (you added it on purpose) → apply deadline / SOS */
+async function addFlow(o, status){
+  status = status || (() => {});
+  status(o.url && window.Android && Android.fetchPage ? 'Reading the page…' : 'Saving…');
+  const j = await call({ action:'capture', app: o.app || 'Quick add', url: o.url || '', screenText: o.note || o.url || '', note: o.note || '' });
+  if (!j.ok) return { error: j.error };
+  if (j.queued) return { queued: true };
+  active_();
+  if (D && D.ai && D.ai.hasKey){ status('Bisi is sorting it…'); await call({ action:'process' }); }
+  await load(true);
+  let r = ((D && D.rows) || []).find(x => x.ID === j.id);
+  const fix = {};
+  if (r && r.Status === 'Closed' && /not an opportunity/i.test(r.Outcome || '')) Object.assign(fix, { Status:'Saved', Category:'Opportunity', Outcome:'' });
+  if (o.deadline) fix.Deadline = o.deadline;
+  if (o.sos){ fix.Status = 'Preparing'; fix['Remind on'] = iso(TODAY); fix.Notes = '🚨 SOS application. ' + ((r && r.Notes) || ''); }
+  if (Object.keys(fix).length){ status('Almost there…'); await call({ action:'update', id: j.id, fields: fix }); await load(true); r = ((D && D.rows) || []).find(x => x.ID === j.id); }
+  return { id: j.id, row: r, rescued: !!fix.Category };
+}
+function afterAdd(out, sos){
+  closeSheet();
+  if (!out.row){ toast('Saved. Bisi will sort it shortly. 🐝'); return; }
+  go('tracker'); render();
+  openItem(out.id);
+  if (sos){
+    toast('🚨 SOS mode on. Checking your eligibility now…');
+    setTimeout(() => { const b = document.querySelector('#sheet [data-x="eligibility"]'); if (b && !b.disabled) b.click(); }, 400);
+  } else toast(out.rescued ? 'Added. (Bisi doubted it, but you know best.) 🐝' : 'Added and sorted. 🐝');
+}
+
+/* ---------- saves Bisi binned as "not an opportunity": one tap to rescue ---------- */
+const misDismissed = () => { try { return JSON.parse(localStorage.getItem('ft-misfiled') || '[]'); } catch(e){ return []; } };
+function renderMisfiled(rows){
+  const el = $('#misfiled'); if (!el) return;
+  const gone = new Set(misDismissed()), since = Date.now() - 3 * 864e5;
+  const mis = rows.filter(r => r.Status === 'Closed' && /not an opportunity/i.test(r.Outcome || '') && !gone.has(r.ID) && new Date(r.Captured).getTime() > since && r.Link);
+  el.innerHTML = mis.length ? `<div class="card misfiled"><b>🙈 Bisi filed ${mis.length === 1 ? 'this' : 'these'} as “not an opportunity”</b>
+    ${mis.slice(0, 3).map(r => `<div class="row" style="align-items:center"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.Title || r.Link)}</span>
+      <button class="btn small primary" data-mis="track" data-id="${esc(r.ID)}">Wrong, track it</button><button class="btn small ghost" data-mis="junk" data-id="${esc(r.ID)}">Junk</button></div>`).join('')}</div>` : '';
+}
+async function trackIt(id){
+  const r = (D.rows || []).find(x => x.ID === id); if (!r) return;
+  toast('On it! Bisi is taking a proper look… 🐝');
+  let text = String(r['Screen text'] || '');
+  if (r.Link){ const pg = await fetchPage(r.Link); if (pg.ok && pg.text) text = 'PAGE TEXT (' + r.Link + '):\n' + pg.text; }
+  const hasKey = D.ai && D.ai.hasKey;
+  await call({ action:'update', id, fields: { Status: hasKey ? 'New' : 'Saved', Outcome:'', Category: hasKey ? '' : 'Opportunity',
+    'Screen text': 'I (the user) confirm this IS an opportunity I want to track and apply for: treat it as an Opportunity (or an Event), never Other.\n\n' + text } });
+  if (hasKey) await call({ action:'process' });
+  await load(true);
+  const r2 = (D.rows || []).find(x => x.ID === id);
+  if (r2 && r2.Status === 'Closed'){ await call({ action:'update', id, fields: { Status:'Saved', Category:'Opportunity', Outcome:'' } }); await load(true); }
+  go('tracker'); render(); openItem(id);
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-mis]'); if (!b) return;
+  if (b.dataset.mis === 'junk'){ try { localStorage.setItem('ft-misfiled', JSON.stringify(misDismissed().concat(b.dataset.id).slice(-200))); } catch(err){} render(); return; }
+  trackIt(b.dataset.id);
+});
+$('#fab').onclick = () => quickAdd('');
+$('#add-quick').onclick = () => quickAdd('');
 
 /* ---------- export ---------- */
 function csvCell(v){ v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
@@ -1274,6 +1385,7 @@ $('#add-shots').addEventListener('change', async e => {
 /* ---------- tabs ---------- */
 function go(name){
   pane = name;
+  const fab = $('#fab'); if (fab) fab.hidden = !(name === 'today' || name === 'tracker');
   if (name === 'notes'){ notesLoad(); renderNotes(); }
   if (name === 'me') fgLoad();
   if (name === 'games' && window.FTGames) FTGames.mount($('#p-games'), { toast });

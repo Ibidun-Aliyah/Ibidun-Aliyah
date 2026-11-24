@@ -1,1 +1,1 @@
-priorities now count how much work an application takes, not just the deadline
+Quick add (+) with SOS mode, links are read properly, and one-tap rescue for saves Bisi wrongly binned

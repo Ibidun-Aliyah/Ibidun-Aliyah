@@ -315,6 +315,29 @@ public class MainActivity extends Activity {
             try { return Notes.save(MainActivity.this, new JSONObject(json)).toString(); } catch (Exception e) { return "{}"; }
         }
 
+        /** Reads a web page's text in the background; answers through window.__fromApp(id, json). */
+        @JavascriptInterface
+        public void fetchPage(String url, String id) {
+            new Thread(() -> {
+                String t = Tracker.pageText(url == null ? "" : url);
+                String json;
+                try { json = new JSONObject().put("ok", !t.isEmpty()).put("text", t).toString(); } catch (Exception e) { json = "{\"ok\":false}"; }
+                final String fj = json;
+                runOnUiThread(() -> { if (web != null) web.evaluateJavascript("window.__fromApp(" + JSONObject.quote(id) + "," + JSONObject.quote(fj) + ")", null); });
+            }).start();
+        }
+
+        /** The clipboard's text (the app is in front, so Android allows it). */
+        @JavascriptInterface
+        public String clipText() {
+            try {
+                android.content.ClipData c = getSystemService(android.content.ClipboardManager.class).getPrimaryClip();
+                if (c == null || c.getItemCount() == 0) return "";
+                CharSequence t = c.getItemAt(0).coerceToText(MainActivity.this);
+                return t == null ? "" : t.toString();
+            } catch (Exception e) { return ""; }
+        }
+
         @JavascriptInterface
         public void share(String text, String url) {
             runOnUiThread(() -> {

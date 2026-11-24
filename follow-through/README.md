@@ -95,6 +95,14 @@ screenshots. Notes with a time offer **Add to Calendar** (a web app can't ring o
 rest of the nagging. Not on iPhone: the floating bubble and Scroll guard (iOS doesn't allow them).
 After changing the dashboard, run `python3 follow-through/web/build.py` and commit `docs/`.
 
+## Quick add & SOS
+The **＋** button (Today and Tracker) opens Quick add: paste a link (or describe it), optionally a deadline, and tick
+**🚨 SOS** when you're applying in a rush. Bisi saves it, sorts it, and if Gemini wrongly files it as "not an opportunity"
+she keeps it anyway (you added it on purpose). SOS puts it in Preparing (essay drafts and a tailored CV follow), sets a
+reminder for today and runs the eligibility check straight away. Copying a link now offers Quick add too.
+On Android, any link saved with little text gets the **page's text read on the phone** and sent along, so Gemini sees the
+real page, not just the URL. Saves binned as "not an opportunity" in the last 3 days show on Today with **Wrong, track it**.
+
 ## Priorities that count effort
 Deadlines aren't the only thing that matters. Each opportunity gets an **effort estimate** from its unticked requirements:
 essays (and word counts), statements, proposals, building/deploying, videos, tests, plus **waiting time** for reference

@@ -77,6 +77,7 @@ final class Tracker {
                 if (shot != null) body.put("imageBase64", jpegBase64(shot));
             } catch (Exception ignored) {}
 
+            enrich(body);
             boolean ok = send(ctx, body);
             if (!ok) enqueue(ctx, body);
             else flushQueueNow(ctx);
@@ -124,12 +125,14 @@ final class Tracker {
             else {
                 // Send anything done offline first, so the dashboard shows it.
                 if (action.equals("dashboard") && queued(ctx) > 0) flushQueueNow(ctx);
-                try { out = http(conn[0], json, 330000); }
+                String req = json;
+                if (action.equals("capture")) { try { JSONObject b = new JSONObject(json); enrich(b); req = b.toString(); } catch (Exception ignored) {} }
+                try { out = http(conn[0], req, 330000); }
                 catch (Exception e) {
                     out = "{\"ok\":false,\"error\":\"network\"}";
                     // Offline: keep simple edits on the phone and send them later.
                     if (OFFLINE_OK.contains(action)) {
-                        try { enqueue(ctx, new JSONObject(json)); out = "{\"ok\":true,\"queued\":true}"; } catch (Exception ignored) {}
+                        try { enqueue(ctx, new JSONObject(req)); out = "{\"ok\":true,\"queued\":true}"; } catch (Exception ignored) {}
                     }
                 }
             }
@@ -168,6 +171,60 @@ final class Tracker {
                 Nag.refreshAsync(ctx);
             } catch (Exception e) { if (cb != null) cb.done(false, ""); }
         });
+    }
+
+    /* ---------- read the page behind a link (so the AI sees more than a URL) ---------- */
+
+    /** If a capture has a link but little text, add the page's readable text. Blocking; call off the main thread. */
+    static void enrich(JSONObject body) {
+        try {
+            String url = body.optString("url"), text = body.optString("screenText");
+            if (url.isEmpty() || !url.startsWith("http") || body.has("imageBase64") && text.length() > 300 || text.length() > 600) return;
+            String page = pageText(url);
+            if (page.isEmpty()) return;
+            body.put("screenText", (text.isEmpty() || text.equals(url) ? "" : text + "\n\n") + "PAGE TEXT (" + url + "):\n" + page);
+        } catch (Exception ignored) {}
+    }
+
+    static String pageText(String url) {
+        try {
+            HttpURLConnection con = null;
+            String u = url;
+            for (int hop = 0; hop < 5; hop++) {
+                con = (HttpURLConnection) new URL(u).openConnection();
+                con.setConnectTimeout(8000); con.setReadTimeout(10000);
+                con.setInstanceFollowRedirects(false);
+                con.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Mobile Safari/537.36");
+                con.setRequestProperty("Accept", "text/html,*/*;q=0.8");
+                int code = con.getResponseCode();
+                if (code >= 300 && code < 400 && con.getHeaderField("Location") != null) { u = new URL(new URL(u), con.getHeaderField("Location")).toString(); con.disconnect(); continue; }
+                break;
+            }
+            String type = con.getContentType() == null ? "" : con.getContentType();
+            if (!type.contains("html") && !type.contains("text")) { con.disconnect(); return ""; }
+            ByteArrayOutputStream buf = new ByteArrayOutputStream();
+            try (InputStream in = con.getInputStream()) {
+                byte[] b = new byte[16384]; int n;
+                while ((n = in.read(b)) > 0 && buf.size() < 1_500_000) buf.write(b, 0, n);
+            } finally { con.disconnect(); }
+            String html = buf.toString("UTF-8");
+            String title = match(html, "(?is)<title[^>]*>(.*?)</title>");
+            String desc = match(html, "(?is)<meta[^>]+(?:name|property)=[\"'](?:og:)?description[\"'][^>]+content=[\"']([^\"']*)");
+            String body = html.replaceAll("(?is)<(script|style|noscript|svg|nav|footer|header)[^>]*>.*?</\\1>", " ")
+                    .replaceAll("(?i)<br\\s*/?>|</p>|</li>|</h[1-6]>|</div>|</tr>", "\n")
+                    .replaceAll("(?s)<[^>]+>", " ");
+            String text = decode(body).replaceAll("[ \\t\\x0B\\f\\r]+", " ").replaceAll("\\s*\n\\s*", "\n").replaceAll("\n{3,}", "\n\n").trim();
+            StringBuilder out = new StringBuilder();
+            if (!title.isEmpty()) out.append("Title: ").append(decode(title).trim()).append('\n');
+            if (!desc.isEmpty()) out.append("Description: ").append(decode(desc).trim()).append('\n');
+            out.append(text.length() > 14000 ? text.substring(0, 14000) : text);
+            return out.toString();
+        } catch (Exception e) { return ""; }
+    }
+    private static String match(String s, String re) { java.util.regex.Matcher m = java.util.regex.Pattern.compile(re).matcher(s); return m.find() ? m.group(1) : ""; }
+    private static String decode(String s) {
+        return s.replace("&nbsp;", " ").replace("&amp;", "&").replace("&quot;", "\"").replace("&#39;", "'").replace("&rsquo;", "’").replace("&lsquo;", "‘")
+                .replace("&ldquo;", "“").replace("&rdquo;", "”").replace("&ndash;", "–").replace("&mdash;", "—").replace("&lt;", "<").replace("&gt;", ">").replace("&#8211;", "–").replace("&#8217;", "’").replace("&#8220;", "“").replace("&#8221;", "”").replace("&#038;", "&");
     }
 
     /* ---------- queue ---------- */
