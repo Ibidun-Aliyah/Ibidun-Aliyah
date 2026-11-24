@@ -380,6 +380,8 @@ section{margin-top:28px}
 .pp-card{aspect-ratio:3/4;border:2.5px solid var(--stroke);border-radius:12px 10px 13px 9px;background:var(--sun);box-shadow:3px 3px 0 var(--sh);display:grid;place-items:center;padding:4px;cursor:pointer;color:#1E1606;font:inherit;transition:transform .2s}
 .pp-card.up{background:#FFFDF4;transform:rotateY(0)}.pp-card.ok{background:#DDEFCF;opacity:.85}
 .pp-back{font-size:1.6rem}.pp-big{font-family:var(--f-d);font-size:1.9rem}.pp-sm{font-size:.82rem;font-weight:700;line-height:1.15;text-align:center;overflow-wrap:anywhere}
+.trsort{margin-top:-4px}.trsort button{font-size:.85rem;padding:3px 10px}
+.effort{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.92rem}
 .colors{display:flex;gap:8px;flex-wrap:wrap}
 .colors button{width:34px;height:34px;border-radius:50%;border:2.5px solid var(--stroke);cursor:pointer}
 .colors button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--card),0 0 0 5.5px var(--stroke)}
@@ -440,6 +442,7 @@ section{margin-top:28px}
         <input id="add-shots" type="file" accept="image/*" multiple hidden>
       </div>
       <div class="tabs" id="tabs"></div>
+      <div class="tabs trsort" id="trsort" aria-label="Sort"></div>
       <input class="search" id="q" type="search" placeholder="Search titles, organisations, tips" aria-label="Search">
       <div class="list" id="all"></div>
     </section>
@@ -613,6 +616,7 @@ const toast = (m, undo) => {
 };
 
 /* ---------- state ---------- */
+let trSort = (() => { try { return localStorage.getItem('ft-trsort') || 'start'; } catch(e){ return 'start'; } })();
 let D = null, tab = 'opps', query = '', sorting = false, view = 'home', statsSent = false, pane = 'today';
 try { const c = localStorage.getItem('ft-dash'); if (c) D = JSON.parse(c); } catch(e){}
 
@@ -669,14 +673,55 @@ async function autoSort(){
 
 /* ---------- derived ---------- */
 const active = r => r.Status === 'Saved' || r.Status === 'Preparing';
+/* ---------- effort: how long an application really takes (not just when it closes) ----------
+ * Each unticked requirement adds work days or "lead time" (waiting on other people or offices).
+ * needDays = the bigger of the lead time and the work (at a student's pace: ×2), plus a day's buffer. */
+const TYPE_DAYS = { scholarship:4, fellowship:5, programme:4, program:4, research:4, grant:5, internship:2, job:2, competition:2, hackathon:2, challenge:2, conference:1, event:0, other:1 };
+function reqDays(t){
+  t = t.toLowerCase();
+  if (/^(age|ages|team( size)?|teams of|open to|must be|eligib|no previous|check |see the|nationality|minimum|completed at least|students? (in|from)|aged|deadline)/.test(t) || /\bage(s|d)? \d|years old|team of \d|members?$/.test(t)) return { work:0, lead:0, kind:'' };
+  if (/recommend|reference|referee/.test(t)) { const n = +(t.match(/(\d)\s*(?:\w+\s)?(?:recommend|reference|referee)/) || [])[1] || 1; return { work:0.5 * n, lead:14, kind:'reference' + (n > 1 ? 's' : '') }; }
+  if (/transcript|certificate|official|passport|visa|birth|proof of|bank statement|attestation|letter from (your|the) (school|university|dean)/.test(t)) return { work:0.5, lead:5, kind:'documents' };
+  if (/english proficiency|ielts|toefl|duolingo english/.test(t)) return { work:0.5, lead: /if applicable|waiver/.test(t) ? 0 : 10, kind:'English test' };
+  const words = +((t.match(/(\d{3,4})\s*(?:-|to)?\s*(?:\d{3,4}\s*)?words?/) || [])[1] || 0);
+  if (/essay|statement|motivation|cover letter|personal|why do you|why you|explain|question|short answer|words|abstract|summary|pitch deck|pitch/.test(t))
+    return { work: words ? Math.min(4, Math.max(1, words / 300)) : /abstract|summary/.test(t) ? 1 : /explain|question|short answer/.test(t) ? 1.5 : 2, lead:0, kind:'writing' };
+  if (/proposal|research plan|project plan|business plan/.test(t)) return { work:3, lead:0, kind:'proposal' };
+  if (/deploy|host|publish|submit (the|your) (link|repo)/.test(t)) return { work:1, lead:0, kind:'building' };
+  if (/build|develop|prototype|portfolio|project|code|app\b|design|demo|model/.test(t)) return { work:3, lead:0, kind:'building' };
+  if (/video/.test(t)) return { work:2, lead:0, kind:'video' };
+  if (/assessment|test|exam|quiz|interview|coding challenge/.test(t)) return { work:1.5, lead:0, kind:'tests' };
+  if (/\bcv\b|resume|résumé/.test(t)) return { work:0.5, lead:0, kind:'CV' };
+  if (/register|registration|sign ?up|rsvp/.test(t)) return { work:0.2, lead:0, kind:'' };
+  if (/application form|online application|apply online|portal|form/.test(t)) return { work:0.5, lead:0, kind:'' };
+  return { work:0.5, lead:0, kind:'' };
+}
+function effort(r){
+  if (r.Category === 'Event') return { need:1, work:0, lead:0, level:'light', kinds:[] };
+  const items = reqs(r), open = items.filter(x => !x.done);
+  let work = 0, lead = 0; const kinds = new Set(), all = items.map(x => reqDays(x.text));
+  open.forEach(x => { const d = reqDays(x.text); work += d.work; lead = Math.max(lead, d.lead); if (d.kind) kinds.add(d.kind); });
+  const type = String(r.Type || 'other').toLowerCase(), base = TYPE_DAYS[type] ?? 1;
+  const known = all.some(d => d.work > 0 || d.lead > 0);
+  if (!known) work = base;                                  // nothing listed: guess from the type
+  else if (open.length) work = Math.max(work, Math.min(base, 3) * (open.length / Math.max(1, items.length)));
+  const need = items.length && !open.length ? 0 : Math.ceil(Math.max(lead, work * 2)) + 1;
+  return { need, work, lead, level: need >= 12 ? 'heavy' : need >= 6 ? 'medium' : 'light', kinds:[...kinds] };
+}
+const startBy = (r, e) => { const d = parse(r.Deadline); if (!d) return null; d.setDate(d.getDate() - (e || effort(r)).need); return d; };
+const effortLabel = e => e.need ? `~${e.need} day${e.need === 1 ? '' : 's'} of work${e.kinds.length ? ' (' + e.kinds.slice(0, 2).join(', ') + ')' : ''}` : 'all steps done';
+
 function urgency(r){
   const d = days(r.Deadline), rem = days(r['Remind on']);
   if (active(r)){
     if (d !== null && d < 0) return { tone:'rose', score:0, why:'Deadline passed ' + fmt(r.Deadline) };
     if (r.Category === 'Event' && d !== null && d <= 2) return { tone:'plum', score:1+d, why: d===0?'Event today':d===1?'Event tomorrow':'Event in 2 days' };
-    if (d !== null && d <= 3) return { tone:'rose', score:1+d, why: d===0?'Due today':d===1?'Due tomorrow':`${d} days left` };
-    if (d !== null && d <= 7) return { tone:'sun', score:5+d, why:`${d} days left` };
-    if (rem !== null && rem <= 0) return { tone:'sky', score:20, why:'Reminder' };
+    const e = r.Category === 'Event' ? null : effort(r), slack = d === null || !e ? null : d - e.need;
+    if (d !== null && d <= 3) return { tone:'rose', score:1+d, why: d===0?'Due today':d===1?'Due tomorrow':`${d} days left`, e };
+    if (slack !== null && slack <= 0) return { tone:'rose', score:2 + slack / 10, why:`Start now · ${effortLabel(e).replace(/ \(.*\)/, '')}, ${d} days left`, e };
+    if (d !== null && d <= 7) return { tone:'sun', score:5+d, why:`${d} days left`, e };
+    if (slack !== null && slack <= 7) return { tone:'sun', score:5 + slack, why:`Start by ${fmt(iso(startBy(r, e)))} · ${effortLabel(e).replace(/ \(.*\)/, '')}`, e };
+    if (rem !== null && rem <= 0) return { tone:'sky', score:20, why:'Reminder', e };
     return null;
   }
   if (r.Status === 'Submitted' && rem !== null && rem <= 0) return { tone:'ok', score:40, why:'Check for a response' };
@@ -697,7 +742,9 @@ function nextStep(r){
   if (r.Status === 'Closed') return r.Outcome || 'Closed';
   const l = reqs(r), todo = l.filter(x => !x.done);
   if (l.length && !todo.length) return 'Everything ticked · submit it!';
-  if (todo.length) return 'Next: ' + todo[0].text + (l.length > 1 ? ` (${l.length - todo.length}/${l.length})` : '');
+  // the next real step (eligibility rules like "Team of 1-4" aren't steps)
+  const step = todo.find(x => { const d = reqDays(x.text); return d.work > 0 || d.lead > 0; });
+  if (step) return 'Next: ' + step.text + (l.length > 1 ? ` (${l.length - todo.length}/${l.length})` : '');
   if (r.Status === 'Preparing') return r['Essay doc'] || r['CV doc'] ? 'Drafts ready · finish and submit' : 'Preparing · write essays & CV';
   return 'Read the requirements';
 }
@@ -1342,8 +1389,12 @@ function listing(rows, tips){
       : `<div class="empty">Tips you save (CV advice, interview tricks…) land here and in your Sunday digest.</div>`;
     return;
   }
-  list = list.slice().sort((a,b) => (a.Deadline||'9999').localeCompare(b.Deadline||'9999'));
-  $('#all').innerHTML = list.length ? list.map(r => { const u = urgency(r); return itemRow(r, u ? u.tone : (r.Status==='Submitted'?'ok':r.Status==='New'?'sky':''), u ? u.why : ''); }).join('')
+  const key = r => { if (!r.Deadline) return 1e6; const d = days(r.Deadline); return trSort === 'deadline' ? d : trSort === 'work' ? -effort(r).need : d - effort(r).need; };
+  list = list.slice().sort((a,b) => key(a) - key(b) || (a.Deadline||'9999').localeCompare(b.Deadline||'9999'));
+  $('#trsort').innerHTML = tab === 'opps' ? [['start','Start soonest'],['deadline','Deadline'],['work','Most work']].map(([k,l]) => `<button data-trsort="${k}" aria-pressed="${trSort===k}">${l}</button>`).join('') : '';
+  $('#all').innerHTML = list.length ? list.map(r => { const u = urgency(r); let why = u ? u.why : '';
+      if (!why && active(r) && r.Deadline && r.Category !== 'Event'){ const e = effort(r); why = `${e.level === 'heavy' ? '🍯🍯🍯' : e.level === 'medium' ? '🍯🍯' : '🍯'} start by ${fmt(iso(startBy(r, e)))}`; }
+      return itemRow(r, u ? u.tone : (r.Status==='Submitted'?'ok':r.Status==='New'?'sky':''), why); }).join('')
     : `<div class="empty">${query ? 'No matches.' : 'Nothing here yet.'}</div>`;
 }
 
@@ -1426,6 +1477,8 @@ function openItem(id){
     <div class="sheet-head"><h3>${esc(r.Title || 'New capture')}</h3><button class="btn small ghost" data-close>Close</button></div>
     <div class="sheet-body">
       <div class="row">${r.Category?`<span class="chip ${r.Category==='Event'?'c-plum':'c-ok'}">${esc(r.Category)}</span>`:''}${r.Type?`<span class="chip">${esc(r.Type)}</span>`:''}${r.Deadline?`<span class="chip ${(urgency(r)||{}).tone?'c-'+urgency(r).tone:''}">${r.Category==='Event'?'':'Due '}${esc(fmt(r.Deadline))}</span>`:''}</div>
+      ${active(r) && r.Category !== 'Event' ? (() => { const e = effort(r), sb = r.Deadline ? startBy(r, e) : null, dd = days(r.Deadline);
+        return `<div class="effort"><span class="chip">${e.level === 'heavy' ? '🍯🍯🍯 Big application' : e.level === 'medium' ? '🍯🍯 Medium effort' : '🍯 Quick one'}</span><span>${esc(effortLabel(e))}${e.lead >= 5 ? ', including waiting time for other people' : ''}.${sb ? ` <b>${dd - e.need <= 0 ? 'Start now.' : 'Start by ' + esc(fmt(iso(sb))) + '.'}</b>` : ''}</span></div>`; })() : ''}
       ${r.Status==='New' ? `<div class="banner info"><span>${D.ai.hasKey?'Not sorted yet.':'Add your Gemini key in Settings to sort this instantly.'}</span>${D.ai.hasKey?'<button class="btn small" data-banner="Sort now">Sort now</button>':''}</div>`:''}
       <div>
         <div class="note" style="margin-bottom:6px">Status</div>
@@ -1516,7 +1569,7 @@ document.addEventListener('click', async e => {
   const wrap = e.target.closest('.swipe');
   if (wrap && (wrap.dataset.justSwiped || wrap.classList.contains('open'))){ if (!wrap.dataset.justSwiped) closeSwipes(); return; }
   if (!wrap) closeSwipes();
-  const t = e.target.closest('[data-open],[data-tip],[data-tab],[data-close],[data-url],[data-status],[data-snooze],[data-ai],[data-banner],[data-view],[data-outcome]');
+  const t = e.target.closest('[data-open],[data-tip],[data-tab],[data-close],[data-url],[data-status],[data-snooze],[data-ai],[data-banner],[data-view],[data-outcome],[data-trsort]');
   if (!t) return;
   if (t.dataset.view){
     view = t.dataset.view;
@@ -1544,6 +1597,7 @@ document.addEventListener('click', async e => {
   if (t.dataset.open) return openItem(t.dataset.open);
   if (t.dataset.tip) return openTip(t.dataset.tip);
   if (t.dataset.tab){ tab = t.dataset.tab; return render(); }
+  if (t.dataset.trsort){ trSort = t.dataset.trsort; try { localStorage.setItem('ft-trsort', trSort); } catch(err){} return render(); }
   if (t.hasAttribute('data-close')) return closeSheet();
   if (t.dataset.url) return open(t.dataset.url);
   if (t.dataset.banner){

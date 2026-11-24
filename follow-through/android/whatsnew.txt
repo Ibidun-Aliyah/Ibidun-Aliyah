@@ -1,1 +1,1 @@
-Bee Chess gets bee pieces, a honeycomb board, 12 lessons and a tutor mode
+priorities now count how much work an application takes, not just the deadline

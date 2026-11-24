@@ -95,6 +95,14 @@ screenshots. Notes with a time offer **Add to Calendar** (a web app can't ring o
 rest of the nagging. Not on iPhone: the floating bubble and Scroll guard (iOS doesn't allow them).
 After changing the dashboard, run `python3 follow-through/web/build.py` and commit `docs/`.
 
+## Priorities that count effort
+Deadlines aren't the only thing that matters. Each opportunity gets an **effort estimate** from its unticked requirements:
+essays (and word counts), statements, proposals, building/deploying, videos, tests, plus **waiting time** for reference
+letters (~2 weeks) and transcripts/official documents (~5 days). Rule-type lines ("Team of 1-4", "Age 18-24") don't count.
+**Start by** = deadline − days needed (work at a student's pace, or the waiting time, whichever is longer). Today's
+"Needs you" includes anything you should start now; the Tracker sorts by **Start soonest** (or Deadline / Most work) and
+tags each item 🍯 quick · 🍯🍯 medium · 🍯🍯🍯 big application. Phone nudges and the widget use the same estimate.
+
 ## Welcome & profile
 The first time the app opens, Bisi buzzes out of the hive (tap it), shows you around in four slides, helps you connect
 your tracker, then asks for your profile: what to call you, name, date of birth, gender (optional), email, country and

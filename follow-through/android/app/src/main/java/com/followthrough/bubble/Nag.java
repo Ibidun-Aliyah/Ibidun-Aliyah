@@ -46,7 +46,7 @@ final class Nag {
     /* ---------- items ---------- */
 
     static final class Item {
-        String id, title, kind; int days; int score;
+        String id, title, kind; int days; int score; int need;
         Item(String id, String title, String kind, int days, int score) { this.id = id; this.title = title; this.kind = kind; this.days = days; this.score = score; }
     }
 
@@ -59,6 +59,43 @@ final class Nag {
             long a = f.parse(today()).getTime(), b = f.parse(iso.substring(0, 10)).getTime();
             return (int) Math.round((b - a) / 86400000.0);
         } catch (Exception e) { return Integer.MIN_VALUE; }
+    }
+
+    /* ---------- effort (mirrors the dashboard): days an application really needs ---------- */
+    private static final java.util.regex.Pattern ELIG = java.util.regex.Pattern.compile("^(age|ages|team( size)?|teams of|open to|must be|eligib|no previous|check |see the|nationality|minimum|completed at least|aged|deadline)|\\bage(s|d)? \\d|years old|team of \\d");
+    private static double[] reqDays(String t) {   // {work, lead}
+        t = t.toLowerCase(Locale.ROOT);
+        if (ELIG.matcher(t).find()) return new double[]{0, 0};
+        if (t.matches(".*(recommend|reference|referee).*")) return new double[]{t.matches(".*\\b2\\b.*") ? 1 : 0.5, 14};
+        if (t.matches(".*(transcript|certificate|official|passport|visa|birth|proof of|bank statement|attestation).*")) return new double[]{0.5, 5};
+        java.util.regex.Matcher w = java.util.regex.Pattern.compile("(\\d{3,4})\\s*words?").matcher(t);
+        if (t.matches(".*(essay|statement|motivation|cover letter|personal|why do you|why you|explain|question|short answer|words|abstract|summary|pitch).*"))
+            return new double[]{w.find() ? Math.min(4, Math.max(1, Integer.parseInt(w.group(1)) / 300.0)) : t.matches(".*(abstract|summary).*") ? 1 : 2, 0};
+        if (t.matches(".*(proposal|research plan|project plan|business plan).*")) return new double[]{3, 0};
+        if (t.matches(".*(deploy|host|publish).*")) return new double[]{1, 0};
+        if (t.matches(".*(build|develop|prototype|portfolio|project|code|app\\b|design|demo|model).*")) return new double[]{3, 0};
+        if (t.matches(".*video.*")) return new double[]{2, 0};
+        if (t.matches(".*(assessment|test|exam|quiz|interview).*")) return new double[]{1.5, 0};
+        if (t.matches(".*(register|registration|sign ?up|rsvp).*")) return new double[]{0.2, 0};
+        return new double[]{0.5, 0};
+    }
+    static int needDays(JSONObject r) {
+        if ("Event".equals(r.optString("Category"))) return 1;
+        String[] lines = r.optString("Requirements").split("\n");
+        double work = 0, lead = 0; int n = 0, open = 0; boolean known = false;
+        for (String l : lines) {
+            l = l.trim(); if (l.isEmpty()) continue; n++;
+            boolean done = l.startsWith("✓");
+            double[] d = reqDays(l.replaceFirst("^✓\\s*", ""));
+            if (d[0] > 0 || d[1] > 0) known = true;
+            if (done) continue;
+            open++; work += d[0]; lead = Math.max(lead, d[1]);
+        }
+        if (n > 0 && open == 0) return 0;
+        String type = r.optString("Type", "other").toLowerCase(Locale.ROOT);
+        double base = type.matches("scholarship|programme|program|research") ? 4 : type.matches("fellowship|grant") ? 5 : type.matches("internship|job|competition|hackathon|challenge") ? 2 : 1;
+        if (!known) work = base;
+        return (int) Math.ceil(Math.max(lead, work * 2)) + 1;
     }
 
     static List<Item> urgent(JSONObject dash) {
@@ -78,6 +115,7 @@ final class Nag {
                 if (d != Integer.MIN_VALUE && d < 0 && d > -15) out.add(new Item(id, title, "overdue", d, 0));
                 else if (event && d != Integer.MIN_VALUE && d <= 2 && d >= 0) out.add(new Item(id, title, "event", d, 1 + d));
                 else if (d != Integer.MIN_VALUE && d <= 3 && d >= 0) out.add(new Item(id, title, "due", d, 1 + d));
+                else if (!event && d != Integer.MIN_VALUE && d > 3 && d - needDays(r) <= 0) { Item it = new Item(id, title, "start", d, 2); it.need = needDays(r); out.add(it); }
                 else if (d != Integer.MIN_VALUE && d <= 7 && d >= 0) out.add(new Item(id, title, "soon", d, 5 + d));
                 else if (rem != Integer.MIN_VALUE && rem <= 0) out.add(new Item(id, title, "reminder", d, 20));
             } else if (st.equals("Submitted") && rem != Integer.MIN_VALUE && rem <= 0) {
@@ -122,6 +160,9 @@ final class Nag {
                         "Fun fact: " + t + " doesn't apply for itself. I checked.");
                 return pick("I'm not saying I'm disappointed about " + t + ". I'm just saying I'm a bee and I'm sad.",
                         "Still " + t + ". Still " + when(it.days) + ". Still me. 🐝");
+            case "start": return pick(t + " needs ~" + it.need + " days of work and closes in " + it.days + ". Start today. Not tomorrow. Today. 🐝",
+                    "Big one: " + t + " takes about " + it.need + " days and you have " + it.days + ". The maths isn't mathing. Start now.",
+                    t + " isn't due yet, but it needs ~" + it.need + " days. References and paperwork don't wait for you.");
             case "soon": return pick(t + " closes " + when(it.days) + ". Starting now would be very mature of you.", "Early bee gets the nectar. " + t + " closes " + when(it.days) + ".",
                     "One week until " + t + ". Future you is begging. I can hear her.");
             case "reminder": return pick("You asked me to remind you about " + t + ". So. Here I am. Reminding.",
@@ -139,7 +180,7 @@ final class Nag {
         switch (it.kind) {
             case "overdue": return R.drawable.bisi_sassy;
             case "due": return it.days <= 1 ? R.drawable.bisi_worried : R.drawable.bisi_sassy;
-            case "event": case "check": case "soon": return R.drawable.bisi_worried;
+            case "event": case "check": case "soon": case "start": return R.drawable.bisi_worried;
             case "reminder": return R.drawable.bisi_sassy;
             default: return R.drawable.bisi_happy;
         }
