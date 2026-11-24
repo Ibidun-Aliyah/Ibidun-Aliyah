@@ -1,0 +1,497 @@
+<meta charset="utf-8">
+<title>Lagos Lives</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Figtree:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: one phone-width column — sticky status bar, story feed, action dock pinned to the bottom. Lagos at night: lagoon blue, danfo yellow. */
+:root {
+  --bg: #0d2128;
+  --surface: #15323b;
+  --surface-2: #1c3f49;
+  --ink: #eef4f0;
+  --muted: #9bb4b1;
+  --line: #2a4f59;
+  --danfo: #f4b81c;
+  --danfo-ink: #1a1405;
+  --good: #5fd49a;
+  --bad: #ff7a5c;
+  --mid: #e9c46a;
+  --display: "Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
+  --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body);
+  font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+button { font: inherit; color: inherit; }
+button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
+.app { max-width: 560px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; }
+.pad { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* ── Title screen ── */
+.title-screen { padding-block: 28px 40px; display: flex; flex-direction: column; gap: 28px; }
+.stripe { height: 14px; background: repeating-linear-gradient(-45deg, var(--danfo) 0 14px, #111 14px 28px); border-radius: 2px; }
+.logo { font-family: var(--display); font-weight: 800; font-size: clamp(3rem, 14vw, 4.6rem); line-height: .9; letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+.logo span { color: var(--danfo); display: block; }
+.lede { color: var(--muted); margin: 10px 0 0; max-width: 40ch; }
+.label { font-size: .72rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); font-weight: 700; margin: 0 0 10px; }
+.cast { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.char { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.char.hero { grid-column: 1 / -1; background: var(--danfo); color: var(--danfo-ink); border-color: var(--danfo); cursor: pointer; padding: 18px; }
+.char.hero .cname { font-size: 2rem; }
+.char.hero .cmeta { color: #4a3a0c; }
+.char.locked { opacity: .55; }
+.cname { font-family: var(--display); font-weight: 800; font-size: 1.15rem; line-height: 1.1; }
+.cmeta { font-size: .85rem; color: var(--muted); }
+.soon { font-size: .68rem; text-transform: uppercase; letter-spacing: .1em; font-weight: 700; margin-top: 4px; }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn { border: 0; border-radius: 12px; padding: 14px 18px; font-weight: 700; cursor: pointer; background: var(--surface-2); }
+.btn.primary { background: var(--danfo); color: var(--danfo-ink); }
+.btn.ghost { background: transparent; border: 1px solid var(--line); }
+.lang-pick { display: inline-flex; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.lang-pick button { border: 0; background: transparent; padding: 6px 12px; border-radius: 999px; font-size: .8rem; font-weight: 700; cursor: pointer; color: var(--muted); }
+.lang-pick button[aria-pressed="true"] { background: var(--danfo); color: var(--danfo-ink); }
+.endings-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.end-chip { border-radius: 10px; padding: 10px 8px; font-size: .78rem; font-weight: 700; text-align: center; background: var(--surface); border: 1px dashed var(--line); color: var(--muted); min-width: 0; }
+.end-chip.found { border-style: solid; color: var(--ink); }
+.end-chip.found.good { border-color: var(--good); }
+.end-chip.found.mid { border-color: var(--mid); }
+.end-chip.found.bad { border-color: var(--bad); }
+
+/* ── Game screen ── */
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); padding-block: 10px; display: flex; flex-direction: column; gap: 8px; }
+.topline { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.chap { font-family: var(--display); font-weight: 800; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.chap small { color: var(--danfo); font-family: var(--body); font-weight: 700; font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; margin-right: 6px; }
+.icon-btn { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 6px 10px; font-size: .78rem; font-weight: 700; cursor: pointer; color: var(--muted); }
+.tools { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+.stats { display: grid; grid-template-columns: auto auto 1fr; gap: 6px 14px; align-items: center; font-size: .8rem; }
+.stat { display: flex; align-items: baseline; gap: 6px; white-space: nowrap; }
+.stat b { font-family: var(--mono); font-weight: 500; font-variant-numeric: tabular-nums; font-size: .88rem; }
+.stat .k { color: var(--muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+.rels { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.rel { display: flex; align-items: center; gap: 5px; font-size: .72rem; color: var(--muted); font-weight: 700; }
+.meter { width: 34px; height: 5px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--good); border-radius: 3px; transition: width .4s ease; }
+.meter.low i { background: var(--bad); }
+.meter.peace { width: 54px; }
+
+.feed { flex: 1; padding-block: 18px 24px; display: flex; flex-direction: column; gap: 14px; cursor: pointer; }
+.card-ch { background: var(--danfo); color: var(--danfo-ink); border-radius: 14px; overflow: hidden; margin-bottom: 6px; }
+.card-ch .stripe { border-radius: 0; height: 10px; }
+.card-ch div.t { padding: 16px 16px 18px; }
+.card-ch .n { font-size: .72rem; text-transform: uppercase; letter-spacing: .14em; font-weight: 700; }
+.card-ch h2 { font-family: var(--display); font-weight: 800; font-size: 2.4rem; line-height: 1; margin: 4px 0 0; }
+.ln { animation: rise .35s ease both; max-width: 62ch; }
+@keyframes rise { from { opacity: .0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.ln.n { color: var(--ink); }
+.ln.t { color: var(--muted); font-style: italic; border-left: 2px solid var(--danfo); padding-left: 12px; }
+.ln.s { display: flex; flex-direction: column; gap: 3px; }
+.ln.s .who { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }
+.ln.s .say { background: var(--surface); border-radius: 4px 14px 14px 14px; padding: 10px 14px; align-self: flex-start; max-width: 100%; }
+.ln.s.me { align-items: flex-end; }
+.ln.s.me .say { background: #3a3110; border-radius: 14px 4px 14px 14px; }
+.ln.c { background: #e7ddd0; color: #1c1a17; border-radius: 14px; padding: 10px 12px 8px; align-self: stretch; max-width: 100%; }
+.ln.c .who { font-size: .75rem; font-weight: 700; }
+.ln.c .msg { background: #fff; border-radius: 4px 12px 12px 12px; padding: 8px 10px; margin-top: 4px; font-size: .95rem; }
+.ln.c .meta { font-size: .65rem; color: #6b655c; text-align: right; margin-top: 3px; font-family: var(--mono); }
+.ln.c.me .msg { background: #d9fdd3; border-radius: 12px 4px 12px 12px; }
+.ln.a { font-family: var(--mono); font-size: .78rem; background: #0a1418; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; color: var(--good); letter-spacing: .02em; overflow-wrap: anywhere; }
+.ln.a::before { content: "SMS · Bank"; display: block; color: var(--muted); font-size: .65rem; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 4px; }
+.ln.pick { align-self: flex-end; background: var(--danfo); color: var(--danfo-ink); border-radius: 14px 4px 14px 14px; padding: 10px 14px; font-weight: 600; max-width: 90%; }
+.fx { display: flex; flex-wrap: wrap; gap: 6px; align-self: flex-end; }
+.fx span { font-size: .72rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--surface); font-family: var(--mono); }
+.fx .up { color: var(--good); }
+.fx .down { color: var(--bad); }
+
+.dock { position: sticky; bottom: 0; background: linear-gradient(to bottom, transparent, var(--bg) 18px); padding-block: 18px max(14px, env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 8px; }
+.choice { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 13px 14px; cursor: pointer; font-weight: 600; line-height: 1.35; transition: background .15s, border-color .15s; }
+.choice:hover { border-color: var(--danfo); }
+.choice[disabled] { opacity: .45; cursor: not-allowed; }
+.choice small { display: block; color: var(--bad); font-weight: 600; font-size: .75rem; margin-top: 2px; }
+.continue { border: 0; background: var(--danfo); color: var(--danfo-ink); border-radius: 12px; padding: 14px; font-weight: 800; cursor: pointer; font-family: var(--display); font-size: 1.05rem; }
+
+/* ── Ending screen ── */
+.end { padding-block: 24px 40px; display: flex; flex-direction: column; gap: 22px; }
+.end-tag { font-size: .72rem; text-transform: uppercase; letter-spacing: .14em; font-weight: 700; }
+.end-tag.good { color: var(--good); } .end-tag.mid { color: var(--mid); } .end-tag.bad { color: var(--bad); }
+.end h1 { font-family: var(--display); font-weight: 800; font-size: clamp(2.6rem, 12vw, 3.8rem); line-height: .95; margin: 6px 0 8px; text-wrap: balance; }
+.end .blurb { color: var(--muted); margin: 0; }
+.panel { background: var(--surface); border-radius: 14px; padding: 16px; }
+.panel h3 { margin: 0 0 10px; font-family: var(--display); font-weight: 800; font-size: 1.1rem; }
+.path { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.path li::marker { color: var(--danfo); font-family: var(--mono); font-size: .8rem; }
+.wahala-bar { height: 12px; background: var(--surface-2); border-radius: 6px; overflow: hidden; margin: 8px 0 6px; }
+.wahala-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--mid), var(--bad)); width: 0; transition: width 1.2s ease .3s; }
+.muted { color: var(--muted); font-size: .88rem; margin: 0; }
+.real { border-left: 3px solid var(--danfo); }
+
+@media (prefers-reduced-motion: reduce) { .ln { animation: none; } .meter i, .wahala-bar i { transition: none; } }
+@media (max-width: 380px) { .stats { grid-template-columns: auto auto; } .rels { grid-column: 1 / -1; justify-content: flex-start; } }
+</style>
+
+<div class="app" id="app"></div>
+
+<script src="stories/femi.js" charset="utf-8"></script>
+<script>
+(function () {
+  "use strict";
+  const STORIES = window.LAGOS_STORIES || {};
+  const SAVE_KEY = "lagos-lives:v1";
+
+  const LOCKED = [
+    { name: "PC", meta: "Working-class babe. Smart, beautiful, and every man has a plan for her." },
+    { name: "The Creative", meta: "Designer by day, broke by night. Talent doesn’t pay rent." },
+    { name: "Dami", meta: "Nepo baby. Money for everything, including the things that will kill him." },
+    { name: "Abuja Main Girl", meta: "Soft life on Instagram. Hard life off it." },
+  ];
+
+  /* ── Storage (per-viewer convenience; game still works without it) ── */
+  function load() { try { return JSON.parse(localStorage.getItem(SAVE_KEY)) || {}; } catch (e) { return {}; } }
+  function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(meta)); } catch (e) {} }
+
+  let meta = load();               // { lang, endings: {femi: {founder: true}}, run: {...} }
+  meta.lang = meta.lang || "pg";
+  meta.endings = meta.endings || {};
+  let run = meta.run || null;      // current playthrough
+  let view = "title";
+
+  const app = document.getElementById("app");
+  const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const naira = (n) => "₦" + Math.round(n).toLocaleString("en-NG");
+  const txt = (o) => (meta.lang === "pg" && o.pg) ? o.pg : o.en;
+
+  const story = () => STORIES[run.story];
+  const sceneOf = (id) => story().scenes[id] || story().endingScenes[id];
+
+  /* ── Effects ── */
+  const CLAMP = { peace: [0, 10], mum: [0, 10], dele: [0, 10], lola: [0, 10], cgpa: [0, 5], wahala: [0, 99], money: [0, 1e12] };
+  function applyFx(fx) {
+    if (!fx) return null;
+    const changes = [];
+    if (fx.set) for (const k in fx.set) run.stats[k] = fx.set[k];
+    for (const k in CLAMP) {
+      if (typeof fx[k] === "number" && fx[k] !== 0) {
+        const [lo, hi] = CLAMP[k];
+        const before = run.stats[k];
+        run.stats[k] = Math.min(hi, Math.max(lo, Math.round((before + fx[k]) * 100) / 100));
+        if (k !== "wahala") changes.push([k, run.stats[k] - before]);
+      }
+    }
+    if (fx.flag) run.flags[fx.flag] = true;
+    if (fx.flags) fx.flags.forEach((f) => (run.flags[f] = true));
+    return changes.length ? changes : null;
+  }
+
+  /* ── Flow ── */
+  function newRun(id) {
+    const s = STORIES[id];
+    run = { story: id, stats: Object.assign({}, s.stats), flags: {}, log: [], feed: [], scene: null, lines: [], li: 0, ch: null };
+    enter(s.start);
+    view = "game";
+    save(); render();
+  }
+
+  function enter(id) {
+    let guard = 0;
+    while (guard++ < 20) {
+      const sc = sceneOf(id);
+      if (!sc) { console.error("Missing scene", id); return; }
+      if (sc.ch && sc.ch !== run.ch) { run.ch = sc.ch; run.fid = (run.fid || 0) + 1; run.feed = [{ k: "chapter", ch: sc.ch }]; }
+      const ch = applyFx(sc.on);
+      run.scene = id;
+      run.lines = sc.lines.map((l, i) => i).filter((i) => !sc.lines[i].if || sc.lines[i].if(run));
+      run.li = 0;
+      if (ch) run.feed.push({ k: "fx", changes: ch });
+      if (run.lines.length === 0 && !sc.choices && !sc.id) {
+        const nx = sc.route ? sc.route(run) : sc.next;
+        if (nx) { id = nx; continue; }
+      }
+      return;
+    }
+  }
+
+  function advance() {
+    if (view !== "game") return;
+    const sc = sceneOf(run.scene);
+    if (run.li < run.lines.length) {
+      run.feed.push({ k: "line", scene: run.scene, i: run.lines[run.li] });
+      run.li++;
+      save(); renderGame(true); return;
+    }
+    if (sc.choices) return;
+    if (sc.id) { finish(sc.id); return; }
+    const nx = sc.route ? sc.route(run) : sc.next;
+    if (nx) { enter(nx); save(); renderGame(true); if (run.lines.length) advance(); }
+  }
+
+  function choose(idx) {
+    const sc = sceneOf(run.scene);
+    const c = sc.choices[idx];
+    run.feed.push({ k: "pick", scene: run.scene, c: idx });
+    const ch = applyFx(c.fx);
+    if (ch) run.feed.push({ k: "fx", changes: ch });
+    run.log.push(c.log || c.en);
+    enter(c.to);
+    save(); renderGame(true);
+    if (run.lines.length) advance();
+  }
+
+  function finish(endingId) {
+    meta.endings[run.story] = meta.endings[run.story] || {};
+    meta.endings[run.story][endingId] = true;
+    run.ended = endingId;
+    view = "end";
+    save(); render();
+    window.scrollTo(0, 0);
+  }
+
+  function save() { meta.run = run; persist(); }
+
+  /* ── Rendering ── */
+  function render() {
+    app.innerHTML = "";
+    if (view === "game" && run) renderGame(false);
+    else if (view === "end" && run) renderEnd();
+    else renderTitle();
+  }
+
+  function langPicker() {
+    const w = el("div", "lang-pick");
+    w.setAttribute("role", "group"); w.setAttribute("aria-label", "Dialogue language");
+    [["en", "English"], ["pg", "Pidgin"]].forEach(([k, label]) => {
+      const b = el("button", null, label);
+      b.type = "button";
+      b.setAttribute("aria-pressed", meta.lang === k);
+      b.onclick = (e) => { e.stopPropagation(); meta.lang = k; persist(); render(); };
+      w.appendChild(b);
+    });
+    return w;
+  }
+
+  function renderTitle() {
+    view = "title";
+    const s = STORIES.femi;
+    const wrap = el("div", "title-screen pad");
+    wrap.appendChild(el("div", "stripe"));
+    const head = el("div");
+    head.innerHTML = `<h1 class="logo">Lagos<span>Lives</span></h1><p class="lede">Five young people. One city. Every choice has a cost, and some of them come due later.</p>`;
+    wrap.appendChild(head);
+
+    const castWrap = el("div");
+    castWrap.appendChild(el("p", "label", "Choose a life"));
+    const cast = el("div", "cast");
+    const hero = el("button", "char hero");
+    hero.type = "button";
+    hero.innerHTML = `<span class="cname">${esc(s.hero)}</span><span class="cmeta">${esc(s.tagline)}</span><span class="soon">“${esc(s.title)}” · play now ▸</span>`;
+    hero.onclick = () => { if (run && run.story === "femi" && !run.ended) { view = "game"; render(); } else newRun("femi"); };
+    cast.appendChild(hero);
+    LOCKED.forEach((c) => {
+      const d = el("div", "char locked");
+      d.innerHTML = `<span class="cname">${esc(c.name)}</span><span class="cmeta">${esc(c.meta)}</span><span class="soon">Coming soon</span>`;
+      cast.appendChild(d);
+    });
+    castWrap.appendChild(cast);
+    wrap.appendChild(castWrap);
+
+    const btns = el("div", "btn-row");
+    if (run && !run.ended) {
+      const cont = el("button", "btn primary", "Continue Femi’s story");
+      cont.onclick = () => { view = "game"; render(); };
+      const fresh = el("button", "btn ghost", "Start over");
+      fresh.onclick = () => newRun("femi");
+      btns.append(cont, fresh);
+      wrap.appendChild(btns);
+    }
+
+    const lang = el("div");
+    lang.appendChild(el("p", "label", "Dialogue"));
+    lang.appendChild(langPicker());
+    wrap.appendChild(lang);
+
+    wrap.appendChild(endingsBlock("femi"));
+    app.appendChild(wrap);
+  }
+
+  function endingsBlock(id) {
+    const s = STORIES[id];
+    const found = meta.endings[id] || {};
+    const keys = Object.keys(s.endings);
+    const n = keys.filter((k) => found[k]).length;
+    const w = el("div");
+    w.appendChild(el("p", "label", `${esc(s.hero)}’s endings · ${n} of ${keys.length} found`));
+    const g = el("div", "endings-grid");
+    keys.forEach((k) => {
+      const e = s.endings[k];
+      g.appendChild(el("div", "end-chip" + (found[k] ? " found " + e.tone : ""), found[k] ? esc(e.title) : "???"));
+    });
+    w.appendChild(g);
+    return w;
+  }
+
+  function lineNode(entry) {
+    const S = story();
+    if (entry.k === "chapter") {
+      const c = S.chapters[entry.ch];
+      const d = el("div", "card-ch");
+      d.innerHTML = `<div class="stripe"></div><div class="t"><div class="n">${esc(c.num)}</div><h2>${esc(c.title)}</h2></div>`;
+      return d;
+    }
+    if (entry.k === "fx") {
+      const d = el("div", "fx");
+      const names = { money: "", cgpa: "CGPA", peace: "Peace", mum: "Mama", dele: "Dele", lola: "Lola" };
+      entry.changes.forEach(([k, v]) => {
+        const up = v > 0;
+        const label = k === "money" ? (up ? "+" : "−") + naira(Math.abs(v)) : `${names[k]} ${up ? "▲" : "▼"}`;
+        d.appendChild(el("span", up ? "up" : "down", esc(label)));
+      });
+      return d;
+    }
+    if (entry.k === "pick") {
+      const c = sceneOf(entry.scene).choices[entry.c];
+      return el("div", "ln pick", esc(txt(c)));
+    }
+    const l = sceneOf(entry.scene).lines[entry.i];
+    const cast = S.cast;
+    if (l.k === "n") return el("p", "ln n", esc(txt(l)));
+    if (l.k === "t") return el("p", "ln t", esc(txt(l)));
+    if (l.k === "a") return el("div", "ln a", esc(l.en));
+    if (l.k === "s") {
+      const who = cast[l.who] || { name: l.who, color: "#ccc" };
+      const d = el("div", "ln s" + (l.who === "femi" ? " me" : ""));
+      d.innerHTML = `<span class="who" style="color:${who.color}">${esc(l.who === "femi" ? "You" : who.name)}</span><span class="say">${esc(txt(l))}</span>`;
+      return d;
+    }
+    if (l.k === "c") {
+      const who = cast[l.who] || { name: l.who };
+      const d = el("div", "ln c" + (l.who === "femi" ? " me" : ""));
+      d.innerHTML = `<div class="who">${esc(l.who === "femi" ? "You" : who.name)}</div><div class="msg">${esc(txt(l))}</div><div class="meta">WhatsApp · ${l.who === "femi" ? "✓" : "now"}</div>`;
+      return d;
+    }
+    return el("p", "ln", esc(txt(l)));
+  }
+
+  let gameEls = null;
+  function renderGame(incremental) {
+    const S = story();
+    if (!incremental || !gameEls) {
+      app.innerHTML = "";
+      const top = el("header", "topbar pad");
+      const tl = el("div", "topline");
+      const chap = el("div", "chap");
+      const tools = el("div", "tools");
+      const home = el("button", "icon-btn", "Menu");
+      home.type = "button";
+      home.onclick = (e) => { e.stopPropagation(); view = "title"; render(); };
+      tools.append(langPicker(), home);
+      tl.append(chap, tools);
+      const stats = el("div", "stats");
+      top.append(tl, stats);
+      const feed = el("main", "feed pad");
+      feed.setAttribute("aria-live", "polite");
+      feed.onclick = (e) => { if (!e.target.closest("button")) advance(); };
+      const dock = el("div", "dock pad");
+      app.append(top, feed, dock);
+      gameEls = { chap, stats, feed, dock, count: 0, fid: run.fid };
+      run.feed.forEach((f) => feed.appendChild(lineNode(f)));
+      gameEls.count = run.feed.length;
+    } else if (gameEls.fid !== run.fid) {
+      gameEls = null; return renderGame(false);
+    } else {
+      for (let i = gameEls.count; i < run.feed.length; i++) gameEls.feed.appendChild(lineNode(run.feed[i]));
+      gameEls.count = run.feed.length;
+    }
+    const c = S.chapters[run.ch] || { num: "", title: "" };
+    gameEls.chap.innerHTML = `<small>${esc(c.num)}</small>${esc(c.title)}`;
+
+    const st = run.stats;
+    const meter = (v, cls) => `<span class="meter ${cls || ""}${v <= 3 ? " low" : ""}"><i style="width:${v * 10}%"></i></span>`;
+    gameEls.stats.innerHTML =
+      `<span class="stat"><span class="k">Money</span><b>${naira(st.money)}</b></span>` +
+      `<span class="stat"><span class="k">CGPA</span><b>${st.cgpa.toFixed(2)}</b></span>` +
+      `<span class="stat"><span class="k">Peace</span>${meter(st.peace, "peace")}</span>` +
+      `<div class="rels" style="grid-column:1/-1;justify-content:flex-start">` +
+      `<span class="rel">Mama ${meter(st.mum)}</span><span class="rel">Dele ${meter(st.dele)}</span><span class="rel">Lola ${meter(st.lola)}</span></div>`;
+
+    const dock = gameEls.dock;
+    dock.innerHTML = "";
+    const sc = sceneOf(run.scene);
+    if (run.li >= run.lines.length && sc.choices) {
+      sc.choices.forEach((ch, i) => {
+        if (ch.if && !ch.if(run)) return;
+        const ok = !ch.req || ch.req(run);
+        const b = el("button", "choice", esc(txt(ch)) + (ok ? "" : `<small>${esc(ch.reqText || "Not available")}</small>`));
+        b.type = "button";
+        b.disabled = !ok;
+        b.onclick = () => choose(i);
+        dock.appendChild(b);
+      });
+    } else {
+      const b = el("button", "continue", sc.id && run.li >= run.lines.length ? "See how it ends ▸" : "Continue ▸");
+      b.type = "button";
+      b.onclick = advance;
+      dock.appendChild(b);
+    }
+    requestAnimationFrame(() => window.scrollTo({ top: document.body.scrollHeight, behavior: incremental ? "smooth" : "auto" }));
+  }
+
+  function renderEnd() {
+    gameEls = null;
+    const S = story();
+    const e = S.endings[run.ended];
+    const wrap = el("div", "end pad");
+    const head = el("div");
+    const toneLabel = { good: "Best ending", mid: "Survivor ending", bad: "Bad ending" }[e.tone];
+    head.innerHTML = `<div class="end-tag ${e.tone}">${toneLabel} · ${esc(S.hero)}</div><h1>${esc(e.title)}</h1><p class="blurb">${esc(e.blurb)}</p>`;
+    wrap.appendChild(head);
+
+    const path = el("div", "panel");
+    path.innerHTML = `<h3>How Femi got here</h3>`;
+    const ol = el("ol", "path");
+    run.log.forEach((l) => ol.appendChild(el("li", null, esc(l))));
+    path.appendChild(ol);
+    wrap.appendChild(path);
+
+    const w = Math.min(100, Math.round((run.stats.wahala / 16) * 100));
+    const wp = el("div", "panel");
+    wp.innerHTML = `<h3>The Wahala Meter</h3><p class="muted">This was hidden the whole time. Every risky choice filled it a little.</p><div class="wahala-bar"><i></i></div><p class="muted">${w < 25 ? "Low. You mostly kept your hands clean." : w < 60 ? "Rising. A few choices could have gone very differently." : "Red. Things were always going to catch up."}</p>`;
+    wrap.appendChild(wp);
+    requestAnimationFrame(() => requestAnimationFrame(() => { const i = wp.querySelector(".wahala-bar i"); if (i) i.style.width = w + "%"; }));
+
+    wrap.appendChild(el("div", "panel real", `<h3>Real talk</h3><p class="muted" style="font-size:.95rem">${esc(e.real)}</p>`));
+    wrap.appendChild(endingsBlock(run.story));
+
+    const btns = el("div", "btn-row");
+    const again = el("button", "btn primary", "Play again, choose differently");
+    again.onclick = () => newRun(run.story);
+    const menu = el("button", "btn ghost", "Main menu");
+    menu.onclick = () => { run = null; meta.run = null; persist(); view = "title"; render(); };
+    btns.append(again, menu);
+    wrap.appendChild(btns);
+    app.innerHTML = "";
+    app.appendChild(wrap);
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (view !== "game") return;
+    if ((e.key === " " || e.key === "Enter") && !e.target.closest("button")) { e.preventDefault(); advance(); }
+  });
+
+  // Keep an in-progress game across live updates of the page.
+  window.claude?.hot?.snapshot?.(() => ({ meta, view }));
+  const start = (data) => {
+    if (data && data.meta) { meta = data.meta; run = meta.run; view = data.view || "title"; }
+    if (view === "end" && (!run || !run.ended)) view = "title";
+    render();
+  };
+  window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+})();
+</script>
