@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 /**
  * The floating bubble.
  *
- * Tap      → capture what's on screen (text, link, screenshot) and send it to the sheet.
+ * Tap      → capture what's on screen (text, link, screenshot). Taps within 6 s are slides of one post, sent together.
  * Drag     → move it; it tucks against the nearest edge.
  * Hold     → say what to save (voice note).
  * Drag it to the bottom edge → hide it for an hour (open the app to bring it back sooner).
@@ -252,13 +252,53 @@ public class BubbleService extends AccessibilityService {
         });
     }
 
+    /* Carousels: taps within a few seconds of each other are slides of ONE post, sent together. */
+    private static final long SLIDE_WAIT = 6000;
+    private static final int MAX_SLIDES = 8;
+    private final java.util.List<Bitmap> slides = new java.util.ArrayList<>();
+    private int slideCount;
+    private String slApp, slUrl;
+    private StringBuilder slText;
+    private Toast slideToast;
+    private final Runnable flushSlides = this::flushSlides;
+
     private void send(String app, String url, String text, Bitmap shot) {
         bubble.setVisibility(View.VISIBLE);
+        busy = false;
+        if (slideCount == 0) { slApp = app; slUrl = url; slText = new StringBuilder(text == null ? "" : text); }
+        else {
+            if (slUrl == null) slUrl = url;
+            if (text != null && !text.isEmpty() && slText.indexOf(text) < 0 && slText.length() < 30000) slText.append("\n--- next slide ---\n").append(text);
+        }
+        slideCount++;
+        if (shot != null && slides.size() < MAX_SLIDES) {
+            int w = shot.getWidth(), h = shot.getHeight();
+            slides.add(w > 760 ? Bitmap.createScaledBitmap(shot, 760, Math.max(1, h * 760 / w), true) : shot);
+        }
+        flash(true);
+        if (slideToast != null) slideToast.cancel();
+        slideToast = Toast.makeText(this, slideCount == 1 ? "Got it! 🐝 More slides of this post? Tap again" : "Slide " + slideCount + " added. Tap again, or wait and I’ll send them together", Toast.LENGTH_SHORT);
+        slideToast.show();
+        main.removeCallbacks(flushSlides);
+        main.postDelayed(flushSlides, slideCount >= MAX_SLIDES ? 300 : SLIDE_WAIT);
+    }
+
+    private void flushSlides() {
+        if (slideCount == 0) return;
+        java.util.List<Bitmap> parts = new java.util.ArrayList<>(slides);
+        int n = slideCount;
+        String app = slApp, url = slUrl, text = slText.toString();
+        slides.clear(); slideCount = 0; slText = null;
+        Bitmap shot = parts.isEmpty() ? null : parts.size() == 1 ? parts.get(0) : Tracker.combine(parts);
+        if (parts.size() > 1) text = "ONE POST: these " + parts.size() + " numbered screenshots are slides of the same post (e.g. a carousel). Read them together, in order, as a single opportunity.\n\n" + text;
+        upload(app, url, text, shot, n);
+    }
+
+    private void upload(String app, String url, String text, Bitmap shot, int n) {
         flash(false);
         Tracker.capture(this, app, url, text, shot, null, (ok, msg) -> {
-            busy = false;
             flash(ok);
-            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, ok && n > 1 ? "Saved " + n + " slides as one post 🐝" : msg, Toast.LENGTH_SHORT).show();
             if (ok) Tracker.sortNow(this, (sorted, what) -> {
                 if (sorted) Toast.makeText(this, what, Toast.LENGTH_LONG).show();
             });

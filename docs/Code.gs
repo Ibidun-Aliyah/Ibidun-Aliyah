@@ -666,7 +666,11 @@ ${String(r['Screen text'] || '').slice(0, 8000)}`;
 /* ---------- essays & CV ---------- */
 function readDocText_(key) {
   // The profile from the app goes in front of the "About me" doc, so sorting, eligibility, essays and interview prep all see it.
-  if (key === 'about-me') { const pr = profileText_(); const rest = readDocRaw_(key); return pr ? pr + (rest ? '\n\n' + rest : '') : rest; }
+  if (key === 'about-me') {
+    const pr = profileText_(); let rest = readDocRaw_(key);
+    if (pr) { const i = rest.indexOf('Profile (from the app)'); if (i >= 0) rest = rest.slice(0, i).trim(); }   // older app versions kept a copy in the doc
+    return pr ? pr + (rest ? '\n\n' + rest : '') : rest;
+  }
   return readDocRaw_(key);
 }
 function readDocRaw_(key) {

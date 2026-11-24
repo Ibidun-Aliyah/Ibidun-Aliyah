@@ -14,11 +14,45 @@ const connected = () => !!(window.Android && Android.webAppUrl && Android.webApp
 
 /* ---------------- profile ---------------- */
 const profile = () => { try { return JSON.parse(LS.get('ft-profile', '{}')) || {}; } catch(e){ return {}; } };
+const MARK = 'Profile (from the app)';
+function profileMarkdown(p){
+  let age = '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(p.dob || '')){ const d = new Date(p.dob + 'T12:00:00'), n = new Date(); age = n.getFullYear() - d.getFullYear() - ((n.getMonth() < d.getMonth() || (n.getMonth() === d.getMonth() && n.getDate() < d.getDate())) ? 1 : 0); }
+  const L = [];
+  if (p.name || p.nickname) L.push('Name: ' + (p.name || p.nickname) + (p.nickname && p.name ? ' (goes by ' + p.nickname + ')' : ''));
+  if (age !== '') L.push('Age: ' + age + ' (born ' + p.dob + ')');
+  if (p.gender) L.push('Gender: ' + p.gender);
+  if (p.country || p.city) L.push('Lives in: ' + [p.city, p.country].filter(Boolean).join(', '));
+  if (p.school) L.push('School: ' + p.school);
+  if (p.course) L.push('Course: ' + p.course);
+  if (p.level) L.push('Level/year: ' + p.level + (p.gradYear ? ', graduating ' + p.gradYear : '')); else if (p.gradYear) L.push('Graduating: ' + p.gradYear);
+  if (p.cgpa) L.push('CGPA: ' + p.cgpa);
+  if (p.interests) L.push('Interests: ' + p.interests);
+  if (p.goals) L.push('Looking for: ' + p.goals);
+  if (p.email) L.push('Email: ' + p.email);
+  return '## ' + MARK + '\n' + L.map(x => '- ' + x).join('\n');
+}
+/* Scripts before version 9 have no profile store, so the profile goes into the "About me" doc the AI already reads:
+ * added at the end the first time; on later edits the doc is rewritten with your own text kept and the profile replaced. */
+async function profileIntoAboutMe(p){
+  const cur = await H.call({ action:'readDoc', key:'about-me' });
+  const text = cur.ok ? String(cur.text || '') : '';
+  const section = profileMarkdown(p);
+  if (!cur.ok && cur.error && cur.error !== 'no_doc') return cur;
+  const i = text.indexOf(MARK);
+  if (!text.trim()) return H.call({ action:'doc', key:'about-me', title:'About me', body:'# About me\n' + section, mode:'replace' });
+  if (i < 0) return H.call({ action:'doc', key:'about-me', body:'\n' + section, mode:'append' });
+  const before = text.slice(0, i).replace(/\s+$/, '');
+  const keep = before.split('\n').map(l => l.trim() ? l : '').join('\n');
+  return H.call({ action:'doc', key:'about-me', body: keep + '\n\n' + section, mode:'replace' });
+}
 async function saveProfile(p){
   LS.set('ft-profile', JSON.stringify(p));
   if (!connected() || !H.call) return { ok:true, local:true };
   const j = await H.call({ action:'profile', profile:p });
-  return j.ok ? j : (j.error === 'unknown_action' ? { ok:true, oldScript:true } : j);
+  if (j.ok) return j;
+  if (j.error === 'unknown_action'){ const d = await profileIntoAboutMe(p); return d.ok ? { ok:true, viaDoc:true } : d; }
+  return j;
 }
 /* restore the profile from the script (e.g. a new phone or the web version) */
 async function syncProfile(){
@@ -187,8 +221,7 @@ function profileForm(edit){
     if (!out.nickname){ e.target.nickname.focus(); return; }
     const btn = e.target.querySelector('[type=submit]'); btn.disabled = true; btn.textContent = 'Saving…';
     const j = await saveProfile(out);
-    if (j.oldScript && H.toast) H.toast('Saved on your phone. Update your tracker script so the AI can use it too.');
-    else if (!j.ok && H.toast) H.toast('Saved on your phone. It’ll reach your tracker next time you’re online.');
+    if (!j.ok && H.toast) H.toast('Saved on your phone. It’ll reach your tracker next time you’re online.');
     if (editOnly){ close(); if (H.toast && j.ok && !j.oldScript) H.toast('Profile saved ✓'); if (H.onDone) H.onDone(); }
     else step('done');
   });
