@@ -62,5 +62,29 @@
   "url": "https://www.opinionnigeria.com/2027-opposition-parties-plot-common-front-to-challenge-apc-consider-power-sharing-deal/",
   "impact": "low",
   "model_change": "Not used: a single report not confirmed by a major outlet. The model will change only if a ticket actually changes."
+ },
+ {
+  "date": "2026-11-19",
+  "headline": "INEC says Atiku remains the ADC candidate until the legal dispute is fully resolved",
+  "source": "PM News",
+  "url": "https://pmnewsnigeria.com/2026/11/19/atiku-remains-adc-candidate-despite-court-ruling-inec/",
+  "impact": "medium",
+  "model_change": "No model change. Confirms the current assumption: the stay of execution is still pending, so the chance he is removed stays at 25%."
+ },
+ {
+  "date": "2026-11-23",
+  "headline": "Tinubu formally declares his re-election bid at a Lagos town hall with Igbo leaders and traders",
+  "source": "Premium Times",
+  "url": "https://www.premiumtimesng.com/news/top-news/927518-2027-tinubu-meets-with-igbo-leaders-traders-in-lagos.html",
+  "impact": "low",
+  "model_change": "No model change. Endorsements are logged but not modelled."
+ },
+ {
+  "date": "2026-11-23",
+  "headline": "Accord candidate Olawepo-Hashim warns about rigging; voter-register clean-up postponed until after the polls",
+  "source": "Daily Trust",
+  "url": "https://dailytrust.com/rigging-could-push-nigeria-into-crisis-gbenga-hashim/",
+  "impact": "low",
+  "model_change": "No model change. The model does not cover rigging or turnout; noted as a risk."
  }
 ]
