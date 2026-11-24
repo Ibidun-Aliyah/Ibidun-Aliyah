@@ -304,7 +304,7 @@
     streak: function () { var d = daysUntil(LS.get('ftw-active', '')); return (d === 0 || d === -1) ? +LS.get('ftw-streak', '0') : 0; },
     lostStreak: function () { var d = daysUntil(LS.get('ftw-active', '')), s = +LS.get('ftw-streak', '0'); return (d !== null && d < -1 && d >= -3 && s >= 2) ? s : 0; },
     getSkin: function () { return LS.get('ft-skin', 'hive'); },
-    setSkin: function (s) { LS.set('ft-skin', s === 'garden' ? 'garden' : 'hive'); },
+    setSkin: function (s) { LS.set('ft-skin', s === 'garden' || s === 'grunge' ? s : 'hive'); },
     getMode: function () { return LS.get('ft-mode', ''); },
     setMode: function (m) { LS.set('ft-mode', m); },
     webAppUrl: function () { return webUrl(); },

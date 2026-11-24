@@ -65,6 +65,12 @@ Tap 🎨 to pick **Hive** (honey and bee black, honeycombs, honey drips; your pi
 Dark** (Hive starts in Light). Bisi comes in two styles: Polished on the dashboard, Plushie on the widget and in
 notifications. The widget follows the look you pick.
 
+### Loser-core
+A third look, made from a friend's mood board (loser-core / grunge): ink black, bone, oxblood and dusty pink, film grain,
+a glitchy light streak, the sharp four-point star, red spirals (your pipeline becomes filling spirals), thin capitals with
+dusty-pink script accents. Bisi becomes a manga-ink **beetle** with beetle puns ("i'm shell-shocked", "scarab-ly proud",
+"stop beetling around"). Always dark. Source: `android/app/src/main/assets/grunge.js`.
+
 ## Emails
 Your daily streak is your **nectar** 🍯: any real action collects a day of it, and Bisi cries if you spill the jar.
 
@@ -202,6 +208,4 @@ echo "sdk.dir=/path/to/Android/sdk" > local.properties
 ```
 
 ## Ideas for later
-- **Dark theme with Bisi as a beetle**, full of beetle puns (paused until there's a mood board for the alt/gothic look).
-- Gothic/alt look for a friend: earlier directions on the design canvas weren't right; waiting for her mood board.
 - Semester planner (timetable, course deadlines, exams, CGPA).

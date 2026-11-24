@@ -273,7 +273,7 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public void setSkin(String skin) {
-            Nag.prefs(MainActivity.this).edit().putString("skin", "garden".equals(skin) ? "garden" : "hive").apply();
+            Nag.prefs(MainActivity.this).edit().putString("skin", "garden".equals(skin) || "grunge".equals(skin) ? skin : "hive").apply();
             Nag.updateWidget(MainActivity.this);
         }
 

@@ -15,7 +15,11 @@
 <title>Follow-Through</title>
 <style>/* fonts bundled in the app so it looks the same offline (SIL Open Font Licence) */
 @font-face{font-family:"Patrick Hand";src:url(fonts/patrickhand.woff2) format("woff2");font-weight:400;font-display:swap}
-@font-face{font-family:"Nunito";src:url(fonts/nunito.woff2) format("woff2");font-weight:200 1000;font-display:swap}</style>
+@font-face{font-family:"Nunito";src:url(fonts/nunito.woff2) format("woff2");font-weight:200 1000;font-display:swap}
+@font-face{font-family:"Smooch Sans";src:url(fonts/smoochsans.woff2) format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Space Grotesk";src:url(fonts/spacegrotesk.woff2) format("woff2");font-weight:300 700;font-display:swap}
+@font-face{font-family:"Space Mono";src:url(fonts/spacemono.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Yellowtail";src:url(fonts/yellowtail.woff2) format("woff2");font-weight:400;font-display:swap}</style>
 <script>
   // Apply the saved look (hive or garden) and light/dark choice before anything paints.
   (function(){
@@ -73,6 +77,42 @@
     --sun:#FFC629; --sun-soft:#3B2D0F; --sky:#F0A93A; --sky-soft:#3A2911; --rose:#FF8A6E; --rose-soft:#43231A; --plum:#C9A0F0; --plum-soft:#2F2240;
     --ok:#6CCB8F; --ok-soft:#183324; --t1:#3B2D0F; --t2:#43231A; --t3:#33280F; --t4:#2F2240; color-scheme:dark}
 }
+
+/* Loser-core (always dark): ink black, bone, oxblood, dusty pink; grain, star, spiral; beetle Bisi */
+:root[data-skin="grunge"]{
+  --f-d:"Space Grotesk",system-ui,sans-serif; --f-b:"Space Grotesk",system-ui,sans-serif;
+  --r1:3px; --r2:3px; --r3:4px;
+  --bg:#0C0B0B; --card:#141212; --sunk:#1C1919; --ink:#EDEAE6; --muted:#A39C99; --stroke:#EDEAE6; --sh:#000000; --line:#2E2A2A;
+  --accent:#EDEAE6; --accent-ink:#0C0B0B; --accent-soft:#241C1E; --hl:#8E1B1B; --tape:rgba(142,27,27,.85); --tape2:rgba(232,180,192,.6);
+  --sun:#E8B4C0; --sun-soft:#2A1D20; --rose:#E0565F; --rose-soft:#2A1214; --sky:#CFC9C6; --sky-soft:#1E1B1B; --plum:#E8B4C0; --plum-soft:#241A1D;
+  --ok:#B8D8B0; --ok-soft:#17201A; --t1:#1C1919; --t2:#2A1214; --t3:#1E1B1B; --t4:#241A1D; color-scheme:dark;
+  --pattern:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='7'%3E%3Ccircle cx='3.5' cy='3.5' r='.8' fill='%23EDEAE6' fill-opacity='.05'/%3E%3C/svg%3E");
+  --corner:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M20 2 L24 16 L38 20 L24 24 L20 38 L16 24 L2 20 L16 16z' fill='%23EDEAE6' opacity='.35'/%3E%3C/svg%3E");
+  --bullet:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M10 0 L12 8 L20 10 L12 12 L10 20 L8 12 L0 10 L8 8z' fill='%23E8B4C0'/%3E%3C/svg%3E");
+}
+:root[data-skin="grunge"] body::after{mix-blend-mode:screen;opacity:.5;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .14 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E")}
+:root[data-skin="grunge"] .top h1{font-family:"Smooch Sans",sans-serif;font-weight:300;text-transform:uppercase;letter-spacing:3px;font-size:1.95rem;white-space:nowrap;min-width:0;color:#EDEAE6;text-shadow:0 0 14px rgba(237,234,230,.25)}
+:root[data-skin="grunge"] .icon{background:#0C0B0B;border:1.5px solid #EDEAE6;border-radius:50%;box-shadow:none;color:#EDEAE6}
+:root[data-skin="grunge"] .sticker{background:#0C0B0B;color:#E8B4C0;border:1.5px solid #E8B4C0;box-shadow:none;border-radius:2px;font-family:"Space Mono",monospace;font-size:.85rem}
+:root[data-skin="grunge"] .sub{font-family:"Space Mono",monospace;font-size:.85rem;letter-spacing:1px;text-transform:lowercase}
+:root[data-skin="grunge"] .hello{font-weight:500;font-size:1.55rem}
+:root[data-skin="grunge"] .hello em{background:none;font-family:"Yellowtail",cursive;color:#E8B4C0;font-size:1.25em;padding:0 2px}
+:root[data-skin="grunge"] .bisi::before{display:none}
+:root[data-skin="grunge"] .bisi .say{transform:none;border-width:1.5px;box-shadow:none;border-radius:2px}
+:root[data-skin="grunge"] .bisi .say b{font-family:"Space Mono",monospace;font-size:.7rem;letter-spacing:2px;color:#E8B4C0;text-transform:uppercase}
+:root[data-skin="grunge"] .bisi .say span{font-size:1.02rem;font-weight:500;line-height:1.35}
+:root[data-skin="grunge"] h2,:root[data-skin="grunge"] .sheet-head h3{font-family:"Smooch Sans",sans-serif;font-weight:500;letter-spacing:3px;text-transform:uppercase}
+:root[data-skin="grunge"] .btn{border-width:1.5px;box-shadow:none;border-radius:2px;font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:.95rem}
+:root[data-skin="grunge"] .btn.primary{background:#8E1B1B;border-color:#8E1B1B;color:#FFF}
+:root[data-skin="grunge"] .card,:root[data-skin="grunge"] .item,:root[data-skin="grunge"] .tile{box-shadow:none;border-width:1.5px}
+:root[data-skin="grunge"] .tabbar{border-top:1.5px solid #EDEAE6;box-shadow:none}
+:root[data-skin="grunge"] .tabbar button{font-family:"Space Mono",monospace;font-size:.68rem;text-transform:lowercase}
+:root[data-skin="grunge"] .tabbar svg,:root[data-skin="grunge"] .g-ico{filter:grayscale(1) brightness(1.5) contrast(1.1)}
+:root[data-skin="grunge"] .tabbar button[aria-current] svg{filter:grayscale(1) brightness(2.2)}
+:root[data-skin="grunge"] .icon{width:40px;height:40px}
+:root[data-skin="grunge"] .fab{background:#8E1B1B;color:#FFF;border:1.5px solid #EDEAE6;box-shadow:none;border-radius:50%}
+:root[data-skin="grunge"] .chip{border-radius:2px}
+:root[data-skin="grunge"] .vine{opacity:.35}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
@@ -211,7 +251,7 @@ section{margin-top:28px}
   border-radius:var(--r2);font-family:var(--f-d);font-size:1.1rem;z-index:40;max-width:calc(100% - 32px);box-shadow:3px 4px 0 rgba(0,0,0,.3)}
 
 /* look picker */
-.skin-opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.skin-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
 .skin-opt{border:2.5px solid var(--line);border-radius:var(--r1);padding:10px;background:var(--card);text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px}
 .skin-opt:nth-child(1){transform:rotate(-1deg)} .skin-opt:nth-child(2){transform:rotate(1deg)}
 .skin-opt[aria-pressed="true"]{border-color:var(--stroke);border-width:3px;box-shadow:4px 5px 0 var(--sh)}
@@ -577,6 +617,7 @@ section{margin-top:28px}
 <div class="toast" id="toast" hidden></div>
 
 <script src="bisi.js"></script>
+<script src="grunge.js"></script>
 <script src="games.js"></script>
 <script src="fun.js"></script>
 <script src="welcome.js"></script>
@@ -1457,8 +1498,9 @@ function charts(rows, tips){
     ['Submitted', real.filter(r => r.Status === 'Submitted').length], ['Results', results]];
   const most = Math.max(1, ...stages.map(x => x[1]));
   const garden = document.documentElement.getAttribute('data-skin') === 'garden';
-  $('#pipe-title').textContent = garden ? 'Your garden is growing' : 'Your honey jars';
-  $('#pipe').innerHTML = `<div class="jars">${stages.map(([label, n], i) => garden ? potSvg(i, n, label) : jarSvg(n, n / most, label, i === 3)).join('')}</div>`;
+  $('#pipe-title').textContent = skinNow() === 'grunge' ? 'your spirals' : garden ? 'Your garden is growing' : 'Your honey jars';
+  const grunge = skinNow() === 'grunge' && window.FTGrunge;
+  $('#pipe').innerHTML = `<div class="jars">${stages.map(([label, n], i) => grunge ? FTGrunge.spiralMeter(n, n / most, label, i === 3) : garden ? potSvg(i, n, label) : jarSvg(n, n / most, label, i === 3)).join('')}</div>`;
 
   // timeline: next 30 days
   const up = rows.filter(r => active(r) && r.Deadline).map(r => ({ r, d: days(r.Deadline) })).filter(x => x.d >= 0 && x.d <= 30).sort((a,b)=>a.d-b.d);
@@ -1814,6 +1856,13 @@ const skinNow = () => document.documentElement.getAttribute('data-skin');
 const modeNow = () => document.documentElement.getAttribute('data-mode');
 function decorate(){
   if (!window.bisiSvg) return;
+  if (skinNow() === 'grunge' && window.FTGrunge){
+    $('#deco-head').innerHTML = FTGrunge.glitchBand(132);
+    $('#vine').innerHTML = FTGrunge.spiralSvg(220, '#8E1B1B', 5);
+    document.documentElement.style.setProperty('--empty-img', 'url("data:image/svg+xml,' + encodeURIComponent(FTGrunge.beetleSvg('sleepy', 62)) + '")');
+    $('#meadow').innerHTML = FTGrunge.meadow();
+    return;
+  }
   const garden = skinNow() === 'garden';
   $('#deco-head').innerHTML = garden ? grassBand(132) : dripBand(132);
   $('#vine').innerHTML = garden ? vineSvg(380) : '';
@@ -1843,15 +1892,16 @@ function lookSheet(){
   openSheet(`<div class="sheet-head"><h3>Choose your look</h3><button class="btn small ghost" data-close>Close</button></div>
     <div class="sheet-body">
       <div class="skin-opts">
-        <button class="skin-opt" data-skin="hive" aria-pressed="${cur==='hive'}"><div class="pv" style="background:#F5B700">${honeycombSvg(42)}${bisiSvg('happy',58)}</div><b>Hive</b><span>Honey, bee black and honeycombs. Bisi's home.</span></button>
-        <button class="skin-opt" data-skin="garden" aria-pressed="${cur==='garden'}"><div class="pv" style="background:#DDEFCF">${flowerSvg(26,'#F7B6C8')}${bisiSvg('happy',58,false,'plushie')}${ladybugSvg(26)}</div><b>Garden</b><span>Leaves, flowers and Dot the ladybug.</span></button>
+        <button class="skin-opt" data-skin="hive" aria-pressed="${cur==='hive'}"><div class="pv" style="background:#F5B700">${honeycombSvg(42)}${(window.FTGrunge ? FTGrunge.bee : bisiSvg)('happy',58)}</div><b>Hive</b><span>Honey, bee black and honeycombs. Bisi's home.</span></button>
+        <button class="skin-opt" data-skin="grunge" aria-pressed="${cur==='grunge'}"><div class="pv" style="background:#0C0B0B">${window.FTGrunge ? FTGrunge.spiralSvg(34, '#8E1B1B', 8) + FTGrunge.beetleSvg('happy', 58) + '<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">' + FTGrunge.star(11, 11, 10, '#E8B4C0') + '</svg>' : ''}</div><b>Loser-core</b><span>Black, bone, oxblood and dusty pink. Grain, stars, spirals. Bisi becomes a beetle.</span></button>
+        <button class="skin-opt" data-skin="garden" aria-pressed="${cur==='garden'}"><div class="pv" style="background:#DDEFCF">${flowerSvg(26,'#F7B6C8')}${(window.FTGrunge ? FTGrunge.bee : bisiSvg)('happy',58,false,'plushie')}${ladybugSvg(26)}</div><b>Garden</b><span>Leaves, flowers and Dot the ladybug.</span></button>
       </div>
       <div>
         <h4 style="font-size:1.35rem;margin-bottom:8px">Light or dark</h4>
         <div class="modes" role="group" aria-label="Light or dark">
           ${['auto','light','dark'].map(m => `<button data-mode-set="${m}" aria-pressed="${mode===m}">${icon[m]}${m[0].toUpperCase()+m.slice(1)}</button>`).join('')}
         </div>
-        <div class="note" style="margin-top:6px">Auto follows your phone. Hive is happiest in Light.</div>
+        <div class="note" style="margin-top:6px">Auto follows your phone. Hive is happiest in Light. Loser-core is always dark.</div>
       </div>
       <div class="note">Your widget follows the look you pick.</div>
     </div>`);
@@ -1867,7 +1917,7 @@ document.addEventListener('click', e => {
   if (md){ setMode(md.dataset.modeSet); lookSheet(); return; }
   const b = e.target.closest('button[data-skin]'); if (!b) return;
   const k = b.dataset.skin; setSkin(k); lookSheet();
-  toast(k === 'hive' ? 'Welcome home. Excellent taste, honestly. 🐝' : 'The garden. Calm. I\'ll still nag you. 🌿');
+  toast(k === 'hive' ? 'Welcome home. Excellent taste, honestly. 🐝' : k === 'grunge' ? 'lights off. i\'m a beetle now. don\'t make it weird. 🪲' : 'The garden. Calm. I\'ll still nag you. 🌿');
 });
 decorate();
 function active_(){ if (window.Android && Android.markActive) Android.markActive(); }
