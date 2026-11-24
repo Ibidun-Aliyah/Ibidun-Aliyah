@@ -95,6 +95,17 @@ screenshots. Notes with a time offer **Add to Calendar** (a web app can't ring o
 rest of the nagging. Not on iPhone: the floating bubble and Scroll guard (iOS doesn't allow them).
 After changing the dashboard, run `python3 follow-through/web/build.py` and commit `docs/`.
 
+## Welcome & profile
+The first time the app opens, Bisi buzzes out of the hive (tap it), shows you around in four slides, helps you connect
+your tracker, then asks for your profile: what to call you, name, date of birth, gender (optional), email, country and
+city, school, course, level, graduation year, CGPA, interests and what you're looking for. It's kept on the phone and in
+your own script (`profile` action, schema 9), where it's added to the front of your "About me" doc, so sorting,
+"Am I eligible?", essays and interview prep all use it. Edit it or replay the welcome in **Me → My profile**.
+
+## Carousels
+Uploading several screenshots asks "Same post?": one post combines them into a single numbered image that Bisi reads as
+one opportunity. On Android, sharing several images at once (e.g. from Gallery) combines them automatically.
+
 ## More widgets
 Long-press the home screen → Widgets → Follow-Through: **Nectar jar** (your streak as a honey jar that tips and drips at
 7 pm if you haven't acted), **Brain snack** (a word, maths or circuits question a day; tap to reveal, Play opens the

@@ -16,6 +16,7 @@
  *
  * Endpoints:
  *   POST {action:"capture", app, url, screenText, imageBase64, note}  → new Tracker row
+ *   POST {action:"profile", profile:{…}} / GET ?action=getProfile        → your profile (name, school, level…)
  *   GET  ?action=list[&status=New]                                     → Tracker rows as JSON
  *   POST {action:"update", id, fields:{Header: value, ...}}            → edit a Tracker row
  *   GET  ?action=image&id=...                                          → screenshot as base64
@@ -44,7 +45,7 @@ const TIPS_NAME = 'Tips & Resources';
 const TIP_HEADERS = ['ID', 'Saved', 'Topic', 'Title', 'Key points', 'Link', 'Saved from', 'Screenshot', 'In digest'];
 const FOLDER_NAME = 'Follow-Through captures';
 const DOCS_FOLDER = 'Follow-Through';
-const SCHEMA = '8';
+const SCHEMA = '9';
 
 /* ---------- one-time setup ---------- */
 function setup() {
@@ -169,6 +170,8 @@ function handle_(p) {
         case 'docs': return docs_();
         case 'delete': return deleteRow_(p);
         case 'suggest': return suggest_(p);
+        case 'profile': return saveProfile_(p);
+        case 'getProfile': return { ok: true, profile: loadProfile_() };
         case 'asset': return asset_(p);
         case 'stats': return stats_(p);
         case 'emailNow': return emailNow_(p);
@@ -662,6 +665,11 @@ ${String(r['Screen text'] || '').slice(0, 8000)}`;
 
 /* ---------- essays & CV ---------- */
 function readDocText_(key) {
+  // The profile from the app goes in front of the "About me" doc, so sorting, eligibility, essays and interview prep all see it.
+  if (key === 'about-me') { const pr = profileText_(); const rest = readDocRaw_(key); return pr ? pr + (rest ? '\n\n' + rest : '') : rest; }
+  return readDocRaw_(key);
+}
+function readDocRaw_(key) {
   const id = PropertiesService.getScriptProperties().getProperty('DOC:' + key);
   if (!id) return '';
   try { return DocumentApp.openById(id).getBody().getText(); } catch (e) { return ''; }
@@ -1089,7 +1097,39 @@ function suggest_(p) {
   return { ok: true, id: id };
 }
 
+/* ---------- profile (from the app's welcome screens and Me tab) ---------- */
+const PROFILE_FIELDS = ['nickname', 'name', 'dob', 'gender', 'email', 'country', 'city', 'school', 'course', 'level', 'gradYear', 'cgpa', 'interests', 'goals'];
+function saveProfile_(p) {
+  const pr = p.profile || {}, out = {};
+  PROFILE_FIELDS.forEach(k => { if (pr[k] != null && String(pr[k]).trim()) out[k] = String(pr[k]).slice(0, 600); });
+  PropertiesService.getScriptProperties().setProperty('PROFILE', JSON.stringify(out));
+  return { ok: true, profile: out };
+}
+function loadProfile_() { try { return JSON.parse(PropertiesService.getScriptProperties().getProperty('PROFILE') || '{}'); } catch (e) { return {}; } }
 function profileText_() {
+  const p = loadProfile_();
+  if (!Object.keys(p).length) return '';
+  let age = '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(p.dob || '')) {
+    const d = new Date(p.dob + 'T12:00:00'), n = new Date();
+    age = n.getFullYear() - d.getFullYear() - ((n.getMonth() < d.getMonth() || (n.getMonth() === d.getMonth() && n.getDate() < d.getDate())) ? 1 : 0);
+  }
+  const L = [];
+  if (p.name || p.nickname) L.push('Name: ' + (p.name || p.nickname) + (p.nickname && p.name ? ' (goes by ' + p.nickname + ')' : ''));
+  if (age !== '') L.push('Age: ' + age + ' (born ' + p.dob + ')');
+  if (p.gender) L.push('Gender: ' + p.gender);
+  if (p.country || p.city) L.push('Lives in: ' + [p.city, p.country].filter(String).join(', '));
+  if (p.school) L.push('School: ' + p.school);
+  if (p.course) L.push('Course: ' + p.course);
+  if (p.level) L.push('Level/year: ' + p.level + (p.gradYear ? ', graduating ' + p.gradYear : ''));
+  else if (p.gradYear) L.push('Graduating: ' + p.gradYear);
+  if (p.cgpa) L.push('CGPA: ' + p.cgpa);
+  if (p.interests) L.push('Interests: ' + p.interests);
+  if (p.goals) L.push('Looking for: ' + p.goals);
+  if (p.email) L.push('Email: ' + p.email);
+  return 'PROFILE (from the app)\n' + L.join('\n');
+}
+function profileText2_() {
   return 'ABOUT ME:\n' + readDocText_('about-me').slice(0, 5000) + '\n\nMY CV:\n' + readDocText_('master-cv').slice(0, 9000);
 }
 
@@ -1103,7 +1143,7 @@ Use only facts from my profile; if something important is unknown, say what to c
 
 ${oppContext_(r)}
 
-${profileText_()}`;
+${profileText2_()}`;
   const ans = gemini_([{ text: prompt }], { json: true, temperature: 0.2, fast: true });
   const j = parseJson_(ans.text);
   if (!j || !j.verdict) return { ok: false, error: 'Could not read the answer. Try again.' };
@@ -1151,7 +1191,7 @@ For 8-10 questions (mix of motivation, technical/mechatronics, teamwork/leadersh
 
 ${oppContext_(r)}
 
-${profileText_()}`;
+${profileText2_()}`;
   const ans = gemini_([{ text: prompt }], { temperature: 0.5 });
   const d = withLock_(() => doc_({ key: 'interview-' + p.id, title: 'Interview prep: ' + r['Title'], body: ans.text, mode: 'replace' }));
   withLock_(() => updateRow_(sheet_(), HEADERS, { id: p.id, fields: { 'Interview doc': d.url } }));

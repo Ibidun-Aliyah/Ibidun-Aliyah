@@ -260,10 +260,42 @@ final class Tracker {
 
     /* ---------- images ---------- */
 
+    /** Several images of one post side by side (2 columns, numbered), to be read as one. */
+    static Bitmap combine(java.util.List<Bitmap> parts) {
+        int cols = 2, cell = 760, gap = 16;
+        int rows = (parts.size() + 1) / 2;
+        int[] rowH = new int[rows];
+        for (int i = 0; i < parts.size(); i++) {
+            Bitmap p = parts.get(i);
+            rowH[i / cols] = Math.max(rowH[i / cols], p.getHeight() * cell / Math.max(1, p.getWidth()));
+        }
+        int W = cols * cell + (cols + 1) * gap, H = gap;
+        for (int r : rowH) H += r + gap;
+        Bitmap out = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888);
+        android.graphics.Canvas c = new android.graphics.Canvas(out);
+        c.drawColor(android.graphics.Color.WHITE);
+        android.graphics.Paint box = new android.graphics.Paint(); box.setColor(android.graphics.Color.parseColor("#1E1606"));
+        android.graphics.Paint num = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+        num.setColor(android.graphics.Color.parseColor("#FFC629")); num.setTextSize(36); num.setFakeBoldText(true);
+        int y = gap;
+        for (int r = 0; r < rows; r++) {
+            for (int k = 0; k < cols; k++) {
+                int i = r * cols + k; if (i >= parts.size()) break;
+                Bitmap p = parts.get(i);
+                int x = gap + k * (cell + gap), h = p.getHeight() * cell / Math.max(1, p.getWidth());
+                c.drawBitmap(p, null, new android.graphics.Rect(x, y, x + cell, y + h), null);
+                c.drawRect(x, y, x + 64, y + 52, box);
+                c.drawText(String.valueOf(i + 1), x + 20, y + 40, num);
+            }
+            y += rowH[r] + gap;
+        }
+        return out;
+    }
+
     static String jpegBase64(Bitmap src) {
         Bitmap b = src;
-        int max = 1400;
         int w = src.getWidth(), h = src.getHeight();
+        int max = h > w * 2.5 || w > 1500 ? 4800 : 1400;   // combined carousels stay readable
         if (Math.max(w, h) > max) {
             float s = (float) max / Math.max(w, h);
             b = Bitmap.createScaledBitmap(src, Math.round(w * s), Math.round(h * s), true);

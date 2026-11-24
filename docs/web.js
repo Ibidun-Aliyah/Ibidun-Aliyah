@@ -105,7 +105,7 @@
 
   /* ---------- small pop-up screens (setup, settings, voice) ---------- */
   var css = document.createElement('style');
-  css.textContent = '.ftw-scrim{position:fixed;inset:0;background:rgba(30,22,6,.45);z-index:60;display:flex;align-items:flex-end;justify-content:center}' +
+  css.textContent = '.ftw-scrim{position:fixed;inset:0;background:rgba(30,22,6,.45);z-index:90;display:flex;align-items:flex-end;justify-content:center}' +
     '.ftw-card{background:var(--card,#FFFDF4);color:var(--ink,#1E1606);border:2.5px solid var(--stroke,#1E1606);border-bottom:0;border-radius:28px 24px 0 0;width:100%;max-width:640px;max-height:92vh;overflow:auto;padding:18px 18px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -6px 0 rgba(0,0,0,.08)}' +
     '.ftw-card h3{font-family:var(--f-d,cursive);font-size:1.6rem;margin:0 0 6px}.ftw-card p,.ftw-card li{line-height:1.45}.ftw-card ol{padding-left:22px;margin:8px 0}.ftw-card li{margin:6px 0}' +
     '.ftw-card input{width:100%;box-sizing:border-box;border:2.5px solid var(--stroke,#1E1606);border-radius:14px;padding:11px 12px;font:inherit;background:var(--card,#fff);color:inherit}' +
@@ -403,7 +403,8 @@
     d.querySelector('.inv-env').onclick = function () { d.classList.add('open'); };
     d.querySelector('.inv-go').onclick = function () {
       LS.set('ftw-invited', '1'); d.remove();
-      if (!webUrl()) { LS.set('ftw-welcomed', '1'); settings(true); }
+      window.__inviting = false;
+      if (window.FTWelcome) FTWelcome.start(); else if (!webUrl()) settings(true);
     };
   }
 
@@ -411,8 +412,7 @@
   window.addEventListener('load', function () {
     document.documentElement.setAttribute('data-platform', 'web');
     var inv = inviteParams();
-    if (inv.from && !webUrl()) showInvite(inv);
-    else if (!webUrl() && !LS.get('ftw-welcomed', '')) { LS.set('ftw-welcomed', '1'); settings(true); }
+    if (inv.from && !webUrl()) { window.__inviting = true; showInvite(inv); }
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
   });
 })();

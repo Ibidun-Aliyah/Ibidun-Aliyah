@@ -425,6 +425,10 @@ section{margin-top:28px}
 
   <div class="pane" id="p-me" hidden>
     <section>
+      <div class="sh"><h2>My profile</h2><small>Bisi uses it for eligibility</small></div>
+      <div class="card" id="profile-card"></div>
+    </section>
+    <section>
       <div class="sh"><h2>My CV</h2><small>used for every tailored CV</small></div>
       <div class="card cv">
         <div class="row">
@@ -503,6 +507,7 @@ section{margin-top:28px}
 
 <script src="bisi.js"></script>
 <script src="games.js"></script>
+<script src="welcome.js"></script>
 <script>
 (() => {
 /* ---------- bridge to the Android app ---------- */
@@ -569,6 +574,7 @@ async function load(quiet){
       banner('off', `📴 Offline: showing your saved copy${ago}. Notes, games, reminders and the bubble still work${q ? `; ${q} change${q === 1 ? '' : 's'} waiting to sync` : ''}. Connect for sorting, AI help and live updates.`, 'Retry'); }
     render(); return; }
   offline = false; sticky = '';
+  if (window.FTWelcome) FTWelcome.syncProfile().then(renderProfileCard);
   D = j; try { localStorage.setItem('ft-dash', JSON.stringify(j)); localStorage.setItem('ft-dash-at', String(Date.now())); } catch(e){}
   if (window.Android && Android.saveDashboard) Android.saveDashboard(JSON.stringify(j));
   checkUpdate();
@@ -656,8 +662,9 @@ function render(){
   const newCount = rows.filter(r => r.Status === 'New').length;
 
   bisiSay(rows, need);
-  $('#hello').innerHTML = need.length ? `<em>${need.length} ${need.length===1?'thing needs':'things need'} you</em> today.` :
-    rows.length ? 'You\'re on top of it. <em>Nothing urgent today.</em>' : 'Nothing saved yet. <em>Tap the bubble on your next find.</em>';
+  const nick = window.FTWelcome ? (FTWelcome.profile().nickname || '') : '';
+  $('#hello').innerHTML = (nick ? `Hi ${esc(nick)}! ` : '') + (need.length ? `<em>${need.length} ${need.length===1?'thing needs':'things need'} you</em> today.` :
+    rows.length ? 'You\'re on top of it. <em>Nothing urgent today.</em>' : 'Nothing saved yet. <em>Tap the bubble on your next find.</em>');
 
   const b = [];
   if (!D.ai.hasKey) b.push(`<div class="banner warn"><span>Turn on instant sorting, essays and CV tailoring: add your free Gemini key.</span><button class="btn small" data-banner="Settings">Set up</button></div>`);
@@ -1104,6 +1111,24 @@ $('#iv-send').onclick = () => {
 };
 $('#iv-preview').onclick = () => open(inviteLink().url);
 
+/* ---------- my profile (Me tab) ---------- */
+function renderProfileCard(){
+  const el = $('#profile-card'); if (!el || !window.FTWelcome) return;
+  const p = FTWelcome.profile();
+  const bits = [p.course, p.level, p.school].filter(Boolean).join(' · ');
+  el.innerHTML = p.nickname
+    ? `<div style="display:flex;gap:12px;align-items:center"><div style="width:64px;flex:none">${window.bisiSvg ? bisiSvg('happy', 64) : ''}</div>
+        <div><div style="font-family:var(--f-d);font-size:1.5rem;line-height:1.1">${esc(p.name || p.nickname)}</div><div class="note">${esc(bits || 'Add your school and course')}</div></div></div>
+       <div class="row" style="margin-top:10px"><button class="btn small" data-prof="edit">Edit profile</button><button class="btn small ghost" data-prof="tour">Replay the welcome</button></div>`
+    : `<p style="margin:0 0 10px">Tell Bisi about you (school, course, level, age) so she can check if you’re eligible for what you save.</p>
+       <div class="row"><button class="btn small primary" data-prof="edit">Add my profile</button><button class="btn small ghost" data-prof="tour">Replay the welcome</button></div>`;
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-prof]'); if (!b || !window.FTWelcome) return;
+  if (b.dataset.prof === 'edit') FTWelcome.editProfile(); else FTWelcome.start(true);
+});
+renderProfileCard();
+
 /* ---------- upload screenshots (iPhone and Android) ---------- */
 function shrinkToJpeg(file){
   return new Promise((res, rej) => {
@@ -1122,6 +1147,22 @@ $('#add-shots').addEventListener('change', async e => {
   const files = [...e.target.files].slice(0, 10); e.target.value = '';
   if (!files.length) return;
   let ok = 0, queued = 0;
+  if (files.length > 1 && window.FTWelcome){
+    const how = await FTWelcome.askOnePost(files.length);
+    if (!how) return;
+    if (how === 'one'){
+      toast('Putting the slides together… 🐝');
+      try {
+        const c = await FTWelcome.combine(files);
+        const j = await call({ action:'capture', app:'Screenshot upload', imageBase64: c.b64,
+          screenText: `ONE POST: these ${c.count} numbered images are slides/pages of the same post (e.g. an Instagram carousel or a multi-page flyer). Read them together, in order, as a single opportunity.` });
+        if (j.ok && window.Android && Android.markActive) Android.markActive();
+        toast(!j.ok ? 'Couldn\'t save that. Try again?' : j.queued ? 'Saved on your phone. It\'ll send when you\'re online.' : `Saved ${c.count} slides as one post. Bisi is reading them…`);
+        if (j.ok && !j.queued) load(true);
+      } catch(err){ toast('Couldn\'t read those images.'); }
+      return;
+    }
+  }
   for (let i = 0; i < files.length; i++){
     toast(`Saving screenshot ${i + 1} of ${files.length}… 🐝`);
     try {
@@ -1147,6 +1188,7 @@ function go(name){
   closeSwipes(); window.scrollTo(0, 0);
 }
 window.__back = () => {
+  if (window.FTWelcome && FTWelcome.isOpen()) return 1;
   if (!$('#sheet').hidden){ closeSheet(); return 1; }
   if (document.querySelector('.swipe.open')){ closeSwipes(); return 1; }
   if (pane === 'games' && window.FTGames && FTGames.back()) return 1;
@@ -1536,7 +1578,7 @@ $('#cv-add-btn').onclick = async () => {
   if (j.ok){ active_(); out.textContent = 'Added ✓\n' + j.changes; $('#cv-add').value = ''; }
   else out.textContent = j.error === 'no_key' ? 'Add your Gemini key in Settings first.' : 'Didn\'t work: ' + String(j.error).slice(0,140);
 };
-window.__onResume = () => { load(true); if (pane === 'notes'){ notesLoad(); renderNotes(); } };
+window.__onResume = () => { if (window.FTWelcome) FTWelcome.resume(); load(true); if (pane === 'notes'){ notesLoad(); renderNotes(); } };
 
 /* ---------- looks: hive or garden, light or dark ---------- */
 const skinNow = () => document.documentElement.getAttribute('data-skin');
@@ -1619,6 +1661,11 @@ function demo(req){
 
 render();
 load();
+if (window.FTWelcome){
+  FTWelcome.init({ call, toast, onDone: () => { renderProfileCard(); render(); } });
+  // after the page (and any invitation) is ready; an open invitation starts the tour itself
+  window.addEventListener('load', () => { if (!window.__inviting) FTWelcome.start(); });
+}
 })();
 </script>
 </body>
