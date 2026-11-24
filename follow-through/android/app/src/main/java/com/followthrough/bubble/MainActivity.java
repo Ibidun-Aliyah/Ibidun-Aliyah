@@ -89,12 +89,18 @@ public class MainActivity extends Activity {
                 fileCallback = cb;
                 Intent pick = new Intent(Intent.ACTION_GET_CONTENT);
                 pick.addCategory(Intent.CATEGORY_OPENABLE);
-                pick.setType("*/*");
-                pick.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
-                        "application/pdf", "image/*", "text/plain",
-                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+                String[] accept = params.getAcceptTypes();
+                boolean imagesOnly = accept != null && accept.length == 1 && "image/*".equals(accept[0]);
+                if (imagesOnly) pick.setType("image/*");   // "Upload screenshots"
+                else {
+                    pick.setType("*/*");
+                    pick.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
+                            "application/pdf", "image/*", "text/plain",
+                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+                }
+                if (params.getMode() == FileChooserParams.MODE_OPEN_MULTIPLE) pick.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                 try {
-                    startActivityForResult(Intent.createChooser(pick, "Choose your CV"), PICK_FILE);
+                    startActivityForResult(Intent.createChooser(pick, imagesOnly ? "Choose screenshots" : "Choose your CV"), PICK_FILE);
                 } catch (Exception e) {
                     fileCallback = null;
                     return false;
@@ -186,7 +192,14 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int req, int res, Intent data) {
         if (req == PICK_FILE && fileCallback != null) {
-            Uri[] result = (res == RESULT_OK && data != null && data.getData() != null) ? new Uri[]{data.getData()} : null;
+            Uri[] result = null;
+            if (res == RESULT_OK && data != null) {
+                if (data.getClipData() != null) {
+                    android.content.ClipData cd = data.getClipData();
+                    result = new Uri[cd.getItemCount()];
+                    for (int i = 0; i < cd.getItemCount(); i++) result[i] = cd.getItemAt(i).getUri();
+                } else if (data.getData() != null) result = new Uri[]{data.getData()};
+            }
             fileCallback.onReceiveValue(result);
             fileCallback = null;
             return;

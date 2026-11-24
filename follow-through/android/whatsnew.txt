@@ -1,1 +1,1 @@
-a neater Quick save widget that fits any size
+upload screenshots straight into your tracker (Tracker → Upload screenshots)

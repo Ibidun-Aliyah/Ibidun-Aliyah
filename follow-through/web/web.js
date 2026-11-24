@@ -112,6 +112,7 @@
     '.ftw-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.ftw-msg{font-size:.92rem;min-height:1.2em;margin:6px 0}.ftw-msg.ok{color:var(--ok,#2C7A4B)}.ftw-msg.no{color:var(--rose,#D9533B)}' +
     '.ftw-sec{border-top:2px dashed var(--line,#E8D08A);margin-top:16px;padding-top:12px}.ftw-sec h4{font-family:var(--f-d,cursive);font-size:1.25rem;margin:0 0 4px}' +
     '.ftw-small{font-size:.85rem;color:var(--muted,#6E5A2C)}.ftw-card code{background:var(--sun-soft,#FFF0C0);padding:1px 5px;border-radius:6px;font-size:.85em;word-break:break-all}' +
+    '.ftw-chip{display:inline-block;border:2px solid var(--stroke,#1E1606);background:var(--sun-soft,#FFF0C0);color:inherit;border-radius:9px;padding:1px 8px;margin:2px 0;font:inherit;font-size:.88rem;font-weight:700;cursor:pointer}' +
     '.ftw-card details{margin:8px 0}.ftw-card summary{cursor:pointer;font-weight:700}';
   document.head.appendChild(css);
 
@@ -128,6 +129,9 @@
   function esc(x) { return String(x == null ? '' : x).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function btn(label, attrs, primary) { return '<button class="btn' + (primary ? ' primary' : '') + '" ' + (attrs || '') + '>' + label + '</button>'; }
   function toast(m) { var t = document.getElementById('toast'); if (!t) return alert(m); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { t.hidden = true; }, 3200); }
+
+  function chip(text) { return '<button class="ftw-chip" data-copy="' + esc(text) + '">' + esc(text) + ' <span aria-hidden="true">⧉</span></button>'; }
+  function linkChip() { return webUrl() ? '<button class="ftw-chip" data-copy="' + esc(webUrl()) + '">your link <span aria-hidden="true">⧉</span></button>' : '<b>your link</b> (connect in step 1 first)'; }
 
   function settings(first) {
     var url = webUrl();
@@ -157,23 +161,35 @@
       '<div class="ftw-sec"><h4>2. Instant sorting &amp; AI help (free)</h4><p class="ftw-small">Get a free Gemini key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> and paste it here. It is stored only in your own script.</p>' +
       '<input id="ftw-key" type="password" autocomplete="off" placeholder="Gemini API key">' +
       '<div class="ftw-row">' + btn('Save key', 'data-ftw="key"') + '</div><div class="ftw-msg" id="ftw-kmsg"></div></div>' +
-      (isIOS ? '<div class="ftw-sec"><h4>3. Save from any app (iPhone)</h4>' +
-        '<details><summary>“Share → Save to Follow-Through”</summary><ol>' +
-        '<li>Open <b>Shortcuts</b> → <b>+</b>. Name it <b>Save to Follow-Through</b>.</li>' +
-        '<li>Tap ⓘ → turn on <b>Show in Share Sheet</b>.</li>' +
-        '<li>Add <b>Get Contents of URL</b>. URL: your Web app URL. Tap ▸: Method <b>POST</b>, Request Body <b>JSON</b>, add fields: <code>action</code> = <code>capture</code>, <code>app</code> = <code>iPhone share</code>, <code>url</code> = <b>Shortcut Input</b>, <code>screenText</code> = <b>Shortcut Input</b>.</li>' +
-        '<li>Add <b>Show Notification</b>: “Saved to Follow-Through 🐝”.</li>' +
-        '<li>Now in Safari, Instagram, X… tap <b>Share</b> → <b>Save to Follow-Through</b>.</li></ol></details>' +
-        '<details><summary>Double-tap the back of the phone to save a screenshot</summary><ol>' +
-        '<li>New shortcut <b>Bisi screenshot</b>: add <b>Take Screenshot</b>, then <b>Base64 Encode</b> (tap ▸, Line Breaks: <b>None</b>).</li>' +
-        '<li>Add <b>Get Contents of URL</b>: your Web app URL, POST, JSON: <code>action</code> = <code>capture</code>, <code>app</code> = <code>Screenshot</code>, <code>imageBase64</code> = <b>Base64 Encoded</b>.</li>' +
-        '<li>Add <b>Show Notification</b>: “Saved 🐝”.</li>' +
-        '<li>Settings → Accessibility → Touch → <b>Back Tap</b> → <b>Double Tap</b> → <b>Bisi screenshot</b>.</li></ol>' +
-        '<p class="ftw-small">Gemini reads the screenshot and fills in the details.</p></details></div>' : '') +
+      (isIOS ? '<div class="ftw-sec"><h4>3. iPhone extras</h4>' +
+        '<p><b>📸 Easiest, no setup:</b> Tracker → <b>Upload screenshots</b>. Pick as many as you like; Bisi reads them and fills in the details.</p>' +
+        '<p class="ftw-small">Widgets: iPhones only allow home-screen widgets from App Store apps, so Follow-Through can’t have its own. The Shortcuts widget below gives you a one-tap save button instead.</p>' +
+        '<details><summary>Share sheet + Back Tap: the “Save to Bisi” shortcut (5 min)</summary>' +
+        '<p class="ftw-small">One shortcut does both: shared links go to your tracker, and with nothing shared (Back Tap) it saves a screenshot. Copy buttons put each value on your clipboard.</p><ol>' +
+        '<li>Open the <b>Shortcuts</b> app → tap <b>+</b> (top right).</li>' +
+        '<li>Tap the name at the top → <b>Rename</b> → ' + chip('Save to Bisi') + '</li>' +
+        '<li>Tap <b>ⓘ</b> (bottom) → switch on <b>Show in Share Sheet</b> → <b>Done</b>. A line appears at the top: “Receive <i>Any</i> input from <i>Share Sheet</i>”. On that line, after “If there’s no input”, tap <b>Stop and Respond</b> → choose <b>Continue</b>.</li>' +
+        '<li>In the search bar at the bottom, find <b>If</b> and add it. Tap <b>Condition</b> → <b>has any value</b>. (It should say <i>If Shortcut Input has any value</i>.)</li>' +
+        '<li>Add <b>Get Contents of URL</b> and drag it <b>between If and Otherwise</b>. Tap <b>URL</b> → paste ' + linkChip() + '. Tap <b>›</b>: Method <b>POST</b>, Request Body <b>JSON</b>. Tap <b>Add new field → Text</b> four times:<br>' +
+          chip('action') + ' = ' + chip('capture') + '<br>' + chip('app') + ' = ' + chip('iPhone share') + '<br>' +
+          chip('url') + ' = <b>Shortcut Input</b> (tap the value box, then <i>Shortcut Input</i> in the bar above the keyboard)<br>' + chip('screenText') + ' = <b>Shortcut Input</b></li>' +
+        '<li>Between <b>Otherwise</b> and <b>End If</b>, add in this order: <b>Take Screenshot</b> → <b>Convert Image</b> (to <b>JPEG</b>) → <b>Resize Image</b> (width ' + chip('1400') + ') → <b>Base64 Encode</b> (tap <b>›</b>, Line Breaks: <b>None</b>) → <b>Get Contents of URL</b>: your link again, POST, JSON:<br>' +
+          chip('action') + ' = ' + chip('capture') + '<br>' + chip('app') + ' = ' + chip('Screenshot') + '<br>' + chip('imageBase64') + ' = <b>Base64 Encoded</b></li>' +
+        '<li>After <b>End If</b>, add <b>Show Notification</b>: ' + chip('Saved to Bisi 🐝') + '</li>' +
+        '<li><b>Important:</b> tap <b>▶</b> once inside Shortcuts. Your iPhone asks to let “Save to Bisi” connect to script.google.com → <b>Always Allow</b>. Back Tap does nothing until you’ve said yes once. A screenshot of the Shortcuts app should appear in your tracker.</li></ol>' +
+        '<p><b>Share sheet:</b> in Safari tap Share, then scroll down the list of actions to <b>Save to Bisi</b>. Not there? Tap <b>Edit Actions…</b> at the bottom and add it. In Instagram tap the paper plane → <b>Share to…</b> first; in X, Share → <b>Share via…</b>.</p>' +
+        '<p><b>Back Tap:</b> Settings → Accessibility → Touch → <b>Back Tap</b> (at the bottom) → <b>Double Tap</b> → scroll to Shortcuts → <b>Save to Bisi</b>. Tap firmly twice near the camera; thick cases can block it.</p></details>' +
+        '<details><summary>A one-tap “save copied link” button for your home screen</summary><ol>' +
+        '<li>New shortcut named ' + chip('Bisi: save link') + ': add <b>Get Clipboard</b>, then <b>Get Contents of URL</b> (your link ' + linkChip() + ', POST, JSON: ' + chip('action') + ' = ' + chip('capture') + ', ' + chip('app') + ' = ' + chip('Copied link') + ', ' + chip('url') + ' = <b>Clipboard</b>, ' + chip('screenText') + ' = <b>Clipboard</b>), then <b>Show Notification</b>.</li>' +
+        '<li>Run it once and allow it to connect.</li>' +
+        '<li>Long-press your home screen → <b>Edit</b> → <b>Add Widget</b> → <b>Shortcuts</b> → add the small widget, then tap it and choose <b>Bisi: save link</b>.</li></ol>' +
+        '<p class="ftw-small">Copy a link anywhere, tap the widget, done.</p></details></div>' : '') +
       '<div class="ftw-sec"><h4>Reminders</h4><p class="ftw-small">Your script emails you every morning, before deadlines and when you ignore things. For notes, tap <b>Add to Calendar</b> after saving one with a time so your phone rings.</p></div>' +
       '<div class="ftw-row" style="justify-content:flex-end">' + btn(first && !url ? 'Look around first' : 'Done', 'data-ftw-close') + '</div>',
     function (root) {
       root.addEventListener('click', function (e) {
+        var cp = e.target.closest('[data-copy]');
+        if (cp) { var v = cp.getAttribute('data-copy'); if (navigator.clipboard) navigator.clipboard.writeText(v).then(function () { var o = cp.innerHTML; cp.innerHTML = 'Copied ✓'; setTimeout(function () { cp.innerHTML = o; }, 1200); }); return; }
         var a = e.target.closest('[data-ftw]'); if (!a) return;
         var act = a.getAttribute('data-ftw');
         if (act === 'apk') { location.href = 'follow-through.apk'; a.textContent = 'Downloading… check your notifications'; return; }
