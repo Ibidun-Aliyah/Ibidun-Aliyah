@@ -1,0 +1,7 @@
+lightgbm>=4.0
+numpy
+pandas
+pyyaml
+requests
+scikit-learn
+scipy

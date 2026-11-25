@@ -1,0 +1,29 @@
+
+2026 qatar — pre-weekend model, trained on 113 races
+
+                     driver          team   p_win p_podium p_points exp_position
+pred_pos                                                                        
+1            max-verstappen      red-bull   32.8%    71.6%    87.7%          4.3
+2              lando-norris       mclaren   19.7%    56.5%    87.6%          5.0
+3            kimi-antonelli      mercedes   12.5%    42.7%    92.4%          5.0
+4            lewis-hamilton       ferrari   12.0%    40.4%    87.5%          5.8
+5           charles-leclerc       ferrari    7.8%    28.5%    87.3%          6.5
+6            george-russell      mercedes    6.1%    23.4%    91.3%          6.3
+7             oscar-piastri       mclaren    3.4%    13.3%    87.7%          7.4
+8              isack-hadjar      red-bull    2.2%     9.2%    82.5%          8.2
+9              pierre-gasly        alpine    0.6%     2.5%    43.8%         11.7
+10              liam-lawson  racing-bulls    0.6%     2.4%    44.2%         11.4
+11           arvid-lindblad  racing-bulls    0.4%     1.5%    29.3%         13.3
+12         franco-colapinto        alpine    0.4%     1.6%    30.8%         13.4
+13          nico-hulkenberg          audi    0.3%     1.1%    23.3%         13.6
+14        gabriel-bortoleto          audi    0.2%     0.9%    20.7%         14.2
+15          carlos-sainz-jr      williams    0.2%     0.8%    18.2%         14.6
+16          alexander-albon      williams    0.2%     0.6%    12.9%         15.9
+17            rafael-camara          haas    0.2%     0.7%    15.2%         14.9
+18             sergio-perez      cadillac    0.1%     0.5%    12.2%         15.9
+19           oliver-bearman          haas    0.1%     0.5%    12.9%         15.9
+20          valtteri-bottas      cadillac    0.1%     0.5%    10.7%         16.6
+21          fernando-alonso  aston-martin    0.1%     0.5%    12.3%         16.0
+22             lance-stroll  aston-martin    0.1%     0.4%     9.6%         16.9
+
+saved results/prediction_2026_qatar.csv

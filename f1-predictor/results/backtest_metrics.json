@@ -1,0 +1,99 @@
+{
+  "all": {
+    "pre": {
+      "winner_hit": 0.311,
+      "podium_overlap": 0.548,
+      "top10_overlap": 0.736,
+      "spearman": 0.591,
+      "mae": 3.945
+    },
+    "post": {
+      "winner_hit": 0.622,
+      "podium_overlap": 0.659,
+      "top10_overlap": 0.78,
+      "spearman": 0.674,
+      "mae": 3.376
+    },
+    "grid": {
+      "winner_hit": 0.689,
+      "podium_overlap": 0.681,
+      "top10_overlap": 0.764,
+      "spearman": 0.644,
+      "mae": 3.486
+    },
+    "champ": {
+      "winner_hit": 0.311,
+      "podium_overlap": 0.6,
+      "top10_overlap": 0.742,
+      "spearman": 0.588,
+      "mae": 4.062
+    },
+    "n_races": 45
+  },
+  "2025": {
+    "pre": {
+      "winner_hit": 0.25,
+      "podium_overlap": 0.625,
+      "top10_overlap": 0.708,
+      "spearman": 0.546,
+      "mae": 4.038
+    },
+    "post": {
+      "winner_hit": 0.542,
+      "podium_overlap": 0.722,
+      "top10_overlap": 0.775,
+      "spearman": 0.667,
+      "mae": 3.254
+    },
+    "grid": {
+      "winner_hit": 0.667,
+      "podium_overlap": 0.75,
+      "top10_overlap": 0.779,
+      "spearman": 0.651,
+      "mae": 3.354
+    },
+    "champ": {
+      "winner_hit": 0.25,
+      "podium_overlap": 0.681,
+      "top10_overlap": 0.708,
+      "spearman": 0.533,
+      "mae": 4.217
+    },
+    "n_races": 24
+  },
+  "2026": {
+    "pre": {
+      "winner_hit": 0.381,
+      "podium_overlap": 0.46,
+      "top10_overlap": 0.767,
+      "spearman": 0.642,
+      "mae": 3.84
+    },
+    "post": {
+      "winner_hit": 0.714,
+      "podium_overlap": 0.587,
+      "top10_overlap": 0.786,
+      "spearman": 0.683,
+      "mae": 3.515
+    },
+    "grid": {
+      "winner_hit": 0.714,
+      "podium_overlap": 0.603,
+      "top10_overlap": 0.748,
+      "spearman": 0.635,
+      "mae": 3.636
+    },
+    "champ": {
+      "winner_hit": 0.381,
+      "podium_overlap": 0.508,
+      "top10_overlap": 0.781,
+      "spearman": 0.652,
+      "mae": 3.885
+    },
+    "n_races": 21
+  },
+  "temperature": {
+    "pre": 0.8311891178203799,
+    "post": 0.7319838327949519
+  }
+}
