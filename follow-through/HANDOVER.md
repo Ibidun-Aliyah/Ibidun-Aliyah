@@ -132,7 +132,8 @@ All prompts read her app profile (level, CGPA, etc.) from the tracker; update pr
      `follow-through/android/whatsnew.txt` (shown in the in-app update banner).
   2. `./gradlew -q lintDebug assembleDebug`; copy `app/build/outputs/apk/debug/app-debug.apk` to `releases/follow-through.apk`.
   3. `python3 follow-through/web/build.py` (copies assets + APK + version.json into `docs/`).
-  4. Update `follow-through/README.md`; commit (message ends with the session's attribution lines); push.
+  4. Update `follow-through/README.md` **and add an entry to the Running log (section 7)**; commit (message ends with
+     the session's attribution lines); push.
   5. `SendUserFile` the APK with a short caption.
 
 ---
@@ -153,3 +154,21 @@ All prompts read her app profile (level, CGPA, etc.) from the tracker; update pr
   tasks can search the web.
 - When editing `dashboard.html` with Python string replaces, assert the old text exists first (several edits silently
   failed before when text had changed).
+
+---
+
+## 7. Running log (newest last). **Add an entry for every request, before replying.**
+
+Aliyah asked (25 Nov 2026) that this document update itself with everything she asks from now on, so nothing is lost
+if the conversation is summarised or a new session starts. Rule: after finishing each request, append one entry here
+(date · what she asked · what was done/decided · anything pending), commit and push with the change.
+
+- **25 Nov · Daily scout ("web scraping")**: asked for Bisi to find *anything* she's eligible for from all over the
+  internet, assess eligibility, and list it; she handles requirements herself. Done: the weekly-picks task became
+  **"Follow-Through: Bisi's daily scout"** (11:23 Lagos daily, up to 8 picks, Strong/Possible eligibility verdict written
+  to the Eligibility column via `update`). For-you cards show the verdict and sort best-first, with "See all". v6.3.
+- **25 Nov · Handover document**: asked what happens when the context window fills up and for a handover so nothing is
+  lost. Explained: the session auto-summarises and continues; only a brand-new session starts blank. Wrote this file +
+  root `CLAUDE.md`. Told her to tell new sessions: read this file and keep pushing to `ccr-56053f25-of024x`.
+- **25 Nov · Keep the handover updated automatically**: asked that every later request be written here so nothing after
+  the handover's creation gets cut off. Done: this Running log + the standing rule in `CLAUDE.md` and the release ritual.
