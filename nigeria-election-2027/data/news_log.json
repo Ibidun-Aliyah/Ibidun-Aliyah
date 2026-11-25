@@ -86,5 +86,21 @@
   "url": "https://dailytrust.com/rigging-could-push-nigeria-into-crisis-gbenga-hashim/",
   "impact": "low",
   "model_change": "No model change. The model does not cover rigging or turnout; noted as a risk."
+ },
+ {
+  "date": "2026-11-24",
+  "headline": "A coalition of Atiku support groups switches to backing Obi and Kwankwaso",
+  "source": "Guardian Nigeria",
+  "url": "https://guardian.ng/news/atikus-presidential-ambition-faces-fresh-challenge-as-supporters-back-obi/",
+  "impact": "low",
+  "model_change": "No model change. Endorsements are logged but not modelled; worth watching for a wider drift from Atiku to Obi."
+ },
+ {
+  "date": "2026-11-15",
+  "headline": "Atiku and Makinde camps hold alliance talks against Tinubu; no agreement yet",
+  "source": "PM News",
+  "url": "https://pmnewsnigeria.com/2026/11/15/2027-atiku-makinde-in-fresh-talks-to-challenge-tinubu/",
+  "impact": "low",
+  "model_change": "No model change. The model will change only if a candidate actually steps down or a ticket merges."
  }
 ]
