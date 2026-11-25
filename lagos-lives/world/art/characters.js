@@ -29,6 +29,20 @@
     pc:       { skin: "#6f432a", w: 37, hair: "ponytail", outfit: { type: "blazer", c: "#2b2f3a", c2: "#f2d7c5" }, ex: ["stud", "lashes"], fem: true, lip: "#7a3a3a" },
     creative: { skin: "#5b3622", w: 39, hair: "locs", tip: "#b5652b", outfit: { type: "hoodie", c: "#e0a43a", c2: "#2f2f2f" }, ex: ["headphones", "stud"] },
     abuja:    { skin: "#9a6644", w: 36, hair: "straight", outfit: { type: "top", c: "#f3e2c7" }, ex: ["hoops", "lashes", "chainthin"], fem: true, lip: "#7a3040" },
+    // Dami's world
+    nkechi:   { skin: "#5a3620", w: 42, hair: "scarf", hc: "#2f7a4a", hc2: "#f4c430", outfit: { type: "buba", c: "#2f7a4a", c2: "#f4ead2", c3: "#c8402a" }, ex: ["lines", "lashes"], fem: true },
+    mummy:    { skin: "#a06a45", w: 38, hair: "straight", hcol: "#5a3420", outfit: { type: "top", c: "#d9b25a" }, ex: ["shadesup", "hoops", "lashes", "chainthin"], fem: true, lip: "#8a2f3a" },
+    senator:  { skin: "#4a2c1a", w: 44, hair: "fila", hc: "#1f3a6b", outfit: { type: "agbada", c: "#f1ece0", c2: "#c9a227" }, ex: ["greybeard", "glasses", "lines"] },
+    gbenga:   { skin: "#5c3820", w: 43, hair: "lowcut", outfit: { type: "kaftan", c: "#7a5232", c2: "#d9b25a" }, ex: ["moustache", "stubble"] },
+    kunle:    { skin: "#7c4a2a", w: 40, hair: "fade", hcol: "#c9a14a", outfit: { type: "shirt", c: "#e84a8a", c2: "#ffd84a" }, ex: ["stud", "chainthin"], mood: "happy" },
+    skido:    { skin: "#4a2a18", w: 41, hair: "bucket", hc: "#2b2b2b", outfit: { type: "tee", c: "#1d1d1d", c2: "#3a3a3a" }, ex: ["chain", "stubble", "stud"], mood: "smug" },
+    halita:   { skin: "#9a6644", w: 36, hair: "straight", outfit: { type: "top", c: "#f3e2c7" }, ex: ["hoops", "lashes", "chainthin"], fem: true, lip: "#7a3040" },
+    officer:  { skin: "#4e301d", w: 43, hair: "beret", hc: "#151515", outfit: { type: "police", c: "#16181c", c2: "#c9a227" }, ex: ["moustache"] },
+    musa:     { skin: "#5a3a22", w: 41, hair: "cap", hc: "#ece6d6", outfit: { type: "kaftan", c: "#dcd6c6", c2: "#8a8270" }, ex: ["stubble"] },
+    lecturer: { skin: "#55351f", w: 42, hair: "lowcut", hcol: "#6f6a66", outfit: { type: "blazer", c: "#5a4632", c2: "#efe6d4" }, ex: ["glasses", "lines"] },
+    pa:       { skin: "#6a4128", w: 40, hair: "lowcut", outfit: { type: "blazer", c: "#1f2b3a", c2: "#f4f1ea" }, ex: [] },
+    tolu:     { skin: "#8a5634", w: 37, hair: "ponytail", outfit: { type: "hoodie", c: "#6d7a8a", c2: "#2f2f2f" }, ex: ["stud", "lashes", "bags"], fem: true },
+    seun:     { skin: "#7a4a2c", w: 40, hair: "twists", tip: "#2b6cb0", outfit: { type: "hoodie", c: "#2b3a4a", c2: "#9fd3ff" }, ex: ["stud", "bags"] },
   };
 
   const VARIANTS = {
@@ -39,6 +53,15 @@
       prison: { outfit: { type: "tee", c: "#c9c3b4", c2: "#c9c3b4" }, ex: ["bags", "stubble"] },
       hospital: { outfit: { type: "gown", c: "#9fc7c0", c2: "#7fa9a2" }, ex: ["bags"] },
       suit: { outfit: { type: "blazer", c: "#1f2b3a", c2: "#f4f1ea" }, ex: ["glasses"] },
+    },
+    dami: {
+      home: { outfit: { type: "hoodie", c: "#8a96a3", c2: "#2f2f2f" }, drop: ["sunglasses", "chain"] },
+      party: {},
+      wrecked: { outfit: { type: "hoodie", c: "#4a5560", c2: "#2f2f2f" }, drop: ["sunglasses", "chain"], ex: ["bags", "stubble"] },
+      cell: { outfit: { type: "tee", c: "#9a968c", c2: "#9a968c" }, drop: ["sunglasses", "chain"], ex: ["bags", "stubble"] },
+      hospital: { outfit: { type: "gown", c: "#9fc7c0", c2: "#7fa9a2" }, drop: ["sunglasses", "chain"], ex: ["bags"] },
+      rehab: { outfit: { type: "tee", c: "#e9e4d6", c2: "#7fb08a" }, drop: ["sunglasses", "chain"] },
+      suit: { outfit: { type: "blazer", c: "#2b2f3a", c2: "#f4f1ea" }, drop: ["sunglasses", "chain"] },
     },
   };
 
@@ -151,6 +174,9 @@
       }
       case "cap": return `<path d="M60 76 C60 44 140 42 142 76Z" fill="${c.hc}"/><path d="M58 76 L150 76 C152 82 146 84 140 82 L60 82Z" fill="${shade(c.hc, -0.25)}"/>`;
       case "fila": return `<path d="M62 72 C60 34 140 32 140 72Z" fill="${c.hc}"/><path d="M118 40 C140 30 158 44 150 62 C144 52 134 46 120 50Z" fill="${shade(c.hc, -0.2)}"/><path d="M62 72 L140 72" stroke="#e8c24a" stroke-width="3"/><path d="M60 86 C58 78 60 74 64 72 M140 86 C142 78 140 74 136 72" stroke="#e9e4da" stroke-width="5" fill="none"/>`;
+      case "scarf": return `<path d="M54 84 C46 46 74 26 100 26 C128 26 154 46 146 84 C140 64 124 56 100 56 C76 56 60 64 54 84Z" fill="${c.hc}"/><path d="M60 70 C80 58 120 58 140 70" stroke="${c.hc2}" stroke-width="4" fill="none" opacity=".8"/><path d="M60 60 C78 50 122 50 140 60" stroke="${c.hc2}" stroke-width="2" fill="none" opacity=".6"/><path d="M128 34 C150 22 160 40 150 52 C146 44 138 40 130 42Z M132 40 C148 46 150 62 140 66 C140 56 136 50 130 46Z" fill="${shade(c.hc, -0.2)}"/>`;
+      case "bucket": return `<path d="M62 74 C62 36 138 36 138 74Z" fill="${c.hc}"/><path d="M48 80 C60 68 140 68 152 80 C146 90 54 90 48 80Z" fill="${shade(c.hc, 0.15)}"/><path d="M66 60 L134 60" stroke="${shade(c.hc, 0.3)}" stroke-width="2"/><text x="100" y="56" font-family="Arial Black, sans-serif" font-size="9" fill="#e0b040" text-anchor="middle">VIBES</text>`;
+      case "beret": return `<path d="M60 76 C52 46 90 30 120 36 C146 40 152 62 140 76Z" fill="${c.hc}"/><path d="M60 78 L140 78" stroke="${shade(c.hc, 0.3)}" stroke-width="5"/><circle cx="78" cy="62" r="6" fill="#c9a227"/>`;
       case "backcap": return `<path d="M60 78 C58 42 142 42 140 78Z" fill="${c.hc}"/><path d="M60 72 C46 70 40 64 44 58 C52 60 58 64 62 66Z" fill="${shade(c.hc, -0.3)}"/><rect x="94" y="72" width="12" height="6" rx="2" fill="${shade(c.hc, -0.3)}"/>`;
       default: return cap;
     }
@@ -183,6 +209,9 @@
       case "singlet": s = `<path d="${TORSO}" fill="${skin}"/><path d="M52 252 C54 214 62 196 70 186 L82 184 Q100 208 118 184 L130 186 C138 196 146 214 148 252Z" fill="${o.c}"/>`; break;
       case "robe": s += `<path d="M70 174 Q100 204 130 174" fill="${skin}"/><path d="M40 190 Q100 260 160 190" stroke="${shade(o.c, -0.12)}" stroke-width="2" fill="none"/>`; break;
       case "overalls": s += `<path d="M80 170 Q100 186 120 170" fill="${skin}" stroke="${shade(o.c2, -0.2)}" stroke-width="3"/><path d="${TORSO}" fill="${o.c2}" opacity="0"/><path d="M64 210 L136 210 L144 252 L56 252Z" fill="${o.c}"/><path d="M70 178 L74 212 M130 178 L126 212" stroke="${o.c}" stroke-width="9"/><circle cx="74" cy="208" r="3" fill="#d8c27a"/><circle cx="126" cy="208" r="3" fill="#d8c27a"/>`; s = s.replace(`<path d="${TORSO}" fill="${o.c}"/>`, `<path d="${TORSO}" fill="${o.c2}"/>`); break;
+      case "agbada": s += `<path d="M84 170 Q100 184 116 170" fill="${skin}"/><path d="M8 252 C10 200 40 176 76 172 L100 236 L124 172 C160 176 190 200 192 252Z" fill="${o.c}"/><path d="M76 172 L100 236 L124 172" stroke="${o.c2}" stroke-width="3" fill="none"/><path d="M88 196 Q100 214 112 196 M84 210 Q100 232 116 210" stroke="${o.c2}" stroke-width="2" fill="none"/><path d="M20 252 C26 214 48 194 70 188" stroke="${shade(o.c, -0.15)}" stroke-width="3" fill="none"/>`; break;
+      case "kaftan": s += `<path d="M84 170 Q100 184 116 170" fill="${skin}"/><path d="M100 176 L100 236" stroke="${o.c2}" stroke-width="2"/><path d="M90 178 Q100 200 110 178" stroke="${o.c2}" stroke-width="3" fill="none"/>` + [192, 204, 216].map((y) => `<path d="M94 ${y} L106 ${y}" stroke="${o.c2}" stroke-width="2"/>`).join(""); break;
+      case "police": s += `<path d="M84 170 L100 194 L116 170Z" fill="${skin}"/><path d="M78 166 L98 196 L88 200 L70 176Z M122 166 L102 196 L112 200 L130 176Z" fill="${shade(o.c, 0.15)}"/><rect x="128" y="200" width="22" height="14" rx="2" fill="${o.c2}"/><path d="M40 186 L60 186 M140 186 L160 186" stroke="${o.c2}" stroke-width="4"/><rect x="50" y="204" width="26" height="6" fill="#3a6aa8"/>`; break;
       case "gown": s += `<path d="M82 170 Q100 186 118 170" fill="${skin}"/>`; for (let x = 30; x < 180; x += 16) for (let y = 196; y < 252; y += 16) s += `<circle cx="${x}" cy="${y}" r="2" fill="${o.c2}"/>`; break;
     }
     return s;
@@ -194,6 +223,8 @@
     if (ex.includes("stubble")) s += `<path d="M66 108 C70 140 90 150 100 150 C110 150 130 140 134 108 C128 130 114 138 100 138 C86 138 72 130 66 108Z" fill="#1b1210" opacity=".22"/>`;
     if (ex.includes("beard")) s += `<path d="M64 104 C68 142 90 152 100 152 C110 152 132 142 136 104 C130 128 116 134 100 134 C84 134 70 128 64 104Z" fill="#1b1210"/><path d="M87 118 Q100 112 113 118 Q100 117 87 118Z" fill="#1b1210"/>`;
     if (ex.includes("whitebeard")) s += `<path d="M64 108 C66 156 88 172 100 172 C112 172 134 156 136 108 C130 132 116 138 100 138 C84 138 70 132 64 108Z" fill="#e9e4da"/><path d="M86 118 Q100 111 114 118 Q100 118 86 118Z" fill="#e9e4da"/>`;
+    if (ex.includes("greybeard")) s += `<path d="M64 106 C68 146 90 156 100 156 C110 156 132 146 136 106 C130 130 116 136 100 136 C84 136 70 130 64 106Z" fill="#cfcac2"/><path d="M87 118 Q100 112 113 118 Q100 117 87 118Z" fill="#cfcac2"/>`;
+    if (ex.includes("shadesup")) s += `<path d="M68 58 L96 58 L94 68 Q83 72 72 67Z M104 58 L132 58 L128 67 Q117 72 106 68Z" fill="#2a1a12"/><path d="M96 61 L104 61" stroke="#c9a227" stroke-width="2"/>`;
     if (ex.includes("moustache")) s += `<path d="M88 118 Q100 112 112 118 Q100 117 88 118Z" fill="#1b1210"/>`;
     if (ex.includes("glasses")) s += `<g fill="none" stroke="#1d1a18" stroke-width="2.6"><rect x="73" y="85" width="22" height="16" rx="6"/><rect x="105" y="85" width="22" height="16" rx="6"/><path d="M95 92 Q100 89 105 92"/></g><path d="M77 88 L84 88" stroke="#fff" stroke-width="1.5" opacity=".5"/>`;
     if (ex.includes("sunglasses")) s += `<path d="M70 86 L96 86 L94 101 Q83 106 73 100Z M104 86 L130 86 L127 100 Q117 106 106 101Z" fill="#111"/><path d="M96 89 L104 89" stroke="#111" stroke-width="3"/><path d="M74 89 L84 89 M108 89 L118 89" stroke="#7fc8ff" stroke-width="2" opacity=".55"/>`;
@@ -213,7 +244,8 @@
     if (!base) return "";
     const v = (VARIANTS[id] && o.variant && VARIANTS[id][o.variant]) || {};
     const c = Object.assign({}, base, { outfit: v.outfit || base.outfit, _gid: uid("gele") });
-    const ex = (base.ex || []).filter((e) => !(v.outfit && ["chain", "stud"].includes(e))).concat(v.ex || []);
+    const drop = v.drop || (v.outfit ? ["chain", "stud"] : []);
+    const ex = (base.ex || []).filter((e) => !drop.includes(e)).concat(v.ex || []);
     const mood = o.mood || base.mood || "neutral";
     const w = c.w, dark = shade(c.skin, -0.18);
     const head = `M100 44 C${100 + w * 0.66} 44 ${100 + w} 62 ${100 + w} 90 C${100 + w} 120 ${100 + w * 0.62} 142 100 144 C${100 - w * 0.62} 142 ${100 - w} 120 ${100 - w} 90 C${100 - w} 62 ${100 - w * 0.66} 44 100 44Z`;

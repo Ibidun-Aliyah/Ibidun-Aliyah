@@ -14,6 +14,16 @@
 (function () {
   window.LAGOS_STAGE = window.LAGOS_STAGE || {};
   window.LAGOS_STAGE.femi = {
+    look: (run) => { const f = run.flags; return f.yahoo && !f.quit && !f.confessed ? "drip" : f.overwork ? "tired" : f.grind ? "workshop" : null; },
+    chatPartner: "dele",
+    endings: {
+      founder: { bg: "market", variant: "suit", mood: "happy" },
+      standing: { bg: "factory", mood: "neutral" },
+      expelled: { bg: "market", mood: "sad" },
+      trial: { bg: "prison", variant: "prison", mood: "sad" },
+      burnout: { bg: "hospital", variant: "hospital", mood: "sad" },
+      missing: { bg: "market", hero: "mama", mood: "sad" },
+    },
     scenes: {
       p_market: { bg: "market", cast: ["mama", "kemi"], moods: { mama: "happy", kemi: "happy" }, femi: "happy", at: { 5: { moods: { kemi: "sad", mama: "smug" } } } },
       p_park: { bg: "garage", cast: ["mama"], femi: "neutral", at: { 1: { join: ["conductor"], moods: { conductor: "happy" } }, 2: { leave: ["conductor"] }, 4: { femi: "worried" }, 5: { moods: { mama: "worried" } } } },

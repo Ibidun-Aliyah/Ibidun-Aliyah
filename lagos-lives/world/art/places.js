@@ -153,16 +153,57 @@
       `<rect x="330" y="80" width="30" height="140" fill="#6a7378"/><path d="M345 80 Q330 40 360 20" stroke="#fff" stroke-width="16" opacity=".4" fill="none" stroke-linecap="round"/>` +
       `<rect x="20" y="300" width="360" height="40" fill="#46708a"/>` + text(200, 327, "AGBARA INDUSTRIAL ESTATE", 15, "#fff") + floor(420, "#6a6a64", "#4a4a46"),
 
+    /* ── Dami's world ── */
+    mansion: () => `<rect width="400" height="560" fill="#1c1a22"/>` + glow(200, 40, 200, "#ffe2a8", 0.35) +
+      `<g transform="translate(200 40)"><path d="M-40 0 L40 0 L28 30 L-28 30Z" fill="#d9b25a" opacity=".8"/>${Array.from({ length: 9 }, (_, i) => `<path d="M${-34 + i * 8.5} 30 L${-34 + i * 8.5} ${44 + (i % 3) * 8}" stroke="#ffe9b0" stroke-width="2"/><circle cx="${-34 + i * 8.5}" cy="${46 + (i % 3) * 8}" r="2.4" fill="#fff6d0"/>`).join("")}</g>` +
+      `<rect x="40" y="120" width="320" height="180" rx="6" fill="#050505"/><rect x="48" y="128" width="304" height="164" fill="#1b3a6b"/>` + text(200, 190, "OGUNLEYE", 30, "#ffd84a") + text(200, 222, "FOR GOVERNOR", 20, "#fff") + text(200, 252, "A FATHER TO ALL", 12, "#9fd3ff") +
+      `<rect x="0" y="300" width="400" height="16" fill="#2a2630"/>` + floor(316, "#e8e2d6", "#bdb5a6") + `<path d="M0 316 L400 316" stroke="#fff" opacity=".4"/>` +
+      `<rect x="30" y="380" width="340" height="70" rx="26" fill="#f3efe6"/><rect x="40" y="360" width="320" height="40" rx="18" fill="#e7e0d2"/><rect x="170" y="470" width="60" height="20" rx="4" fill="#c9a227" opacity=".6"/>` + `<rect x="360" y="200" width="30" height="120" fill="#2d6a3a"/><ellipse cx="375" cy="190" rx="26" ry="40" fill="#3f8a4a"/>`,
+    bedroom: () => `<rect width="400" height="560" fill="#14122a"/>` + glow(320, 260, 180, "#7a4aff", 0.35) + glow(80, 300, 140, "#ff3fa4", 0.2) +
+      `<rect x="200" y="200" width="180" height="100" rx="6" fill="#0a0a14"/><rect x="206" y="206" width="168" height="88" fill="#3a1a6a"/><path d="M220 280 L260 230 L300 260 L360 220" stroke="#ff6aa8" stroke-width="3" fill="none"/>` +
+      `<rect x="40" y="220" width="130" height="80" rx="6" fill="#0a0a14"/><rect x="46" y="226" width="118" height="68" fill="#123a5a"/>` +
+      `<rect x="0" y="300" width="400" height="22" fill="#2a2440"/><path d="M0 300 L400 300" stroke="#9a5aff" stroke-width="2" opacity=".7"/>` + floor(322, "#1d1a30", "#110f1e") +
+      `<rect x="10" y="420" width="200" height="60" rx="10" fill="#e9e6f2" opacity=".8"/><rect x="10" y="400" width="200" height="26" rx="10" fill="#6a5aa8"/>` + `<path d="M300 470 l12 -30 l18 0 l8 30Z" fill="#b8b8b8"/>`,
+    kitchen: () => `<rect width="400" height="560" fill="#e9e2cf"/>` + `<rect x="120" y="20" width="160" height="10" rx="5" fill="#fff"/>` + glow(200, 30, 200, "#ffffff", 0.5) +
+      Array.from({ length: 5 }, (_, i) => `<rect x="${20 + i * 76}" y="80" width="66" height="110" rx="3" fill="#c9b48a" stroke="#a89068" stroke-width="3"/><circle cx="${74 + i * 76}" cy="140" r="3" fill="#6a5434"/>`).join("") +
+      `<rect x="0" y="300" width="400" height="20" fill="#d6cfbf"/><rect x="0" y="320" width="400" height="100" fill="#a89068"/>` +
+      `<rect x="40" y="250" width="70" height="50" rx="6" fill="#3a3a3a"/><rect x="50" y="262" width="24" height="14" rx="3" fill="#8a8a8a"/><circle cx="94" cy="270" r="7" fill="#555"/>` + `<ellipse cx="290" cy="290" rx="40" ry="10" fill="#2b2b2b"/><rect x="250" y="270" width="80" height="20" fill="#3a3a3a"/>` + `<path class="smoke" d="M290 260 Q280 230 296 200" stroke="#fff" stroke-width="10" fill="none" opacity=".25" stroke-linecap="round"/>` + floor(420, "#bfb59f", "#9a907a"),
+    club: () => `<rect width="400" height="560" fill="#0a0a14"/>` + glow(200, 160, 220, "#2a7aff", 0.35) + glow(60, 300, 160, "#ff2a6a", 0.3) + glow(340, 300, 160, "#ffd84a", 0.25) +
+      Array.from({ length: 7 }, (_, i) => `<path d="M${200} 0 L${i * 66 - 10} 420" stroke="${["#2a7aff", "#ff2a6a", "#ffd84a"][i % 3]}" stroke-width="3" opacity=".25"/>`).join("") +
+      `<rect x="60" y="260" width="280" height="50" fill="#141420"/><rect x="60" y="250" width="280" height="12" fill="#2a2a3a"/>` +
+      [110, 200, 290].map((x) => `<rect x="${x - 6}" y="200" width="12" height="50" rx="3" fill="#1a4a2a"/><path class="bulb" d="M${x} 196 l-6 -16 l6 6 l6 -6Z" fill="#ffe9a8"/>`).join("") +
+      Array.from({ length: 8 }, (_, i) => person(30 + i * 50, 480 + (i % 2) * 12, 1.2, "#05050a", 0.9)).join(""),
+    bridge: (cp) => sky("#03050c", "#0b1430", "#121a33") + skyline(250, "#0a0f22", 33, 0.2) +
+      `<rect y="270" width="400" height="290" fill="#04080f"/>` + Array.from({ length: 30 }, (_, i) => `<rect x="${(i * 53) % 400}" y="${300 + ((i * 29) % 240)}" width="${10 + (i % 4) * 6}" height="1.5" fill="#ffcf70" opacity=".18"/>`).join("") +
+      `<path d="M-20 420 Q200 360 420 330 L420 380 Q200 410 -20 470Z" fill="#3a3a40"/><path d="M-20 420 Q200 360 420 330" stroke="#8a8a90" stroke-width="4" fill="none"/><path d="M-20 446 Q200 386 420 356" stroke="#f4f0e0" stroke-width="2" stroke-dasharray="14 14" fill="none" opacity=".5"/>` +
+      Array.from({ length: 6 }, (_, i) => { const x = 20 + i * 76, y = 410 - i * 15; return `<path d="M${x} ${y} L${x} ${y - 90} L${x + 14} ${y - 92}" stroke="#555" stroke-width="3" fill="none"/>` + glow(x + 14, y - 88, 40, "#ffc35a", 0.5); }).join("") +
+      (cp ? `<rect x="230" y="330" width="16" height="24" fill="#e85a1a"/><rect x="230" y="336" width="16" height="4" fill="#fff"/><rect x="270" y="320" width="16" height="24" fill="#e85a1a"/><rect x="270" y="326" width="16" height="4" fill="#fff"/>` + glow(250, 330, 70, "#fff6d0", 0.5) + glow(330, 300, 90, "#2a6aff", 0.45) + glow(360, 300, 80, "#ff2a2a", 0.35) + `<rect x="300" y="290" width="90" height="40" rx="6" fill="#1a1a1e"/>` + text(345, 316, "POLICE", 12, "#fff") : ""),
+    rehab: () => sky("#bfe0f0", "#e6f2f0") + `<rect x="0" y="180" width="400" height="200" fill="#f2efe8"/><path d="M0 180 L400 180" stroke="#cfc8b8" stroke-width="4"/>` + `<rect x="60" y="220" width="60" height="70" fill="#9fc7d8"/><rect x="280" y="220" width="60" height="70" fill="#9fc7d8"/>` + text(200, 210, "NEW DAWN RECOVERY · ABEOKUTA", 12, "#2f7a5a") +
+      `<rect x="0" y="380" width="400" height="180" fill="#6fae5a"/>` + [40, 360].map((x) => `<rect x="${x - 6}" y="250" width="12" height="140" fill="#6a4a2a"/><circle cx="${x}" cy="240" r="48" fill="#3f8a3a"/>`).join("") +
+      [120, 170, 220, 270].map((x, i) => `<g transform="translate(${x} ${430 + (i % 2) * 6})"><rect x="-14" y="-24" width="28" height="22" rx="4" fill="#f4f4f0"/><rect x="-16" y="-4" width="32" height="6" fill="#e2e2dc"/><path d="M-12 2 L-12 20 M12 2 L12 20" stroke="#cfcfc8" stroke-width="3"/></g>`).join(""),
+    yaba: () => `<rect width="400" height="560" fill="#c7b89a"/>` + `<path d="M0 0 L400 0 L400 40 L0 40Z" fill="#b5a584"/><path d="M190 40 L210 40 L210 90 L190 90Z" fill="#555"/><g class="smoke"><path d="M140 96 L260 84 M200 90 L200 90" stroke="#444" stroke-width="6"/></g><circle cx="200" cy="92" r="8" fill="#333"/>` +
+      `<rect x="250" y="120" width="110" height="110" fill="#9fc7e8" stroke="#5a4a3a" stroke-width="8"/><path d="M305 120 L305 230 M250 175 L360 175" stroke="#5a4a3a" stroke-width="5"/>` + text(305, 160, "", 1, "#000") +
+      `<rect x="40" y="150" width="140" height="90" fill="#efe6d0" opacity=".7"/>` + text(110, 190, "DAY 412", 18, "#2f7a5a") + text(110, 214, "one day at a time", 11, "#5a4a3a") +
+      `<rect x="0" y="340" width="400" height="220" fill="#8a7a5f"/><rect x="200" y="380" width="190" height="70" rx="6" fill="#e9e2cf"/><rect x="200" y="368" width="190" height="20" rx="6" fill="#6a8aa8"/>` + `<rect x="30" y="360" width="90" height="10" fill="#6a4a2a"/><rect x="40" y="320" width="70" height="40" fill="#222"/><rect x="44" y="324" width="62" height="30" fill="#4aa3df" opacity=".8"/>`,
+    boardroom: () => `<rect width="400" height="560" fill="#e8eef0"/>` + `<rect x="0" y="0" width="400" height="300" fill="#bcd6e0"/>` + skyline(300, "#9bb8c6", 41, 0.0) + Array.from({ length: 5 }, (_, i) => `<path d="M${i * 100} 0 L${i * 100} 300" stroke="#e8eef0" stroke-width="6"/>`).join("") +
+      `<rect x="40" y="60" width="140" height="44" rx="8" fill="#0f5f3a"/>` + text(110, 89, "ColdRoom", 20, "#fff") +
+      `<rect x="0" y="300" width="400" height="10" fill="#cfd8dc"/>` + floor(310, "#d9e0e2", "#b9c2c6") + `<rect x="30" y="400" width="340" height="30" rx="6" fill="#2b2f3a"/>` + laptop(80, 400, "#8ad0ff") + laptop(260, 400, "#a6ffcf") + `<rect x="350" y="250" width="20" height="60" fill="#7a5a3a"/><ellipse cx="360" cy="240" rx="26" ry="36" fill="#3f8a4a"/>`,
+    study: () => `<rect width="400" height="560" fill="#3a2418"/>` + glow(320, 240, 120, "#ffc35a", 0.4) +
+      [20, 110].map((x) => `<rect x="${x}" y="40" width="80" height="300" fill="#5a3a22"/>` + [80, 140, 200, 260, 320].map((y) => `<rect x="${x}" y="${y}" width="80" height="6" fill="#2a180c"/>` + Array.from({ length: 6 }, (_, k) => `<rect x="${x + 4 + k * 12}" y="${y - 34}" width="10" height="34" fill="${["#7a2e2e", "#2e4a7a", "#3a6a3a", "#c9a227", "#5a3a6a", "#8a5a2a"][(k + y) % 6]}"/>`).join("")).join("")).join("") +
+      `<rect x="230" y="60" width="140" height="90" fill="#1b3a6b"/>` + text(300, 100, "OGUNLEYE", 18, "#ffd84a") + text(300, 124, "2027", 14, "#fff") +
+      `<path d="M220 160 L220 330" stroke="#888" stroke-width="3"/><path d="M220 160 L260 166 L260 196 L220 190Z" fill="#008751"/><path d="M233 162 L247 164 L247 194 L233 192Z" fill="#fff"/>` +
+      `<rect x="300" y="290" width="16" height="50" fill="#555"/><path d="M290 280 L326 280 L316 296 L300 296Z" fill="#c9a227"/>` + `<rect x="0" y="380" width="400" height="180" fill="#4a2a18"/><rect x="0" y="380" width="400" height="12" fill="#6a3a22"/>`,
     black: () => `<rect width="400" height="560" fill="#050505"/>`,
   };
 
-  const MOOD = { market: "city", garage: "city", faculty: "city", buka: "city", factory: "city", hostel: "indoor", hostelnight: "night", lecture: "indoor", cafe: "indoor", rooftop: "night", office: "office", nwosu: "indoor", exam: "indoor", workshop: "night", party: "party", bush: "tense", shrine: "tense", prison: "tense", hospital: "indoor", stage: "indoor", street: "night", black: "tense" };
+  const MOOD = { market: "city", garage: "city", faculty: "city", buka: "city", factory: "city", hostel: "indoor", hostelnight: "night", lecture: "indoor", cafe: "indoor", rooftop: "night", office: "office", nwosu: "indoor", exam: "indoor", workshop: "night", party: "party", bush: "tense", shrine: "tense", prison: "tense", hospital: "indoor", stage: "indoor", street: "night", black: "tense", mansion: "indoor", bedroom: "night", kitchen: "indoor", club: "party", bridge: "night", checkpoint: "tense", rehab: "city", yaba: "city", boardroom: "indoor", study: "tense" };
 
+  const ALIAS = { hostelnight: ["hostel", true], checkpoint: ["bridge", true] };
   function place(name) {
-    const night = name === "hostelnight";
-    const fn = P[night ? "hostel" : name] || P.black;
-    return `<svg class="place" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${fn(night)}</svg>`;
+    const [base, flag] = ALIAS[name] || [name, false];
+    const fn = P[base] || P.black;
+    return `<svg class="place" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${fn(flag)}</svg>`;
   }
 
-  window.LL_ART = Object.assign(window.LL_ART || {}, { place, placeMood: MOOD, places: Object.keys(P).concat(["hostelnight"]) });
+  window.LL_ART = Object.assign(window.LL_ART || {}, { place, placeMood: MOOD, places: Object.keys(P).concat(Object.keys(ALIAS)) });
 })();

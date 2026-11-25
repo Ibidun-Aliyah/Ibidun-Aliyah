@@ -61,6 +61,9 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
 .hero-card .nm { font-family: var(--display); font-weight: 800; font-size: 2.6rem; line-height: .9; }
 .hero-card .tg { font-size: .9rem; color: #4a3a0c; }
 .hero-card .cta { margin-top: auto; font-family: var(--display); font-weight: 800; font-size: 1rem; }
+.hero-card.alt { background: #7fc8ff; margin-top: 12px; }
+.hero-card.alt .tg { color: #12324a; }
+.hero-card .cn { font-size: .72rem; color: inherit; opacity: .75; font-style: italic; }
 .hero-card .stripe { position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background: repeating-linear-gradient(-45deg, #111 0 10px, transparent 10px 20px); }
 .locked-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 .locked { position: relative; border-radius: 16px; overflow: hidden; background: #12262d; border: 1px solid var(--line); display: flex; flex-direction: column; min-width: 0; }
@@ -241,6 +244,8 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
 <script src="world/art/characters.js" charset="utf-8"></script>
 <script src="world/art/places.js" charset="utf-8"></script>
 <script src="world/stage/femi.stage.js" charset="utf-8"></script>
+<script src="stories/dami.js" charset="utf-8"></script>
+<script src="world/stage/dami.stage.js" charset="utf-8"></script>
 <script>
 (function () {
   "use strict";
@@ -256,8 +261,7 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
   const LOCKED = [
     { id: "pc", name: "PC", meta: "Working-class babe. Smart, beautiful, and every man has a plan for her." },
     { id: "creative", name: "The Creative", meta: "Talent doesn’t pay rent." },
-    { id: "dami", name: "Dami", meta: "Nepo baby. Money for everything, including the things that will kill him." },
-    { id: "abuja", name: "Abuja Main Girl", meta: "Soft life online. Hard life offline." },
+    { id: "halita", name: "Halita", meta: "Abuja Main Girl. Soft life online. Hard life offline." },
   ];
 
   /* ── Save (per-viewer convenience) ── */
@@ -413,42 +417,44 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
   function renderSelect() {
     showScreen("select");
     Sound.setMood("night");
-    const s = STORIES.femi, root = $("#select");
+    const root = $("#select");
     root.innerHTML = "";
     const head = el("div", "sel-head");
     head.appendChild(el("div", "mini-logo", "Lagos <span>Lives</span>"));
     head.appendChild(seg(renderSelect));
     root.appendChild(head);
     root.appendChild(el("p", "label", "Choose a life"));
-    const hero = el("button", "hero-card");
-    hero.type = "button";
-    const inProgress = run && run.story === "femi" && !run.ended;
-    hero.innerHTML = `<div class="txt"><span class="nm">${esc(s.hero)}</span><span class="tg">${esc(s.tagline)}</span><span class="cta">${inProgress ? "Continue ▸" : "“" + esc(s.title) + "” · Play ▸"}</span></div><div class="art">${ART.portrait("femi", { mood: "happy" })}</div><div class="stripe"></div>`;
-    hero.onclick = () => { Sound.init(); Sound.resume(); if (inProgress) openGame(); else newRun("femi"); };
-    root.appendChild(hero);
-    if (inProgress) {
-      const r = el("div", "btn-row"); const b = el("button", "btn ghost", "Start Femi over"); b.type = "button"; b.onclick = () => newRun("femi"); r.appendChild(b); root.appendChild(r);
-    }
+    ["femi", "dami"].forEach((sid) => {
+      const st = STORIES[sid]; if (!st) return;
+      const inProgress = run && run.story === sid && !run.ended;
+      const hero = el("button", "hero-card" + (sid === "dami" ? " alt" : ""));
+      hero.type = "button";
+      hero.innerHTML = `<div class="txt"><span class="nm">${esc(st.hero)}</span><span class="tg">${esc(st.tagline)}</span>${st.contentNote ? `<span class="cn">${esc(st.contentNote)}</span>` : ""}<span class="cta">${inProgress ? "Continue ▸" : "“" + esc(st.title) + "” · Play ▸"}</span></div><div class="art">${ART.portrait(st.player || sid, { mood: sid === "dami" ? "smug" : "happy" })}</div><div class="stripe"></div>`;
+      hero.onclick = () => { Sound.init(); Sound.resume(); if (inProgress) openGame(); else newRun(sid); };
+      root.appendChild(hero);
+      if (inProgress) { const r = el("div", "btn-row"); const b = el("button", "btn ghost", `Start ${esc(st.hero)} over`); b.type = "button"; b.onclick = () => newRun(sid); r.appendChild(b); root.appendChild(r); }
+    });
     root.appendChild(el("p", "label", "Coming soon"));
     const row = el("div", "locked-row");
     LOCKED.forEach((c) => row.appendChild(el("div", "locked", `<span class="soon">Coming soon</span><div class="art">${ART.portrait(c.id)}</div><div class="txt"><div class="nm">${esc(c.name)}</div><div class="tg">${esc(c.meta)}</div></div>`)));
     root.appendChild(row);
-    root.appendChild(endingsBlock("femi"));
+    ["femi", "dami"].forEach((sid) => STORIES[sid] && root.appendChild(endingsBlock(sid)));
   }
 
   /* ───────────── ENGINE ───────────── */
   const story = () => STORIES[run.story];
   const stageOf = (id) => ((STAGES[run.story] || {}).scenes || {})[id] || {};
   const sceneOf = (id) => story().scenes[id] || story().endingScenes[id];
-  const CLAMP = { peace: [0, 10], mum: [0, 10], dele: [0, 10], lola: [0, 10], cgpa: [0, 5], wahala: [0, 99], money: [0, 1e12] };
+  const RANGE = { cgpa: [0, 5], wahala: [0, 99], money: [0, 1e12] };
+  const player = () => story().player || "femi";
 
   function applyFx(fx) {
     if (!fx) return [];
     const ch = [];
     if (fx.set) for (const k in fx.set) run.stats[k] = fx.set[k];
-    for (const k in CLAMP) if (typeof fx[k] === "number" && fx[k] !== 0) {
-      const b = run.stats[k];
-      run.stats[k] = Math.min(CLAMP[k][1], Math.max(CLAMP[k][0], Math.round((b + fx[k]) * 100) / 100));
+    for (const k in run.stats) if (typeof fx[k] === "number" && fx[k] !== 0) {
+      const b = run.stats[k], [lo, hi] = RANGE[k] || [0, 10];
+      run.stats[k] = Math.min(hi, Math.max(lo, Math.round((b + fx[k]) * 100) / 100));
       if (k !== "wahala" && run.stats[k] !== b) ch.push([k, run.stats[k] - b]);
     }
     if (fx.flag) run.flags[fx.flag] = true;
@@ -507,21 +513,21 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
   function save() { meta.run = run; persist(); }
 
   /* ── Who's on stage right now? Pure function of the run, so saves restore exactly. ── */
-  function femiLook(conf) {
-    const f = run.flags;
-    let variant = conf.variant || (f.yahoo && !f.quit && !f.confessed ? "drip" : f.overwork ? "tired" : f.grind ? "workshop" : null);
+  function playerLook(conf) {
+    const lookFn = (STAGES[run.story] || {}).look;
+    let variant = conf.variant || (lookFn ? lookFn(run) : null);
     const p = run.stats.peace;
     let mood = conf.femi || (p <= 2 ? "sad" : p <= 4 ? "worried" : "neutral");
     return { variant, mood };
   }
   function computeStage() {
     const conf = stageOf(run.scene), sc = sceneOf(run.scene);
-    const test = (rule) => { const [k, f] = rule.split(":"); return k === "not" ? !run.flags[f] : !!run.flags[f]; };
+    const test = (rule) => (rule.startsWith("not:") ? !run.flags[rule.slice(4)] : !!run.flags[rule]);
     let bg = conf.bg || "black";
     let cast = (conf.cast || []).slice();
     for (const k in conf.castIf || {}) if (test(conf.castIf[k])) cast.push(k);
     const moods = Object.assign({}, conf.moods);
-    const look = femiLook(conf);
+    const look = playerLook(conf);
     let hideFemi = false, fx = null, call = null;
     const calls = conf.calls || [];
     for (let k = 0; k < run.li; k++) {
@@ -536,13 +542,13 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
         if (ev.hideFemi) hideFemi = true;
         if (k === run.li - 1) fx = ev.fx || null;
       }
-      if (ln && ln.k === "s" && ln.who !== "femi") {
+      if (ln && ln.k === "s" && ln.who !== player()) {
         if (calls.includes(ln.who)) call = ln.who;
         else if (!cast.includes(ln.who)) cast.push(ln.who);
       }
     }
     const cur = run.li ? sc.lines[run.lines[run.li - 1]] : null;
-    const speaker = cur ? (cur.k === "s" ? cur.who : cur.k === "t" ? "femi" : null) : null;
+    const speaker = cur ? (cur.k === "s" ? cur.who : cur.k === "t" ? player() : null) : null;
     if (cast.length > 3) cast = cast.slice(-3);
     return { bg, cast, moods, look, hideFemi, fx, speaker, cur, call };
   }
@@ -597,13 +603,14 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
     G.chap.innerHTML = `<small>${esc(c.num)}</small>${esc(c.title)}`;
     const st = run.stats;
     const m = (v) => `<span class="meter${v <= 3 ? " low" : ""}"><i style="width:${v * 10}%"></i></span>`;
-    G.stats.innerHTML = `<span class="pill"><b>${naira(st.money)}</b></span><span class="pill">CGPA <b>${st.cgpa.toFixed(2)}</b></span><span class="pill">Peace ${m(st.peace)}</span><span class="pill">Mama ${m(st.mum)}</span><span class="pill">Dele ${m(st.dele)}</span><span class="pill">Lola ${m(st.lola)}</span>`;
+    G.stats.innerHTML = uiStats().map(([k, label]) => k === "money" ? `<span class="pill"><b>${naira(st.money)}</b></span>` : k === "cgpa" ? `<span class="pill">CGPA <b>${st.cgpa.toFixed(2)}</b></span>` : `<span class="pill">${esc(label)} ${m(st[k])}</span>`).join("");
     $('[data-a="snd"]', G.root).textContent = meta.sound ? "Sound on" : "Sound off";
     $('[data-a="lang"]', G.root).textContent = meta.lang === "pg" ? "Pidgin" : "English";
   }
 
+  const uiStats = () => story().ui || [["money"], ["cgpa", "CGPA"], ["peace", "Peace"], ["mum", "Mama"], ["dele", "Dele"], ["lola", "Lola"]];
   function flushToasts() {
-    const names = { cgpa: "CGPA", peace: "Peace", mum: "Mama", dele: "Dele", lola: "Lola" };
+    const names = Object.fromEntries(uiStats().map(([k, l]) => [k, l]));
     pendingToasts.forEach(([k, v], i) => {
       const up = v > 0;
       const t = el("div", "toast " + (up ? "up" : "down"), k === "money" ? (up ? "+" : "−") + naira(Math.abs(v)) : `${names[k]} ${up ? "▲" : "▼"}`);
@@ -626,7 +633,8 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
   function slots(n) { return [[48], [30, 56], [22, 40, 58]][n - 1] || []; }
   function renderActors(st) {
     const want = [];
-    if (!st.hideFemi) want.push({ id: "femi", mood: st.look.mood, variant: st.look.variant, left: -12 });
+    const me = player();
+    if (!st.hideFemi) want.push({ id: me, mood: st.look.mood, variant: st.look.variant, left: -12 });
     const pos = slots(st.cast.length);
     st.cast.forEach((c, i) => want.push({ id: c, mood: st.moods[c], left: pos[i] }));
     const keep = {};
@@ -642,10 +650,10 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
       a.classList.remove("leaving");
       if (a.dataset.key !== key) { a.innerHTML = ART.portrait(w.id, { mood: w.mood, variant: w.variant }); a.dataset.key = key; a.querySelectorAll(".lid").forEach((l) => l.style.setProperty("--d", a.style.getPropertyValue("--d"))); }
       a.style.left = w.left + "%";
-      a.style.zIndex = w.id === st.speaker ? 3 : w.id === "femi" ? 2 : 1;
+      a.style.zIndex = w.id === st.speaker ? 3 : w.id === me ? 2 : 1;
       const talking = w.id === st.speaker;
       a.classList.toggle("talk", talking);
-      a.classList.toggle("dim", !!st.speaker && !talking || (!st.speaker && w.id !== "femi" && st.cur && st.cur.k === "t"));
+      a.classList.toggle("dim", !!st.speaker && !talking || (!st.speaker && w.id !== me && st.cur && st.cur.k === "t"));
     });
     for (const id in G.actorEls) if (!keep[id]) { const a = G.actorEls[id]; a.classList.add("leaving"); delete G.actorEls[id]; setTimeout(() => a.remove(), 500); }
   }
@@ -717,11 +725,11 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
     if (cur.k === "c") {
       let ph = $(".phone", ov);
       const from = story().cast[cur.who] || { name: cur.who };
-      const me = cur.who === "femi";
-      const partner = me ? (ph ? ph.dataset.with : "dele") : cur.who;
+      const me = cur.who === player();
+      const partner = me ? (ph ? ph.dataset.with : ((STAGES[run.story] || {}).chatPartner || "dele")) : cur.who;
       if (!ph || ph.dataset.with !== partner) {
         if (ph) ph.remove();
-        ph = el("div", "phone", `<div class="scr"><div class="head"><div class="av">${ART.portrait(partner)}</div><div><b>${esc(story().cast[partner].name)}</b><small>${me ? "last seen today" : "online"}</small></div></div><div class="msgs"></div></div>`);
+        ph = el("div", "phone", `<div class="scr"><div class="head"><div class="av">${ART.portrait(partner)}</div><div><b>${esc((story().cast[partner] || { name: partner }).name)}</b><small>${me ? "last seen today" : "online"}</small></div></div><div class="msgs"></div></div>`);
         ph.dataset.with = partner; ov.appendChild(ph);
       }
       const msgs = $(".msgs", ph);
@@ -729,7 +737,7 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
         msgs.innerHTML = "";
         // rebuild consecutive chat lines from this scene up to now
         const sc = sceneOf(run.scene);
-        for (let k = 0; k < run.li; k++) { const l = sc.lines[run.lines[k]]; if (l.k === "c" && (l.who === partner || l.who === "femi")) msgs.appendChild(el("div", "bub" + (l.who === "femi" ? " me" : ""), `${esc(txt(l))}<small>${l.who === "femi" ? "✓" : "now"}</small>`)); }
+        for (let k = 0; k < run.li; k++) { const l = sc.lines[run.lines[k]]; if (l.k === "c" && (l.who === partner || l.who === player())) msgs.appendChild(el("div", "bub" + (l.who === player() ? " me" : ""), `${esc(txt(l))}<small>${l.who === player() ? "✓" : "now"}</small>`)); }
         msgs.scrollTop = msgs.scrollHeight;
       }
       if (animate) Sound.pop();
@@ -748,9 +756,9 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
     }
     if (cur.k === "s") {
       const c = story().cast[cur.who] || { name: cur.who, color: "#ccc" };
-      who.hidden = false; who.textContent = cur.who === "femi" ? "You" : c.name; who.style.background = c.color;
+      who.hidden = false; who.textContent = cur.who === player() ? "You" : c.name; who.style.background = c.color;
     } else if (cur.k === "t") {
-      box.classList.add("think"); who.hidden = false; who.textContent = "Femi’s thoughts"; who.style.background = "#f4dfa0";
+      box.classList.add("think"); who.hidden = false; who.textContent = `${story().hero}’s thoughts`; who.style.background = "#f4dfa0";
     } else { box.classList.add("narr"); who.hidden = true; }
     typeText(tnode, txt(cur), animate);
   }
@@ -769,7 +777,7 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
       const sc = sceneOf(f.s);
       if (f.c != null) { log.appendChild(el("p", "pick", "▸ " + esc(txt(sc.choices[f.c])))); return; }
       const l = sc.lines[f.i], cast = story().cast;
-      if (l.k === "s" || l.k === "c") log.appendChild(el("p", null, `<b style="color:${(cast[l.who] || {}).color || "#ccc"}">${esc(l.who === "femi" ? "You" : (cast[l.who] || {}).name || l.who)}</b>${esc(txt(l))}`));
+      if (l.k === "s" || l.k === "c") log.appendChild(el("p", null, `<b style="color:${(cast[l.who] || {}).color || "#ccc"}">${esc(l.who === player() ? "You" : (cast[l.who] || {}).name || l.who)}</b>${esc(txt(l))}`));
       else log.appendChild(el("p", l.k === "t" ? "t" : null, esc(txt(l))));
     });
     sheet.appendChild(log);
@@ -783,19 +791,20 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
     stopTyping();
     showScreen("end");
     const S = story(), e = S.endings[run.ended], conf = stageOf(run.endScene);
-    const look = { mood: { good: "happy", mid: "neutral", bad: "sad" }[e.tone], variant: { trial: "prison", burnout: "hospital", founder: "suit" }[run.ended] || null };
-    const finalBg = { founder: "market", standing: "factory", expelled: "market", trial: "prison", burnout: "hospital", missing: "market" }[run.ended] || conf.bg;
-    const hero = run.ended === "missing" ? ART.portrait("mama", { mood: "sad" }) : ART.portrait("femi", look);
+    const ev = ((STAGES[run.story] || {}).endings || {})[run.ended] || {};
+    const finalBg = ev.bg || conf.bg || "black";
+    const hero = ART.portrait(ev.hero || player(), { mood: ev.mood || { good: "happy", mid: "neutral", bad: "sad" }[e.tone], variant: ev.hero ? null : ev.variant });
+    const hm = S.hiddenMeter || { title: "The Wahala Meter", desc: "Hidden the whole time. Every risky choice filled it a little.", low: "Low. You mostly kept your hands clean.", mid: "Rising. A few choices could have gone very differently.", high: "Red. It was always going to catch up.", max: 16 };
     Sound.setMood(e.tone === "bad" ? "tense" : "night");
     const root = $("#end");
     const tone = { good: "Best ending", mid: "Survivor ending", bad: "Bad ending" }[e.tone];
-    const w = Math.min(100, Math.round((run.stats.wahala / 16) * 100));
+    const w = Math.min(100, Math.round((run.stats.wahala / hm.max) * 100));
     root.innerHTML = `
       <div class="end-hero"><div class="bg on">${ART.place(finalBg)}</div><div class="actor">${hero}</div><div class="grain"></div><div class="shade"></div>
         <div class="ttl gut"><div class="end-tag ${e.tone}">${tone} · ${esc(S.hero)}</div><h1>${esc(e.title)}</h1><p class="blurb">${esc(e.blurb)}</p></div></div>
       <div class="end-body gut">
-        <div class="panel"><h3>How Femi got here</h3><ol class="path">${run.log.map((l) => `<li>${esc(l)}</li>`).join("")}</ol></div>
-        <div class="panel"><h3>The Wahala Meter</h3><p class="muted">Hidden the whole time. Every risky choice filled it a little.</p><div class="wbar"><i></i></div><p class="muted">${w < 25 ? "Low. You mostly kept your hands clean." : w < 60 ? "Rising. A few choices could have gone very differently." : "Red. It was always going to catch up."}</p></div>
+        <div class="panel"><h3>How ${esc(S.hero)} got here</h3><ol class="path">${run.log.map((l) => `<li>${esc(l)}</li>`).join("")}</ol></div>
+        <div class="panel"><h3>${esc(hm.title)}</h3><p class="muted">${esc(hm.desc)}</p><div class="wbar"><i></i></div><p class="muted">${esc(w < 25 ? hm.low : w < 60 ? hm.mid : hm.high)}</p></div>
         <div class="panel real"><h3>Real talk</h3><p class="muted" style="font-size:.95rem">${esc(e.real)}</p></div>
         <div class="end-found"></div>
         <div class="btn-row"><button class="btn primary" type="button" data-e="again">Play again, choose differently</button><button class="btn ghost" type="button" data-e="menu">Main menu</button></div>
