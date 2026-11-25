@@ -433,6 +433,7 @@ section{margin-top:28px}
 .why-stats{display:flex;flex-direction:column;gap:7px}
 .why-bar{display:grid;grid-template-columns:minmax(0,1.4fr) 2fr auto;gap:8px;align-items:center;font-size:.88rem;font-weight:700}
 .why-bar i{display:block;height:10px;background:var(--sun);border:1.5px solid var(--stroke);border-radius:6px;min-width:8px}
+.fy-elig{display:flex;flex-direction:column;gap:3px;margin:6px 0 2px}.fy-elig .chip{align-self:flex-start}
 .colors{display:flex;gap:8px;flex-wrap:wrap}
 .colors button{width:34px;height:34px;border-radius:50%;border:2.5px solid var(--stroke);cursor:pointer}
 .colors button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--card),0 0 0 5.5px var(--stroke)}
@@ -991,15 +992,22 @@ $('#gq').addEventListener('input', e => { gq = e.target.value.trim().toLowerCase
 
 /* ---------- Bisi's picks (Status = Suggested) ---------- */
 function forYou(rows){
-  const s = rows.filter(r => r.Status === 'Suggested');
+  const rank = r => /^Strong/.test(r.Eligibility || '') ? 0 : /^Possible/.test(r.Eligibility || '') ? 1 : !r.Eligibility ? 2 : 3;
+  const s = rows.filter(r => r.Status === 'Suggested').sort((a, b) => rank(a) - rank(b) || (a.Deadline || '9999').localeCompare(b.Deadline || '9999'));
+  const show = fyAll ? s : s.slice(0, 5);
   $('#foryou').innerHTML = s.length ? `<section class="foryou"><div class="sh"><h2>Bisi found these for you</h2><small>${s.length} new</small></div>
-    ${s.slice(0, 4).map(r => `<div class="fy"><div class="t">${esc(r.Title)}</div>
+    ${show.map(r => { const v = String(r.Eligibility || ''), verdict = v.split(' · ')[0], why = v.split(' · ').slice(1).join(' · ');
+      return `<div class="fy"><div class="t">${esc(r.Title)}</div>
       <div class="note">${esc([r.Organisation, r.Type, r.Deadline ? 'due ' + fmt(r.Deadline) : ''].filter(Boolean).join(' · '))}</div>
+      ${verdict ? `<div class="fy-elig"><span class="chip ${/^Strong/.test(verdict) ? 'c-ok' : /^Possible/.test(verdict) ? 'c-sun' : 'c-rose'}">${/^Strong/.test(verdict) ? '✓ You look eligible' : /^Possible/.test(verdict) ? '~ Possibly eligible' : '✗ Probably not eligible'}</span>${why ? `<span class="note">${esc(why.slice(0, 180))}</span>` : ''}</div>` : ''}
       ${r['What it offers'] ? `<div class="note">${esc(String(r['What it offers']).slice(0, 160))}</div>` : ''}
       <div class="row"><button class="btn small primary" data-act="accept" data-kind="row" data-id="${esc(r.ID)}">Add to my tracker</button>
       <button class="btn small" data-open="${esc(r.ID)}">Details</button>
-      <button class="btn small ghost" data-act="dismiss" data-kind="row" data-id="${esc(r.ID)}">Not for me</button></div></div>`).join('')}</section>` : '';
+      <button class="btn small ghost" data-act="dismiss" data-kind="row" data-id="${esc(r.ID)}">Not for me</button></div></div>`; }).join('')}
+    ${s.length > 5 ? `<button class="btn small ghost" data-fyall style="margin-top:8px">${fyAll ? 'Show fewer' : `See all ${s.length}`}</button>` : ''}</section>` : '';
 }
+let fyAll = false;
+document.addEventListener('click', e => { if (e.target.closest('[data-fyall]')){ fyAll = !fyAll; render(); } });
 
 /* ---------- deadline calendar ---------- */
 let calOffset = 0, calSel = null;

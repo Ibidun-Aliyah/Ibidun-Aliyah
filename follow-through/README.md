@@ -161,6 +161,13 @@ Without internet the app shows your last saved tracker, and notes, reminders, ga
 keep working. Status changes, edits, deletes and captures are saved on the phone and sent when you're back online.
 Sorting, AI help (essays, CV, eligibility…) and live updates need a connection.
 
+## Bisi's daily scout
+Every day at 11:23 (Lagos) a Claude scheduled task searches widely (official pages, opportunity aggregators, hackathon
+sites, university and company pages) for open opportunities matching your profile and interests, checks your eligibility
+(nationality, level, age, CGPA, gender, field, fees, location) and adds up to 8 to **For you** with a verdict: ✓ You
+look eligible · ~ Possibly eligible. Best matches show first; tap **Add to my tracker** or **Not for me** (which asks why,
+so the scout learns).
+
 ## "Why not?"
 Archiving, deleting or closing something you hadn't applied to (or tapping "Not for me" on a pick) asks why: Not eligible,
 Not enough time, Too much work for what it offers, Missed the deadline, Not interested anymore, Costs money / fees, Missing
