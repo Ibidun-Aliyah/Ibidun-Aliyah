@@ -425,6 +425,14 @@ section{margin-top:28px}
 .qa .sos input{width:22px;height:22px;flex:none;accent-color:var(--rose);margin-top:1px}
 .qa .sos small{display:block;font-weight:600;color:var(--muted)}
 .misfiled{margin-top:12px;display:flex;flex-direction:column;gap:4px}.mis-item{padding:10px 0;border-top:2px dashed var(--line)}.mis-item:first-of-type{border-top:0}.mis-t{font-weight:800;font-size:1rem;line-height:1.3;overflow-wrap:anywhere}.misfiled .row{margin-top:8px;flex-wrap:wrap}
+.why{display:flex;flex-direction:column;gap:10px}
+.why-opts{display:flex;flex-wrap:wrap;gap:7px}
+.why-opts button{border:2px solid var(--stroke);border-radius:999px;padding:6px 12px;background:var(--card);color:var(--ink);font:inherit;font-weight:700;font-size:.88rem;cursor:pointer}
+.why-opts button[aria-checked="true"]{background:var(--sun);color:#1E1606}
+.why textarea{border:2.5px solid var(--stroke);border-radius:var(--r2);padding:9px 12px;background:var(--card);color:var(--ink);font:inherit}
+.why-stats{display:flex;flex-direction:column;gap:7px}
+.why-bar{display:grid;grid-template-columns:minmax(0,1.4fr) 2fr auto;gap:8px;align-items:center;font-size:.88rem;font-weight:700}
+.why-bar i{display:block;height:10px;background:var(--sun);border:1.5px solid var(--stroke);border-radius:6px;min-width:8px}
 .colors{display:flex;gap:8px;flex-wrap:wrap}
 .colors button{width:34px;height:34px;border-radius:50%;border:2.5px solid var(--stroke);cursor:pointer}
 .colors button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--card),0 0 0 5.5px var(--stroke)}
@@ -517,7 +525,7 @@ section{margin-top:28px}
     </section>
   </div>
 
-  <div class="pane" id="p-history" hidden><div id="v-history"></div></div>
+  <div class="pane" id="p-history" hidden><div id="v-history"></div><div id="v-why"></div></div>
 
   <div class="pane" id="p-me" hidden>
     <section>
@@ -890,14 +898,60 @@ const endSwipe = () => {
 document.addEventListener('pointerup', endSwipe);
 document.addEventListener('pointercancel', endSwipe);
 
+/* ---------- "why not?": when you drop something you hadn't applied to ---------- */
+const WHY = ['Not eligible', 'Not enough time', 'Too much work for what it offers', 'Missed the deadline', 'Not interested anymore', 'Costs money / fees', 'Missing documents', 'Travel or location', 'Found something better', 'Other'];
+const notApplied = r => ['New', 'Suggested', 'Saved', 'Preparing'].includes(r.Status);
+function askWhy(r, verb){
+  return new Promise(done => {
+    let finished = false; const finish = v => { if (finished) return; finished = true; done(v); };
+    openSheet(`<div class="sheet-head"><h3>Why not? 🤔</h3><button class="btn small ghost" data-why-skip>Skip</button></div>
+      <div class="sheet-body why">
+        <p style="margin:0">You're ${esc(verb)} <b>${esc(r.Title || 'this')}</b> without applying. What happened? It helps me pick better things for you.</p>
+        <div class="why-opts" role="radiogroup" aria-label="Reason">${WHY.map(w => `<button type="button" role="radio" aria-checked="false" data-why="${esc(w)}">${esc(w)}</button>`).join('')}</div>
+        <label class="note" for="why-note">Anything else? (optional)</label>
+        <textarea id="why-note" rows="2" placeholder="e.g. needs 3 years of study, I'm only in 2nd year"></textarea>
+        <button class="btn primary" id="why-save" disabled>Save reason</button>
+      </div>`);
+    let pick = '';
+    sheet.querySelectorAll('[data-why]').forEach(b => b.onclick = () => { pick = b.dataset.why; sheet.querySelectorAll('[data-why]').forEach(x => x.setAttribute('aria-checked', x === b)); $('#why-save').disabled = false; });
+    $('#why-save').onclick = () => { const note = $('#why-note').value.trim(); closeSheet(); finish({ reason: pick, note }); };
+    sheet.querySelector('[data-why-skip]').onclick = () => { closeSheet(); finish(null); };
+    const watch = setInterval(() => { if (sheet.hidden){ clearInterval(watch); finish(null); } }, 300);   // closed by tapping outside
+  });
+}
+function whyNote(r, w){ return ((r.Notes || '').trim() ? r.Notes.trim() + '\n' : '') + `Didn't apply (${iso(TODAY)}): ${w.reason}${w.note ? ' · ' + w.note : ''}`; }
+function logWhy(r, w){
+  try { const L = JSON.parse(localStorage.getItem('ft-whynot') || '[]'); L.push({ t: r.Title || '', type: r.Type || '', reason: w.reason, note: w.note, d: iso(TODAY) }); localStorage.setItem('ft-whynot', JSON.stringify(L.slice(-300))); } catch(e){}
+}
+function renderWhy(rows){
+  const el = $('#v-why'); if (!el) return;
+  let L = []; try { L = JSON.parse(localStorage.getItem('ft-whynot') || '[]'); } catch(e){}
+  // also read reasons saved in the sheet (other phones, the web version)
+  const seen = new Set(L.map(x => x.t + '|' + x.reason));
+  (rows || []).forEach(r => { const m = /Didn't apply \([^)]*\): ([^·\n]+)/.exec(r.Notes || ''); if (m && !seen.has((r.Title || '') + '|' + m[1].trim())) L.push({ t: r.Title, reason: m[1].trim() }); });
+  if (!L.length){ el.innerHTML = ''; return; }
+  const counts = {}; L.forEach(x => counts[x.reason] = (counts[x.reason] || 0) + 1);
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1]), max = top[0][1];
+  const tip = { 'Not enough time': 'Bisi now nudges big applications earlier (start-by dates).', 'Not eligible': 'Keep your profile up to date so Bisi can check eligibility before you start.', 'Missed the deadline': 'Try the SOS Quick add, and keep notifications on.', 'Missing documents': 'Get transcripts and reference letters early: they take the longest.', 'Too much work for what it offers': 'Sort by “Most work” and pick your battles.' }[top[0][0]] || '';
+  el.innerHTML = `<section><div class="sh"><h2>Why you passed</h2><small>${L.length} skipped</small></div>
+    <div class="card why-stats">${top.map(([k, n]) => `<div class="why-bar"><span>${esc(k)}</span><i style="width:${Math.round(n / max * 100)}%"></i><b>${n}</b></div>`).join('')}
+    ${tip ? `<p class="note" style="margin:8px 0 0">💡 ${esc(tip)}</p>` : ''}</div></section>`;
+}
+
 async function rowAction(id, act){
   const r = (D.rows || []).find(x => x.ID === id); if (!r) return;
-  const prev = { Status: r.Status, Outcome: r.Outcome || '', 'Remind on': r['Remind on'] || '' };
+  const prev = { Status: r.Status, Outcome: r.Outcome || '', 'Remind on': r['Remind on'] || '', Notes: r.Notes || '' };
+  let why = null;
+  if (['archive', 'delete', 'dismiss'].includes(act) && notApplied(r) && r.Category !== 'Event'){
+    why = await askWhy(r, act === 'delete' ? 'deleting' : act === 'dismiss' ? 'passing on' : 'archiving');
+    if (why) logWhy(r, why);
+  }
   const fields = act === 'delete' ? { Status: 'Closed', Outcome: 'Deleted', 'Remind on': '' }
     : act === 'restore' ? { Status: 'Saved', Outcome: '', 'Remind on': addDays(1) }
     : act === 'dismiss' ? { Status: 'Closed', Outcome: 'Dismissed', 'Remind on': '' }
     : act === 'accept' ? { Status: 'Saved', 'Remind on': addDays(1) }
     : { Status: 'Closed', Outcome: 'Archived', 'Remind on': '' };
+  if (why && act !== 'delete') fields.Notes = whyNote(r, why);
   closeSheet(); Object.assign(r, fields); render(); active_();
   let undone = false;
   const msg = { delete: `Deleted "${(r.Title || 'capture').slice(0, 28)}"`, restore: 'Restored. It\'s back in your to-dos.', dismiss: 'Okay, not for you. Noted.',
@@ -1557,6 +1611,7 @@ const appliedDate = r => r['Applied on'] || String(r.Updated||'').slice(0,10) ||
 function outcomeOf(r){ return r.Outcome && DECIDED.indexOf(r.Outcome) >= 0 ? r.Outcome : (r.Status === 'Submitted' ? 'Waiting' : (r.Outcome || 'Waiting')); }
 const OUT_TONE = { Accepted:'ok', Shortlisted:'sky', Interview:'sky', Rejected:'rose', 'No response':'', Waiting:'sun' };
 function history(rows){
+  renderWhy(rows);
   const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   const list = rows.filter(applied).sort((a,b) => appliedDate(b).localeCompare(appliedDate(a)));
   const missed = rows.filter(r => (active(r) && r.Deadline && days(r.Deadline) < 0) || r.Outcome === 'Missed the deadline');
@@ -1760,6 +1815,13 @@ document.addEventListener('click', async e => {
   }
   if (t.dataset.status && current){
     const s = t.dataset.status, f = { Status: s };
+    if (s === 'Closed' && notApplied(current) && current.Category !== 'Event'){
+      const r0 = current, w = await askWhy(r0, 'closing');
+      if (w){ logWhy(r0, w); f.Outcome = "Didn't apply"; f.Notes = whyNote(r0, w); }
+      current = r0;
+      active_();
+      return setFields(r0.ID, f, w ? 'Noted. I\'ll pick better next time. 🐝' : 'Closed.');
+    }
     if (s === 'Submitted'){ f['Remind on'] = addDays(14); if (!current['Applied on']) f['Applied on'] = iso(TODAY); }
     active_();
     return setFields(current.ID, f, s==='Preparing' ? 'Preparing. Tap “Write my essays” or “Tailor my CV” when ready.' : s==='Submitted' ? '🐝 Look at you! I\'ll ask about the result in 2 weeks.' : 'Updated.');

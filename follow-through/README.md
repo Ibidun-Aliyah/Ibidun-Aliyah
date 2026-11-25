@@ -161,6 +161,12 @@ Without internet the app shows your last saved tracker, and notes, reminders, ga
 keep working. Status changes, edits, deletes and captures are saved on the phone and sent when you're back online.
 Sorting, AI help (essays, CV, eligibility…) and live updates need a connection.
 
+## "Why not?"
+Archiving, deleting or closing something you hadn't applied to (or tapping "Not for me" on a pick) asks why: Not eligible,
+Not enough time, Too much work for what it offers, Missed the deadline, Not interested anymore, Costs money / fees, Missing
+documents, Travel or location, Found something better, Other, plus an optional note. It's saved in the item's Notes
+("Didn't apply (date): reason"); History shows **Why you passed** with a tip, and Bisi's weekly picks avoid the same dead ends.
+
 ## Applied history
 The dashboard's **Applied history** tab lists everything you've applied to by month, with results (Accepted,
 Shortlisted, Interview, Rejected, No response, Waiting), your success rate, applications per month, and a
