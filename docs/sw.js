@@ -1,6 +1,6 @@
 /* Keeps Follow-Through working offline: the app itself is cached; your data comes from your own script. */
-const CACHE = 'ft-web-953a7186f2';
-const SHELL = ['./', 'index.html', 'web.js', 'bisi.js', 'games.js', 'welcome.js', 'events.js', 'hive.js', 'puzzles.js', 'fun.js', 'grunge.js', 'fonts/nunito.woff2', 'fonts/patrickhand.woff2', 'fonts/smoochsans.woff2', 'fonts/spacegrotesk.woff2', 'fonts/spacemono.woff2', 'fonts/yellowtail.woff2',
+const CACHE = 'ft-web-fff2f15eab';
+const SHELL = ['./', 'index.html', 'web.js', 'bisi.js', 'games.js', 'welcome.js', 'events.js', 'hive.js', 'fun.js', 'grunge.js', 'fonts/nunito.woff2', 'fonts/patrickhand.woff2', 'fonts/smoochsans.woff2', 'fonts/spacegrotesk.woff2', 'fonts/spacemono.woff2', 'fonts/yellowtail.woff2',
   'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'Code.gs'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {

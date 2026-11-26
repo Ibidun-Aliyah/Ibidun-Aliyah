@@ -240,74 +240,10 @@ function seqGen(level){
   return { q:`<span class="g-mid">${seq.join(', ')}, <b>?</b></span>`, choices: choices(ans, shuffle(near(ans, Math.max(3, Math.round(Math.abs(ans) * .15))))), answer:String(ans), explain:`Rule: ${why}` };
 }
 
-/* ---------------- Estimate It: order-of-magnitude intuition ---------------- */
-// [question, answer, unit, fun fact]; tiers get less familiar
-const FACTS = [
- [ ['How many bones in an adult human body?', 206, '', 'Babies are born with about 270; some fuse as you grow.'],
-   ['How many states does Nigeria have?', 36, '', 'Plus the Federal Capital Territory, Abuja.'],
-   ['How many countries are in Africa?', 54, '', 'The most of any continent.'],
-   ['Speed of sound in air, in metres per second?', 343, 'm/s', 'At 20 °C. Count seconds between lightning and thunder, divide by 3: kilometres away.'],
-   ['Height of Mount Everest, in metres?', 8849, 'm', 'Measured again in 2020 by China and Nepal together.'],
-   ['Normal atmospheric pressure at sea level, in kPa?', 101.3, 'kPa', 'About 1 bar, or 14.7 psi.'],
-   ['Roughly what percentage of your body is water?', 60, '%', 'Your brain is closer to 75%.'],
-   ['How many days does the Moon take to orbit Earth?', 27.3, 'days', 'The full-moon-to-full-moon cycle is longer (29.5 days) because Earth moves too.'] ],
- [ ['How many litres of water fill an Olympic swimming pool (50 m × 25 m × 2 m)?', 2500000, 'L', '2,500 cubic metres. 1 m³ = 1,000 litres.'],
-   ['Distance from Earth to the Moon, in km?', 384400, 'km', 'Light covers it in about 1.3 seconds.'],
-   ['How many times does your heart beat in a day?', 100000, '', 'About 70 beats a minute × 1,440 minutes.'],
-   ['Seconds in a year?', 31500000, 's', 'About π × 10⁷: a physicist\'s favourite shortcut.'],
-   ['Height of the Burj Khalifa, in metres?', 828, 'm', 'The tallest building in the world since 2010.'],
-   ['How many times does a honeybee beat its wings per second?', 230, '', 'That fast beat is the buzz you hear.'],
-   ['Top flying speed of a honeybee, in km/h?', 25, 'km/h', 'About as fast as a casual cyclist.'],
-   ['Power of a typical electric kettle, in watts?', 2000, 'W', 'That\'s why it trips weak sockets and generators.'] ],
- [ ['Length of the River Niger, in km?', 4180, 'km', 'Africa\'s third-longest river, flowing through five countries.'],
-   ['Length of the River Nile, in km?', 6650, 'km', 'Usually counted as the longest river in the world.'],
-   ['Distance from Earth to the Sun, in km?', 150000000, 'km', 'Sunlight takes about 8 minutes 20 seconds to reach you.'],
-   ['Speed of light, in km per second?', 300000, 'km/s', 'More precisely 299,792 km/s in a vacuum.'],
-   ['Typical smartphone battery capacity, in mAh?', 4500, 'mAh', 'Most phones today sit between 4,000 and 5,000 mAh.'],
-   ['Clock speed of a modern laptop processor, in GHz?', 3, 'GHz', 'Three billion cycles every second.'],
-   ['Diameter of a human hair, in micrometres (µm)?', 70, 'µm', 'Hair ranges from about 20 to 180 µm.'],
-   ['Wavelength of green light, in nanometres?', 550, 'nm', 'Visible light runs from about 400 nm (violet) to 700 nm (red).'] ],
- [ ['How many neurons are in a human brain?', 86000000000, '', 'About 86 billion, each with up to thousands of connections.'],
-   ['Age of the Earth, in years?', 4500000000, 'years', 'About 4.5 billion years, from dating meteorites and old rocks.'],
-   ['Roughly how many cells are in a human body?', 37000000000000, '', 'Around 37 trillion. Red blood cells are the most common.'],
-   ['Transistors in a flagship phone chip (2023)?', 19000000000, '', 'Apple\'s A17 Pro has about 19 billion.'],
-   ['How many flowers do bees visit to make one 500 g jar of honey?', 2000000, '', 'Roughly 2 million. Respect the bees.'],
-   ['Population of Nigeria (2024 estimate)?', 230000000, 'people', 'The most populous country in Africa.'],
-   ['Bytes in one gigabyte (GB)?', 1000000000, 'bytes', 'A billion. (A gibibyte, GiB, is 1,073,741,824.)'],
-   ['Surface gravity on Earth, in m/s²?', 9.81, 'm/s²', 'Drop something and it gains about 35 km/h every second.'] ],
-];
-const nice = n => { const a = Math.abs(n); if (a >= 1e12) return +(n / 1e12).toPrecision(3) + ' trillion'; if (a >= 1e9) return +(n / 1e9).toPrecision(3) + ' billion'; if (a >= 1e6) return +(n / 1e6).toPrecision(3) + ' million'; return (+n.toPrecision(3)).toLocaleString('en-GB'); };
-function estGen(level){
-  const tier = Math.min(FACTS.length - 1, Math.floor((level - 1) / 1.5)), [q, ans, unit, fact] = pickOne(FACTS[tier]);
-  const f = level >= 5 ? [3, 1 / 3, 10] : level >= 3 ? [10, 1 / 10, 3] : [10, 1 / 10, 100];
-  const opts = shuffle([ans, ans * f[0], ans * f[1], ans * f[2] ]).map(nice);
-  return { q:`<span class="g-mid" style="font-size:1.05em">${q}</span><small class="note">Pick the closest</small>`, choices: opts, answer: nice(ans), explain: `${nice(ans)}${unit ? ' ' + unit : ''}. ${fact}` };
-}
-
-/* ---------------- Unit Dash: conversions against the clock ---------------- */
-// [from, to, factor or function, level] ; inputs are chosen so answers come out clean
-const UNITS = [
- ['km', 'm', 1000, 1], ['g', 'kg', 0.001, 1], ['mA', 'A', 0.001, 1], ['cm', 'mm', 10, 1], ['h', 'min', 60, 1], ['kW', 'W', 1000, 1],
- ['km/h', 'm/s', 1 / 3.6, 2], ['°C', 'K', c => c + 273, 2], ['L', 'm³', 0.001, 2], ['kPa', 'Pa', 1000, 2], ['min', 's', 60, 2], ['MB', 'kB', 1000, 2],
- ['bar', 'kPa', 100, 3], ['rpm', 'rad/s', 2 * Math.PI / 60, 3], ['inch', 'mm', 25.4, 3], ['kWh', 'MJ', 3.6, 3], ['µF', 'nF', 1000, 3], ['MΩ', 'kΩ', 1000, 3],
- ['hp', 'kW', 0.746, 4], ['mph', 'km/h', 1.609, 4], ['°F', '°C', f => (f - 32) * 5 / 9, 4], ['rad', '°', 180 / Math.PI, 4], ['psi', 'kPa', 6.895, 4], ['N·m', 'kN·m', 0.001, 4],
-];
-const INPUTS = { 'km/h': [18, 36, 54, 72, 90, 108], '°C': [0, 25, 37, 100, -40], '°F': [32, 50, 68, 98.6, 212], rpm: [60, 120, 300, 600, 3000], rad: [1, 2, 0.5, 3.14], hp: [1, 10, 100, 2], mph: [10, 30, 60, 100], psi: [10, 30, 100, 14.7], kWh: [1, 2, 5, 10], inch: [1, 2, 4, 10, 12] };
-const r3 = n => +(+n).toPrecision(4);
-function unitGen(level){
-  const pool = UNITS.filter(u => u[3] <= Math.min(4, Math.ceil(level / 1.5)) && u[3] >= Math.max(1, Math.ceil(level / 1.5) - 1));
-  const [a, b, f] = pickOne(pool), x = INPUTS[a] ? pickOne(INPUTS[a]) : pickOne([2, 3, 5, 7.5, 12, 25, 40, 250, 0.5, 1.2]);
-  const conv = typeof f === 'function' ? f : v => v * f, ans = r3(conv(x));
-  const wrong = typeof f === 'function' ? [r3(x - 273), r3(ans + 32), r3(x * 1.8 + 32), r3(ans * 2)] : [r3(x / f), r3(ans * 10), r3(ans / 10), r3(ans * 1000)];
-  return { q:`<span class="g-big">${x} ${a}</span><small class="note">= ? ${b}</small>`, choices: choices(String(ans), wrong.map(String)), answer: String(ans), explain: `${x} ${a} = ${ans} ${b}${typeof f === 'function' ? '' : ` (×${r3(f)})`}.` };
-}
-
 const GAMES = {
   words: { name:'Word Hive', icon:'📖', blurb:'Vocabulary from academic to rare. Missed words come back until you learn them.', gen:wordGen, mode:'round' },
   math:  { name:'Number Sprint', icon:'🧮', blurb:'60 seconds of mental maths: arithmetic up to logs, derivatives and determinants.', gen:mathGen, mode:'sprint' },
   bits:  { name:'Bit Buzz', icon:'⚡', blurb:'Binary, hex, logic gates, Ohm\'s law, dividers, RC circuits. Mechatronics brain food.', gen:bitGen, mode:'round' },
-  est:   { name:'Estimate It', icon:'🌍', blurb:'How many litres in an Olympic pool? Guess the right ballpark and learn a fun fact.', gen:estGen, mode:'round' },
-  units: { name:'Unit Dash', icon:'📏', blurb:'60 seconds of unit conversions: km/h to m/s, rpm to rad/s, psi to kPa. Exam-useful.', gen:unitGen, mode:'sprint' },
 };
 
 const LINES = {
@@ -323,11 +259,9 @@ function hub(){
   const pollen = store.get('pollen', 0);
   root.innerHTML = `<section><div class="sh"><h2>Brain break</h2><small>🌼 ${pollen} pollen</small></div>
     <p class="g-intro">Quick games that make you smarter while you procrastinate. They work offline. The levels go up as you get them right, from Freshman to Professor.</p>
-    ${window.FTPuzzles ? FTPuzzles.dailyCard() : ''}
     <div class="g-hub">${Object.entries(GAMES).map(([k, x]) => { const lv = store.get('lv-' + k, 1), best = store.get('best-' + k, 0);
       return `<button class="card g-card" data-game="${k}"><span class="g-ico">${x.icon}</span><b>${x.name}</b><small>${x.blurb}</small>
         <span class="g-meta"><span class="pill">${RANKS[lv - 1]} · L${lv}</span>${best ? `<span class="pill">Best ${best}</span>` : ''}</span></button>`; }).join('')}</div>
-    ${window.FTPuzzles ? `<div class="sh" style="margin-top:22px"><h2>Puzzles</h2><small>levels that get harder</small></div><div class="g-hub">${FTPuzzles.hubCards()}</div>` : ''}
     ${window.FTFun ? `<div class="sh" style="margin-top:22px"><h2>Just for fun</h2><small>no learning, promise (mostly)</small></div>
     <div class="g-hub">${Object.entries(FTFun.list).map(([k, x]) => { const m = FTFun.meta(k);
       return `<button class="card g-card g-fun" data-fun="${k}"><span class="g-ico">${x.icon}</span><b>${x.name}</b><small>${x.blurb}</small>
@@ -395,11 +329,7 @@ function finish(){
   if (mood === 'great' && ctx.confetti) ctx.confetti();
 }
 let funActive = null;
-let pzActive = false;
 function onClick(e){
-  const pz = e.target.closest('[data-pz]'); if (pz && window.FTPuzzles){ g = null; pzActive = true; FTPuzzles.start(pz.dataset.pz, root, ctx); return; }
-  if (e.target.closest('[data-pzdaily]') && window.FTPuzzles){ g = null; pzActive = true; FTPuzzles.startDaily(root, ctx); return; }
-  if (pzActive){ if (e.target.closest('[data-gback]')){ FTPuzzles.stop(); pzActive = false; hub(); } return; }
   const fun = e.target.closest('[data-fun]'); if (fun && window.FTFun){ g = null; funActive = fun.dataset.fun; FTFun.start(funActive, root); return; }
   if (funActive){ if (e.target.closest('[data-gback]')){ FTFun.stop(); funActive = null; hub(); } return; }
   const c = e.target.closest('[data-gc]'); if (c) return answer(+c.dataset.gc);
@@ -408,10 +338,10 @@ function onClick(e){
   if (e.target.closest('[data-gback]')) return hub();
 }
 window.FTGames = {
-  mount(el, c){ root = el; ctx = c || {}; if (!root.dataset.wired){ root.addEventListener('click', onClick); root.dataset.wired = 1; } if (!g && !pzActive && !funActive) hub(); },
-  back(){ if (pzActive && window.FTPuzzles){ FTPuzzles.stop(); pzActive = false; hub(); return true; } if (funActive && window.FTFun){ FTFun.stop(); funActive = null; hub(); return true; } if (g){ g = null; hub(); return true; } return false; },
+  mount(el, c){ root = el; ctx = c || {}; if (!root.dataset.wired){ root.addEventListener('click', onClick); root.dataset.wired = 1; } if (!g && !funActive) hub(); },
+  back(){ if (funActive && window.FTFun){ FTFun.stop(); funActive = null; hub(); return true; } if (g){ g = null; hub(); return true; } return false; },
   _words: () => WORDS.flat(),
   playing(){ return !!g; },
-  _gen: { wordGen, mathGen, bitGen, seqGen, estGen, unitGen },
+  _gen: { wordGen, mathGen, bitGen, seqGen },
 };
 })();

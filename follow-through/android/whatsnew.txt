@@ -1,1 +1,1 @@
-Games tab + 7 new games (Circuit Bloom, Robo Path, Hive Sudoku, Word Ladder, Nectar Sort, Estimate It, Unit Dash), Daily Buzzle, Hive Builder, Bee Garden widget
+removed the new puzzle games; better games coming
