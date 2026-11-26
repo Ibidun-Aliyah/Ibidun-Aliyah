@@ -459,6 +459,37 @@ public class MainActivity extends Activity {
             });
         }
 
+        /** A short buzz when you tick something off. */
+        @JavascriptInterface
+        public void buzz(int ms) {
+            try {
+                android.os.Vibrator v = getSystemService(android.os.Vibrator.class);
+                if (v != null && v.hasVibrator()) v.vibrate(android.os.VibrationEffect.createOneShot(Math.max(5, Math.min(200, ms)), android.os.VibrationEffect.DEFAULT_AMPLITUDE));
+            } catch (Exception ignored) {}
+        }
+
+        /** Saves a PNG card to Pictures/Follow-Through and opens the share sheet (WhatsApp, Instagram…). */
+        @JavascriptInterface
+        public void shareImage(String b64, String text) {
+            runOnUiThread(() -> {
+                try {
+                    android.content.ContentValues v = new android.content.ContentValues();
+                    v.put(android.provider.MediaStore.Images.Media.DISPLAY_NAME, "opportunity-" + System.currentTimeMillis() + ".png");
+                    v.put(android.provider.MediaStore.Images.Media.MIME_TYPE, "image/png");
+                    v.put(android.provider.MediaStore.Images.Media.RELATIVE_PATH, android.os.Environment.DIRECTORY_PICTURES + "/Follow-Through");
+                    Uri uri = getContentResolver().insert(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, v);
+                    try (java.io.OutputStream os = getContentResolver().openOutputStream(uri)) {
+                        os.write(android.util.Base64.decode(b64, android.util.Base64.DEFAULT));
+                    }
+                    Intent send = new Intent(Intent.ACTION_SEND).setType("image/png").putExtra(Intent.EXTRA_STREAM, uri)
+                            .putExtra(Intent.EXTRA_TEXT, text == null ? "" : text).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(Intent.createChooser(send, "Share this opportunity"));
+                } catch (Exception e) {
+                    android.widget.Toast.makeText(MainActivity.this, "Couldn't share the card.", android.widget.Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
         /** Opens Android's print screen, where "Save as PDF" is one of the printers. */
         @JavascriptInterface
         public void printHtml(String html, String title) {

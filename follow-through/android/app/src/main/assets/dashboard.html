@@ -493,6 +493,7 @@ section{margin-top:28px}
     <div id="misfiled"></div>
     <div id="evcards"></div>
     <div class="tiles" id="tiles"></div>
+    <div id="kreset"></div>
     <div id="plan"></div>
     <input class="search gsearch" id="gq" type="search" placeholder="Search everything: opportunities, tips, notes…" aria-label="Search everything">
     <div id="gresults"></div>
@@ -519,6 +520,7 @@ section{margin-top:28px}
       </div>
       <div class="tabs" id="tabs"></div>
       <div class="tabs trsort" id="trsort" aria-label="Sort"></div>
+      <div class="tabs trsort" id="trplace" aria-label="Where"></div>
       <input class="search" id="q" type="search" placeholder="Search titles, organisations, tips" aria-label="Search">
       <div class="list" id="all"></div>
     </section>
@@ -552,7 +554,7 @@ section{margin-top:28px}
     </section>
   </div>
 
-  <div class="pane" id="p-history" hidden><div class="seg ph-seg"><button data-go="progress" aria-pressed="false">📈 How it's going</button><button data-go="history" aria-pressed="true">🏆 History &amp; wins</button></div><div id="v-wall"></div><div id="v-history"></div><div id="v-events"></div><div id="v-why"></div></div>
+  <div class="pane" id="p-history" hidden><div class="seg ph-seg"><button data-go="progress" aria-pressed="false">📈 How it's going</button><button data-go="history" aria-pressed="true">🏆 History &amp; wins</button></div><div id="v-wall"></div><div id="v-insight"></div><div id="v-history"></div><div id="v-events"></div><div id="v-why"></div></div>
 
   <div class="pane" id="p-me" hidden>
     <section>
@@ -651,6 +653,7 @@ section{margin-top:28px}
 <script src="welcome.js"></script>
 <script src="events.js"></script>
 <script src="hive.js"></script>
+<script src="kit.js"></script>
 <script>
 (() => {
 /* ---------- bridge to the Android app ---------- */
@@ -854,6 +857,7 @@ function render(){
   part(() => renderMisfiled(D.rows || []));
   part(() => { if (window.FTEvents){ const ec = $('#evcards'); if (ec) ec.innerHTML = FTEvents.todayCards(rows); } });
   if (window.FTHive) part(() => { $('#plan').innerHTML = FTHive.plan(rows); $('#report').innerHTML = FTHive.report(rows); $('#heat').innerHTML = FTHive.heat(rows); $('#v-wall').innerHTML = FTHive.wall(rows); $('#hivebuild').innerHTML = FTHive.builder(rows); FTHive.renderPouch(); });
+  if (window.FTKit) part(() => { $('#kreset').innerHTML = FTKit.resetCard(rows); $('#v-insight').innerHTML = FTKit.insights(rows); });
   const nick = window.FTWelcome ? (FTWelcome.profile().nickname || '') : '';
   $('#hello').innerHTML = (nick ? `Hi ${esc(nick)}! ` : '') + (need.length ? `<em>${need.length} ${need.length===1?'thing needs':'things need'} you</em> today.` :
     rows.length ? 'You\'re on top of it. <em>Nothing urgent today.</em>' : 'Nothing saved yet. <em>Tap the bubble on your next find.</em>');
@@ -1632,6 +1636,8 @@ function listing(rows, tips){
   const labels = [['opps','Opportunities'],['events','Events'],['tips','Tips'],['done','Submitted & closed'],['archived','Archived']];
   $('#tabs').innerHTML = labels.map(([k,l]) => `<button data-tab="${k}" aria-pressed="${tab===k}">${l} · ${groups[k].length}</button>`).join('');
   let list = groups[tab];
+  const placeBase = list;
+  if (window.FTKit && (tab === 'opps' || tab === 'events')){ $('#trplace').innerHTML = FTKit.placeChips(placeBase); list = FTKit.filterPlace(list); } else if ($('#trplace')) $('#trplace').innerHTML = '';
   if (query) list = list.filter(r => JSON.stringify([r.Title,r.Organisation,r.Topic,r['Key points'],r.Type]).toLowerCase().includes(query));
   if (tab === 'tips'){
     $('#all').innerHTML = list.length ? list.slice().reverse().map(t => swipeWrap(t.ID, 'tip', true, `<div class="item" data-tip="${esc(t.ID)}">
@@ -1733,6 +1739,7 @@ function openItem(id){
       ${active(r) && r.Category !== 'Event' ? (() => { const e = effort(r), sb = r.Deadline ? startBy(r, e) : null, dd = days(r.Deadline);
         return `<div class="effort"><span class="chip">${e.level === 'heavy' ? '🍯🍯🍯 Big application' : e.level === 'medium' ? '🍯🍯 Medium effort' : '🍯 Quick one'}</span><span>${esc(effortLabel(e))}${e.lead >= 5 ? ', including waiting time for other people' : ''}.${sb ? ` <b>${dd - e.need <= 0 ? 'Start now.' : 'Start by ' + esc(fmt(iso(sb))) + '.'}</b>` : ''}</span></div>`; })() : ''}
       ${window.FTHive ? FTHive.path(r) : ''}
+      ${window.FTKit && r.Category !== 'Other' ? FTKit.placeTag(r) : ''}
       ${window.FTEvents ? FTEvents.panel(r) : ''}
       ${r.Status==='New' ? `<div class="banner info"><span>${D.ai.hasKey?'Not sorted yet.':'Add your Gemini key in Settings to sort this instantly.'}</span>${D.ai.hasKey?'<button class="btn small" data-banner="Sort now">Sort now</button>':''}</div>`:''}
       <div>
@@ -1790,6 +1797,7 @@ function openItem(id){
         ${r.Link?`<button class="btn" data-url="${esc(r.Link)}">Open link ↗</button>`:''}
         ${r.Deadline?`<button class="btn" data-url="${esc(gcal(r))}">Add to calendar</button>`:''}
         ${r.Screenshot?`<button class="btn" data-url="${esc(r.Screenshot)}">Screenshot</button>`:''}
+        ${window.FTKit ? `<button class="btn" data-kit="share">Share as a card</button><button class="btn" data-kit="copy">Quick copy</button>` : ''}
       </div>
       ${active(r)?`<div><div class="note" style="margin-bottom:6px">Remind me</div><div class="row">
         <button class="btn small" data-snooze="1">Tomorrow</button><button class="btn small" data-snooze="3">In 3 days</button><button class="btn small" data-snooze="7">Next week</button></div></div>`:''}
@@ -1809,11 +1817,13 @@ function openTip(id){
     <div class="row" style="border-top:2px dashed var(--line);padding-top:12px"><button class="btn small" data-act="delete" data-kind="tip" data-id="${esc(t.ID)}" style="color:var(--rose)">${ICON_DEL} Delete tip</button></div></div>`);
 }
 
-async function setFields(id, fields, msg){
-  const r = D.rows.find(x => x.ID === id); Object.assign(r, fields);
+async function setFields(id, fields, msg, undo){
+  const r = D.rows.find(x => x.ID === id), prev = {}; Object.keys(fields).forEach(k => { prev[k] = r[k] == null ? '' : r[k]; }); Object.assign(r, fields);
   render(); if (current && current.ID === id) openItem(id);
   const j = await call({ action:'update', id, fields });
-  if (!j.ok){ toast('Couldn\'t save that. Check your connection.'); load(true); } else if (msg) toast(msg);
+  if (!j.ok){ toast('Couldn\'t save that. Check your connection.'); load(true); }
+  else if (undo) toast(msg || 'Updated.', () => setFields(id, prev, 'Undone ↩'));
+  else if (msg) toast(msg);
 }
 
 /* ---------- events ---------- */
@@ -1840,7 +1850,7 @@ document.addEventListener('click', async e => {
     if (!current['Applied on'] && DECIDED.indexOf(o) >= 0) f['Applied on'] = iso(TODAY);
     active_();
     const title = current.Title;
-    await setFields(current.ID, f, o==='Accepted' || o==='Rejected' ? '' : 'Saved to your history.');
+    await setFields(current.ID, f, o==='Accepted' || o==='Rejected' ? 'Saved.' : 'Saved to your history.', true);
     if (o === 'Accepted') celebrate('party', 'YOU GOT IN!', `<b>${esc(title)}</b>. I'm telling every flower in Lagos. I always believed in you. (Mostly.)`);
     else if (o === 'Shortlisted' || o === 'Interview'){
       celebrate('party', o === 'Interview' ? 'An interview!' : 'Shortlisted!', `<b>${esc(title)}</b> wants to know you better. Breathe. I'm writing your interview prep now.`);
@@ -1870,11 +1880,11 @@ document.addEventListener('click', async e => {
       if (w){ logWhy(r0, w); f.Outcome = "Didn't apply"; f.Notes = whyNote(r0, w); }
       current = r0;
       active_();
-      return setFields(r0.ID, f, w ? 'Noted. I\'ll pick better next time. 🐝' : 'Closed.');
+      return setFields(r0.ID, f, w ? 'Noted. I\'ll pick better next time. 🐝' : 'Closed.', true);
     }
     if (s === 'Submitted'){ f['Remind on'] = addDays(14); if (!current['Applied on']) f['Applied on'] = iso(TODAY); }
     active_();
-    return setFields(current.ID, f, s==='Preparing' ? 'Preparing. Tap “Write my essays” or “Tailor my CV” when ready.' : s==='Submitted' ? '🐝 Look at you! I\'ll ask about the result in 2 weeks.' : 'Updated.');
+    return setFields(current.ID, f, s==='Preparing' ? 'Preparing. Tap “Write my essays” or “Tailor my CV” when ready.' : s==='Submitted' ? '🐝 Look at you! I\'ll ask about the result in 2 weeks.' : 'Updated.', true);
   }
   if (t.dataset.snooze && current){ const n = +t.dataset.snooze; active_(); return setFields(current.ID, { 'Remind on': addDays(n) }, n===1?'Back tomorrow.':`Back in ${n} days.`); }
   if (t.dataset.ai && current){
@@ -2050,6 +2060,8 @@ if (window.FTHive){
 }
 try { render(); } catch(e){ console.error(e); }
 load();
+if (window.FTKit) FTKit.init({ days, fmt, iso, parse, today: () => TODAY, render, toast, openSheet, closeSheet, openItem, current: () => current,
+  rows: () => (D && D.rows || []).filter(r => r.Outcome !== 'Deleted'), reqs, applied, appliedDate, active, urgency });
 if (window.FTWelcome){
   FTWelcome.init({ call, toast, onDone: () => { renderProfileCard(); render(); } });
   // after the page (and any invitation) is ready; an open invitation starts the tour itself

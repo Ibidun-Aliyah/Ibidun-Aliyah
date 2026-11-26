@@ -766,7 +766,6 @@ const FUN = {
   chess:  { name: 'Bee Chess', icon: '♟️', blurb: 'Bee-themed chess against Bisi, from Larva to Queen. New to chess? There are lessons and a tutor.', start: r => chessView(r) },
   flight: { name: 'Bisi Flight', icon: '🐝', blurb: 'Tap to fly between the flowers and grab nectar. Harder the longer you last.', start: r => flightStart(r) },
   drop:   { name: 'Honey Drop', icon: '🍯', blurb: 'Drop and merge: two of the same become the next one up, from pollen all the way to a crown.', start: r => hdStart(r) },
-  pairs:  { name: 'Pollen Pairs', icon: '🃏', blurb: 'Flip cards to match symbols, units and words with their meanings.', start: r => pairsSetup(r) },
 };
 function onClick(e){
   if (!active) return;

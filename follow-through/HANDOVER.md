@@ -74,9 +74,14 @@ iPhone/web: docs/ on GitHub Pages ──▶ same kind of script (each person has
 
 ## 3. Current state (26 Nov 2026)
 
-- **App version 6.9** (versionCode 39) built and pushed. The next build should be 6.10 / 40 (versionName "6.10").
+- **App version 6.10** (versionCode 40) built and pushed. The next build should be 6.11 / 41.
+- **v6.10 `assets/kit.js`** (FTKit): Quick copy (Pouch 3rd tab + "Quick copy" in item sheets; `ft-kit-details`, `ft-kit-answers`,
+  bios start from profile with [ADD: …] gaps), places (auto-guess Lagos/Nigeria/online/abroad + manual `ft-place`, tracker filter
+  `#trplace`), share-as-card (canvas PNG 1080×1350 → `Android.shareImage` to Pictures/Follow-Through, web share/download),
+  Sunday/Monday reset (`ft-week`, top 3 boost Today's plan, "This week's top 3" card), What worked (History, needs ≥3 results
+  incl. a win), haptics (`Android.buzz`, VIBRATE permission). Undo toast on status/outcome changes (`setFields(…, undo)`).
 - **Tabs (6.8)**: Today · Tracker · Notes · Pouch · Progress · Games · Me. History lives inside Progress (toggle
-  "How it's going | History & wins"; go('history') highlights Progress). Games (repo, not yet released): `games.js` (Word Hive only), `fun.js` (Chess, Flight, Honey Drop,
+  "How it's going | History & wins"; go('history') highlights Progress). Games: `games.js` (Word Hive only), `fun.js` (Chess, Flight, Honey Drop,
   Pollen Pairs). Hive Builder (wax from real progress, `ft-hive-build`) on Progress. Android widget **Bee garden**
   (`Widgets$Garden`, one flower per streak day, droops after 19:00 if inactive, hive at 30).
 - **v6.5 module `assets/hive.js`** (FTHive): bee-path timeline in each opportunity sheet, Bee Pouch pane (`p-pouch`:
@@ -257,3 +262,7 @@ if the conversation is summarised or a new session starts. Rule: after finishing
   Honey Drop+ changes: drawn pieces with faces (no emoji), combos, particles/shake, Swap/hold slot, Shake ×3, overflow
   countdown. Also gave her a list of small app-improvement ideas. **Pending:** her verdict per game → port the keepers
   into `fun.js`, then release (next = 6.10/40).
+- **26 Nov · Binned all 5 preview games** (Honey Drop+, Café, Pet, Rush, Swat; repo copy deleted; artifact Jg1sCEaAB4rWrvf3JYANLW
+  left up, delete only if she asks). App games now: Word Hive, Bee Chess, Bisi Flight, Honey Drop (original). Built her picks
+  1, 2, 7, 8, 9 ("especially 9"), 10, 11, 12 as v6.10 (see section 3). Not built: 3 (icon shortcuts), 4 (pin + countdown widget),
+  5 (labels), 6 (fees). **Pending:** feedback; she may want the remaining games gone too (unclear from "bin all").

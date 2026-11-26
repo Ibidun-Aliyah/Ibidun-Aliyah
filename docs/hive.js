@@ -234,9 +234,9 @@ function renderPouch(){
   const ai = H.rows().filter(r => r['Essay doc'] || r['CV doc']);
   host.innerHTML = `<section>
     <div class="pc-hero">${bee('happy', 64)}<div><h2>Bee Pouch</h2><small>Your documents and essays, one tap away. Kept on this phone.</small></div></div>
-    <div class="seg pc-tabs"><button data-ptab="docs" aria-pressed="${ptab === 'docs'}">📁 Documents (${docs.length})</button><button data-ptab="essays" aria-pressed="${ptab === 'essays'}">📚 Essays (${es.length + ai.filter(r => r['Essay doc']).length})</button></div>
-    <input class="search" id="pc-q" type="search" placeholder="${ptab === 'docs' ? 'Search: passport, transcript, WAEC…' : 'Search your essays: leadership, robotics…'}" value="${esc(pq)}" aria-label="Search the pouch">
-    ${ptab === 'docs' ? `
+    <div class="seg pc-tabs"><button data-ptab="docs" aria-pressed="${ptab === 'docs'}">📁 Documents (${docs.length})</button><button data-ptab="essays" aria-pressed="${ptab === 'essays'}">📚 Essays (${es.length + ai.filter(r => r['Essay doc']).length})</button><button data-ptab="kit" aria-pressed="${ptab === 'kit'}">📋 Quick copy</button></div>
+    <input class="search" id="pc-q" type="search" placeholder="${ptab === 'docs' ? 'Search: passport, transcript, WAEC…' : ptab === 'kit' ? 'Search: email, bio, goals…' : 'Search your essays: leadership, robotics…'}" value="${esc(pq)}" aria-label="Search the pouch">
+    ${ptab === 'kit' ? (window.FTKit ? FTKit.kitHtml(pq) : '') : ptab === 'docs' ? `
       <div class="row" style="margin-bottom:12px"><label class="btn primary" for="pc-file">＋ Add documents</label><input id="pc-file" type="file" multiple hidden accept="image/*,.pdf,.doc,.docx,.txt"></div>
       ${docs.length ? CATS.map(c => { const l = docs.filter(d => d.cat === c[0] && (m(d.name) || m(d.note) || m(c[2]))); return l.length ? `<div class="month">${c[1]} ${c[2]}</div>
         <div class="pc-grid">${l.map(d => `<button class="pc-doc" data-doc="${d.id}"><span class="pc-th" data-thumb="${d.id}">${/^image\//.test(d.mime) ? '' : esc(ext(d.name))}</span><b>${esc(d.name)}</b><small>${esc(d.note || sizeTxt(d.size))}</small></button>`).join('')}</div>` : ''; }).join('')
@@ -268,7 +268,7 @@ function planTasks(rows){
     if (!(d !== null && d <= 14) && !(slack <= 10) && r.Status !== 'Preparing') return;
     const l = H.reqs(r);
     const steps = l.map((x, i) => ({ x, i, k: H.reqDays(x.text) })).filter(s => !s.x.done && (s.k.work > 0 || s.k.lead > 0));
-    const score = d === null ? 50 : Math.min(d, slack + 2);
+    const score = (d === null ? 50 : Math.min(d, slack + 2)) - (window.FTKit && FTKit.isPick(r.ID) ? 6 : 0);
     if (!l.length){ out.push({ key: r.ID + ':read', r, text: 'Read the requirements and tick what you need', min: 15, score }); return; }
     // waiting-on-people steps first (ask today, wait later), then the next piece of work
     const lead = steps.filter(s => s.k.lead >= 5).slice(0, 1), work = steps.filter(s => s.k.lead < 5).slice(0, 1);
