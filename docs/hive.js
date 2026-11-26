@@ -409,10 +409,8 @@ function meCards(){
   const widget = web ? `<section><div class="sh"><h2>Home-screen widget</h2><small>iPhone · free Scriptable app</small></div>
     <div class="card wa"><ol>
       <li>Install <b>Scriptable</b> from the App Store (free).</li>
-      <li>Tap <b>Copy widget script</b> below.</li>
-      <li>In Scriptable: <b>＋</b> → paste → name it <b>Bisi</b>.</li>
-      <li>Home screen: long-press → <b>＋</b> → <b>Scriptable</b> → pick a size → tap the widget while jiggling → Script: <b>Bisi</b>.</li></ol>
-      <div class="row"><button class="btn primary" data-hive="widget">Copy widget script</button></div>
+      <li>Tap <b>Set up the widget</b> below and follow the steps (about 2 minutes).</li></ol>
+      <div class="row"><button class="btn primary" data-hive="widget">Set up the widget</button></div>
       <div class="note">It shows what's due next and your counts, refreshes every half hour, and opens the app when tapped. The script holds your private link: don't post it anywhere.</div></div></section>` : '';
   return wa + widget;
 }
@@ -422,13 +420,18 @@ function widgetScript(){
   const app = location.origin + location.pathname.replace(/[^/]*$/, '');
   const goth = document.documentElement.dataset.skin === 'grunge';
   return `// Bisi · Follow-Through widget (Scriptable). Your private link is below: don't share this script.
-const URL = ${JSON.stringify(url)};
+const API = ${JSON.stringify(url)};
 const APP = ${JSON.stringify(app)};
 const C = ${goth ? `{ bg1: "#0C0B0B", bg2: "#2A0E10", ink: "#EDEAE6", muted: "#A39C99", hot: "#E0393E", emoji: "🪲", name: "Bisi" }` : `{ bg1: "#FFD23F", bg2: "#FFF3CC", ink: "#1E1606", muted: "#6E5A2C", hot: "#D9533B", emoji: "🐝", name: "Bisi" }`};
 const fm = FileManager.local(), cache = fm.joinPath(fm.documentsDirectory(), "bisi-cache.json");
-let data = null;
-try { data = await new Request(URL + "?action=dashboard").loadJSON(); if (data && data.ok) fm.writeString(cache, JSON.stringify(data)); else data = null; } catch (e) {}
-if (!data && fm.fileExists(cache)) data = JSON.parse(fm.readString(cache));
+let data = null, err = "";
+try {
+  const req = new Request(API + "?action=dashboard"); req.timeoutInterval = 25;
+  const txt = await req.loadString();
+  const j = JSON.parse(txt);
+  if (j && j.ok) { data = j; fm.writeString(cache, txt); } else err = (j && j.error) || "sheet said no";
+} catch (e) { err = String(e).slice(0, 80); }
+if (!data && fm.fileExists(cache)) { try { data = JSON.parse(fm.readString(cache)); } catch (e) {} }
 const today = new Date(); today.setHours(0, 0, 0, 0);
 const days = s => { const m = /^(\\d{4})-(\\d{2})-(\\d{2})/.exec(s || ""); return m ? Math.round((new Date(+m[1], +m[2] - 1, +m[3]) - today) / 864e5) : null; };
 const rows = ((data && data.rows) || []).filter(r => r.Outcome !== "Deleted");
@@ -444,7 +447,7 @@ const t = head.addText(C.emoji + " " + C.name); t.font = Font.boldRoundedSystemF
 head.addSpacer();
 const c = head.addText(week ? week + " due this week" : "all calm"); c.font = Font.mediumSystemFont(11); c.textColor = new Color(week ? C.hot : C.muted);
 w.addSpacer(6);
-if (!data) { const e = w.addText("Can't reach your sheet. Open Follow-Through once."); e.font = Font.systemFont(12); e.textColor = new Color(C.muted); }
+if (!data) { const e = w.addText("Can't reach your sheet yet. Check your internet, then tap to open the app." + (err ? "\n(" + err + ")" : "")); e.font = Font.systemFont(11); e.textColor = new Color(C.muted); }
 else if (!act.length) { const e = w.addText("Nothing due. Go find something to apply for! 🌼"); e.font = Font.systemFont(13); e.textColor = new Color(C.ink); }
 else for (const r of act.slice(0, fam === "small" ? 2 : fam === "large" ? 7 : 3)) {
   const d = days(r.Deadline), s = w.addStack(); s.centerAlignContent();
@@ -455,9 +458,79 @@ else for (const r of act.slice(0, fam === "small" ? 2 : fam === "large" ? 7 : 3)
 }
 w.addSpacer();
 const f = w.addText(rows.filter(r => r.Status === "Submitted").length + " submitted · " + act.length + " in progress"); f.font = Font.systemFont(10); f.textColor = new Color(C.muted);
-if (config.runsInWidget) Script.setWidget(w); else await w.presentMedium();
+if (config.runsInWidget) Script.setWidget(w);
+else { await w.presentMedium(); }
 Script.complete();
 `;
+}
+
+
+/* ================= 10. Hive Builder: wax from real progress decorates your hive ================= */
+const SHOP = [
+  ['sun', '☀️', 'Sun', 8], ['flowers', '🌷', 'Flower patch', 10], ['mushrooms', '🍄', 'Mushrooms', 12], ['clouds', '☁️', 'Clouds', 12],
+  ['tier', '🍯', 'Bigger hive', 15], ['fence', '🪵', 'Fence', 18], ['pond', '💧', 'Pond', 25], ['bench', '🪑', 'Bench', 30],
+  ['butterflies', '🦋', 'Butterflies', 35], ['friends', '🐝', 'Bee friends', 40], ['jars', '🫙', 'Honey jars', 50], ['rainbow', '🌈', 'Rainbow', 80], ['crown', '👑', 'Hive crown', 120]];
+function waxOf(rows){
+  const ticks = rows.reduce((a, r) => a + H.reqs(r).filter(x => x.done).length, 0);
+  const saved = rows.filter(r => r.Category === 'Opportunity' || r.Category === 'Event').length;
+  const applied = rows.filter(H.applied).length, wins = rows.filter(r => ['Accepted', 'Shortlisted', 'Interview'].indexOf(r.Outcome) >= 0).length;
+  const went = rows.filter(r => r.Category === 'Event' && r.Outcome === 'Attended').length;
+  const earned = saved + ticks + applied * 5 + went * 3 + wins * 10, own = LS.get('ft-hive-build', []);
+  const spent = own.reduce((a, k) => a + ((SHOP.find(x => x[0] === k) || [])[3] || 0), 0);
+  return { earned, spent, left: earned - spent, own, parts: { saved, ticks, applied, went, wins } };
+}
+function scene(own){
+  const has = k => own.indexOf(k) >= 0, ink = '#1E1606';
+  const tiers = has('tier') ? 5 : 3, hx = 170, hb = 168;
+  let g = `<rect width="340" height="200" fill="#DCEBFA"/>`;
+  if (has('rainbow')) g += [['#F08068', 120], ['#FFD23F', 110], ['#5FA04E', 100], ['#7FAEDD', 90]].map(([c, r]) => `<path d="M${170 - r} 170 A${r} ${r} 0 0 1 ${170 + r} 170" fill="none" stroke="${c}" stroke-width="9" opacity=".8"/>`).join('');
+  if (has('sun')) g += `<circle cx="300" cy="36" r="20" fill="#FFD23F" stroke="${ink}" stroke-width="2.5"/>`;
+  if (has('clouds')) g += `<g fill="#fff" stroke="${ink}" stroke-width="2"><path d="M40 50a12 12 0 0 1 22-6a10 10 0 0 1 18 8h-40z"/><path d="M200 34a10 10 0 0 1 18-5a8 8 0 0 1 15 6h-33z"/></g>`;
+  g += `<path d="M0 160 Q85 148 170 158 T340 156 V200 H0z" fill="#8FC970" stroke="${ink}" stroke-width="2.5"/>`;
+  if (has('pond')) g += `<ellipse cx="268" cy="178" rx="44" ry="12" fill="#7FAEDD" stroke="${ink}" stroke-width="2.5"/><path d="M250 176h14M276 180h12" stroke="#fff" stroke-width="2"/>`;
+  if (has('fence')) g += `<g stroke="${ink}" stroke-width="2" fill="#D9A066">${[0, 1, 2, 3, 4].map(i => `<rect x="${8 + i * 16}" y="138" width="9" height="26" rx="2"/>`).join('')}<rect x="4" y="146" width="80" height="5" rx="2"/></g>`;
+  g += `<path d="M${hx} ${hb - tiers * 18 - 16}v14" stroke="${ink}" stroke-width="3"/><path d="M${hx - 34} ${hb - tiers * 18 - 16}h68" stroke="#8C5A2B" stroke-width="5" stroke-linecap="round"/>`;
+  for (let i = 0; i < tiers; i++){ const w = 40 + i * 9, y = hb - (tiers - i) * 18; g += `<rect x="${hx - w / 2}" y="${y}" width="${w}" height="19" rx="9.5" fill="${i % 2 ? '#E39B1B' : '#F5B700'}" stroke="${ink}" stroke-width="2.5"/>`; }
+  g += `<ellipse cx="${hx}" cy="${hb - 10}" rx="7" ry="6" fill="${ink}"/>`;
+  if (has('crown')) g += `<path d="M${hx - 14} ${hb - tiers * 18 - 20}l5 -14l9 8l9 -8l5 14z" fill="#FFD23F" stroke="${ink}" stroke-width="2.5" transform="translate(0 -6)"/>`;
+  if (has('flowers')) g += [40, 58, 76, 100].map((x, i) => `<path d="M${x} 186v-16" stroke="#2F6B3A" stroke-width="2.5"/><circle cx="${x}" cy="168" r="6" fill="${['#F7B6C8', '#C9A0F0', '#F08068', '#FFFFFF'][i]}" stroke="${ink}" stroke-width="2"/><circle cx="${x}" cy="168" r="2.5" fill="#F5B700"/>`).join('');
+  if (has('mushrooms')) g += `<g stroke="${ink}" stroke-width="2"><rect x="120" y="176" width="6" height="10" fill="#fff"/><path d="M113 178a10 8 0 0 1 20 0z" fill="#E0393E"/><rect x="222" y="178" width="5" height="8" fill="#fff"/><path d="M216 180a8 6 0 0 1 17 0z" fill="#E0393E"/></g>`;
+  if (has('bench')) g += `<g stroke="${ink}" stroke-width="2.5" fill="#B5651D"><rect x="214" y="150" width="46" height="7" rx="2"/><rect x="214" y="140" width="46" height="6" rx="2"/><path d="M220 157v10M254 157v10"/></g>`;
+  if (has('jars')) g += [0, 1, 2].map(i => `<rect x="${92 + i * 14}" y="${i === 1 ? 128 : 142}" width="12" height="15" rx="3" fill="#F5B700" stroke="${ink}" stroke-width="2"/>`).join('');
+  if (has('butterflies')) g += `<g stroke="${ink}" stroke-width="1.5"><path d="M60 92l-8-6a5 5 0 0 0 0 10zM60 92l8-6a5 5 0 0 1 0 10z" fill="#C9A0F0"/><path d="M250 100l-7-5a4 4 0 0 0 0 9zM250 100l7-5a4 4 0 0 1 0 9z" fill="#F7B6C8"/></g>`;
+  if (has('friends')) g += [[110, 70], [232, 84], [140, 110]].map(([x, y]) => `<g transform="translate(${x} ${y})"><ellipse rx="8" ry="6" fill="#FFD23F" stroke="${ink}" stroke-width="2"/><path d="M-2 -5v10M3 -5v10" stroke="${ink}" stroke-width="2"/><ellipse cx="-2" cy="-8" rx="4" ry="3" fill="#fff" stroke="${ink}" stroke-width="1.5"/></g>`).join('');
+  return `<svg viewBox="0 0 340 200" width="100%" class="hb-svg" role="img" aria-label="Your hive">${g}</svg>`;
+}
+function builder(rows){
+  const w = waxOf(rows);
+  return `<div class="card hb"><div class="calhead"><h4>Your hive</h4><span class="pill">🕯️ ${w.left} wax</span></div>
+    <div class="hb-scene">${scene(w.own)}<div class="hb-bee">${bee(w.own.length >= 8 ? 'party' : 'happy', 44)}</div></div>
+    <div class="hb-shop">${SHOP.map(([k, ic, name, cost]) => { const own = w.own.indexOf(k) >= 0;
+      return `<button class="hb-item ${own ? 'own' : w.left >= cost ? 'can' : ''}" data-hb="${k}" ${own ? 'disabled' : ''}><span>${ic}</span><b>${name}</b><small>${own ? '✓ yours' : cost + ' wax'}</small></button>`; }).join('')}</div>
+    <div class="note">Earn wax by doing the real thing: <b>+1</b> per opportunity saved, <b>+1</b> per step ticked, <b>+5</b> per application submitted, <b>+3</b> per event attended, <b>+10</b> per win. You've earned ${w.earned} so far.</div></div>`;
+}
+function buy(k){
+  const it = SHOP.find(x => x[0] === k), w = waxOf(H.rows()); if (!it || w.own.indexOf(k) >= 0) return;
+  if (w.left < it[3]){ H.toast(`You need ${it[3] - w.left} more wax. Submit an application: that's 5! 🐝`); return; }
+  LS.set('ft-hive-build', w.own.concat(k)); H.toast(`${it[1]} ${it[2]} added to your hive!`); H.render();
+}
+function widgetSheet(){
+  const sc = widgetScript(); if (!sc) return;
+  H.openSheet(`<div class="sheet-head"><h3>iPhone widget</h3><button class="btn small ghost" data-close>Close</button></div>
+    <div class="sheet-body wa">
+      <div class="note">A widget is a little live card on your home screen. iPhones only allow widgets from installed apps, and this app lives in Safari, so we borrow a free app called <b>Scriptable</b> to draw it. It's safe; it just runs this one small script.</div>
+      <ol>
+        <li>Install <b>Scriptable</b> from the App Store (free, by Simon Støvring).</li>
+        <li>Tap <b>Copy script</b> below. (If that doesn't work, press and hold inside the box → Select All → Copy.)</li>
+        <li>Open Scriptable → tap <b>＋</b> (top right) → paste into the empty page → tap the title at the top and rename it <b>Bisi</b> → <b>Done</b>.</li>
+        <li>Tap the <b>Bisi</b> script once. You should see a preview of the widget. If it says it can't reach your sheet, check your internet.</li>
+        <li>Go to your home screen → press and hold an empty spot until apps wiggle → <b>＋</b> or <b>Edit → Add Widget</b> (top left) → search <b>Scriptable</b> → pick the middle size → <b>Add Widget</b>.</li>
+        <li>While it still wiggles, tap the new widget → <b>Script</b> → choose <b>Bisi</b>. Tap outside to finish. Tapping the widget later opens Follow-Through.</li>
+      </ol>
+      <textarea id="wg-script" rows="6" readonly style="font-family:monospace;font-size:11px">${esc(sc)}</textarea>
+      <div class="row"><button class="btn primary" data-hive="wcopy">Copy script</button></div>
+      <div class="note">It refreshes on its own every half hour or so (iPhone decides exactly when). The script holds your private link: don't post it anywhere.</div>
+    </div>`);
 }
 
 /* ================= wiring ================= */
@@ -471,8 +544,10 @@ document.addEventListener('click', e => {
   const rc = t.closest('[data-rc]'); if (rc){
     if (rc.dataset.rc === 'share'){ const txt = reportText(); if (window.Android && Android.share && !Android.web) Android.share(txt, ''); else if (navigator.share) navigator.share({ text: txt }).catch(() => {}); else copy(txt, 'Copied your report card.'); return; }
     rcOff = Math.min(0, rcOff + +rc.dataset.rc); H.render(); return; }
+  const hb = t.closest('[data-hb]'); if (hb){ buy(hb.dataset.hb); return; }
   const hv = t.closest('[data-hive]'); if (hv){
-    if (hv.dataset.hive === 'widget'){ const s = widgetScript(); if (s) copy(s, 'Copied! Now paste it into a new Scriptable script. 📲'); }
+    if (hv.dataset.hive === 'widget'){ widgetSheet(); }
+    if (hv.dataset.hive === 'wcopy'){ const ta = document.getElementById('wg-script'); if (ta){ ta.select(); copy(ta.value, 'Copied! Now open Scriptable. 📲'); } }
     if (hv.dataset.hive === 'save-draft'){
       const r = H.current(), ta = document.getElementById('rv-draft'); if (!ta || !ta.value.trim()){ H.toast('Paste your draft first.'); return; }
       const q = r ? (H.reqs(r).find(x => /essay|statement|why|describe|question|words/i.test(x.text)) || {}).text || '' : '';
@@ -532,6 +607,12 @@ const STYLE = `
 .fr-ico{font-size:32px}.frame b{line-height:1.2}.frame small{color:var(--muted);font-size:12px}.frame i{font-size:11px;color:var(--muted)}
 .empty-frame{border-style:dashed;border-color:var(--line);cursor:default;grid-column:1/-1}
 .brave{display:flex;gap:12px;align-items:center}.brave b{font-size:32px;font-family:'Patrick Hand',cursive;color:var(--rose)}
+.hb-scene{position:relative;border:2.5px solid var(--stroke);border-radius:14px;overflow:hidden;margin:6px 0 10px}.hb-svg{display:block}
+.hb-bee{position:absolute;right:30%;top:18%;width:44px;height:44px;animation:bp-bob 2.6s ease-in-out infinite}.hb-bee svg{width:44px;height:44px}
+.hb-shop{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;margin-bottom:6px}
+.hb-item{flex:none;width:84px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border:2px solid var(--line);border-radius:12px;background:var(--card);font:inherit;color:var(--muted);cursor:pointer}
+.hb-item span{font-size:24px}.hb-item b{font-size:12px;line-height:1.1;color:var(--ink);text-align:center}.hb-item small{font-size:11px}
+.hb-item.can{border-color:var(--stroke);box-shadow:2px 2px 0 var(--sh)}.hb-item.own{background:var(--accent-soft);opacity:.75}
 .wa ol{margin:0 0 8px;padding-left:20px}.wa li{margin-bottom:6px}
 `;
 function init(h){
@@ -540,5 +621,5 @@ function init(h){
 }
 const safe = f => (...a) => { if (!H) return ''; try { return f(...a); } catch(e){ console.error('FTHive', e); return ''; } };
 window.FTHive = { init, path: safe(path), hint: safe(hint), plan: safe(plan), heat: safe(heat), report: safe(report), wall: safe(wall),
-  meCards: safe(meCards), mountPouch: safe(mountPouch), renderPouch: safe(renderPouch), saveEssay, widgetScript, _planTasks: planTasks, _guessCat: guessCat };
+  meCards: safe(meCards), builder: safe(builder), mountPouch: safe(mountPouch), renderPouch: safe(renderPouch), saveEssay, widgetScript, _planTasks: planTasks, _guessCat: guessCat };
 })();

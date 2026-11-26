@@ -49,6 +49,9 @@ final class Widgets {
     public static class Note extends AppWidgetProvider {
         @Override public void onUpdate(Context c, AppWidgetManager m, int[] ids) { m.updateAppWidget(ids, note(c)); }
     }
+    public static class Garden extends AppWidgetProvider {
+        @Override public void onUpdate(Context c, AppWidgetManager m, int[] ids) { m.updateAppWidget(ids, garden(c)); }
+    }
     public static class Quick extends AppWidgetProvider {
         @Override public void onUpdate(Context c, AppWidgetManager m, int[] ids) { m.updateAppWidget(ids, quick(c)); }
     }
@@ -80,6 +83,7 @@ final class Widgets {
         update(c, Snack.class, null);
         update(c, Note.class, null);
         update(c, Quick.class, null);
+        update(c, Garden.class, null);
     }
 
     static void updateNote(Context c) { update(c, Note.class, null); }
@@ -89,7 +93,7 @@ final class Widgets {
             AppWidgetManager m = AppWidgetManager.getInstance(c);
             int[] ids = m.getAppWidgetIds(new ComponentName(c, cls));
             if (ids.length == 0) return;
-            if (v == null) v = cls == Jar.class ? jar(c) : cls == Snack.class ? snack(c) : cls == Note.class ? note(c) : quick(c);
+            if (v == null) v = cls == Jar.class ? jar(c) : cls == Snack.class ? snack(c) : cls == Note.class ? note(c) : cls == Garden.class ? garden(c) : quick(c);
             m.updateAppWidget(ids, v);
         } catch (Exception e) { android.util.Log.e("FollowThrough", "widget", e); }
     }
@@ -98,6 +102,80 @@ final class Widgets {
         Intent i = new Intent(c, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         if (extra != null) i.putExtra(extra, value);
         return PendingIntent.getActivity(c, req, i, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    /* ---------- Bee garden: one flower per day of the streak ---------- */
+
+    static RemoteViews garden(Context c) {
+        RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_garden);
+        int streak = Nag.streak(c);
+        boolean today = Nag.activeToday(c);
+        boolean droop = streak > 0 && !today && Calendar.getInstance().get(Calendar.HOUR_OF_DAY) >= 19;
+        v.setImageViewBitmap(R.id.g_img, drawGarden(streak, droop));
+        v.setTextViewText(R.id.g_days, streak == 0 ? "Bare soil" : streak + (streak == 1 ? " flower" : " flowers"));
+        String line = streak == 0 ? "Do one thing today to plant a seed 🌱"
+                : droop ? "Thirsty! Do one thing before midnight"
+                : streak >= 30 ? "A whole meadow. The hive moved in 🐝"
+                : today ? "Watered today ✓ Come back tomorrow" : "Water it: do one thing today";
+        v.setTextViewText(R.id.g_line, line);
+        v.setOnClickPendingIntent(R.id.g_root, openApp(c, 205, null, null));
+        return v;
+    }
+
+    /** Hand-drawn garden: up to 14 flowers in two rows; past 14 they grow taller, at 30 a hive appears. */
+    static Bitmap drawGarden(int streak, boolean droop) {
+        int W = 420, H = 260;
+        Bitmap b = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888);
+        Canvas cv = new Canvas(b);
+        Paint ink = new Paint(Paint.ANTI_ALIAS_FLAG); ink.setStyle(Paint.Style.STROKE); ink.setColor(INK);
+        ink.setStrokeWidth(5); ink.setStrokeCap(Paint.Cap.ROUND); ink.setStrokeJoin(Paint.Join.ROUND);
+        Paint f = new Paint(Paint.ANTI_ALIAS_FLAG);
+        // sun
+        f.setColor(Color.parseColor(droop ? "#F0A93A" : "#FFD23F")); cv.drawCircle(370, 46, 26, f); cv.drawCircle(370, 46, 26, ink);
+        // soil
+        Path soil = new Path(); soil.moveTo(0, 214);
+        for (int x = 0; x <= W; x += 60) soil.quadTo(x + 30, 204, x + 60, 214);
+        soil.lineTo(W, H); soil.lineTo(0, H); soil.close();
+        f.setColor(Color.parseColor("#9C6B3C")); cv.drawPath(soil, f); cv.drawPath(soil, ink);
+        int[] petals = { Color.parseColor("#F7B6C8"), Color.parseColor("#FFD23F"), Color.parseColor("#C9A0F0"),
+                Color.parseColor("#F08068"), Color.parseColor("#7FAEDD"), Color.parseColor("#FFFFFF") };
+        int n = Math.min(14, streak), grow = Math.min(40, Math.max(0, streak - 14) * 3);
+        if (streak >= 30) drawHive(cv, 46, 120, ink);
+        if (n == 0) {   // a seed bag
+            f.setColor(Color.parseColor("#DDEFCF"));
+            RectF bag = new RectF(180, 150, 240, 210); cv.drawRoundRect(bag, 10, 10, f); cv.drawRoundRect(bag, 10, 10, ink);
+            cv.drawLine(196, 172, 224, 172, ink);
+        }
+        for (int i = 0; i < n; i++) {
+            boolean back = i % 2 == 1;
+            float x = (streak >= 30 ? 110 : 30) + (i / 2) * ((streak >= 30 ? 290f : 360f) / 7f) + (back ? 18 : 0);
+            float base = back ? 206 : 222, h = (back ? 70 : 56) + grow + (i * 37 % 13);
+            float tx = droop ? x + 16 : x, ty = base - h + (droop ? 14 : 0);
+            Paint stem = new Paint(ink); stem.setColor(Color.parseColor("#2F6B3A")); stem.setStrokeWidth(6);
+            Path st = new Path(); st.moveTo(x, base); st.quadTo(x - 4, (base + ty) / 2, tx, ty); cv.drawPath(st, stem);
+            f.setColor(Color.parseColor("#5FA04E"));
+            cv.drawOval(new RectF(x - 2, base - h / 2.4f, x + 22, base - h / 2.4f + 10), f);
+            float r = 12 + Math.min(6, grow / 6f);
+            f.setColor(petals[i % petals.length]);
+            for (int k = 0; k < 5; k++) {
+                double a = Math.PI * 2 * k / 5;
+                float px = (float) (tx + Math.sin(a) * r), py = (float) (ty - Math.cos(a) * r);
+                cv.drawCircle(px, py, r * 0.62f, f); cv.drawCircle(px, py, r * 0.62f, thin(ink));
+            }
+            f.setColor(Color.parseColor("#F5B700")); cv.drawCircle(tx, ty, r * 0.5f, f); cv.drawCircle(tx, ty, r * 0.5f, thin(ink));
+        }
+        if (streak > 0) drawBee(cv, droop ? 300 : 250, droop ? 150 : 70, droop);
+        return b;
+    }
+    private static Paint thin(Paint ink) { Paint p = new Paint(ink); p.setStrokeWidth(3); return p; }
+    private static void drawHive(Canvas cv, float x, float y, Paint ink) {
+        Paint f = new Paint(Paint.ANTI_ALIAS_FLAG);
+        for (int i = 0; i < 4; i++) {
+            float w = 46 + i * 12, top = y + i * 20;
+            RectF r = new RectF(x - w / 2 + 10, top, x + w / 2 + 10, top + 22);
+            f.setColor(Color.parseColor(i % 2 == 0 ? "#F5B700" : "#E39B1B")); cv.drawRoundRect(r, 11, 11, f); cv.drawRoundRect(r, 11, 11, ink);
+        }
+        f.setColor(INK); cv.drawCircle(x + 10, y + 70, 7, f);
     }
 
     /* ---------- 1. Nectar jar ---------- */

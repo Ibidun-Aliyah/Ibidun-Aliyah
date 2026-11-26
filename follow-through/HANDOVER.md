@@ -74,7 +74,13 @@ iPhone/web: docs/ on GitHub Pages ──▶ same kind of script (each person has
 
 ## 3. Current state (26 Nov 2026)
 
-- **App version 6.7** (versionCode 37) built and pushed. The next build should be 6.8 / 38.
+- **App version 6.8** (versionCode 38) built and pushed. The next build should be 6.9 / 39.
+- **Tabs (6.8)**: Today · Tracker · Notes · Pouch · Progress · Games · Me. History lives inside Progress (toggle
+  "How it's going | History & wins"; go('history') highlights Progress). Games: `games.js` (Word Hive, Number Sprint, Bit Buzz,
+  Estimate It, Unit Dash), `puzzles.js` FTPuzzles (Circuit Bloom, Robo Path 8 levels, Hive Sudoku 6×6→9×9, Word Ladder ~900
+  words, Nectar Sort, Daily Buzzle = date-seeded, rotates ladder/circuit/sort/sudoku), `fun.js` (Chess, Flight, Honey Drop,
+  Pollen Pairs). Hive Builder (wax from real progress, `ft-hive-build`) on Progress. Android widget **Bee garden**
+  (`Widgets$Garden`, one flower per streak day, droops after 19:00 if inactive, hive at 30).
 - **v6.5 module `assets/hive.js`** (FTHive): bee-path timeline in each opportunity sheet, Bee Pouch pane (`p-pouch`:
   documents in app storage via `Android.pouchPut/Get/Del/Open` or IndexedDB on web, metadata `ft-pouch`; essays in
   `ft-essays`), Today's plan (`ft-plan`, ticks requirements), heatmap + report card (Progress), Wall of wins (History),
@@ -232,3 +238,11 @@ if the conversation is summarised or a new session starts. Rule: after finishing
   It, Unit Dash, Nectar Sort (pour honey colours), Hive Builder (wax from real applications decorates a hive), Bee Garden
   (grows with streak), Daily Buzzle (one shared puzzle a day), Swarm Trivia (incl. Nigeria facts), Two-player Hive (hex
   connection). Top picks: Circuit Bloom, Nectar Sort, Hive Builder, Daily Buzzle (+ Robo Path). **Pending:** her picks.
+- **26 Nov · Games batch (6.8)**: she picked Circuit Bloom, Robo Path, Sudoku, Word Ladder, Estimate It, Unit Dash, Nectar
+  Sort, Hive Builder (NOT in games: put on Progress), Bee Garden (as a widget), Daily Buzzle; wanted a Games tab (scrolling
+  for games was annoying) → History folded into Progress to keep 7 tabs. No games removed (she didn't name any).
+  iPhone widget "isn't working": script hardened (no `URL` shadowing, timeout, cache, shows the error on the widget),
+  setup moved into a step-by-step sheet with a select-all textbox fallback; explained what a widget/Scriptable is.
+  Verified: generators (sudoku uniqueness, sort solvable, ladder distances, every Robo level solvable), Playwright run with
+  her cached data, no errors. **Not verified:** Bee garden bitmap on a real phone; Scriptable on a real iPhone.
+  **Pending:** her feedback; which old games to remove (if any).

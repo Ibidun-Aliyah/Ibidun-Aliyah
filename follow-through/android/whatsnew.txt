@@ -1,1 +1,1 @@
-fix: blank screens on opening (your saved items show again); Bee Pouch gets its own tab
+Games tab + 7 new games (Circuit Bloom, Robo Path, Hive Sudoku, Word Ladder, Nectar Sort, Estimate It, Unit Dash), Daily Buzzle, Hive Builder, Bee Garden widget

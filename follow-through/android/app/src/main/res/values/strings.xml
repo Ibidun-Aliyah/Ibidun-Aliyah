@@ -11,6 +11,8 @@
     <string name="wdesc_note">Sticky note: your pinned note</string>
     <string name="wdesc_quick">Quick save: voice, paste a link, or a note</string>
     <string name="wl_jar">Nectar jar</string>
+    <string name="wl_garden">Bee garden</string>
+    <string name="wdesc_garden">Bee garden: a flower for every day you keep going</string>
     <string name="wl_snack">Brain snack</string>
     <string name="wl_note">Sticky note</string>
     <string name="wl_quick">Quick save</string>

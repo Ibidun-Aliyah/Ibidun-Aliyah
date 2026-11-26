@@ -177,6 +177,12 @@ into folders, ready to open or send, plus an **essay library**. Today gets a **p
 **busy-ness heatmap** and a **monthly report card**; History gets a **Wall of wins**. Me explains saving from WhatsApp
 and has a free **iPhone home-screen widget** (Scriptable).
 
+## Games tab (v6.8)
+Brain break has its own tab: learning games (Word Hive, Number Sprint, Bit Buzz, Estimate It, Unit Dash), puzzles with
+levels (Circuit Bloom, Robo Path, Hive Sudoku, Word Ladder, Nectar Sort), a **Daily Buzzle** (the same puzzle for everyone
+each day, shareable) and the just-for-fun games. Progress has **Your hive**: wax earned from real progress buys decorations.
+Android has a **Bee garden** widget that grows a flower for each day of your streak.
+
 ## Bisi's daily scout
 Every day at 11:23 (Lagos) a Claude scheduled task searches widely (official pages, opportunity aggregators, hackathon
 sites, university and company pages) for open opportunities matching your profile and interests, checks your eligibility
