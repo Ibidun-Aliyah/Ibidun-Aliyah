@@ -1,0 +1,459 @@
+<title>Bisi Arcade Preview</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE occasion: a toy arcade cabinet for one person to try games
+   IDEA a honey-yellow handheld console; each game is a cartridge you slot in
+   PICTURE the live game screen, filling most of the first screen
+   COLOUR honey #FFC629 housing, ink #1E1606, cream screen #FFF8E1, rose #E0493E accent
+   TYPE Patrick Hand display + Nunito text
+   LAYOUT phone: title row, cartridge strip, screen, controls; laptop: same centred at 520px */
+:root{color-scheme:light;--honey:#FFC629;--honey2:#F5B700;--ink:#1E1606;--cream:#FFF8E1;--rose:#E0493E;--leaf:#5FA04E;--sky:#BFE3F5;--muted:#6E5A2C}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--honey);color:var(--ink);font:600 16px/1.45 Nunito,system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:540px;margin:0 auto;padding:12px max(4vw,14px,env(safe-area-inset-left,0px)) 24px max(4vw,14px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px;min-height:100%}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+h1{font:400 34px/1 'Patrick Hand',cursive;margin:0;letter-spacing:-.01em}
+header p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.carts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.cart{border:2.5px solid var(--ink);border-radius:10px 10px 4px 4px;background:var(--cream);padding:6px 2px 5px;font:400 15px/1.05 'Patrick Hand',cursive;color:var(--ink);cursor:pointer;box-shadow:0 3px 0 var(--ink);display:flex;flex-direction:column;align-items:center;gap:3px}
+.cart svg{width:28px;height:28px}
+.cart[aria-pressed=true]{background:var(--ink);color:var(--honey);transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.console{background:#FFD95A;border:3px solid var(--ink);border-radius:26px 26px 34px 34px;padding:12px;box-shadow:0 6px 0 var(--ink)}
+.screen{position:relative;background:var(--cream);border:3px solid var(--ink);border-radius:14px;overflow:hidden;height:min(560px,calc(100svh - 270px));min-height:420px;touch-action:none;user-select:none;-webkit-user-select:none}
+.screen canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hud{position:absolute;left:10px;right:10px;top:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;font:400 20px/1 'Patrick Hand',cursive}
+.hud .r{display:flex;gap:6px;pointer-events:auto}
+.pill{background:#fff;border:2px solid var(--ink);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.btn{border:2.5px solid var(--ink);border-radius:12px;background:#fff;color:var(--ink);font:400 18px/1 'Patrick Hand',cursive;padding:8px 12px;cursor:pointer;box-shadow:0 3px 0 var(--ink);min-height:40px}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.btn.go{background:var(--ink);color:var(--honey)}
+.btn[disabled]{opacity:.45}
+.over{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px;background:rgba(255,248,225,.92)}
+.over h2{font:400 34px/1 'Patrick Hand',cursive;margin:0}
+.over p{margin:0;max-width:30ch}
+.over .bee{width:90px;height:90px}
+.controls{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.how{font-size:14px;margin:0;color:var(--ink);background:#FFF3C4;border:2px dashed var(--ink);border-radius:12px;padding:8px 12px}
+/* café */
+.cafe{position:absolute;inset:0;display:grid;grid-template-rows:1fr auto auto auto;gap:10px;padding:44px 10px 10px;background:linear-gradient(to top,#E9C28F 0 158px,#FCE7C8 158px)}
+.cafe::before{content:"Bisi's Bee Café";position:absolute;left:50%;top:62px;transform:translateX(-50%) rotate(-2deg);font:400 30px/1 'Patrick Hand',cursive;background:#fff;border:3px solid #1E1606;border-radius:10px;padding:6px 16px;box-shadow:0 4px 0 #1E1606;white-space:nowrap}
+.cafe .queue{align-self:end}
+.queue{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:end}
+.cust{position:relative;background:transparent;border:0;padding:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:150px;justify-content:flex-end}
+.cust .bubble{background:#fff;border:2px solid var(--ink);border-radius:12px;padding:3px 4px;display:flex;gap:2px;min-height:36px;align-items:center}
+.cust .bubble svg{width:28px;height:28px}
+.cust .bubble svg.done{opacity:.25}
+.cust .bug{width:64px;height:64px}
+.pat{width:60px;height:6px;border:1.5px solid var(--ink);border-radius:4px;background:#fff;overflow:hidden}.pat i{display:block;height:100%;background:var(--leaf)}
+.counter{background:#B5651D;border:3px solid var(--ink);border-radius:10px;height:14px}
+.tray{display:flex;gap:6px;justify-content:center;min-height:44px;align-items:center;background:#fff;border:2px dashed var(--ink);border-radius:12px;padding:4px}
+.tray svg{width:34px;height:34px}
+.tray .lbl{font:400 16px 'Patrick Hand',cursive;color:var(--muted)}
+.stations{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.st{position:relative;border:2.5px solid var(--ink);border-radius:12px;background:#fff;padding:4px 2px;display:flex;flex-direction:column;align-items:center;font:400 14px/1 'Patrick Hand',cursive;cursor:pointer;box-shadow:0 3px 0 var(--ink);overflow:hidden;color:var(--ink)}
+.st svg{width:36px;height:36px}
+.st i{position:absolute;left:0;bottom:0;height:5px;background:var(--honey2)}
+/* pet */
+.meters{position:absolute;left:10px;right:10px;top:8px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;font:400 15px/1 'Patrick Hand',cursive}
+.meter b{display:block;font-weight:400;margin-bottom:3px}
+.meter span{display:block;height:10px;border:2px solid var(--ink);border-radius:6px;background:#fff;overflow:hidden}
+.meter span i{display:block;height:100%;transition:width .4s}
+.say{position:absolute;left:50%;top:70px;transform:translateX(-50%);background:#fff;border:2.5px solid var(--ink);border-radius:16px;padding:6px 12px;font:400 19px/1.15 'Patrick Hand',cursive;max-width:84%;text-align:center}
+.petbar{position:absolute;left:10px;right:10px;bottom:10px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+footer{font-size:13px;color:var(--muted);text-align:center}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header><div><h1>Bisi Arcade</h1><p>Preview: try each one, then tell me keep, change or bin.</p></div></header>
+  <nav class="carts" id="carts" aria-label="Games"></nav>
+  <div class="console">
+    <div class="screen" id="screen"></div>
+    <div class="controls" id="controls"></div>
+  </div>
+  <p class="how" id="how"></p>
+  <footer>Nothing here is in the app yet. Scores stay on this device.</footer>
+</div>
+
+<script>
+{
+const $ = s => document.querySelector(s);
+const store = { get(k, d){ try { const v = localStorage.getItem('arc-' + k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } }, set(k, v){ try { localStorage.setItem('arc-' + k, JSON.stringify(v)); } catch(e){} } };
+const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch(e){} };
+const rnd = (a, b) => a + Math.random() * (b - a);
+const INK = '#1E1606';
+
+/* ---------- Bisi, drawn on canvas (and as SVG for the overlays) ---------- */
+function drawBee(g, x, y, r, o){
+  o = o || {}; const t = performance.now() / 1000, flap = Math.sin(t * 30) * 0.35, mood = o.mood || 'happy';
+  g.save(); g.translate(x, y); if (o.angle) g.rotate(o.angle); if (o.flip) g.scale(-1, 1);
+  g.lineWidth = Math.max(2, r * .09); g.strokeStyle = INK; g.lineJoin = 'round'; g.lineCap = 'round';
+  g.fillStyle = 'rgba(207,234,246,.9)';
+  for (const s of [-1, 1]){ g.save(); g.translate(-r * .1, -r * .75); g.rotate(s * .5 + (o.still ? 0 : flap) * s); g.beginPath(); g.ellipse(s * r * .35, -r * .25, r * .42, r * .6, s * .6, 0, Math.PI * 2); g.fill(); g.stroke(); g.restore(); }
+  g.fillStyle = '#F6C343'; g.beginPath(); g.ellipse(0, 0, r, r * .85, 0, 0, Math.PI * 2); g.fill();
+  g.save(); g.clip(); g.fillStyle = INK; for (const sx of [-.45, .05]) g.fillRect(sx * r - r * .12, -r, r * .24, r * 2); g.restore();
+  g.beginPath(); g.ellipse(0, 0, r, r * .85, 0, 0, Math.PI * 2); g.stroke();
+  g.beginPath(); g.moveTo(-r * .98, r * .05); g.lineTo(-r * 1.25, r * .12); g.stroke();
+  // face on the right side
+  const fx = r * .48;
+  g.fillStyle = '#F6C343'; g.beginPath(); g.arc(fx, -r * .05, r * .52, 0, Math.PI * 2); g.fill(); g.stroke();
+  g.beginPath(); g.moveTo(fx - r * .1, -r * .52); g.quadraticCurveTo(fx - r * .2, -r * .95, fx - r * .38, -r * .98); g.moveTo(fx + r * .15, -r * .52); g.quadraticCurveTo(fx + r * .25, -r * .95, fx + r * .42, -r * 1.0); g.stroke();
+  g.fillStyle = INK;
+  if (mood === 'sleep'){ g.beginPath(); g.arc(fx - r * .17, -r * .12, r * .09, 0, Math.PI); g.moveTo(fx + r * .27, -r * .12); g.arc(fx + r * .18, -r * .12, r * .09, 0, Math.PI); g.stroke(); }
+  else { for (const ex of [-.17, .18]){ g.beginPath(); g.arc(fx + ex * r, -r * .12, r * .085, 0, Math.PI * 2); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(fx + ex * r + r * .03, -r * .15, r * .03, 0, Math.PI * 2); g.fill(); g.fillStyle = INK; } }
+  g.fillStyle = 'rgba(242,155,139,.8)'; g.beginPath(); g.arc(fx - r * .3, r * .08, r * .08, 0, Math.PI * 2); g.arc(fx + r * .32, r * .08, r * .08, 0, Math.PI * 2); g.fill();
+  g.beginPath();
+  if (mood === 'sad' || mood === 'worried'){ g.arc(fx, r * .22, r * .12, Math.PI * 1.15, Math.PI * 1.85); }
+  else if (mood === 'sleep'){ g.arc(fx, r * .14, r * .05, 0, Math.PI * 2); }
+  else { g.arc(fx, r * .06, r * .14, Math.PI * .15, Math.PI * .85); }
+  g.stroke();
+  g.restore();
+}
+function beeSvg(mood){
+  const c = document.createElement('canvas'); c.width = c.height = 180; const g = c.getContext('2d'); drawBee(g, 86, 104, 52, { mood, still: true });
+  return `<img class="bee" alt="" src="${c.toDataURL()}">`;
+}
+
+/* ---------- shared canvas setup ---------- */
+let cur = null;
+function canvasFor(screen){
+  const cv = document.createElement('canvas'), dpr = Math.min(2, devicePixelRatio || 1), W = screen.clientWidth, H = screen.clientHeight;
+  cv.width = W * dpr; cv.height = H * dpr; screen.appendChild(cv); const g = cv.getContext('2d'); g.scale(dpr, dpr);
+  return { cv, g, W, H };
+}
+function overlay(screen, html){ let o = screen.querySelector('.over'); if (!o){ o = document.createElement('div'); o.className = 'over'; screen.appendChild(o); } o.innerHTML = html; o.hidden = false; return o; }
+function hud(screen, left, right){ let h = screen.querySelector('.hud'); if (!h){ h = document.createElement('div'); h.className = 'hud'; screen.appendChild(h); } h.innerHTML = `<div class="r">${left}</div><div class="r">${right || ''}</div>`; return h; }
+function loop(fn){ let last = performance.now(), id; const step = now => { const dt = Math.min(0.05, (now - last) / 1000); last = now; if (fn(dt) !== false) id = requestAnimationFrame(step); }; id = requestAnimationFrame(step); return () => cancelAnimationFrame(id); }
+function bg(g, W, H, top, bot){ const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, top); gr.addColorStop(1, bot); g.fillStyle = gr; g.fillRect(0, 0, W, H); }
+
+/* =================== 1. Honey Drop+ =================== */
+const LV = [['Pollen', '#FFF1A8', 0], ['Honey', '#FFC629', 0], ['Daisy', '#FFFFFF', 5], ['Clover', '#9FD67F', 4], ['Ladybug', '#F26B5B', 0], ['Sunflower', '#FFB000', 9], ['Butterfly', '#9CC6F2', 0], ['Bee', '#F6C343', 0], ['Hibiscus', '#F58FB4', 6], ['Queen', '#C9A0F0', 0]];
+const PTS = [2, 6, 12, 20, 30, 42, 56, 72, 90, 150];
+const drop = {
+  how: 'Tap or drag to aim, let go to drop. Two of the same touching merge into the next one up. Merge quickly for a combo. Swap the piece you\'re holding, or Shake the jar (3 per game) when things get stuck. Don\'t let it overflow the dashed line.',
+  start(screen, ctrl){
+    const { g, W, H, cv } = canvasFor(screen), unit = Math.min(W, 440) / 24, top = 110;
+    const R = lv => unit * (1 + lv * .45);
+    const pick = () => [0, 0, 0, 1, 1, 2, 3][Math.floor(Math.random() * 7)];
+    let s = null;
+    const reset = () => { s = { balls: [], parts: [], texts: [], aim: W / 2, cur: pick(), next: [pick(), pick()], hold: null, swapped: false, score: 0, best: store.get('drop-best', 0), cool: 0, danger: 0, combo: 0, comboT: 0, shakes: 3, shake: 0, maxLv: 0, play: true }; };
+    reset();
+    const aim = e => { const r = cv.getBoundingClientRect(); s.aim = Math.max(10, Math.min(W - 10, e.clientX - r.left)); };
+    cv.onpointerdown = e => { if (s.play) aim(e); };
+    cv.onpointermove = e => { if (s.play) aim(e); };
+    cv.onpointerup = e => { if (!s.play || s.cool > 0) return; aim(e); const r = R(s.cur), x = Math.max(r + 6, Math.min(W - r - 6, s.aim)); s.balls.push({ x, y: top - 46, vx: rnd(-.2, .2), vy: 0, lv: s.cur, r, age: 0, spin: 0, rot: 0 }); s.cur = s.next.shift(); s.next.push(pick()); s.cool = .35; s.swapped = false; drawCtrl(); };
+    const drawCtrl = () => { ctrl.innerHTML = `<button class="btn" id="d-swap" ${s.swapped ? 'disabled' : ''}>Swap${s.hold !== null ? ' (' + LV[s.hold][0] + ')' : ''}</button><button class="btn" id="d-shake" ${s.shakes ? '' : 'disabled'}>Shake ×${s.shakes}</button><button class="btn" id="d-new">Restart</button>`;
+      $('#d-swap').onclick = () => { if (s.swapped) return; const h = s.hold; s.hold = s.cur; s.cur = h === null ? s.next.shift() : h; if (h === null) s.next.push(pick()); s.swapped = true; drawCtrl(); };
+      $('#d-shake').onclick = () => { if (!s.shakes) return; s.shakes--; s.shake = .5; buzz(80); for (const b of s.balls){ b.vy -= rnd(3, 6); b.vx += rnd(-2.5, 2.5); } drawCtrl(); };
+      $('#d-new').onclick = () => { reset(); screen.querySelector('.over') && (screen.querySelector('.over').hidden = true); drawCtrl(); }; };
+    drawCtrl();
+    const burst = (x, y, col, n) => { for (let i = 0; i < n; i++){ const a = rnd(0, 6.28), v = rnd(1.5, 5); s.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 1, life: 1, col }); } };
+    const physics = () => {
+      const B = s.balls, floor = H - 10;
+      for (const b of B){ b.age++; b.vy += .16; b.x += b.vx; b.y += b.vy; b.vx *= .992; b.rot += b.vx / b.r;
+        if (b.x - b.r < 8){ b.x = 8 + b.r; b.vx = Math.abs(b.vx) * .35; }
+        if (b.x + b.r > W - 8){ b.x = W - 8 - b.r; b.vx = -Math.abs(b.vx) * .35; }
+        if (b.y + b.r > floor){ b.y = floor - b.r; b.vy *= -.2; b.vx *= .9; } }
+      for (let i = 0; i < B.length; i++) for (let j = i + 1; j < B.length; j++){
+        const a = B[i], b = B[j]; if (a.dead || b.dead) continue;
+        const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || .01, min = a.r + b.r; if (d >= min) continue;
+        if (a.lv === b.lv){ a.dead = b.dead = true; const lv = a.lv + 1, mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+          s.combo = s.comboT > 0 ? s.combo + 1 : 1; s.comboT = 1.4; const pts = PTS[a.lv] * s.combo; s.score += pts;
+          s.texts.push({ x: mx, y: my, t: s.combo > 1 ? `+${pts}  combo ×${s.combo}` : '+' + pts, life: 1 });
+          burst(mx, my, LV[a.lv][1], 10 + a.lv * 3); buzz(a.lv > 4 ? 40 : 15); if (a.lv >= 5) s.shake = .25;
+          if (lv < LV.length){ B.push({ x: mx, y: my, vx: 0, vy: -1.5, lv, r: R(lv), age: 60, pop: 1, rot: 0 }); s.maxLv = Math.max(s.maxLv, lv); }
+          else { s.score += 500; s.texts.push({ x: mx, y: my - 30, t: 'QUEEN CROWNED! +500', life: 1.6 }); burst(mx, my, '#FFD23F', 60); }
+          continue; }
+        const nx = dx / d, ny = dy / d, ov = min - d, ma = a.r * a.r, mb = b.r * b.r, tot = ma + mb;
+        a.x -= nx * ov * mb / tot; a.y -= ny * ov * mb / tot; b.x += nx * ov * ma / tot; b.y += ny * ov * ma / tot;
+        const rel = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
+        if (rel < 0){ const imp = -1.15 * rel / (1 / ma + 1 / mb); a.vx -= imp * nx / ma; a.vy -= imp * ny / ma; b.vx += imp * nx / mb; b.vy += imp * ny / mb; } }
+      s.balls = B.filter(b => !b.dead);
+    };
+    const ball = (b, x, y, r) => {
+      const [, col, pet] = LV[b.lv], k = b.pop ? 1 + b.pop * .25 : 1; r *= k;
+      g.save(); g.translate(x, y); g.rotate(b.rot || 0); g.lineWidth = 2.5; g.strokeStyle = INK;
+      if (pet){ g.fillStyle = col; for (let i = 0; i < pet; i++){ g.save(); g.rotate(i * Math.PI * 2 / pet); g.beginPath(); g.ellipse(0, -r * .72, r * .34, r * .42, 0, 0, Math.PI * 2); g.fill(); g.stroke(); g.restore(); } }
+      g.fillStyle = pet ? '#FFD23F' : col; g.beginPath(); g.arc(0, 0, pet ? r * .62 : r, 0, Math.PI * 2); g.fill(); g.stroke();
+      if (b.lv === 4){ g.fillStyle = INK; for (const [px, py] of [[-.4, -.2], [.35, .1], [-.1, .45], [.1, -.5]]){ g.beginPath(); g.arc(px * r, py * r, r * .12, 0, 7); g.fill(); } }
+      if (b.lv === 7){ g.save(); g.beginPath(); g.arc(0, 0, r, 0, 7); g.clip(); g.fillStyle = INK; g.fillRect(-r * .35, -r, r * .25, r * 2); g.fillRect(r * .15, -r, r * .25, r * 2); g.restore(); }
+      if (b.lv === 6){ g.fillStyle = 'rgba(255,255,255,.6)'; g.beginPath(); g.ellipse(-r * .45, -r * .3, r * .3, r * .45, .5, 0, 7); g.ellipse(r * .45, -r * .3, r * .3, r * .45, -.5, 0, 7); g.fill(); }
+      if (b.lv === 9){ g.fillStyle = '#FFD23F'; g.beginPath(); g.moveTo(-r * .5, -r * .55); g.lineTo(-r * .3, -r * 1.05); g.lineTo(0, -r * .7); g.lineTo(r * .3, -r * 1.05); g.lineTo(r * .5, -r * .55); g.closePath(); g.fill(); g.stroke(); }
+      g.rotate(-(b.rot || 0));
+      const fr = pet ? r * .62 : r, ey = -fr * .1;
+      g.fillStyle = INK; g.beginPath(); g.arc(-fr * .3, ey, Math.max(1.8, fr * .1), 0, 7); g.arc(fr * .3, ey, Math.max(1.8, fr * .1), 0, 7); g.fill();
+      g.lineWidth = Math.max(1.5, fr * .08); g.beginPath(); g.arc(0, ey + fr * .12, fr * .2, .2, Math.PI - .2); g.stroke();
+      g.fillStyle = 'rgba(255,255,255,.55)'; g.beginPath(); g.ellipse(-r * .4, -r * .45, r * .2, r * .12, -.6, 0, 7); g.fill();
+      g.restore();
+    };
+    const stop = loop(dt => {
+      if (s.play){ s.cool -= dt; s.comboT -= dt; for (let k = 0; k < 3; k++) physics();
+        const high = s.balls.some(b => b.age > 90 && b.y - b.r < top && Math.abs(b.vy) < .8);
+        s.danger = high ? s.danger + dt : Math.max(0, s.danger - dt * 2);
+        if (s.danger > 2.6){ s.play = false; if (s.score > s.best) store.set('drop-best', s.score);
+          overlay(screen, `${beeSvg(s.score > s.best ? 'happy' : 'sad')}<h2>${s.score > s.best ? 'New best!' : 'Jar overflowed!'}</h2><p>Score <b>${s.score}</b>. You reached <b>${LV[s.maxLv][0]}</b>.</p><button class="btn go" id="d-again">Play again</button>`);
+          $('#d-again').onclick = () => { reset(); screen.querySelector('.over').hidden = true; drawCtrl(); }; } }
+      const sh = s.shake > 0 ? (s.shake -= dt, rnd(-4, 4)) : 0;
+      g.save(); g.translate(sh, 0);
+      bg(g, W, H, '#FFF8E1', '#FFE9A8');
+      g.strokeStyle = 'rgba(201,138,11,.14)'; g.lineWidth = 1;
+      for (let y = 0; y < H; y += 30) for (let x = (y / 30) % 2 ? 0 : 17; x < W; x += 34){ g.beginPath(); for (let k = 0; k < 6; k++){ const a = Math.PI / 3 * k + Math.PI / 6; g[k ? 'lineTo' : 'moveTo'](x + 15 * Math.cos(a), y + 15 * Math.sin(a)); } g.closePath(); g.stroke(); }
+      const warn = s.danger > .3;
+      g.setLineDash([9, 7]); g.strokeStyle = warn ? `rgba(224,73,62,${.5 + .5 * Math.sin(performance.now() / 90)})` : 'rgba(30,22,6,.35)'; g.lineWidth = warn ? 3 : 2;
+      g.beginPath(); g.moveTo(8, top); g.lineTo(W - 8, top); g.stroke(); g.setLineDash([]);
+      if (s.play){ const r = R(s.cur), x = Math.max(r + 6, Math.min(W - r - 6, s.aim));
+        g.strokeStyle = 'rgba(30,22,6,.15)'; g.lineWidth = r * 2; g.beginPath(); g.moveTo(x, top - 46); g.lineTo(x, H); g.stroke();
+        if (s.cool <= 0) ball({ lv: s.cur }, x, top - 46, r);
+        drawBee(g, x + r + 22, top - 70, 16, { flip: false }); }
+      for (const b of s.balls){ if (b.pop){ b.pop = Math.max(0, b.pop - dt * 4); } ball(b, b.x, b.y, b.r); }
+      for (const p of s.parts){ p.x += p.vx; p.y += p.vy; p.vy += .15; p.life -= dt * 1.4; g.globalAlpha = Math.max(0, p.life); g.fillStyle = p.col; g.strokeStyle = INK; g.lineWidth = 1; g.beginPath(); g.arc(p.x, p.y, 4, 0, 7); g.fill(); g.stroke(); }
+      s.parts = s.parts.filter(p => p.life > 0); g.globalAlpha = 1;
+      g.font = "400 22px 'Patrick Hand', cursive"; g.textAlign = 'center';
+      for (const t of s.texts){ t.y -= .7; t.life -= dt * .8; g.globalAlpha = Math.max(0, t.life); g.lineWidth = 4; g.strokeStyle = '#fff'; g.strokeText(t.t, t.x, t.y); g.fillStyle = INK; g.fillText(t.t, t.x, t.y); }
+      s.texts = s.texts.filter(t => t.life > 0); g.globalAlpha = 1;
+      g.strokeStyle = INK; g.lineWidth = 5; g.beginPath(); g.moveTo(5, top - 24); g.lineTo(5, H - 5); g.lineTo(W - 5, H - 5); g.lineTo(W - 5, top - 24); g.stroke();
+      if (warn){ g.fillStyle = 'rgba(224,73,62,.9)'; g.font = "400 20px 'Patrick Hand', cursive"; g.fillText('Overflowing! ' + Math.max(0, 2.6 - s.danger).toFixed(1) + 's', W / 2, top + 24); }
+      g.restore();
+      hud(screen, `<span class="pill">${s.score}</span>${s.combo > 1 && s.comboT > 0 ? `<span class="pill">combo ×${s.combo}</span>` : ''}`, `<span class="pill">Next ${LV[s.next[0]][0]}</span>`);
+    });
+    return stop;
+  }
+};
+
+/* =================== 2. Swat or Save =================== */
+const swat = {
+  how: 'Wasps (striped red) are falling on the hive: tap to swat them. Bees are friends: DON\'T tap them, let them reach the hive. Tap golden honey drops for bonus points. Miss a wasp or swat a bee and you lose a heart.',
+  start(screen, ctrl){
+    const { g, W, H, cv } = canvasFor(screen); let s;
+    const reset = () => { s = { things: [], fx: [], score: 0, hearts: 3, t: 0, spawn: 0, speed: 1, play: true, best: store.get('swat-best', 0), saved: 0 }; };
+    reset(); s.play = false;
+    overlay(screen, `${beeSvg('worried')}<h2>Swat or Save</h2><p>Swat the wasps. Spare the bees. Protect the hive.</p><button class="btn go" id="s-go">Start</button>`); $('#s-go').onclick = () => { screen.querySelector('.over').hidden = true; s.play = true; };
+    ctrl.innerHTML = '<button class="btn" id="s-new">Restart</button>'; $('#s-new').onclick = () => { reset(); const o = screen.querySelector('.over'); if (o) o.hidden = true; };
+    const lose = (x, y, why) => { s.hearts--; buzz(120); s.fx.push({ x, y, t: why, life: 1, col: '#E0493E' }); if (s.hearts <= 0) end(); };
+    const end = () => { s.play = false; if (s.score > s.best) store.set('swat-best', s.score);
+      overlay(screen, `${beeSvg('sad')}<h2>${s.score > s.best ? 'New best!' : 'The hive is sore'}</h2><p>Score <b>${s.score}</b> · ${s.saved} bees made it home.</p><button class="btn go" id="s-again">Again</button>`); $('#s-again').onclick = () => { reset(); screen.querySelector('.over').hidden = true; }; };
+    cv.onpointerdown = e => { if (!s.play) return; const r = cv.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
+      let hit = null, bd = 1e9; for (const t of s.things){ const d = Math.hypot(t.x - px, t.y - py); if (d < t.r + 18 && d < bd){ hit = t; bd = d; } }
+      if (!hit){ s.fx.push({ x: px, y: py, t: 'whoosh', life: .6, col: '#6E5A2C' }); return; }
+      hit.dead = true;
+      if (hit.k === 'wasp'){ s.score += 10; s.fx.push({ x: hit.x, y: hit.y, t: 'SPLAT +10', life: 1, col: INK }); buzz(20); }
+      else if (hit.k === 'gold'){ s.score += 30; s.fx.push({ x: hit.x, y: hit.y, t: '+30 honey!', life: 1, col: '#C98A0B' }); }
+      else lose(hit.x, hit.y, 'Not the bee!! 😭'); };
+    const wasp = (t) => { g.save(); g.translate(t.x, t.y); g.rotate(Math.sin(performance.now() / 120 + t.ph) * .2);
+      g.lineWidth = 2.5; g.strokeStyle = INK; g.fillStyle = 'rgba(220,235,245,.9)'; const f = Math.sin(performance.now() / 25) * .4;
+      g.beginPath(); g.ellipse(-6, -t.r * .8, t.r * .4, t.r * .6, -.6 + f, 0, 7); g.ellipse(6, -t.r * .8, t.r * .4, t.r * .6, .6 - f, 0, 7); g.fill(); g.stroke();
+      g.fillStyle = '#E0493E'; g.beginPath(); g.ellipse(0, 0, t.r * .62, t.r, 0, 0, 7); g.fill(); g.save(); g.clip(); g.fillStyle = INK; for (const y of [-.3, .2, .65]) g.fillRect(-t.r, y * t.r, t.r * 2, t.r * .22); g.restore(); g.stroke();
+      g.fillStyle = INK; g.beginPath(); g.moveTo(-4, t.r * .95); g.lineTo(0, t.r * 1.4); g.lineTo(4, t.r * .95); g.fill();
+      g.fillStyle = '#fff'; g.beginPath(); g.arc(-5, -t.r * .45, 4.5, 0, 7); g.arc(5, -t.r * .45, 4.5, 0, 7); g.fill(); g.stroke();
+      g.fillStyle = INK; g.beginPath(); g.arc(-4, -t.r * .42, 2, 0, 7); g.arc(4, -t.r * .42, 2, 0, 7); g.fill();
+      g.beginPath(); g.moveTo(-9, -t.r * .7); g.lineTo(-2, -t.r * .58); g.moveTo(9, -t.r * .7); g.lineTo(2, -t.r * .58); g.stroke(); g.restore(); };
+    const stop = loop(dt => {
+      if (s.play){ s.t += dt; s.speed = 1 + s.t / 35; s.spawn -= dt;
+        if (s.spawn <= 0){ const r = Math.random(), k = r < .55 ? 'wasp' : r < .92 ? 'bee' : 'gold'; s.things.push({ k, x: rnd(30, W - 30), y: -30, r: k === 'gold' ? 14 : 20, vy: rnd(50, 80) * s.speed, ph: rnd(0, 6), sway: rnd(.5, 1.5) }); s.spawn = Math.max(.32, 1.1 - s.t / 60) * rnd(.6, 1.2); }
+        for (const t of s.things){ t.y += t.vy * dt; t.x += Math.sin(s.t * t.sway * 2 + t.ph) * 40 * dt;
+          if (t.y > H - 70 && !t.dead){ t.dead = true; if (t.k === 'wasp') lose(t.x, H - 90, 'Ouch! Sting!'); else if (t.k === 'bee'){ s.saved++; s.score += 5; s.fx.push({ x: t.x, y: H - 90, t: 'home +5', life: .8, col: '#2F6B3A' }); } } }
+        s.things = s.things.filter(t => !t.dead); }
+      bg(g, W, H, '#BFE3F5', '#FFF1C9');
+      g.fillStyle = '#8FC970'; g.strokeStyle = INK; g.lineWidth = 3; g.beginPath(); g.moveTo(0, H - 46); g.quadraticCurveTo(W / 2, H - 70, W, H - 46); g.lineTo(W, H); g.lineTo(0, H); g.fill(); g.stroke();
+      for (let i = 0; i < 4; i++){ const w = 70 + i * 18, y = H - 120 + i * 18; g.fillStyle = i % 2 ? '#E39B1B' : '#F5B700'; g.beginPath(); g.roundRect(W / 2 - w / 2, y, w, 20, 10); g.fill(); g.stroke(); }
+      g.fillStyle = INK; g.beginPath(); g.ellipse(W / 2, H - 52, 9, 8, 0, 0, 7); g.fill();
+      for (const t of s.things){ if (t.k === 'wasp') wasp(t); else if (t.k === 'bee') drawBee(g, t.x, t.y, t.r * .8, { angle: Math.PI / 2 * .6 }); else { g.fillStyle = '#F5B700'; g.strokeStyle = INK; g.lineWidth = 2.5; g.beginPath(); g.moveTo(t.x, t.y - t.r * 1.5); g.quadraticCurveTo(t.x + t.r * 1.1, t.y, t.x, t.y + t.r); g.quadraticCurveTo(t.x - t.r * 1.1, t.y, t.x, t.y - t.r * 1.5); g.fill(); g.stroke(); } }
+      g.font = "400 22px 'Patrick Hand', cursive"; g.textAlign = 'center';
+      for (const f of s.fx){ f.y -= 40 * dt; f.life -= dt; g.globalAlpha = Math.max(0, f.life); g.lineWidth = 4; g.strokeStyle = '#fff'; g.strokeText(f.t, f.x, f.y); g.fillStyle = f.col; g.fillText(f.t, f.x, f.y); }
+      s.fx = s.fx.filter(f => f.life > 0); g.globalAlpha = 1;
+      hud(screen, `<span class="pill">${s.score}</span>`, `<span class="pill">${'♥'.repeat(Math.max(0, s.hearts))}${'♡'.repeat(3 - Math.max(0, s.hearts))}</span>`);
+    });
+    return stop;
+  }
+};
+
+/* =================== 3. Honey Rush =================== */
+const rush = {
+  how: 'Bisi flies on her own. Tap the top half of the screen to go up a lane, the bottom half to go down (or swipe). Dodge wasps and rain clouds, grab nectar drops. The pink flower is a magnet that pulls nectar to you for a few seconds.',
+  start(screen, ctrl){
+    const { g, W, H, cv } = canvasFor(screen), lanes = [H * .3, H * .52, H * .74]; let s;
+    const reset = () => { s = { lane: 1, y: lanes[1], obs: [], dist: 0, nectar: 0, speed: 220, spawn: 1, play: true, hit: 0, magnet: 0, best: store.get('rush-best', 0), scroll: 0 }; };
+    reset(); s.play = false;
+    overlay(screen, `${beeSvg('happy')}<h2>Honey Rush</h2><p>Tap top or bottom to switch lanes. Dodge wasps and rain. Grab nectar.</p><button class="btn go" id="r-go">Fly!</button>`); $('#r-go').onclick = () => { screen.querySelector('.over').hidden = true; s.play = true; };
+    ctrl.innerHTML = '<button class="btn" id="r-up">▲ Up</button><button class="btn" id="r-down">▼ Down</button><button class="btn" id="r-new">Restart</button>';
+    const move = d => { if (s.play) s.lane = Math.max(0, Math.min(2, s.lane + d)); };
+    $('#r-up').onclick = () => move(-1); $('#r-down').onclick = () => move(1); $('#r-new').onclick = () => { reset(); const o = screen.querySelector('.over'); if (o) o.hidden = true; };
+    let sy = null; cv.onpointerdown = e => { sy = e.clientY; };
+    cv.onpointerup = e => { const r = cv.getBoundingClientRect(); if (sy !== null && Math.abs(e.clientY - sy) > 30) move(e.clientY < sy ? -1 : 1); else move(e.clientY - r.top < H / 2 ? -1 : 1); sy = null; };
+    const end = () => { s.play = false; const sc = Math.round(s.dist / 10) + s.nectar * 5; if (sc > s.best) store.set('rush-best', sc);
+      overlay(screen, `${beeSvg('worried')}<h2>${sc > s.best ? 'New best!' : 'Bonk!'}</h2><p>${Math.round(s.dist / 10)} m flown · ${s.nectar} nectar · score <b>${sc}</b></p><button class="btn go" id="r-again">Fly again</button>`);
+      $('#r-again').onclick = () => { reset(); screen.querySelector('.over').hidden = true; }; };
+    const stop = loop(dt => {
+      if (s.play){ s.speed += dt * 6; s.dist += s.speed * dt; s.scroll += s.speed * dt; s.spawn -= dt; s.magnet = Math.max(0, s.magnet - dt);
+        s.y += (lanes[s.lane] - s.y) * Math.min(1, dt * 12);
+        if (s.spawn <= 0){ const free = [0, 1, 2].sort(() => Math.random() - .5), n = Math.random() < .35 ? 2 : 1;
+          for (let i = 0; i < n; i++) s.obs.push({ k: Math.random() < .6 ? 'wasp' : 'cloud', lane: free[i], x: W + 40 });
+          s.obs.push({ k: Math.random() < .07 ? 'magnet' : 'drop', lane: free[2], x: W + 40 + rnd(0, 80) });
+          s.spawn = Math.max(.55, 1.4 - s.dist / 9000); }
+        for (const o of s.obs){ o.x -= s.speed * dt; const oy = lanes[o.lane];
+          if (o.k === 'drop' && s.magnet > 0 && o.x < W * .7){ o.lane = s.lane; }
+          if (!o.dead && Math.abs(o.x - 70) < 30 && Math.abs(oy - s.y) < 34){ o.dead = true;
+            if (o.k === 'drop'){ s.nectar++; buzz(8); } else if (o.k === 'magnet'){ s.magnet = 6; } else { buzz(150); end(); } } }
+        s.obs = s.obs.filter(o => o.x > -60 && !o.dead); }
+      bg(g, W, H, '#9AD0F0', '#FFF1C9');
+      g.fillStyle = 'rgba(255,255,255,.8)'; for (let i = 0; i < 4; i++){ const x = ((i * 190 - s.scroll * .2) % (W + 200) + W + 200) % (W + 200) - 100; g.beginPath(); g.ellipse(x, 60 + i * 22 % 60, 40, 14, 0, 0, 7); g.fill(); }
+      for (let i = 0; i < 9; i++){ const x = ((i * 70 - s.scroll * .6) % (W + 70) + W + 70) % (W + 70) - 35; g.strokeStyle = '#2F6B3A'; g.lineWidth = 3; g.beginPath(); g.moveTo(x, H); g.lineTo(x, H - 34 - i * 7 % 20); g.stroke(); g.fillStyle = ['#F7B6C8', '#FFFFFF', '#C9A0F0'][i % 3]; g.strokeStyle = INK; g.lineWidth = 2; g.beginPath(); g.arc(x, H - 38 - i * 7 % 20, 8, 0, 7); g.fill(); g.stroke(); }
+      g.fillStyle = '#8FC970'; g.fillRect(0, H - 14, W, 14);
+      g.setLineDash([4, 14]); g.strokeStyle = 'rgba(30,22,6,.12)'; g.lineWidth = 2; for (const ly of lanes){ g.beginPath(); g.moveTo(0, ly + 30); g.lineTo(W, ly + 30); g.stroke(); } g.setLineDash([]);
+      for (const o of s.obs){ const y = lanes[o.lane];
+        if (o.k === 'drop'){ g.fillStyle = '#F5B700'; g.strokeStyle = INK; g.lineWidth = 2.5; g.beginPath(); g.moveTo(o.x, y - 16); g.quadraticCurveTo(o.x + 13, y + 2, o.x, y + 11); g.quadraticCurveTo(o.x - 13, y + 2, o.x, y - 16); g.fill(); g.stroke(); }
+        else if (o.k === 'magnet'){ g.fillStyle = '#F58FB4'; g.strokeStyle = INK; g.lineWidth = 2.5; for (let k = 0; k < 6; k++){ const a = k * 1.047; g.beginPath(); g.arc(o.x + Math.cos(a) * 11, y + Math.sin(a) * 11, 8, 0, 7); g.fill(); g.stroke(); } g.fillStyle = '#FFD23F'; g.beginPath(); g.arc(o.x, y, 8, 0, 7); g.fill(); g.stroke(); }
+        else if (o.k === 'cloud'){ g.fillStyle = '#7C8A99'; g.strokeStyle = INK; g.lineWidth = 2.5; g.beginPath(); g.arc(o.x - 16, y, 16, 0, 7); g.arc(o.x + 4, y - 9, 20, 0, 7); g.arc(o.x + 22, y + 2, 14, 0, 7); g.fill(); g.stroke(); g.strokeStyle = '#4A7FB5'; for (let k = -1; k <= 1; k++){ g.beginPath(); g.moveTo(o.x + k * 12, y + 20); g.lineTo(o.x + k * 12 - 4, y + 32); g.stroke(); } }
+        else { g.save(); g.translate(o.x, y); g.fillStyle = '#E0493E'; g.strokeStyle = INK; g.lineWidth = 2.5; g.beginPath(); g.ellipse(0, 0, 22, 14, 0, 0, 7); g.fill(); g.save(); g.clip(); g.fillStyle = INK; for (const x of [-8, 4]) g.fillRect(x, -14, 6, 28); g.restore(); g.stroke(); g.fillStyle = 'rgba(220,235,245,.9)'; g.beginPath(); g.ellipse(2, -16, 10, 7, .4 + Math.sin(performance.now() / 30) * .3, 0, 7); g.fill(); g.stroke(); g.fillStyle = '#fff'; g.beginPath(); g.arc(-14, -3, 5, 0, 7); g.fill(); g.stroke(); g.fillStyle = INK; g.beginPath(); g.arc(-15, -2, 2.2, 0, 7); g.fill(); g.restore(); } }
+      if (s.magnet > 0){ g.strokeStyle = 'rgba(245,143,180,.7)'; g.lineWidth = 3; g.beginPath(); g.arc(70, s.y, 40 + Math.sin(performance.now() / 80) * 4, 0, 7); g.stroke(); }
+      drawBee(g, 70, s.y, 24, { mood: s.play ? 'happy' : 'worried' });
+      hud(screen, `<span class="pill">${Math.round(s.dist / 10)} m</span><span class="pill">nectar ${s.nectar}</span>`, `<span class="pill">best ${s.best}</span>`);
+    });
+    return stop;
+  }
+};
+
+/* =================== 4. Bee Café =================== */
+const FOOD = {
+  tea: ['Honey tea', 1.2, '<svg viewBox="0 0 40 40"><path d="M8 14h20v10a8 8 0 0 1-8 8h-4a8 8 0 0 1-8-8z" fill="#fff" stroke="#1E1606" stroke-width="2.5"/><path d="M10 18h16v5a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6z" fill="#E39B1B"/><path d="M28 17h3a4 4 0 0 1 0 8h-3" fill="none" stroke="#1E1606" stroke-width="2.5"/><path d="M15 6q-2 3 0 5M21 5q-2 3 0 5" stroke="#1E1606" stroke-width="2" fill="none" stroke-linecap="round"/></svg>'],
+  cake: ['Pollen cake', 1.8, '<svg viewBox="0 0 40 40"><path d="M6 30l28 0-4-14-20 0z" fill="#FFF1C9" stroke="#1E1606" stroke-width="2.5" stroke-linejoin="round"/><path d="M8 22h24" stroke="#F58FB4" stroke-width="4"/><path d="M10 16q10-8 20 0" fill="#F58FB4" stroke="#1E1606" stroke-width="2.5"/><circle cx="20" cy="9" r="3.5" fill="#E0493E" stroke="#1E1606" stroke-width="2"/></svg>'],
+  smoothie: ['Nectar smoothie', 2.2, '<svg viewBox="0 0 40 40"><path d="M11 12h18l-3 22H14z" fill="#C9A0F0" stroke="#1E1606" stroke-width="2.5" stroke-linejoin="round"/><path d="M11 12h18" stroke="#1E1606" stroke-width="2.5"/><path d="M22 12l5-9" stroke="#E0493E" stroke-width="3" stroke-linecap="round"/><circle cx="17" cy="20" r="2" fill="#fff"/></svg>'],
+  toast: ['Honey toast', 1.5, '<svg viewBox="0 0 40 40"><path d="M9 32V17a6 6 0 0 1-1-11h24a6 6 0 0 1-1 11v15z" fill="#E6B26E" stroke="#1E1606" stroke-width="2.5" stroke-linejoin="round"/><path d="M13 17q7 6 14 0v8q-7 4-14 0z" fill="#F5B700" stroke="#1E1606" stroke-width="2"/></svg>'],
+};
+const BUGS = [
+  ['Lady', '<svg class="bug" viewBox="0 0 64 64"><ellipse cx="32" cy="40" rx="20" ry="17" fill="#E0493E" stroke="#1E1606" stroke-width="3"/><path d="M32 23v34" stroke="#1E1606" stroke-width="2.5"/><circle cx="24" cy="38" r="3.5"/><circle cx="40" cy="44" r="3.5"/><circle cx="38" cy="32" r="3"/><circle cx="25" cy="49" r="3"/><circle cx="32" cy="20" r="10" fill="#1E1606"/><circle cx="28" cy="18" r="3" fill="#fff"/><circle cx="36" cy="18" r="3" fill="#fff"/><path d="M26 11l-4-7M38 11l4-7" stroke="#1E1606" stroke-width="2.5" stroke-linecap="round"/></svg>'],
+  ['Ant', '<svg class="bug" viewBox="0 0 64 64"><circle cx="20" cy="44" r="9" fill="#6B3A1F" stroke="#1E1606" stroke-width="3"/><circle cx="33" cy="42" r="7" fill="#6B3A1F" stroke="#1E1606" stroke-width="3"/><circle cx="45" cy="34" r="10" fill="#6B3A1F" stroke="#1E1606" stroke-width="3"/><circle cx="48" cy="32" r="3" fill="#fff"/><circle cx="48.5" cy="32.5" r="1.5"/><path d="M50 25l4-9M44 24l-1-10M20 52l-4 8M33 49l0 9M28 50l-6 8" stroke="#1E1606" stroke-width="2.5" stroke-linecap="round"/></svg>'],
+  ['Flutter', '<svg class="bug" viewBox="0 0 64 64"><path d="M32 30C20 10 4 16 10 30c4 8 14 8 22 4z" fill="#9CC6F2" stroke="#1E1606" stroke-width="3"/><path d="M32 30c12-20 28-14 22 0-4 8-14 8-22 4z" fill="#F58FB4" stroke="#1E1606" stroke-width="3"/><path d="M32 34c-8 8-18 14-14 20 3 4 10 0 14-8zM32 34c8 8 18 14 14 20-3 4-10 0-14-8z" fill="#FFD23F" stroke="#1E1606" stroke-width="3"/><path d="M32 24v32" stroke="#1E1606" stroke-width="4" stroke-linecap="round"/><path d="M31 24l-5-9M33 24l5-9" stroke="#1E1606" stroke-width="2" stroke-linecap="round"/></svg>'],
+  ['Beetle', '<svg class="bug" viewBox="0 0 64 64"><ellipse cx="32" cy="40" rx="17" ry="19" fill="#2A9D8F" stroke="#1E1606" stroke-width="3"/><path d="M32 22v36" stroke="#1E1606" stroke-width="2.5"/><path d="M22 30q4-4 8 0" stroke="#fff" stroke-width="2" fill="none"/><circle cx="32" cy="19" r="9" fill="#1E1606"/><circle cx="28" cy="17" r="2.6" fill="#fff"/><circle cx="36" cy="17" r="2.6" fill="#fff"/><path d="M18 34l-8-4M18 44l-9 2M46 34l8-4M46 44l9 2" stroke="#1E1606" stroke-width="2.5" stroke-linecap="round"/></svg>'],
+];
+const cafe = {
+  how: 'Customers show what they want. Tap a station to make it (wait for the bar), then tap the customer to serve what\'s on your tray. Serve fast for tips. Each day is 75 seconds; hit the coin goal to open the next, busier day.',
+  start(screen, ctrl){
+    let s, timer = null;
+    const box = document.createElement('div'); box.className = 'cafe'; screen.appendChild(box);
+    const day = () => store.get('cafe-day', 1);
+    const begin = d => { s = { d, t: 75, coins: 0, goal: 40 + d * 25, tray: [], cooking: {}, seats: [null, null, null], spawn: 1, play: true, served: 0 }; render(); };
+    const order = () => { const keys = Object.keys(FOOD).slice(0, Math.min(4, 2 + s.d)), n = Math.random() < .25 + s.d * .1 ? 2 : 1, items = []; for (let i = 0; i < n; i++) items.push(keys[Math.floor(Math.random() * keys.length)]); return items; };
+    const render = () => {
+      box.innerHTML = `<div class="queue">${s.seats.map((c, i) => c ? `<button class="cust" data-c="${i}"><span class="bubble">${c.items.map((k, j) => FOOD[k][2].replace('<svg', `<svg class="${c.got[j] ? 'done' : ''}"`)).join('')}</span>${BUGS[c.b][1]}<span class="pat"><i style="width:${Math.max(0, c.p / c.max * 100)}%;background:${c.p / c.max < .3 ? '#E0493E' : '#5FA04E'}"></i></span></button>` : '<div class="cust"></div>').join('')}</div>
+        <div class="counter"></div>
+        <div class="tray">${s.tray.length ? s.tray.map(k => FOOD[k][2]).join('') : '<span class="lbl">Your tray (holds 3)</span>'}</div>
+        <div class="stations">${Object.keys(FOOD).map((k, i) => { const lock = i >= Math.min(4, 2 + s.d); const c = s.cooking[k];
+          return `<button class="st" data-st="${k}" ${lock ? 'disabled style="opacity:.35"' : ''}>${FOOD[k][2]}${FOOD[k][0]}${c ? `<i style="width:${Math.min(100, c / FOOD[k][1] * 100)}%"></i>` : ''}</button>`; }).join('')}</div>`;
+      hud(screen, `<span class="pill">Day ${s.d}</span><span class="pill">${Math.ceil(s.t)}s</span>`, `<span class="pill">🪙 ${s.coins}/${s.goal}</span>`);
+    };
+    box.onclick = e => { if (!s.play) return;
+      const st = e.target.closest('[data-st]'); if (st && !st.disabled){ const k = st.dataset.st; if (!s.cooking[k] && s.tray.length < 3) s.cooking[k] = .001; return; }
+      const c = e.target.closest('[data-c]'); if (c){ const cu = s.seats[+c.dataset.c]; if (!cu) return; let gave = false;
+        cu.items.forEach((k, j) => { const ti = s.tray.indexOf(k); if (!cu.got[j] && ti >= 0){ s.tray.splice(ti, 1); cu.got[j] = true; gave = true; } });
+        if (!gave){ buzz(60); return; }
+        if (cu.got.every(Boolean)){ const tip = Math.round(cu.p / cu.max * 6); s.coins += 8 * cu.items.length + tip; s.served++; s.seats[+c.dataset.c] = null; buzz(20); }
+        render(); } };
+    ctrl.innerHTML = '<button class="btn" id="c-new">Restart day</button><button class="btn" id="c-reset">Back to day 1</button>';
+    $('#c-new').onclick = () => { begin(day()); const o = screen.querySelector('.over'); if (o) o.hidden = true; };
+    $('#c-reset').onclick = () => { store.set('cafe-day', 1); begin(1); const o = screen.querySelector('.over'); if (o) o.hidden = true; };
+    begin(day());
+    let acc = 0;
+    const stop = loop(dt => {
+      if (!s.play) return;
+      s.t -= dt; s.spawn -= dt;
+      for (const k in s.cooking){ s.cooking[k] += dt; if (s.cooking[k] >= FOOD[k][1]){ delete s.cooking[k]; if (s.tray.length < 3) s.tray.push(k); } }
+      if (s.spawn <= 0){ const i = s.seats.indexOf(null); if (i >= 0){ const items = order(), max = 16 + items.length * 6 - s.d; s.seats[i] = { b: Math.floor(Math.random() * BUGS.length), items, got: items.map(() => false), p: max, max }; } s.spawn = Math.max(2.2, 5 - s.d * .6) * rnd(.7, 1.2); }
+      s.seats.forEach((c, i) => { if (c){ c.p -= dt; if (c.p <= 0){ s.seats[i] = null; buzz(80); } } });
+      acc += dt; if (acc > .12){ acc = 0; render(); }
+      if (s.t <= 0){ s.play = false; const won = s.coins >= s.goal; if (won) store.set('cafe-day', s.d + 1);
+        overlay(screen, `${beeSvg(won ? 'happy' : 'sad')}<h2>${won ? 'Day ' + s.d + ' done!' : 'Closing time'}</h2><p>${s.served} customers served · ${s.coins} coins${won ? '. Tomorrow is busier, with a new menu item.' : `. You needed ${s.goal}. Try again!`}</p><button class="btn go" id="c-next">${won ? 'Open day ' + (s.d + 1) : 'Retry day ' + s.d}</button>`);
+        $('#c-next').onclick = () => { screen.querySelector('.over').hidden = true; begin(day()); }; }
+    });
+    return () => { stop(); clearInterval(timer); };
+  }
+};
+
+/* =================== 5. Pet Bisi =================== */
+const pet = {
+  how: 'Bisi needs you. Keep her fed, entertained, rested and clean. In this preview time runs fast (1 minute here is about an hour). In the app she\'d also cheer up when you finish real applications.',
+  start(screen, ctrl){
+    const { g, W, H, cv } = canvasFor(screen);
+    const now = Date.now(), saved = store.get('pet', null);
+    const s = saved && saved.at ? saved : { food: 70, fun: 70, energy: 80, clean: 70, at: now, age: 0 };
+    const away = Math.min(600, (now - s.at) / 1000);
+    for (const k of ['food', 'fun', 'energy', 'clean']) s[k] = Math.max(0, s[k] - away * .25);
+    let act = null, actT = 0, line = '', lineT = 0, sleeping = false, catchS = null;
+    const meters = document.createElement('div'); meters.className = 'meters'; screen.appendChild(meters);
+    const say = document.createElement('div'); say.className = 'say'; say.hidden = true; screen.appendChild(say);
+    const bar = document.createElement('div'); bar.className = 'petbar'; screen.appendChild(bar);
+    const talk = t => { line = t; lineT = 3; say.textContent = t; say.hidden = false; };
+    const LINES = { food: ['Mmm, honey. Chef\'s kiss. 🍯', 'Full belly, happy bee.', 'You remembered I was hungry!'], fun: ['Again! Again!', 'Best day ever (so far).'], clean: ['Squeaky clean. I smell like flowers.', 'Bubbles!!'], energy: ['Zzz… five more minutes…', 'Nap time. Don\'t forget your deadlines while I sleep.'] };
+    const pick = a => a[Math.floor(Math.random() * a.length)];
+    bar.innerHTML = [['food', 'Feed'], ['fun', 'Play'], ['energy', 'Nap'], ['clean', 'Bath']].map(([k, n]) => `<button class="btn" data-pa="${k}">${n}</button>`).join('');
+    bar.onclick = e => { const b = e.target.closest('[data-pa]'); if (!b || act) return; const k = b.dataset.pa;
+      if (k === 'fun'){ catchS = { t: 8, got: 0, dots: [] }; act = 'fun'; talk('Catch the pollen I throw! Tap it!'); return; }
+      act = k; actT = k === 'energy' ? 4 : 2; if (k === 'energy') sleeping = true; talk(pick(LINES[k])); };
+    cv.onpointerdown = e => { if (act !== 'fun' || !catchS) return; const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+      for (const d of catchS.dots) if (!d.dead && Math.hypot(d.x - x, d.y - y) < 30){ d.dead = true; catchS.got++; buzz(10); } };
+    ctrl.innerHTML = '<button class="btn" id="p-reset">Start over</button>';
+    $('#p-reset').onclick = () => { Object.assign(s, { food: 70, fun: 70, energy: 80, clean: 70, age: 0 }); talk('Hi again! I\'m Bisi. Look after me? 🐝'); };
+    talk(away > 60 ? 'You\'re back! I missed you. Also: I\'m starving.' : 'Hi! I\'m Bisi. Look after me? 🐝');
+    let bubbles = [];
+    const stop = loop(dt => {
+      const drain = sleeping ? .3 : 1;
+      s.food = Math.max(0, s.food - dt * .9 * drain); s.fun = Math.max(0, s.fun - dt * 1.1 * drain); s.clean = Math.max(0, s.clean - dt * .6);
+      s.energy = sleeping ? Math.min(100, s.energy + dt * 12) : Math.max(0, s.energy - dt * .7); s.age += dt; s.at = Date.now();
+      if (act && act !== 'fun'){ actT -= dt; if (act === 'food') s.food = Math.min(100, s.food + dt * 25); if (act === 'clean'){ s.clean = Math.min(100, s.clean + dt * 30); if (Math.random() < .5) bubbles.push({ x: W / 2 + rnd(-70, 70), y: H * .6, r: rnd(6, 14), life: 1 }); }
+        if (actT <= 0){ act = null; sleeping = false; } }
+      if (act === 'fun' && catchS){ catchS.t -= dt; if (Math.random() < dt * 2.2) catchS.dots.push({ x: rnd(40, W - 40), y: H * .55, vx: rnd(-60, 60), vy: rnd(-260, -180) });
+        for (const d of catchS.dots){ d.vy += 260 * dt; d.x += d.vx * dt; d.y += d.vy * dt; }
+        catchS.dots = catchS.dots.filter(d => !d.dead && d.y < H);
+        if (catchS.t <= 0){ s.fun = Math.min(100, s.fun + 10 + catchS.got * 8); talk(catchS.got >= 5 ? `You caught ${catchS.got}! You're my favourite human.` : `${catchS.got} caught. Let's play again soon!`); act = null; catchS = null; } }
+      lineT -= dt; if (lineT <= 0 && !say.hidden){ say.hidden = true; }
+      const low = ['food', 'fun', 'energy', 'clean'].filter(k => s[k] < 25);
+      if (!act && low.length && Math.random() < dt * .08) talk({ food: 'My tummy is rumbling… honey please?', fun: 'I\'m sooo bored. Play with me?', energy: 'So… sleepy…', clean: 'I\'m a bit sticky. Bath?' }[low[0]]);
+      if (Math.random() < dt) store.set('pet', s);
+      // draw
+      const night = sleeping;
+      bg(g, W, H, night ? '#2B2F55' : '#CDEBFA', night ? '#4A4778' : '#FFF1C9');
+      if (night){ g.fillStyle = '#FFF1A8'; for (let i = 0; i < 18; i++){ g.beginPath(); g.arc((i * 97) % W, (i * 53) % (H * .4) + 20, 1.6, 0, 7); g.fill(); } }
+      g.fillStyle = night ? '#3A5A3A' : '#8FC970'; g.strokeStyle = INK; g.lineWidth = 3; g.beginPath(); g.moveTo(0, H * .72); g.quadraticCurveTo(W / 2, H * .66, W, H * .72); g.lineTo(W, H); g.lineTo(0, H); g.fill(); g.stroke();
+      g.fillStyle = '#B5651D'; g.beginPath(); g.ellipse(W / 2, H * .74, 90, 16, 0, 0, 7); g.fill(); g.stroke();
+      const mood = sleeping ? 'sleep' : low.length >= 2 ? 'sad' : low.length ? 'worried' : 'happy';
+      const by = H * .55 + (sleeping ? 18 : Math.sin(performance.now() / 400) * 8) + (act === 'fun' ? Math.abs(Math.sin(performance.now() / 150)) * -16 : 0);
+      drawBee(g, W / 2, by, Math.min(W, H) * .17, { mood, still: sleeping });
+      if (sleeping){ g.fillStyle = '#fff'; g.font = "400 26px 'Patrick Hand', cursive"; g.fillText('z', W / 2 + 70, by - 60 - (performance.now() / 20) % 30); g.fillText('Z', W / 2 + 90, by - 90 - (performance.now() / 25) % 30); }
+      if (act === 'food'){ g.fillStyle = '#F5B700'; g.strokeStyle = INK; g.lineWidth = 2.5; g.beginPath(); g.roundRect(W / 2 + 60, by + 10, 34, 38, 8); g.fill(); g.stroke(); }
+      for (const b of bubbles){ b.y -= 60 * dt; b.life -= dt * .6; g.globalAlpha = Math.max(0, b.life); g.strokeStyle = '#7FAEDD'; g.lineWidth = 2; g.fillStyle = 'rgba(255,255,255,.5)'; g.beginPath(); g.arc(b.x, b.y, b.r, 0, 7); g.fill(); g.stroke(); }
+      bubbles = bubbles.filter(b => b.life > 0); g.globalAlpha = 1;
+      if (catchS) for (const d of catchS.dots){ g.fillStyle = '#FFD23F'; g.strokeStyle = INK; g.lineWidth = 2; g.beginPath(); g.arc(d.x, d.y, 12, 0, 7); g.fill(); g.stroke(); }
+      meters.innerHTML = [['food', 'Food', '#F5B700'], ['fun', 'Fun', '#F58FB4'], ['energy', 'Energy', '#7FAEDD'], ['clean', 'Clean', '#5FA04E']].map(([k, n, c]) => `<div class="meter"><b>${n}</b><span><i style="width:${s[k]}%;background:${s[k] < 25 ? '#E0493E' : c}"></i></span></div>`).join('');
+    });
+    return () => { store.set('pet', s); stop(); };
+  }
+};
+
+/* ---------- cartridge strip ---------- */
+const GAMES = [
+  ['drop', 'Honey Drop+', drop, '<svg viewBox="0 0 30 30"><circle cx="11" cy="19" r="8" fill="#FFC629" stroke="#1E1606" stroke-width="2"/><circle cx="21" cy="11" r="6" fill="#F26B5B" stroke="#1E1606" stroke-width="2"/></svg>'],
+  ['cafe', 'Bee Café', cafe, '<svg viewBox="0 0 30 30"><path d="M5 11h16v8a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6z" fill="#fff" stroke="#1E1606" stroke-width="2"/><path d="M21 13h2a3 3 0 0 1 0 6h-2" fill="none" stroke="#1E1606" stroke-width="2"/><path d="M8 14h10v4a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4z" fill="#E39B1B"/></svg>'],
+  ['pet', 'Pet Bisi', pet, '<svg viewBox="0 0 30 30"><path d="M15 26S4 19 4 11a6 6 0 0 1 11-3 6 6 0 0 1 11 3c0 8-11 15-11 15z" fill="#F58FB4" stroke="#1E1606" stroke-width="2"/></svg>'],
+  ['rush', 'Honey Rush', rush, '<svg viewBox="0 0 30 30"><path d="M3 20h10M5 14h8M3 8h8" stroke="#1E1606" stroke-width="2" stroke-linecap="round"/><path d="M20 6q7 8 0 17q-7-9 0-17z" fill="#F5B700" stroke="#1E1606" stroke-width="2"/></svg>'],
+  ['swat', 'Swat or Save', swat, '<svg viewBox="0 0 30 30"><ellipse cx="15" cy="16" rx="7" ry="10" fill="#E0493E" stroke="#1E1606" stroke-width="2"/><path d="M8 13h14M8 19h14" stroke="#1E1606" stroke-width="3"/></svg>'],
+];
+let stopCur = null;
+function play(key){
+  if (stopCur) stopCur(); const scr = $('#screen'), ctrl = $('#controls'); scr.innerHTML = ''; ctrl.innerHTML = '';
+  const G = GAMES.find(x => x[0] === key) || GAMES[0];
+  document.querySelectorAll('.cart').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === G[0]));
+  $('#how').textContent = G[2].how;
+  stopCur = G[2].start(scr, ctrl);
+  try { history.replaceState(null, '', '#' + G[0]); } catch(e){}
+}
+$('#carts').innerHTML = GAMES.map(([k, n, , ic]) => `<button class="cart" data-k="${k}" aria-pressed="false">${ic}<span>${n}</span></button>`).join('');
+$('#carts').onclick = e => { const b = e.target.closest('.cart'); if (b) play(b.dataset.k); };
+const start = () => play((location.hash || '#drop').slice(1));
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(start); else start();
+addEventListener('hashchange', () => { const k = location.hash.slice(1); if (GAMES.some(x => x[0] === k)) play(k); });
+let rt, lastW = innerWidth; addEventListener('resize', () => { if (Math.abs(innerWidth - lastW) < 40) return; lastW = innerWidth; clearTimeout(rt); rt = setTimeout(() => play((location.hash || '#drop').slice(1)), 300); });
+}
+</script>

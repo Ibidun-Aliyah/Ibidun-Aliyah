@@ -76,7 +76,7 @@ iPhone/web: docs/ on GitHub Pages ──▶ same kind of script (each person has
 
 - **App version 6.9** (versionCode 39) built and pushed. The next build should be 6.10 / 40 (versionName "6.10").
 - **Tabs (6.8)**: Today · Tracker · Notes · Pouch · Progress · Games · Me. History lives inside Progress (toggle
-  "How it's going | History & wins"; go('history') highlights Progress). Games (6.9): `games.js` (Word Hive, Number Sprint, Bit Buzz), `fun.js` (Chess, Flight, Honey Drop,
+  "How it's going | History & wins"; go('history') highlights Progress). Games (repo, not yet released): `games.js` (Word Hive only), `fun.js` (Chess, Flight, Honey Drop,
   Pollen Pairs). Hive Builder (wax from real progress, `ft-hive-build`) on Progress. Android widget **Bee garden**
   (`Widgets$Garden`, one flower per streak day, droops after 19:00 if inactive, hive at 30).
 - **v6.5 module `assets/hive.js`** (FTHive): bee-path timeline in each opportunity sheet, Bee Pouch pane (`p-pouch`:
@@ -249,3 +249,11 @@ if the conversation is summarised or a new session starts. Rule: after finishing
   deleted; recoverable from commit 5c99b14 if ever wanted). Kept: Games tab, Hive Builder (Progress), Bee Garden widget
   (not games). Lesson: she does NOT want brain-teaser/"mind games"/quiz puzzles. Listed the 7 remaining old games for her to
   cull, and pitched a different direction (fun/social/Naija/cozy/story games). **Pending:** her removals + new picks.
+- **26 Nov · Game picks round 2**: removed **Number Sprint, Bit Buzz, Pollen Pairs** in the repo (not released yet: hold
+  the APK until she picks games, to save her data). She said NO to: Ayo/Whot ("Haiku", unclear which), Ludo, Bisi's Diaries,
+  Hive Gossip, Dress-Up, Rhythm Buzz, friend/multiplayer games. Wants to TRY first (not in the app): **Bee Café, Pet Bisi,
+  Honey Rush, Swat or Save**, plus an **improved Honey Drop**. Built them as one playable preview page: claude.ai artifact
+  **Jg1sCEaAB4rWrvf3JYANLW** ("Bisi Arcade", private); source copy in `follow-through/prototypes/bisi-arcade.html`.
+  Honey Drop+ changes: drawn pieces with faces (no emoji), combos, particles/shake, Swap/hold slot, Shake ×3, overflow
+  countdown. Also gave her a list of small app-improvement ideas. **Pending:** her verdict per game → port the keepers
+  into `fun.js`, then release (next = 6.10/40).
