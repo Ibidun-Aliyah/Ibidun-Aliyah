@@ -38,6 +38,7 @@ final class Tracker {
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
     private static final String PREFS = "follow_through";
     /** Actions that can wait in the queue when there's no internet. */
+    private static final java.util.Set<String> AI_SLOW = new java.util.HashSet<>(Arrays.asList("process", "essay", "tailor", "uploadCv", "cvAdd", "eligibility", "review", "interview", "capture", "image", "asset"));
     private static final java.util.Set<String> OFFLINE_OK = new java.util.HashSet<>(Arrays.asList("update", "tipUpdate", "delete", "capture"));
 
     private Tracker() {}
@@ -127,7 +128,10 @@ final class Tracker {
                 if (action.equals("dashboard") && queued(ctx) > 0) flushQueueNow(ctx);
                 String req = json;
                 if (action.equals("capture")) { try { JSONObject b = new JSONObject(json); enrich(b); req = b.toString(); } catch (Exception ignored) {} }
-                try { out = http(conn[0], req, 330000); }
+                // Only the AI actions (Gemini writing essays, sorting) need minutes; everything else gives up fast on a
+                // weak connection so the app falls back to the saved copy / offline queue instead of looking frozen.
+                int timeout = AI_SLOW.contains(action) ? 330000 : action.equals("dashboard") ? 40000 : 25000;
+                try { out = http(conn[0], req, timeout); }
                 catch (Exception e) {
                     out = "{\"ok\":false,\"error\":\"network\"}";
                     // Offline: keep simple edits on the phone and send them later.
@@ -250,10 +254,11 @@ final class Tracker {
         for (File f : files) {
             try {
                 JSONObject body = new JSONObject(new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8));
-                if (send(c, body)) f.delete(); else left++;
+                if (send(c, body)) f.delete(); else { left++; break; }   // no connection: don't wait on every file
             } catch (Exception e) { left++; }
         }
-        return left;
+        File[] rest = queueDir(c).listFiles();
+        return left == 0 ? 0 : (rest == null ? left : rest.length);
     }
 
     private static void enqueue(Context c, JSONObject body) {

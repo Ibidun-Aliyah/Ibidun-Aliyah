@@ -213,3 +213,8 @@ if the conversation is summarised or a new session starts. Rule: after finishing
   a bot would cost money), **iPhone widget** = Scriptable script copied from Me (contains her private URL, generated on
   device only). No script update needed. Pending: her feedback; Pouch has no Drive backup yet (would need a script
   action); maybe backup/export of the pouch later.
+- **26 Nov · "App not responding, only notes work"** (she skipped installing 6.4, network was bad): not the skipped version
+  (APKs are full installs) and not v6.5's JS (replayed her real 58 rows: all tabs <10 ms). Cause: `Tracker.call` waited
+  up to 330 s per request on a weak connection, and the dashboard first flushed the offline queue file by file. Fix:
+  only AI actions keep 330 s (`AI_SLOW`); dashboard 40 s, others 25 s; queue flush stops at the first failure.
+  **Pending:** verify on the emulator, then release as 6.6/36.
