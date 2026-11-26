@@ -161,6 +161,15 @@ Without internet the app shows your last saved tracker, and notes, reminders, ga
 keep working. Status changes, edits, deletes and captures are saved on the phone and sent when you're back online.
 Sorting, AI help (essays, CV, eligibility…) and live updates need a connection.
 
+## Event follow-ups
+Events get their own flow (`assets/events.js`): **Are you going?** (Going / Maybe / Not going → why), **Registered?** with a
+saved ticket link, a **prep card** the day before and on the day (time, Join link or Directions, what to bring, Lagos
+traffic "leave early"), a **networking cheat sheet** (your intro + 4 conversation starters from your profile), a
+morning-of notification with Join/Directions and a pep talk (Android), **Did you go?** that evening (Attended / Missed →
+why / Cancelled), a **recap** (rating 1–5, who you met, what you learned, opportunities mentioned → added to your
+tracker), **people you met** (a reminder note the next evening with a drafted follow-up message), a **next-year
+reminder** for annual events, event stats in History, and stickers (Out & about, Networker, Social butterfly).
+
 ## Bisi's daily scout
 Every day at 11:23 (Lagos) a Claude scheduled task searches widely (official pages, opportunity aggregators, hackathon
 sites, university and company pages) for open opportunities matching your profile and interests, checks your eligibility

@@ -74,7 +74,7 @@ iPhone/web: docs/ on GitHub Pages ──▶ same kind of script (each person has
 
 ## 3. Current state (25 Nov 2026)
 
-- **App version 6.3** (versionCode 33) built and pushed. The next build should be 6.4 / 34.
+- **App version 6.4** (versionCode 34) built and pushed. The next build should be 6.5 / 35.
 - **Script**: repo has **schema 9** (profile store). Aliyah's live script may still be **schema 8** until she updates;
   check with `curl -sL "<web app URL>?action=ping"`. Everything in the app works on 8 (profile falls back to the
   About-me doc).
@@ -180,3 +180,11 @@ if the conversation is summarised or a new session starts. Rule: after finishing
   (people/learned/opportunities mentioned → auto-captures), 9 people-you-met + 48h follow-up message drafts (Gemini),
   10 certificate/slides chaser after a week, 11 one-tap "Add to my CV" (cvAdd), 12 rate 1–5 to tune the daily scout,
   13 events stats + stickers in History, 14 next-year reminder for annual events. **Pending: build the numbers she picks.**
+- **26 Nov · Built event follow-ups 1,2,3,5,6,7,8,9,12,13,14** (she clarified she'd also wanted *general* feature
+  ideas, not just events). New `assets/events.js` (state in localStorage `ft-ev`; outcomes written to the row:
+  Outcome Attended/Missed/Cancelled/Not going + Notes lines "Registered ✓", "Recap: rated N/5 · learned · met", "Met: …").
+  Today cards (Did you go? / TODAY-TOMORROW prep / Are you going?), panel in the event sheet, recap sheet (rating, people,
+  learnings, opportunities → `capture`), people-you-met → local reminder note with drafted message, next-year note for
+  annual events, History event stats, stickers. Android `Nag.eventNudges`: 07–11 "Today: …" with Join/Directions, 19–22
+  "How was …?". v6.4. Not built: 4 (calendar alarms), 10 (certificate chaser), 11 (Add to CV). **Pending:** she'll pick
+  from a list of general feature ideas (sent in the same reply); scout prompt could also prefer events rated 4–5/5.

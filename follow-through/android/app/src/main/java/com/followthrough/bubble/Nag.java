@@ -10,6 +10,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.content.SharedPreferences;
 import android.widget.RemoteViews;
 
@@ -265,7 +266,48 @@ final class Nag {
         }
     }
 
+    /* ---------- events: morning-of reminder (Join / Directions) and "Did you go?" that evening ---------- */
+    static void eventNudges(Context c) {
+        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        boolean morning = hour >= 7 && hour < 11, evening = hour >= 19 && hour < 22;
+        if (!morning && !evening) return;
+        JSONArray rows = cached(c).optJSONArray("rows");
+        SharedPreferences p = prefs(c);
+        String today = today();
+        for (int i = 0; rows != null && i < rows.length(); i++) {
+            JSONObject r = rows.optJSONObject(i);
+            if (r == null || !"Event".equals(r.optString("Category")) || "Closed".equals(r.optString("Status")) || "Suggested".equals(r.optString("Status"))) continue;
+            if (!r.optString("Deadline").startsWith(today)) continue;
+            String id = r.optString("ID"), title = r.optString("Title", "your event"), key = (morning ? "evAM:" : "evPM:") + id + ":" + today;
+            if (p.getBoolean(key, false)) continue;
+            p.edit().putBoolean(key, true).apply();
+            String notes = r.optString("Notes"), all = (notes + " " + title + " " + r.optString("Link")).toLowerCase(Locale.ROOT);
+            boolean online = all.matches("(?s).*\\b(online|virtual|zoom|google meet|meet\\.google|teams|webinar|livestream)\\b.*");
+            ensureChannel(c);
+            int nid = 8100 + Math.abs(id.hashCode() % 800) + (morning ? 0 : 900);
+            Intent open = new Intent(c, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            Notification.Builder b = new Notification.Builder(c, CHANNEL).setSmallIcon(R.drawable.ic_notify).setColor(c.getColor(R.color.accent)).setAutoCancel(true)
+                    .setContentIntent(PendingIntent.getActivity(c, nid, open, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT));
+            if (morning) {
+                String text = pick("Today's the day: " + title + ". You've got this. Talk to at least two people. 🐝",
+                        title + " is today! Charge your phone, bring your CV, and smile at strangers (professionally).",
+                        "It's " + title + " day. I believe in you. Also, leave early. Lagos traffic doesn't.");
+                b.setLargeIcon(android.graphics.drawable.Icon.createWithResource(c, R.drawable.bisi_party)).setContentTitle("📅 Today: " + title).setContentText(text).setStyle(new Notification.BigTextStyle().bigText(text));
+                String link = r.optString("Link");
+                Uri go = online && link.startsWith("http") ? Uri.parse(link)
+                        : Uri.parse("https://www.google.com/maps/search/?api=1&query=" + Uri.encode(title + " Lagos"));
+                Intent view = new Intent(Intent.ACTION_VIEW, go).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                b.addAction(new Notification.Action.Builder(null, online ? "Join" : "Directions", PendingIntent.getActivity(c, nid + 1, view, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT)).build());
+            } else {
+                String text = "Did you go? Tap to tell me, rate it, and save who you met. 🐝";
+                b.setLargeIcon(android.graphics.drawable.Icon.createWithResource(c, R.drawable.bisi_happy)).setContentTitle("How was " + title + "?").setContentText(text);
+            }
+            try { c.getSystemService(NotificationManager.class).notify(nid, b.build()); } catch (SecurityException ignored) {}
+        }
+    }
+
     static void maybeNag(Context c) {
+        try { eventNudges(c); } catch (Exception ignored) {}
         Calendar now = Calendar.getInstance();
         int hour = now.get(Calendar.HOUR_OF_DAY);
         if (hour < 8 || hour >= 22) return;
