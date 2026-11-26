@@ -172,3 +172,11 @@ if the conversation is summarised or a new session starts. Rule: after finishing
   root `CLAUDE.md`. Told her to tell new sessions: read this file and keep pushing to `ccr-56053f25-of024x`.
 - **25 Nov · Keep the handover updated automatically**: asked that every later request be written here so nothing after
   the handover's creation gets cut off. Done: this Running log + the standing rule in `CLAUDE.md` and the release ritual.
+- **26 Nov · Event follow-ups (ideas only, waiting for her picks)**: asked for follow-ups for events (did you attend /
+  still want to go, etc.) and for suggestions to choose from. Offered 14 numbered ideas: 1 "Are you going?" (Going/
+  Maybe/Not going → why), 2 "Registered yet?" + save ticket link, 3 day-before prep card (Lagos time, map/join link,
+  what to bring, traffic "leave by"), 4 calendar with 3h/1h alarms, 5 morning-of notification with Join/Directions,
+  6 networking cheat sheet (Gemini), 7 "Did you go?" evening after (Attended/Missed/Cancelled → why), 8 quick recap
+  (people/learned/opportunities mentioned → auto-captures), 9 people-you-met + 48h follow-up message drafts (Gemini),
+  10 certificate/slides chaser after a week, 11 one-tap "Add to my CV" (cvAdd), 12 rate 1–5 to tune the daily scout,
+  13 events stats + stickers in History, 14 next-year reminder for annual events. **Pending: build the numbers she picks.**
