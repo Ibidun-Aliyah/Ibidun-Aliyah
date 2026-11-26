@@ -1,1 +1,1 @@
-bee path for every application, Bee Pouch for documents + essay library, today's plan, busy-ness heatmap, monthly report card, wall of wins
+fix: the app no longer freezes on a weak connection; shows your saved copy and syncs later

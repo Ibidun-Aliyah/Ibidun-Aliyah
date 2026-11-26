@@ -74,7 +74,7 @@ iPhone/web: docs/ on GitHub Pages ──▶ same kind of script (each person has
 
 ## 3. Current state (26 Nov 2026)
 
-- **App version 6.5** (versionCode 35) built and pushed. The next build should be 6.6 / 36.
+- **App version 6.6** (versionCode 36) built and pushed. The next build should be 6.7 / 37.
 - **v6.5 module `assets/hive.js`** (FTHive): bee-path timeline in each opportunity sheet, Bee Pouch pane (`p-pouch`:
   documents in app storage via `Android.pouchPut/Get/Del/Open` or IndexedDB on web, metadata `ft-pouch`; essays in
   `ft-essays`), Today's plan (`ft-plan`, ticks requirements), heatmap + report card (Progress), Wall of wins (History),
@@ -217,4 +217,5 @@ if the conversation is summarised or a new session starts. Rule: after finishing
   (APKs are full installs) and not v6.5's JS (replayed her real 58 rows: all tabs <10 ms). Cause: `Tracker.call` waited
   up to 330 s per request on a weak connection, and the dashboard first flushed the offline queue file by file. Fix:
   only AI actions keep 330 s (`AI_SLOW`); dashboard 40 s, others 25 s; queue flush stops at the first failure.
-  **Pending:** verify on the emulator, then release as 6.6/36.
+  Released as **6.6/36**. The emulator never finished booting (30+ min, no KVM), so the fix wasn't run on a device;
+  **Pending:** her confirmation it's responsive on a weak connection.
