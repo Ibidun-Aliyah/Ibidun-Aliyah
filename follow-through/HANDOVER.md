@@ -188,3 +188,14 @@ if the conversation is summarised or a new session starts. Rule: after finishing
   annual events, History event stats, stickers. Android `Nag.eventNudges`: 07–11 "Today: …" with Join/Directions, 19–22
   "How was …?". v6.4. Not built: 4 (calendar alarms), 10 (certificate chaser), 11 (Add to CV). **Pending:** she'll pick
   from a list of general feature ideas (sent in the same reply); scout prompt could also prefer events rated 4–5/5.
+- **26 Nov · Picked general features (to build, in this order)**: ✅ wanted: **1 Application timeline as a bee path**
+  (Bisi flies flower to flower through the stages and fills a **nectar pot at the end = Submitted**; whimsical),
+  **3 Document vault** (she called it "document portal"/"B pawns"; she's tired of hunting for documents; quick access),
+  **4 Essay library** (she can't find her old essays, so it'll mostly fill up with new ones + the AI drafts),
+  **6 Monthly report card**, **8 Smart daily plan**, **10 WhatsApp capture**, **11 Results celebration wall**,
+  **12 Deadline heatmap**, **15 widget for the iPhone friend**. ❌ Not now: reference tracker (most of her applications
+  don't need references), interview mode, study buddy, exam-season mode, CGPA/semester planner, Bisi voice notes.
+  Notes: WhatsApp capture can't be a free WhatsApp bot (paid API); free route = WhatsApp's Share → Follow-Through (Android,
+  already works) / iPhone Share → shortcut. iPhone widget: free **Scriptable** app widget script (fetches her own script's
+  dashboard JSON), or a Shortcuts widget. Document vault without a script update = files kept in the app (IndexedDB)
+  with categories; Drive copy needs a script action later.
