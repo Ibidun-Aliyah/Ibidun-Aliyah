@@ -170,6 +170,13 @@ why / Cancelled), a **recap** (rating 1–5, who you met, what you learned, oppo
 tracker), **people you met** (a reminder note the next evening with a drafted follow-up message), a **next-year
 reminder** for annual events, event stats in History, and stickers (Out & about, Networker, Social butterfly).
 
+## Bee path, Bee Pouch & planning (v6.5)
+`assets/hive.js`: every opportunity shows a **bee path** (Bisi flies flower to flower; the nectar pot fills and is full
+when you submit). **Bee Pouch** keeps your documents (passport, transcripts, certificates, photos…) on the phone, sorted
+into folders, ready to open or send, plus an **essay library**. Today gets a **plan** of small steps; Progress gets a
+**busy-ness heatmap** and a **monthly report card**; History gets a **Wall of wins**. Me explains saving from WhatsApp
+and has a free **iPhone home-screen widget** (Scriptable).
+
 ## Bisi's daily scout
 Every day at 11:23 (Lagos) a Claude scheduled task searches widely (official pages, opportunity aggregators, hackathon
 sites, university and company pages) for open opportunities matching your profile and interests, checks your eligibility

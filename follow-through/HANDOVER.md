@@ -72,9 +72,13 @@ iPhone/web: docs/ on GitHub Pages ──▶ same kind of script (each person has
 
 ---
 
-## 3. Current state (25 Nov 2026)
+## 3. Current state (26 Nov 2026)
 
-- **App version 6.4** (versionCode 34) built and pushed. The next build should be 6.5 / 35.
+- **App version 6.5** (versionCode 35) built and pushed. The next build should be 6.6 / 36.
+- **v6.5 module `assets/hive.js`** (FTHive): bee-path timeline in each opportunity sheet, Bee Pouch pane (`p-pouch`:
+  documents in app storage via `Android.pouchPut/Get/Del/Open` or IndexedDB on web, metadata `ft-pouch`; essays in
+  `ft-essays`), Today's plan (`ft-plan`, ticks requirements), heatmap + report card (Progress), Wall of wins (History),
+  WhatsApp + Scriptable iPhone widget help cards (Me, `#me-hive`).
 - **Script**: repo has **schema 9** (profile store). Aliyah's live script may still be **schema 8** until she updates;
   check with `curl -sL "<web app URL>?action=ping"`. Everything in the app works on 8 (profile falls back to the
   About-me doc).
@@ -199,3 +203,13 @@ if the conversation is summarised or a new session starts. Rule: after finishing
   already works) / iPhone Share → shortcut. iPhone widget: free **Scriptable** app widget script (fetches her own script's
   dashboard JSON), or a Shortcuts widget. Document vault without a script update = files kept in the app (IndexedDB)
   with categories; Drive copy needs a script action later.
+- **26 Nov · Built the picked features (v6.5)**: bee-path timeline (5 flowers Found→Read up→Gather→Polish→Submit nectar
+  pot that fills with progress; Bisi bobs at the current flower), **Bee Pouch** (her "B pawns": documents auto-sorted into
+  folders by filename, open/send to WhatsApp/Gmail via Downloads/Bee Pouch, kept on the phone; plus **essay library**,
+  "Save to essay library" under Review my draft, and "you've written something similar" hints on opportunities),
+  **Today's plan** (≤4 steps within ~2h weekdays/3h weekends; ticking ticks the requirement), **busy-ness heatmap**
+  (12 weeks, counts effort spread before deadlines), **monthly report card** (A–E per subject, Bisi's comment, share),
+  **Wall of wins** (framed accepted/shortlisted/interview + "brave tries"), **Save from WhatsApp** how-to (Share sheet;
+  a bot would cost money), **iPhone widget** = Scriptable script copied from Me (contains her private URL, generated on
+  device only). No script update needed. Pending: her feedback; Pouch has no Drive backup yet (would need a script
+  action); maybe backup/export of the pouch later.

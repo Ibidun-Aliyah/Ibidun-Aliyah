@@ -492,6 +492,8 @@ section{margin-top:28px}
     <div id="misfiled"></div>
     <div id="evcards"></div>
     <div class="tiles" id="tiles"></div>
+    <div id="plan"></div>
+    <button class="card g-entry" data-go="pouch"><span class="g-ico">👝</span><span><b>Bee Pouch</b><small>Your documents and essays, one tap away</small></span><span aria-hidden="true">→</span></button>
     <input class="search gsearch" id="gq" type="search" placeholder="Search everything: opportunities, tips, notes…" aria-label="Search everything">
     <div id="gresults"></div>
     <div id="foryou"></div>
@@ -503,6 +505,8 @@ section{margin-top:28px}
   </div>
 
   <div class="pane" id="p-games" hidden></div>
+
+  <div class="pane" id="p-pouch" hidden></div>
 
   <div class="pane" id="p-tracker" hidden>
     <section>
@@ -537,15 +541,17 @@ section{margin-top:28px}
     <section>
       <div class="sh"><h2>How it's going</h2><small id="chartnote"></small></div>
       <div class="charts">
+        <div id="report" style="display:contents"></div>
         <div class="card chart"><h4 id="pipe-title">Your honey jars</h4><div id="pipe"></div></div>
         <div class="card chart"><div class="calhead"><h4 id="cal-title">Deadline calendar</h4><span class="row"><button class="btn small" id="cal-prev" aria-label="Previous month">‹</button><button class="btn small" id="cal-next" aria-label="Next month">›</button></span></div><div id="cal"></div><div id="cal-day"></div></div>
+        <div id="heat" style="display:contents"></div>
         <div class="card chart"><h4>Next 30 days</h4><div id="timeline"></div></div>
         <div class="card chart"><h4>Saved per week</h4><div id="weeks"></div></div>
       </div>
     </section>
   </div>
 
-  <div class="pane" id="p-history" hidden><div id="v-history"></div><div id="v-events"></div><div id="v-why"></div></div>
+  <div class="pane" id="p-history" hidden><div id="v-wall"></div><div id="v-history"></div><div id="v-events"></div><div id="v-why"></div></div>
 
   <div class="pane" id="p-me" hidden>
     <section>
@@ -567,6 +573,8 @@ section{margin-top:28px}
         <div class="result" id="cv-result" hidden></div>
       </div>
     </section>
+    <button class="card g-entry" data-go="pouch"><span class="g-ico">👝</span><span><b>Bee Pouch</b><small>Documents (passport, transcript, certificates…) and your essay library</small></span><span aria-hidden="true">→</span></button>
+    <div id="me-hive"></div>
     <button class="card g-entry" data-go="games"><span class="g-ico">🎮</span><span><b>Brain break</b><small>Learning games for when you're bored</small></span><span aria-hidden="true">→</span></button>
     <section>
       <div class="sh"><h2>Invite a friend 💌</h2><small>iPhone &amp; Android</small></div>
@@ -641,6 +649,7 @@ section{margin-top:28px}
 <script src="fun.js"></script>
 <script src="welcome.js"></script>
 <script src="events.js"></script>
+<script src="hive.js"></script>
 <script>
 (() => {
 /* ---------- bridge to the Android app ---------- */
@@ -842,6 +851,7 @@ function render(){
   bisiSay(rows, need);
   renderMisfiled(D.rows || []);
   if (window.FTEvents){ const ec = $('#evcards'); if (ec) ec.innerHTML = FTEvents.todayCards(rows); }
+  if (window.FTHive){ $('#plan').innerHTML = FTHive.plan(rows); $('#report').innerHTML = FTHive.report(rows); $('#heat').innerHTML = FTHive.heat(rows); $('#v-wall').innerHTML = FTHive.wall(rows); FTHive.renderPouch(); }
   const nick = window.FTWelcome ? (FTWelcome.profile().nickname || '') : '';
   $('#hello').innerHTML = (nick ? `Hi ${esc(nick)}! ` : '') + (need.length ? `<em>${need.length} ${need.length===1?'thing needs':'things need'} you</em> today.` :
     rows.length ? 'You\'re on top of it. <em>Nothing urgent today.</em>' : 'Nothing saved yet. <em>Tap the bubble on your next find.</em>');
@@ -1522,6 +1532,7 @@ function go(name){
   if (name === 'notes'){ notesLoad(); renderNotes(); }
   if (name === 'me') fgLoad();
   if (name === 'games' && window.FTGames) FTGames.mount($('#p-games'), { toast });
+  if (name === 'pouch' && window.FTHive) setTimeout(() => FTHive.mountPouch($('#p-pouch')));
   document.querySelectorAll('.pane').forEach(p => p.hidden = p.id !== 'p-' + name);
   document.querySelectorAll('.tabbar button').forEach(b => b.toggleAttribute('aria-current', b.dataset.go === name));
   document.querySelectorAll('.tabbar button[aria-current]').forEach(b => b.setAttribute('aria-current', 'page'));
@@ -1718,6 +1729,7 @@ function openItem(id){
       <div class="row">${r.Category?`<span class="chip ${r.Category==='Event'?'c-plum':'c-ok'}">${esc(r.Category)}</span>`:''}${r.Type?`<span class="chip">${esc(r.Type)}</span>`:''}${r.Deadline?`<span class="chip ${(urgency(r)||{}).tone?'c-'+urgency(r).tone:''}">${r.Category==='Event'?'':'Due '}${esc(fmt(r.Deadline))}</span>`:''}</div>
       ${active(r) && r.Category !== 'Event' ? (() => { const e = effort(r), sb = r.Deadline ? startBy(r, e) : null, dd = days(r.Deadline);
         return `<div class="effort"><span class="chip">${e.level === 'heavy' ? '🍯🍯🍯 Big application' : e.level === 'medium' ? '🍯🍯 Medium effort' : '🍯 Quick one'}</span><span>${esc(effortLabel(e))}${e.lead >= 5 ? ', including waiting time for other people' : ''}.${sb ? ` <b>${dd - e.need <= 0 ? 'Start now.' : 'Start by ' + esc(fmt(iso(sb))) + '.'}</b>` : ''}</span></div>`; })() : ''}
+      ${window.FTHive ? FTHive.path(r) : ''}
       ${window.FTEvents ? FTEvents.panel(r) : ''}
       ${r.Status==='New' ? `<div class="banner info"><span>${D.ai.hasKey?'Not sorted yet.':'Add your Gemini key in Settings to sort this instantly.'}</span>${D.ai.hasKey?'<button class="btn small" data-banner="Sort now">Sort now</button>':''}</div>`:''}
       <div>
@@ -1738,6 +1750,7 @@ function openItem(id){
       </dl>
       ${req.length?`<div><div class="row" style="justify-content:space-between;margin-bottom:4px"><div class="note">What you need</div>${ring(r, 40)}</div>
         <div>${reqs(r).map((x,i)=>`<label class="chk ${x.done?'done':''}"><input type="checkbox" data-req="${i}" ${x.done?'checked':''} aria-label="${esc(x.text)}"><span>${esc(x.text)}</span></label>`).join('')}</div></div>`:''}
+      ${window.FTHive ? FTHive.hint(r) : ''}
       ${isOpp && r.Status!=='New' ? `<div class="ai">
         <h4>Get it written</h4>
         <div class="row">
@@ -1760,7 +1773,7 @@ function openItem(id){
         <h4>Review my draft</h4>
         <div class="note">Wrote something yourself? Paste it and Bisi gives honest feedback.</div>
         <textarea class="search" id="rv-draft" rows="5" placeholder="Paste your essay draft here" style="margin:0"></textarea>
-        <div class="row"><button class="btn small primary" data-x="review" ${D.ai.hasKey?'':'disabled'}>Review it</button></div>
+        <div class="row"><button class="btn small primary" data-x="review" ${D.ai.hasKey?'':'disabled'}>Review it</button><button class="btn small" data-hive="save-draft">Save to essay library</button></div>
         <div class="result" id="x-review" hidden></div>
       </div>`:''}
       ${(r.Outcome==='Shortlisted'||r.Outcome==='Interview') ? `<div class="ai">
@@ -2029,6 +2042,12 @@ render();
 load();
 if (window.FTEvents) FTEvents.init({ days, fmt, iso, parse, today: () => TODAY, render, call, toast, active: active_, askWhy, logWhy,
   openSheet, closeSheet, openItem, current: () => current, rows: () => (D && D.rows) || [], load: () => load(true), open });
+if (window.FTHive){
+  FTHive.init({ days, fmt, iso, parse, today: () => TODAY, render, call, toast, openSheet, closeSheet, openItem, current: () => current,
+    rows: () => (D && D.rows || []).filter(r => r.Outcome !== 'Deleted'), reqs, reqString, reqDays, effort, startBy, urgency, active, applied, appliedDate });
+  $('#me-hive').innerHTML = FTHive.meCards();
+  render();
+}
 if (window.FTWelcome){
   FTWelcome.init({ call, toast, onDone: () => { renderProfileCard(); render(); } });
   // after the page (and any invitation) is ready; an open invitation starts the tour itself

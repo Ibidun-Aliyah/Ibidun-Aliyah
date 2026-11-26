@@ -97,11 +97,11 @@ public class MainActivity extends Activity {
                     pick.setType("*/*");
                     pick.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
                             "application/pdf", "image/*", "text/plain",
-                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword"});
                 }
                 if (params.getMode() == FileChooserParams.MODE_OPEN_MULTIPLE) pick.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                 try {
-                    startActivityForResult(Intent.createChooser(pick, imagesOnly ? "Choose screenshots" : "Choose your CV"), PICK_FILE);
+                    startActivityForResult(Intent.createChooser(pick, imagesOnly ? "Choose screenshots" : "Choose files"), PICK_FILE);
                 } catch (Exception e) {
                     fileCallback = null;
                     return false;
@@ -399,6 +399,62 @@ public class MainActivity extends Activity {
                     android.widget.Toast.makeText(MainActivity.this, "Saved to Downloads: " + name, android.widget.Toast.LENGTH_LONG).show();
                 } catch (Exception e) {
                     android.widget.Toast.makeText(MainActivity.this, "Couldn't save the file.", android.widget.Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
+        /* ---- Bee Pouch: documents kept privately inside the app ---- */
+        private java.io.File pouchFile(String id) {
+            java.io.File dir = new java.io.File(getFilesDir(), "pouch");
+            if (!dir.exists()) dir.mkdirs();
+            return new java.io.File(dir, id.replaceAll("[^A-Za-z0-9_-]", "_"));
+        }
+
+        @JavascriptInterface
+        public boolean pouchPut(String id, String b64) {
+            try (java.io.FileOutputStream os = new java.io.FileOutputStream(pouchFile(id))) {
+                os.write(android.util.Base64.decode(b64, android.util.Base64.DEFAULT));
+                return true;
+            } catch (Exception e) { return false; }
+        }
+
+        @JavascriptInterface
+        public String pouchGet(String id) {
+            java.io.File f = pouchFile(id);
+            if (!f.exists()) return "";
+            try (java.io.FileInputStream in = new java.io.FileInputStream(f)) {
+                java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+                byte[] buf = new byte[16384]; int n;
+                while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+                return android.util.Base64.encodeToString(out.toByteArray(), android.util.Base64.NO_WRAP);
+            } catch (Exception e) { return ""; }
+        }
+
+        @JavascriptInterface
+        public void pouchDel(String id) { pouchFile(id).delete(); }
+
+        /** Copies a pouch file to Downloads/Bee Pouch, then opens it (or shares it, e.g. to WhatsApp or Gmail). */
+        @JavascriptInterface
+        public void pouchOpen(String id, String name, String mime, boolean share) {
+            runOnUiThread(() -> {
+                try {
+                    android.content.ContentValues v = new android.content.ContentValues();
+                    v.put(android.provider.MediaStore.Downloads.DISPLAY_NAME, name);
+                    v.put(android.provider.MediaStore.Downloads.MIME_TYPE, mime);
+                    v.put(android.provider.MediaStore.Downloads.RELATIVE_PATH, android.os.Environment.DIRECTORY_DOWNLOADS + "/Bee Pouch");
+                    Uri uri = getContentResolver().insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, v);
+                    try (java.io.OutputStream os = getContentResolver().openOutputStream(uri);
+                         java.io.FileInputStream in = new java.io.FileInputStream(pouchFile(id))) {
+                        byte[] buf = new byte[16384]; int n;
+                        while ((n = in.read(buf)) > 0) os.write(buf, 0, n);
+                    }
+                    Intent it = share
+                            ? new Intent(Intent.ACTION_SEND).setType(mime).putExtra(Intent.EXTRA_STREAM, uri)
+                            : new Intent(Intent.ACTION_VIEW).setDataAndType(uri, mime);
+                    it.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(Intent.createChooser(it, share ? "Send " + name : "Open " + name));
+                } catch (Exception e) {
+                    android.widget.Toast.makeText(MainActivity.this, "Couldn't open that file.", android.widget.Toast.LENGTH_LONG).show();
                 }
             });
         }
