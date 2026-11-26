@@ -4,7 +4,7 @@ import { getCollection } from 'astro:content';
 import { SITE } from '../site.config';
 import { u, formatDate } from '../lib/url';
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft))
+const posts = (await getCollection('blog', ({ data }) => import.meta.env.DEV || !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 3);
 ---

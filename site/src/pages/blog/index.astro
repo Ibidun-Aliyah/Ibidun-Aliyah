@@ -3,7 +3,7 @@ import Base from '../../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 import { u, formatDate } from '../../lib/url';
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft))
+const posts = (await getCollection('blog', ({ data }) => import.meta.env.DEV || !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 <Base title="The log" description="Aliyah Ibidun Ibiwunmi's log: projects, workshops, coursework notes and everything else from a Mechatronics Engineering student in Lagos.">
@@ -20,7 +20,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
       <div class="cards">
         {posts.map((p) => (
           <a class="card" href={u(`/blog/${p.id}/`)}>
-            <span class="kind">{p.data.tags[0] ?? 'Log'}</span>
+            <span class="kind">{p.data.draft ? 'Draft · only you can see this' : (p.data.tags[0] ?? 'Log')}</span>
             <h3>{p.data.title}</h3>
             <p>{p.data.description}</p>
             <span class="meta"><time datetime={p.data.date.toISOString()}>{formatDate(p.data.date)}</time></span>

@@ -38,3 +38,10 @@ Open `site/public/mixer.js` and delete that style's block from `DIRECTIONS`.
     cd site
     npm install
     npm run dev
+
+## Work on things without visitors seeing them
+
+- **Drafts:** keep `draft: true` at the top of a post. It stays off the live site, but it shows
+  (with a "Draft" label) when you run `npm run dev` on your laptop. Flip it to `false` to publish.
+- **Bigger changes:** make a new branch on GitHub and edit there. Only `main` goes live,
+  so nothing on other branches is public on the site until you merge it.
