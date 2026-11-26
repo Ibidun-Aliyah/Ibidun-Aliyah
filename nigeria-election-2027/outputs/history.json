@@ -58,5 +58,20 @@
   },
   "runoff": 0.1754,
   "atiku_off_prob": 0.25
+ },
+ {
+  "date": "2026-11-26",
+  "win": {
+   "tinubu": 0.7457,
+   "atiku": 0.1287,
+   "obi": 0.1257
+  },
+  "share": {
+   "tinubu": 0.39,
+   "atiku": 0.2185,
+   "obi": 0.329
+  },
+  "runoff": 0.1754,
+  "atiku_off_prob": 0.25
  }
 ]

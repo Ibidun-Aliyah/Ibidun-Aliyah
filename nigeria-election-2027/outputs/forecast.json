@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-25",
+ "generated": "2026-11-26",
  "election_date": "2027-01-16",
  "n_simulations": 20000,
  "candidates_meta": {
@@ -2530,6 +2530,21 @@
    },
    "runoff": 0.1754,
    "atiku_off_prob": 0.25
+  },
+  {
+   "date": "2026-11-26",
+   "win": {
+    "tinubu": 0.7457,
+    "atiku": 0.1287,
+    "obi": 0.1257
+   },
+   "share": {
+    "tinubu": 0.39,
+    "atiku": 0.2185,
+    "obi": 0.329
+   },
+   "runoff": 0.1754,
+   "atiku_off_prob": 0.25
   }
  ],
  "news": [
@@ -2540,6 +2555,14 @@
    "url": "https://guardian.ng/news/atikus-presidential-ambition-faces-fresh-challenge-as-supporters-back-obi/",
    "impact": "low",
    "model_change": "No model change. Endorsements are logged but not modelled; worth watching for a wider drift from Atiku to Obi."
+  },
+  {
+   "date": "2026-11-24",
+   "headline": "INEC asks police to speed up prosecution of attacks on campaigns; NDC boycotts the meeting, saying its members are not protected",
+   "source": "Legit.ng",
+   "url": "https://www.legit.ng/politics/1743289-inec-request-security-agencies-csos-2027-election/",
+   "impact": "medium",
+   "model_change": "No model change. The violence is spread across the country, not concentrated in one zone, so the playbook's turnout-uncertainty rule does not apply yet. INEC security conference on 26 Nov."
   },
   {
    "date": "2026-11-23",

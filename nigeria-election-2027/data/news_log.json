@@ -102,5 +102,13 @@
   "url": "https://pmnewsnigeria.com/2026/11/15/2027-atiku-makinde-in-fresh-talks-to-challenge-tinubu/",
   "impact": "low",
   "model_change": "No model change. The model will change only if a candidate actually steps down or a ticket merges."
+ },
+ {
+  "date": "2026-11-24",
+  "headline": "INEC asks police to speed up prosecution of attacks on campaigns; NDC boycotts the meeting, saying its members are not protected",
+  "source": "Legit.ng",
+  "url": "https://www.legit.ng/politics/1743289-inec-request-security-agencies-csos-2027-election/",
+  "impact": "medium",
+  "model_change": "No model change. The violence is spread across the country, not concentrated in one zone, so the playbook's turnout-uncertainty rule does not apply yet. INEC security conference on 26 Nov."
  }
 ]
