@@ -33,6 +33,7 @@ public class SettingsActivity extends Activity {
         findViewById(R.id.saveKey).setOnClickListener(v -> {
             String k = key.getText().toString().trim();
             if (k.isEmpty()) { keyStatus.setText("Paste your key first."); return; }
+            if (Tracker.connection(this) == null) { keyStatus.setText("No Google sheet connected: add your key in the app instead (Me → Setup & backup)."); return; }
             keyStatus.setText("Checking the key…");
             keyStatus.setTextColor(getColor(R.color.muted));
             try {

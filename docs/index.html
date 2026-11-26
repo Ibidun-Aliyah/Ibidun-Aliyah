@@ -586,6 +586,7 @@ section{margin-top:28px}
       </div>
     </section>
     <button class="card g-entry" data-go="pouch"><span class="g-ico">👝</span><span><b>Bee Pouch</b><small>Documents (passport, transcript, certificates…) and your essay library</small></span><span aria-hidden="true">→</span></button>
+    <div id="me-local"></div>
     <div id="me-hive"></div>
     <section>
       <div class="sh"><h2>Invite a friend 💌</h2><small>iPhone &amp; Android</small></div>
@@ -663,6 +664,7 @@ section{margin-top:28px}
 <script src="events.js"></script>
 <script src="hive.js"></script>
 <script src="kit.js"></script>
+<script src="local.js"></script>
 <script>
 (() => {
 /* ---------- bridge to the Android app ---------- */
@@ -674,6 +676,7 @@ window.__fromApp = (id, text) => {
 function call(req){
   return new Promise(res => {
     if (!window.Android){ res(demo(req)); return; }
+    if (window.FTLocal && FTLocal.active()){ FTLocal.handle(req).then(res); return; }   // Instant mode: no Google sheet
     const id = 'r' + (++seq);
     pending[id] = j => {
       if (j && j.queued) offlinePatch(req);
@@ -695,7 +698,7 @@ function offlinePatch(req){
 }
 let offline = false;
 window.addEventListener('online', () => { if (offline) load(true); });
-const open = url => { if (!url) return; window.Android ? Android.openUrl(url) : window.open(url, '_blank'); };
+const open = url => { if (!url) return; if (/^local:/.test(url)){ if (window.FTLocal) FTLocal.showDoc(url.slice(6)); return; } window.Android ? Android.openUrl(url) : window.open(url, '_blank'); };
 
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
@@ -866,6 +869,7 @@ function render(){
   part(() => renderMisfiled(D.rows || []));
   part(() => { if (window.FTEvents){ const ec = $('#evcards'); if (ec) ec.innerHTML = FTEvents.todayCards(rows); } });
   if (window.FTHive) part(() => { $('#plan').innerHTML = FTHive.plan(rows); $('#report').innerHTML = FTHive.report(rows); $('#heat').innerHTML = FTHive.heat(rows); $('#v-wall').innerHTML = FTHive.wall(rows); $('#hivebuild').innerHTML = FTHive.builder(rows); FTHive.renderPouch(); });
+  part(() => { const ml = $('#me-local'); if (ml && window.FTLocal) ml.innerHTML = FTLocal.meCard(); });
   if (window.FTKit) part(() => { $('#kreset').innerHTML = FTKit.resetCard(rows); $('#v-insight').innerHTML = FTKit.insights(rows); });
   const nick = window.FTWelcome ? (FTWelcome.profile().nickname || '') : '';
   $('#hello').innerHTML = (nick ? `Hi ${esc(nick)}! ` : '') + (need.length ? `<em>${need.length} ${need.length===1?'thing needs':'things need'} you</em> today.` :
@@ -2069,6 +2073,8 @@ if (window.FTHive){
 }
 try { render(); } catch(e){ console.error(e); }
 load();
+if (window.FTLocal) FTLocal.init({ toast, openSheet, closeSheet, open, load: () => load(true), rawCall: call,
+  copy: t => { if (window.Android && Android.copy && !Android.web){ Android.copy(t); toast('Copied ✓'); } else if (navigator.clipboard) navigator.clipboard.writeText(t).then(() => toast('Copied ✓'), () => toast('Couldn\'t copy.')); } });
 if (window.FTKit) FTKit.init({ days, fmt, iso, parse, today: () => TODAY, render, toast, openSheet, closeSheet, openItem, current: () => current,
   rows: () => (D && D.rows || []).filter(r => r.Outcome !== 'Deleted'), reqs, applied, appliedDate, active, urgency });
 if (window.FTWelcome){

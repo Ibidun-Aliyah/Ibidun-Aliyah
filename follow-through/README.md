@@ -18,7 +18,13 @@ See an opportunity → tap the bubble → it lands in your Google Sheet, filled 
 | `apps-script/Code.gs` | The script that turns your Google Sheet into the tracker's backend. |
 | `enrich-task.md` | What the scheduled Claude task does with each new capture. |
 
-## Setup (about 10 minutes)
+## Setup: none (Instant start)
+Open the app (Android APK or the iPhone/web link) and tap **⚡ Start now**. Everything is kept on the phone; add a free
+Gemini key in **Me → Setup & backup** for AI sorting, essays and CV help, and download a backup now and then.
+Want automatic backup, morning emails and Google Docs? **Me → Connect a Google sheet** walks through the 5 steps below
+inside the app, and moves everything already on the phone into the new sheet.
+
+## Google sheet setup (optional, about 10 minutes)
 
 ### 1. The sheet (works from a phone browser)
 1. In Chrome, open **script.google.com** → **New project** (tick ⋮ → *Desktop site* if it looks squashed).

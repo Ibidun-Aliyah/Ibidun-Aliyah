@@ -30,9 +30,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle saved) {
         super.onCreate(saved);
-        if (Tracker.connection(this) == null) {
-            startActivity(new Intent(this, SettingsActivity.class));
-        }
         try { Nag.schedule(this); } catch (Throwable e) { android.util.Log.e("FollowThrough", "schedule", e); }
         try {
             if (android.os.Build.VERSION.SDK_INT >= 33 && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
@@ -456,6 +453,50 @@ public class MainActivity extends Activity {
                 } catch (Exception e) {
                     android.widget.Toast.makeText(MainActivity.this, "Couldn't open that file.", android.widget.Toast.LENGTH_LONG).show();
                 }
+            });
+        }
+
+        /* ---- Instant mode (no Google sheet) ---- */
+
+        /** Captures saved while there's no sheet: handed to the dashboard once, then removed. */
+        @JavascriptInterface
+        public String queueTake() { return Tracker.connection(MainActivity.this) == null ? Tracker.takeQueue(MainActivity.this) : "[]"; }
+
+        /** POST (or GET when body is empty) for the on-phone AI; answers through window.__ftlHttp(id, status, text). */
+        @JavascriptInterface
+        public void httpPost(String url, String body, String id) {
+            new Thread(() -> {
+                int status = 0; String text;
+                try {
+                    java.net.HttpURLConnection con = (java.net.HttpURLConnection) new java.net.URL(url).openConnection();
+                    con.setConnectTimeout(15000); con.setReadTimeout(120000);
+                    if (body != null && !body.isEmpty()) {
+                        con.setRequestMethod("POST"); con.setDoOutput(true); con.setRequestProperty("Content-Type", "application/json");
+                        try (java.io.OutputStream os = con.getOutputStream()) { os.write(body.getBytes(java.nio.charset.StandardCharsets.UTF_8)); }
+                    }
+                    status = con.getResponseCode();
+                    try (java.io.InputStream in = status >= 400 ? con.getErrorStream() : con.getInputStream()) {
+                        java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream(); byte[] b = new byte[8192]; int n;
+                        while (in != null && (n = in.read(b)) > 0) out.write(b, 0, n);
+                        text = out.toString("UTF-8");
+                    }
+                } catch (Exception e) { text = "network"; }
+                final String js = "window.__ftlHttp && window.__ftlHttp(" + JSONObject.quote(id) + "," + status + "," + JSONObject.quote(text) + ")";
+                runOnUiThread(() -> { if (web != null) web.evaluateJavascript(js, null); });
+            }).start();
+        }
+
+        /** Saves a Google-sheet link from the in-app wizard and tests it. */
+        @JavascriptInterface
+        public void connectSheet(String url, String id) {
+            runOnUiThread(() -> {
+                String old = Tracker.prefs(MainActivity.this).getString("code", "");
+                Tracker.prefs(MainActivity.this).edit().putString("code", url).apply();
+                Tracker.ping(MainActivity.this, (ok, msg) -> {
+                    if (!ok) Tracker.prefs(MainActivity.this).edit().putString("code", old).apply();
+                    String js = "window.__ftlHttp && window.__ftlHttp(" + JSONObject.quote(id) + "," + (ok ? 200 : 0) + "," + JSONObject.quote(msg) + ")";
+                    if (web != null) web.evaluateJavascript(js, null);
+                });
             });
         }
 

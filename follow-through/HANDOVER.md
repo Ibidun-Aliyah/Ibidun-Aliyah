@@ -74,7 +74,16 @@ iPhone/web: docs/ on GitHub Pages ──▶ same kind of script (each person has
 
 ## 3. Current state (26 Nov 2026)
 
-- **App version 6.10** (versionCode 40) built and pushed. The next build should be 6.11 / 41.
+- **App version 6.11** (versionCode 41) built and pushed. The next build should be 6.12 / 42.
+- **Instant start (6.11, `assets/local.js` FTLocal)**: when NOT connected to a sheet, `call()` in dashboard.html (and web.js
+  `request`) is answered on the phone: rows/tips/docs in `ftl-db`, screenshots via `Android.pouchPut('shot-'+id)` / IndexedDB,
+  Gemini called directly with the user's key (`ftl-key`, never leaves the phone; `Android.httpPost` fallback). AI docs are
+  `local:<key>` URLs shown in-app (`FTLocal.showDoc`). Android native captures (bubble/share/voice/widgets) still go to
+  Tracker's queue when unconnected; the dashboard drains them with `Android.queueTake()`. Me → **Setup & backup**: key,
+  backup/restore JSON, **Connect a Google sheet** 5-step wizard (copy Code.gs from Pages, open Apps Script, authorize,
+  deploy, paste → `Android.connectSheet` / `__ftwSetUrl`) which then migrates phone rows into the sheet. iPhone instant users:
+  3-step Shortcut that opens `<site>?add=<input>`. MainActivity no longer forces Settings on first launch. Connected users
+  (Aliyah) are unaffected. Limits in instant mode: no emails, no Claude scout, notification action buttons can't update.
 - **v6.10 `assets/kit.js`** (FTKit): Quick copy (Pouch 3rd tab + "Quick copy" in item sheets; `ft-kit-details`, `ft-kit-answers`,
   bios start from profile with [ADD: …] gaps), places (auto-guess Lagos/Nigeria/online/abroad + manual `ft-place`, tracker filter
   `#trplace`), share-as-card (canvas PNG 1080×1350 → `Android.shareImage` to Pictures/Follow-Through, web share/download),
@@ -266,3 +275,7 @@ if the conversation is summarised or a new session starts. Rule: after finishing
   left up, delete only if she asks). App games now: Word Hive, Bee Chess, Bisi Flight, Honey Drop (original). Built her picks
   1, 2, 7, 8, 9 ("especially 9"), 10, 11, 12 as v6.10 (see section 3). Not built: 3 (icon shortcuts), 4 (pin + countdown widget),
   5 (labels), 6 (fees). **Pending:** feedback; she may want the remaining games gone too (unclear from "bin all").
+- **26 Nov · "Simplify setup, two friends couldn't do it"**: she chose **both** → v6.11 Instant start (no setup; data on
+  phone; optional free Gemini key) + the in-app guided Google-sheet wizard with migration. Tested on web with a mocked
+  Gemini (capture → sorted → essay doc → backup → wizard; `?add=` capture). **Not tested on a real phone/iPhone yet.**
+  **Pending:** her friends' feedback; maybe a shareable iCloud shortcut link if an iPhone user builds it once.

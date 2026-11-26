@@ -171,6 +171,11 @@ function setup(){
       <div class="onb-row"><button class="btn primary onb-ok" data-onb="profile">Next: about you →</button></div>`);
     return;
   }
+  if (window.FTLocal){
+    shell(`<div class="onb-pic">${bee('happy', 120)}</div><h2>Let’s build your hive</h2>
+      <p>No setup needed. Start now and everything you save stays on this phone.</p>${FTLocal.setupChoice()}`);
+    return;
+  }
   shell(`<div class="onb-pic">${bee('happy', 120)}</div><h2>Let’s build your hive</h2>
     <p>Your opportunities live in <b>your own</b> Google Sheet, run by a small script in your Google account. It takes about 10 minutes, once, and I’ll walk you through it.</p>
     <div class="onb-row"><button class="btn primary onb-ok" data-onb="connect">Set up my tracker</button></div>
@@ -300,6 +305,6 @@ window.FTWelcome = {
   editProfile(){ profileForm(true); },
   profile, syncProfile, combine, askOnePost,
   isOpen(){ return !!root; },
-  close,
+  close, step,
 };
 })();

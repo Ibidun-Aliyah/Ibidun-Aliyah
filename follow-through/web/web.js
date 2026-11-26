@@ -269,6 +269,14 @@
       function (root) { root.querySelector('[data-cal]').onclick = function () { download('reminder.ics', 'text/calendar', icsFor(n)); close(); }; });
   }
 
+  /* the in-app Google-sheet wizard saves the link through here */
+  window.__ftwSetUrl = function (u) {
+    return fetch(u + '?action=ping').then(function (r) { return r.json(); }).then(function (j) {
+      if (!j.ok) return { ok: false, text: j.error || 'Your script answered with an error.' };
+      LS.set(URL_KEY, u); return { ok: true, status: 200, text: 'Connected to ' + j.sheet };
+    }).catch(function () { return { ok: false, text: 'Couldn’t reach it. Check “Who has access” is Anyone and that you ran authorize.' }; });
+  };
+
   /* ---------- the stand-in for the Android app ---------- */
   var lastNotes = {};
   var api = {
@@ -279,7 +287,7 @@
         if (id === '__voice') { toast(obj.ok ? (obj.queued ? 'Saved on your phone; it’ll send when you’re online.' : 'Saved to your tracker 🐝') : 'Couldn’t save that.'); if (obj.ok && window.__onResume) window.__onResume(); return; }
         if (window.__fromApp) window.__fromApp(id, typeof obj === 'string' ? obj : JSON.stringify(obj));
       };
-      if (!webUrl()) return reply({ ok: false, error: 'not_connected' });
+      if (!webUrl()) { if (window.FTLocal) { FTLocal.handle(req).then(reply); return; } return reply({ ok: false, error: 'not_connected' }); }
       var go = function () {
         post(req).then(function (txt) {
           var j; try { j = JSON.parse(txt); } catch (e) { j = { ok: false, error: 'bad_response' }; }
@@ -395,7 +403,7 @@
         '<ul class="inv-perks"><li>📌<span><b>Save anything</b> from Safari, Instagram or X in one tap</span></li>' +
         '<li>🤖<span><b>Sorted for you</b>: deadlines, requirements, even essay drafts and a tailored CV</span></li>' +
         '<li>🐝<span><b>Bisi the bee</b> reminds you before every deadline. You will not escape.</span></li>' +
-        '<li>🔒<span><b>All yours</b>: everything lives in your own Google account</span></li>' +
+        '<li>⚡<span><b>No setup</b>: open it and start. Everything stays on your phone (add a Google sheet later if you like)</span></li>' +
         (isAndroid ? '<li>🫧<span><b>On Android</b> you also get Bisi’s floating bubble: tap it on any screen to save what you’re looking at</span></li>' : '') + '</ul>' +
         '<button class="btn primary inv-go">Let’s go 🐝</button>' +
         '<div class="inv-sign">— Bisi, on behalf of ' + (from || 'the hive') + '</div></div></div>';

@@ -83,7 +83,7 @@ final class Tracker {
             if (!ok) enqueue(ctx, body);
             else flushQueueNow(ctx);
             String msg = ok ? "Saved to your tracker" :
-                    (connection(ctx) == null ? "Saved on your phone. Connect your sheet in the app to send it."
+                    (connection(ctx) == null ? "Saved to Bisi 🐝"
                             : "No connection. Saved on your phone and will send later.");
             MAIN.post(() -> cb.done(ok, msg));
         });
@@ -259,6 +259,19 @@ final class Tracker {
         }
         File[] rest = queueDir(c).listFiles();
         return left == 0 ? 0 : (rest == null ? left : rest.length);
+    }
+
+    /** Instant mode: everything waiting in the queue, as a JSON array, removed from the phone's queue. */
+    static synchronized String takeQueue(Context c) {
+        org.json.JSONArray out = new org.json.JSONArray();
+        File[] files = queueDir(c).listFiles();
+        if (files == null) return "[]";
+        Arrays.sort(files);
+        for (File f : files) {
+            try { out.put(new JSONObject(new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8))); f.delete(); }
+            catch (Exception ignored) {}
+        }
+        return out.toString();
     }
 
     private static void enqueue(Context c, JSONObject body) {
