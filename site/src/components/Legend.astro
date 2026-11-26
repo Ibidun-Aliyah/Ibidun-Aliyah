@@ -1,0 +1,17 @@
+---
+import { KINDS } from '../lib/kinds';
+const { filter = false } = Astro.props;
+---
+<aside class="legend" aria-label="LED colour code">
+  <span class="silk"><b>LED colour code</b></span>
+  <ul>
+    {Object.entries(KINDS).map(([key, k]) => (
+      <li style={`--led:${k.color}`}>
+        {filter
+          ? <button type="button" data-filter={key} aria-pressed="true"><span class="dot"></span>{k.label}</button>
+          : <span><span class="dot"></span>{k.label}</span>}
+      </li>
+    ))}
+  </ul>
+  {filter && <p class="hint">Tap a colour to switch those posts on or off.</p>}
+</aside>

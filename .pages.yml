@@ -1,0 +1,52 @@
+# Settings for Pages CMS (https://pagescms.org): a simple editor for posting
+# to the site without touching code. Log in at https://app.pagescms.org with GitHub.
+media:
+  input: site/public/images
+  output: /images
+
+content:
+  - name: posts
+    label: Posts
+    type: collection
+    path: site/src/content/blog
+    filename: "{year}-{month}-{day}-{primary}.md"
+    view:
+      fields: [title, kind, date, draft]
+      primary: title
+      sort: [date, title]
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+      - name: description
+        label: One-line summary (Google shows this in search results)
+        type: string
+      - name: date
+        label: Date
+        type: date
+        required: true
+      - name: kind
+        label: What kind of post is it? (sets the LED colour)
+        type: select
+        default: build
+        options:
+          values:
+            - { value: build, label: "Build (amber)" }
+            - { value: teach, label: "Teach (green)" }
+            - { value: organise, label: "Organise (blue)" }
+            - { value: learn, label: "Learn (pink)" }
+            - { value: life, label: "Life (white)" }
+      - name: cover
+        label: Cover photo (optional)
+        type: image
+      - name: draft
+        label: Hide this post (draft)
+        type: boolean
+        default: true
+      - name: body
+        label: Post
+        type: rich-text

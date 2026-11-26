@@ -2,14 +2,13 @@
 import Base from '../layouts/Base.astro';
 import { u } from '../lib/url';
 ---
-<Base title="Page not found">
-  <section class="masthead compact">
-    <div class="decor" data-decor aria-hidden="true"></div>
-    <div class="wrap inner">
-      <span class="eyebrow">404</span>
-      <h1>This page wandered off the breadboard</h1>
-      <p class="lede">The link might be old or mistyped.</p>
-      <div class="cta"><a class="btn" href={u('/')}>Go home</a><a class="ghost" href={u('/blog/')}>Read the log</a></div>
-    </div>
-  </section>
+<Base title="Open circuit">
+  <div class="wrap">
+    <section class="section">
+      <span class="silk">Error 404 · open circuit</span>
+      <h1>This trace doesn’t connect to anything.</h1>
+      <p class="lede">The link might be old or mistyped. Let’s get you back on the board.</p>
+      <div class="hero"><div class="cta"><a class="btn" href={u('/')}>Go home</a><a class="link" href={u('/log/')}>Read the log</a></div></div>
+    </section>
+  </div>
 </Base>

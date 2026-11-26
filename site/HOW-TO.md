@@ -1,47 +1,30 @@
-# My site: how to use it
+# Aliyah's board: how to use it
 
-The site lives in this `site` folder. Every time you load a page it picks a random mix of
-colours, fonts, patterns and shapes from six styles (Toy Robot Workshop, Sticker Notebook,
-Ankara Pop, Pixel Arcade, Cotton Cloud, Blueprint Storybook). Visitors can open
-"Today's mix" in the corner to see the mix and remix it.
+## Write a post (no code)
 
-## Add a blog post (you can do this right on github.com)
+1. Go to **https://app.pagescms.org** and log in with GitHub (first time only: allow it to access this repo).
+2. Open this repo, then **Posts**, then **Add an entry**.
+3. Fill in the title, a one-line summary, the date, and what kind of post it is
+   (that picks the LED colour). Add a cover photo if you like, then write the post.
+   You can drop photos straight into the post too.
+4. **Hide this post (draft)** starts switched on, so nobody sees it yet.
+   Switch it off when you're ready, press **Save**, and the post goes live about a minute later.
 
-1. Open `site/src/content/blog/`.
-2. Copy `_new-post-template.md` into a new file with a short name, like `my-line-follower.md`.
-   The file name becomes the web address: `/blog/my-line-follower/`.
-3. Fill in the title, description (Google shows this in results), date and tags.
-4. Change `draft: true` to `draft: false`, write your post underneath, and commit.
-5. The site rebuilds and goes live by itself in about a minute.
-
-Photos go in `site/public/images/`, then in a post: `![What the photo shows](/images/photo.jpg)`.
+Works on your phone's browser too.
 
 ## Change your details
 
-Edit `site/src/site.config.ts` for your email, LinkedIn, Instagram and the Google verification code.
-The About page text is in `site/src/pages/about.astro`.
-
-## Remove a style from the mix
-
-Open `site/public/mixer.js` and delete that style's block from `DIRECTIONS`.
+`site/src/site.config.ts` holds your email, LinkedIn, Instagram and the Google verification code.
+The robot's lines are at the top of `site/src/components/Robot.astro`.
 
 ## Get on Google (free)
 
 1. Go to https://search.google.com/search-console and add your site's address.
-2. Pick "HTML tag" verification, copy only the `content="..."` value into
-   `googleVerification` in `site.config.ts`, commit, wait a minute, then press Verify.
-3. In Search Console open "Sitemaps" and submit `sitemap-index.xml`.
+2. Choose "HTML tag", copy only the `content="..."` value into `googleVerification`
+   in `site.config.ts`, wait a minute, then press Verify.
+3. Under "Sitemaps", submit `sitemap-index.xml`.
 4. Put your site link on LinkedIn, Instagram and your GitHub profile.
 
-## Run it on your own computer (optional)
+## Note
 
-    cd site
-    npm install
-    npm run dev
-
-## Work on things without visitors seeing them
-
-- **Drafts:** keep `draft: true` at the top of a post. It stays off the live site, but it shows
-  (with a "Draft" label) when you run `npm run dev` on your laptop. Flip it to `false` to publish.
-- **Bigger changes:** make a new branch on GitHub and edit there. Only `main` goes live,
-  so nothing on other branches is public on the site until you merge it.
+The repo is public, so drafts are hidden from the website but still readable on GitHub.

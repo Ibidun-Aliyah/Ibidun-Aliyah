@@ -1,0 +1,42 @@
+---
+// The helper robot on the home page. Tap it for the next line.
+// Edit the lines below; keep them short.
+const lines = [
+  'Beep! Welcome to Aliyah’s board.',
+  'Every post is an LED. Scroll down and watch them light up.',
+  'Currently learning: embedded systems and robotics.',
+  'Ask her about RAIN-INN. She leads it on campus.',
+  'Top of her 200-level cohort. I’m just saying.',
+  'Lights out and away we go!',
+  'Tap me again. I have nowhere to be.',
+];
+---
+<div class="bot-wrap">
+  <div class="bubble" id="bubble" aria-live="polite">{lines[0]}</div>
+  <button class="bot" id="bot" type="button" aria-label="Helper robot. Tap for another message." data-lines={JSON.stringify(lines)}>
+    <svg viewBox="0 0 220 250" aria-hidden="true">
+      <g class="body-all">
+        <line x1="110" y1="44" x2="110" y2="20" class="limb" style="stroke-width:4" />
+        <circle cx="110" cy="16" r="8" class="ant" />
+        <rect x="38" y="44" width="144" height="100" rx="26" class="shell" />
+        <rect x="54" y="60" width="112" height="68" rx="16" class="screen" />
+        <g class="eyes">
+          <rect x="78" y="80" width="16" height="22" rx="8" class="eye" />
+          <rect x="126" y="80" width="16" height="22" rx="8" class="eye" />
+        </g>
+        <circle cx="70" cy="112" r="6" class="cheek" /><circle cx="150" cy="112" r="6" class="cheek" />
+        <path d="M100 112 Q110 120 120 112" class="mouth" />
+        <rect x="98" y="144" width="24" height="12" rx="3" class="metal" />
+        <path d="M54 166 Q30 180 34 204" class="limb" /><circle cx="34" cy="206" r="7" class="hand" />
+        <g class="arm-r"><path d="M166 164 Q192 150 194 126" class="limb" /><circle cx="194" cy="122" r="7" class="hand" /></g>
+        <rect x="54" y="154" width="112" height="66" rx="18" class="shell" />
+        <rect x="88" y="170" width="44" height="30" rx="4" class="chip" />
+        <path d="M94 170v-6M104 170v-6M116 170v-6M126 170v-6M94 200v6M104 200v6M116 200v6M126 200v6" class="chip-pin" />
+        <text x="110" y="189" text-anchor="middle">U1</text>
+        <circle cx="80" cy="232" r="15" class="wheel" /><circle cx="80" cy="232" r="4" class="hub" />
+        <circle cx="140" cy="232" r="15" class="wheel" /><circle cx="140" cy="232" r="4" class="hub" />
+      </g>
+    </svg>
+  </button>
+  <span class="silk">Helper bot · tap me</span>
+</div>

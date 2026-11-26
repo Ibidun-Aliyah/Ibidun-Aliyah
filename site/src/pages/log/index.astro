@@ -1,0 +1,27 @@
+---
+import Base from '../../layouts/Base.astro';
+import Board from '../../components/Board.astro';
+import Legend from '../../components/Legend.astro';
+import { getPosts } from '../../lib/posts';
+const posts = await getPosts();
+---
+<Base title="The log" description="Aliyah Ibidun Ibiwunmi's log: builds, workshops, things learned and life as a Mechatronics Engineering student in Lagos.">
+  <div class="wrap">
+    <section class="section" aria-labelledby="log-h">
+      <div class="section-head">
+        <div class="titles">
+          <span class="silk">The log · {posts.length} {posts.length === 1 ? 'post' : 'posts'}</span>
+          <h1 id="log-h">Everything I build, teach, organise and learn</h1>
+          <p class="lede">Newest at the top. Each post is an LED on the board, coloured by what kind of post it is.</p>
+        </div>
+      </div>
+      <div class="board-layout">
+        <div>
+          <Board posts={posts} />
+          <p class="empty" id="board-empty" hidden>All the LEDs are switched off. Tap a colour to turn some back on.</p>
+        </div>
+        <Legend filter />
+      </div>
+    </section>
+  </div>
+</Base>

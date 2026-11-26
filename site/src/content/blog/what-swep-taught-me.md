@@ -2,7 +2,7 @@
 title: "What SWEP taught me about engineering safety"
 description: "Risk assessments, housekeeping and safety culture across three engineering departments during the Student Work Experience Program."
 date: 2026-11-24
-tags: ["Engineering", "Coursework"]
+kind: learn
 ---
 
 As part of my engineering training I took part in the **Student Work Experience Program (SWEP)**, which rotated me through different departments.

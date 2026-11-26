@@ -1,68 +1,103 @@
 ---
 import Base from '../layouts/Base.astro';
+import { SITE } from '../site.config';
+import { u } from '../lib/url';
+const year = new Date().getFullYear();
 ---
-<Base title="About" description="About Aliyah Ibidun Ibiwunmi: Mechatronics Engineering at LASUSTECH, RAIN-INN campus lead, Microsoft Learn Student Ambassador, and builder of AI and robotics projects.">
-  <section class="masthead compact">
-    <div class="decor" data-decor aria-hidden="true"></div>
-    <div class="wrap inner">
-      <span class="eyebrow">About</span>
-      <h1>Engineering as a tool to <mark>solve human problems</mark></h1>
-      <p class="lede">I’m Aliyah, a Mechatronics Engineering student at LASUSTECH with a deep interest in AI, robotics and embedded systems. I don’t wait for the classroom. I build my own learning paths and blend coursework with personal projects, community leadership and self-study.</p>
-    </div>
-  </section>
-
+<Base title="About" description="The datasheet for Aliyah Ibidun Ibiwunmi: Mechatronics Engineering at LASUSTECH, RAIN-INN campus lead, Microsoft Learn Student Ambassador, and builder of AI and robotics projects.">
   <div class="wrap">
-    <section class="section" aria-labelledby="int-h">
-      <h2 id="int-h">What I’m into</h2>
-      <div class="chips">
-        <span class="chip">AI for robotics and automation</span>
-        <span class="chip">Smart systems for urban safety and mobility</span>
-        <span class="chip">Embedded hardware and IoT</span>
-        <span class="chip">Human-centred tech for developing contexts</span>
-        <span class="chip">AI for education and infrastructure</span>
+    <section class="section" aria-labelledby="about-h">
+      <div class="titles" style="display:grid;gap:8px">
+        <span class="silk">About · datasheet</span>
+        <h1 id="about-h">Engineering is a tool for <mark>solving human problems.</mark></h1>
       </div>
-    </section>
 
-    <section class="section" aria-labelledby="edu-h">
-      <h2 id="edu-h">Education</h2>
-      <div class="card">
-        <span class="kind">2024 to present</span>
-        <h3>B.Eng. Mechatronics Engineering, Lagos State University of Science and Technology</h3>
-        <p>Current CGPA 4.24 / 5.00, the highest in my 200-level cohort. Building a base across mechanical, electrical, computer science and control systems.</p>
-        <p>Key courses so far: Engineering Mathematics II, Strength of Materials, Thermodynamics, Engineering Materials, and Philosophy &amp; Logic.</p>
-      </div>
-    </section>
+      <article class="sheet">
+        <div class="sheet-head"><span>Datasheet · AIB-2024</span><span>Rev. {year} · Lagos, Nigeria</span></div>
+        <div style="display:grid;gap:10px">
+          <h2>{SITE.name}</h2>
+          <p class="lede">Mechatronics engineer in progress. I don’t wait for the classroom: I build my own learning paths and mix coursework with personal projects, community leadership and self-study.</p>
+        </div>
 
-    <section class="section" aria-labelledby="lead-h">
-      <h2 id="lead-h">Leadership</h2>
-      <ul class="timeline">
-        <li><span class="when">2025 to present</span><h3>Campus Lead, Robotics and Artificial Intelligence Innovators Network (RAIN-INN)</h3><span>Running hands-on AI and ML workshops for beginners, growing a student robotics and AI community, and planning hackathons with national leadership and mentors.</span></li>
-        <li><span class="when">2025 to present</span><h3>Microsoft Learn Student Ambassador</h3><span>Learning and sharing Microsoft technologies through workshops and learning challenges.</span></li>
-        <li><span class="when">2025 to present</span><h3>Campus Ambassador, Cowrywise</h3><span>Promoting financial literacy and a saving culture among students.</span></li>
-        <li><span class="when">2025 to present</span><h3>Assistant General Secretary, NAMES LASUSTECH</h3><span>Serving mechatronics engineering students in the National Association of Mechatronics Engineering Students.</span></li>
-      </ul>
-    </section>
+        <div class="cols">
+          <div>
+            <h3>Features</h3>
+            <ul>
+              <li>B.Eng. Mechatronics Engineering, LASUSTECH (2024 to present)</li>
+              <li>CGPA 4.24 / 5.00, highest in the 200-level cohort</li>
+              <li>Base across mechanical, electrical, computer science and control systems</li>
+              <li>Builds structured self-learning roadmaps and shares them with peers</li>
+              <li>Runs workshops and grows student tech communities</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Applications</h3>
+            <ul>
+              <li>AI for robotics and automation</li>
+              <li>Smart systems for urban safety and mobility</li>
+              <li>Embedded hardware and IoT</li>
+              <li>Human-centred tech for developing contexts</li>
+              <li>AI for education and infrastructure</li>
+            </ul>
+          </div>
+        </div>
 
-    <section class="section two-col" aria-label="Skills and current learning">
-      <div class="prose">
-        <h2>Skills</h2>
-        <ul>
-          <li>Arduino prototyping with sensors, actuators and breadboard circuits</li>
-          <li>Beginner robotics and embedded systems</li>
-          <li>Microsoft Learn AI and cloud tools</li>
-          <li>Leadership, project management and community engagement</li>
-          <li>Google Workspace, Notion and spreadsheets</li>
-        </ul>
-      </div>
-      <div class="prose">
-        <h2>Currently learning</h2>
-        <ul>
-          <li>Embedded systems and hardware development</li>
-          <li>Robotics fundamentals</li>
-          <li>Microsoft AI and cloud learning paths</li>
-          <li>Blockchain development basics</li>
-        </ul>
-      </div>
+        <div style="display:grid;gap:10px">
+          <h3>Pin descriptions · leadership</h3>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Pin</th><th>Role</th><th>Function</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td><b>Campus Lead</b>, Robotics and Artificial Intelligence Innovators Network (RAIN-INN) · 2025 to present</td><td>Hands-on AI and ML workshops for beginners, a student robotics and AI community, hackathons and peer learning.</td></tr>
+                <tr><td>2</td><td><b>Microsoft Learn Student Ambassador</b> · 2025 to present</td><td>Learning and sharing Microsoft technologies through workshops and challenges.</td></tr>
+                <tr><td>3</td><td><b>Campus Ambassador</b>, Cowrywise · 2025 to present</td><td>Financial literacy and a saving culture among students.</td></tr>
+                <tr><td>4</td><td><b>Assistant General Secretary</b>, NAMES LASUSTECH · 2025 to present</td><td>Serving mechatronics engineering students.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style="display:grid;gap:10px">
+          <h3>Typical characteristics · skills</h3>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Parameter</th><th>Value</th></tr></thead>
+              <tbody>
+                <tr><td>Prototyping</td><td>Arduino with sensors, actuators and breadboard circuits</td></tr>
+                <tr><td>Robotics</td><td>Beginner robotics and embedded systems</td></tr>
+                <tr><td>AI and cloud</td><td>Microsoft Learn AI and cloud tools</td></tr>
+                <tr><td>People</td><td>Leadership, team coordination, project management, community engagement</td></tr>
+                <tr><td>Tools</td><td>Google Workspace, Notion, spreadsheets</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="cols">
+          <div>
+            <h3>Field testing · SWEP</h3>
+            <ul>
+              <li><b>Agricultural Engineering:</b> workshop risk assessments and safety housekeeping</li>
+              <li><b>Chemical Engineering:</b> safety inspections and lab housekeeping</li>
+              <li><b>Civil Engineering:</b> lab risk assessments and safe work areas</li>
+            </ul>
+          </div>
+          <div>
+            <h3>In development · currently learning</h3>
+            <ul>
+              <li>Embedded systems and hardware development</li>
+              <li>Robotics fundamentals</li>
+              <li>Microsoft AI and cloud learning paths</li>
+              <li>Blockchain development basics</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="display:grid;gap:8px">
+          <h3>Ordering information</h3>
+          <p style="margin:0">Open to collaborations, internships and projects. Email <b>{SITE.email}</b> or <a href={u('/#say-hi')}>find all my links here</a>.</p>
+        </div>
+      </article>
     </section>
   </div>
 </Base>

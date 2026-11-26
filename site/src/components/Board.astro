@@ -1,0 +1,21 @@
+---
+import { KINDS } from '../lib/kinds';
+import { u, formatDate } from '../lib/url';
+const { posts } = Astro.props;
+---
+<ol class="board">
+  {posts.map((p) => {
+    const k = KINDS[p.data.kind];
+    return (
+      <li class="node" data-kind={p.data.kind} style={`--led:${k.color}`}>
+        <span class="pad" aria-hidden="true"><span class="led"></span></span>
+        <a class="part" href={u(`/log/${p.id}/`)}>
+          {p.data.cover && <img src={u(p.data.cover)} alt="" loading="lazy" />}
+          <span class="silk">{p.ref} · <span class="kind">{k.label}</span> · {formatDate(p.data.date)}{p.data.draft && ' · draft'}</span>
+          <h3>{p.data.title}</h3>
+          {p.data.description && <p>{p.data.description}</p>}
+        </a>
+      </li>
+    );
+  })}
+</ol>

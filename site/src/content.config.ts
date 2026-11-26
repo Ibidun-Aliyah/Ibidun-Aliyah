@@ -5,9 +5,11 @@ const blog = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/blog' }),
   schema: z.object({
     title: z.string(),
-    description: z.string(),
+    description: z.string().default(''),
     date: z.coerce.date(),
-    tags: z.array(z.string()).default([]),
+    // Which colour LED the post gets on the board.
+    kind: z.enum(['build', 'teach', 'organise', 'learn', 'life']).default('life'),
+    cover: z.string().optional(),
     draft: z.boolean().default(false),
   }),
 });
