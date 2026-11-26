@@ -1,0 +1,66 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import { SITE } from '../site.config';
+import { u, formatDate } from '../lib/url';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+---
+<Base>
+  <section class="masthead">
+    <div class="decor" data-decor aria-hidden="true"></div>
+    <div class="wrap inner">
+      <span class="tag">Mechatronics Engineering · LASUSTECH</span>
+      <h1>Hi, I’m Aliyah. I build little robots for <mark>big human problems.</mark></h1>
+      <p class="lede">I’m a Mechatronics Engineering student in Lagos, working towards AI, robotics and embedded systems. This is where I log everything I build, learn and organise.</p>
+      <div class="cta">
+        <a class="btn" href={u('/blog/')}>Read my log</a>
+        <a class="ghost" href={u('/about/')}>More about me</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <section class="section" aria-labelledby="latest-h">
+      <div class="section-head">
+        <h2 id="latest-h">Fresh from the log</h2>
+        <a class="ghost" href={u('/blog/')}>See every post</a>
+      </div>
+      <div class="cards">
+        {posts.map((p) => (
+          <a class="card" href={u(`/blog/${p.id}/`)}>
+            <span class="kind">{p.data.tags[0] ?? 'Log'}</span>
+            <h3>{p.data.title}</h3>
+            <p>{p.data.description}</p>
+            <span class="meta"><time datetime={p.data.date.toISOString()}>{formatDate(p.data.date)}</time></span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="doing-h">
+      <div class="section-head"><h2 id="doing-h">What I’m up to</h2></div>
+      <div class="cards">
+        <div class="card"><span class="kind">Build</span><h3>Arduino builds</h3><p>Small automation projects with sensors, actuators and microcontrollers on a breadboard.</p></div>
+        <div class="card"><span class="kind">Teach</span><h3>RAIN-INN workshops</h3><p>Hands-on AI and ML workshops for beginners across departments, as campus lead.</p></div>
+        <div class="card"><span class="kind">Organise</span><h3>Campus hackathon</h3><p>Proposed and planning the first LASUSTECH hackathon, focused on campus problems.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="say-hi" aria-labelledby="hi-h">
+      <div class="contact">
+        <h2 id="hi-h">Say hi</h2>
+        <p class="lede">I’m open to collaborations, internships and projects in AI and robotics, smart systems and IoT, EdTech, and community-led innovation.</p>
+        <span class="email">{SITE.email}</span>
+        <div class="links">
+          <a class="btn" href={`mailto:${SITE.email}`}>Email me</a>
+          {SITE.linkedin && <a class="ghost" href={SITE.linkedin} rel="me">LinkedIn</a>}
+          {SITE.instagram && <a class="ghost" href={SITE.instagram} rel="me">Instagram</a>}
+          {SITE.github && <a class="ghost" href={SITE.github} rel="me">GitHub</a>}
+        </div>
+      </div>
+    </section>
+  </div>
+</Base>

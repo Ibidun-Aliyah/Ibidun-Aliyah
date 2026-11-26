@@ -1,0 +1,92 @@
+---
+import '../styles/global.css';
+import { SITE } from '../site.config';
+import { u } from '../lib/url';
+
+interface Props {
+  title?: string;
+  description?: string;
+  type?: 'website' | 'article';
+  published?: Date;
+  jsonLd?: Record<string, unknown>;
+}
+const { title, description = SITE.description, type = 'website', published, jsonLd } = Astro.props;
+const fullTitle = title ? `${title} · ${SITE.name}` : SITE.title;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const path = Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '') || '/';
+const isActive = (p: string) => (p === '/' ? path === '/' : path.startsWith(p));
+const sameAs = [SITE.linkedin, SITE.instagram, SITE.github].filter(Boolean);
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={SITE.name} />
+    <link rel="canonical" href={canonical} />
+    <link rel="sitemap" href={u('/sitemap-index.xml')} />
+    <link rel="icon" href={u('/favicon.svg')} type="image/svg+xml" />
+    <meta name="theme-color" content="#FFF1CC" />
+    {SITE.googleVerification && <meta name="google-site-verification" content={SITE.googleVerification} />}
+
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    {published && <meta property="article:published_time" content={published.toISOString()} />}
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Picks this visit's random style mix before the page paints -->
+    <script is:inline src={u('/mixer.js')}></script>
+
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+    {!jsonLd && (
+      <script type="application/ld+json" set:html={JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'Person', name: SITE.name, url: new URL(u('/'), Astro.site).href,
+        jobTitle: 'Mechatronics Engineering Student', sameAs,
+        affiliation: { '@type': 'CollegeOrUniversity', name: 'Lagos State University of Science and Technology (LASUSTECH)' },
+      })} />
+    )}
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="logo" href={u('/')} aria-label={`${SITE.name}, home`}>{SITE.short}<span>.</span></a>
+        <nav class="site-nav" aria-label="Main">
+          <a href={u('/blog/')} aria-current={isActive('/blog') ? 'page' : undefined}>log</a>
+          <a href={u('/about/')} aria-current={isActive('/about') ? 'page' : undefined}>about</a>
+          <a href={u('/#say-hi')}>say hi</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <span>© {new Date().getFullYear()} {SITE.name}</span>
+        <span>The look changes every visit. Refresh for a surprise.</span>
+      </div>
+    </footer>
+
+    <details class="mix-badge">
+      <summary>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="16" cy="16" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>
+        Today’s mix
+      </summary>
+      <div class="body">
+        <div id="mix-badge-text" aria-live="polite">Refresh the page for a new look.</div>
+        <button id="remix" type="button">Remix it</button>
+      </div>
+    </details>
+  </body>
+</html>
