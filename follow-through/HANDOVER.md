@@ -226,3 +226,9 @@ if the conversation is summarised or a new session starts. Rule: after finishing
   wrapped in `part()` so one failure can't blank the app; FTEvents exports guarded until init. **Bee Pouch got its own
   tab** (7 tabs, label font .8rem; Today entry card removed, Me card kept). Testing lesson: always also test with
   `localStorage['ft-dash']` pre-filled and a hung network (scratchpad `t/cached.js`). Her data was never lost.
+- **26 Nov · Asked for game ideas** (wants to remove some, add new). Suggested removals: Bisi Flight (reflex only),
+  Honey Drop or Pollen Pairs (overlap), maybe Number Sprint. New ideas offered: Circuit Bloom (rotate wires to power
+  flowers; resistors/LEDs/gates), Robo Path (block-code a robot bee), Hive Sudoku (hex grid), Word Ladder Buzz, Estimate
+  It, Unit Dash, Nectar Sort (pour honey colours), Hive Builder (wax from real applications decorates a hive), Bee Garden
+  (grows with streak), Daily Buzzle (one shared puzzle a day), Swarm Trivia (incl. Nigeria facts), Two-player Hive (hex
+  connection). Top picks: Circuit Bloom, Nectar Sort, Hive Builder, Daily Buzzle (+ Robo Path). **Pending:** her picks.
