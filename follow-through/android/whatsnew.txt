@@ -1,1 +1,1 @@
-fix: the app no longer freezes on a weak connection; shows your saved copy and syncs later
+fix: blank screens on opening (your saved items show again); Bee Pouch gets its own tab

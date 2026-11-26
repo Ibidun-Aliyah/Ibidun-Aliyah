@@ -207,5 +207,6 @@ function onClick(e){
 document.addEventListener('click', onClick);
 document.addEventListener('change', e => { const t = e.target.closest('[data-ev-ticket]'); if (t){ put(t.dataset.evTicket, { ticket: t.value.trim() }); H.toast('Ticket link saved. 🎟️'); } });
 
-window.FTEvents = { init(h){ H = h; }, panel, todayCards, stats, counts, state: st };
+const ready = f => (...a) => H ? f(...a) : '';
+window.FTEvents = { init(h){ H = h; }, panel: ready(panel), todayCards: ready(todayCards), stats: ready(stats), counts, state: st };
 })();

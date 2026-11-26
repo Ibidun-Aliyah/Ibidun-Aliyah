@@ -263,11 +263,11 @@ section{margin-top:28px}
 
 /* tab bar */
 .wrap{padding-bottom:calc(110px + env(safe-area-inset-bottom))}
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:15;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2px;
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:15;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;
   padding:6px max(8px,env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-right));
   background:var(--card);border-top:2.5px solid var(--stroke);border-radius:22px 18px 0 0 / 14px 18px 0 0;box-shadow:0 -3px 0 var(--sh)}
 .tabbar button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 2px 3px;border-radius:14px 10px 12px 9px;
-  color:var(--muted);font-family:var(--f-d);font-size:.9rem;min-height:52px;cursor:pointer;position:relative}
+  color:var(--muted);font-family:var(--f-d);font-size:.8rem;min-height:52px;cursor:pointer;position:relative}
 .tabbar button[aria-current="page"]{color:var(--ink);background:var(--accent-soft);border:2px solid var(--stroke);box-shadow:2px 3px 0 var(--sh);transform:translateY(-3px) rotate(-1deg)}
 .tabbar svg{flex:none}
 .see-all{margin-top:12px;align-self:flex-start}
@@ -502,7 +502,6 @@ section{margin-top:28px}
     <div id="evcards"></div>
     <div class="tiles" id="tiles"></div>
     <div id="plan"></div>
-    <button class="card g-entry" data-go="pouch"><span class="g-ico">👝</span><span><b>Bee Pouch</b><small>Your documents and essays, one tap away</small></span><span aria-hidden="true">→</span></button>
     <input class="search gsearch" id="gq" type="search" placeholder="Search everything: opportunities, tips, notes…" aria-label="Search everything">
     <div id="gresults"></div>
     <div id="foryou"></div>
@@ -642,6 +641,7 @@ section{margin-top:28px}
   <button data-go="today" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><ellipse cx="12" cy="14" rx="7" ry="6" fill="#F6C343" stroke="currentColor" stroke-width="2"/><path d="M8 13h8M9 16.5h6" stroke="currentColor" stroke-width="2"/><ellipse cx="8" cy="6.5" rx="3.5" ry="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><ellipse cx="16" cy="6.5" rx="3.5" ry="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Today</span></button>
   <button data-go="tracker"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>Tracker</span></button>
   <button data-go="notes"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v11l-5 5H5z" fill="#FFE27A"/><path d="M14 20v-5h5M8 9h8M8 12.5h5"/></svg><span>Notes</span></button>
+  <button data-go="pouch"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16l-1.5 10.5a2 2 0 0 1-2 1.5h-9a2 2 0 0 1-2-1.5z" fill="#FFD23F"/><path d="M8 9V7a4 4 0 0 1 8 0v2M10 14h4"/></svg><span>Pouch</span></button>
   <button data-go="progress"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="3" rx="1"/><path d="M6 7h12v11a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3z"/><path d="M6.5 13c3-1.5 8-1.5 11 0V18a2.5 2.5 0 0 1-2.5 2.5H9A2.5 2.5 0 0 1 6.5 18z" fill="#F5B700" stroke="none"/></svg><span>Progress</span></button>
   <button data-go="history"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10v6a5 5 0 0 1-10 0z" fill="#FFD23F"/><path d="M7 5H4a3 3 0 0 0 3 4M17 5h3a3 3 0 0 1-3 4M12 14v3M8 21h8M9 17h6v4H9z"/></svg><span>History</span></button>
   <button data-go="me"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M6 2.5h9l4 4V21H6z"/><path d="M15 2.5V7h4"/><circle cx="12.5" cy="11" r="2.5"/><path d="M8.5 18c.8-2.3 2.3-3.3 4-3.3s3.2 1 4 3.3"/></svg><span>Me</span></button>
@@ -857,10 +857,11 @@ function render(){
   const need = rows.map(r => ({ r, u: urgency(r) })).filter(x => x.u).sort((a,b) => a.u.score - b.u.score);
   const newCount = rows.filter(r => r.Status === 'New').length;
 
-  bisiSay(rows, need);
-  renderMisfiled(D.rows || []);
-  if (window.FTEvents){ const ec = $('#evcards'); if (ec) ec.innerHTML = FTEvents.todayCards(rows); }
-  if (window.FTHive){ $('#plan').innerHTML = FTHive.plan(rows); $('#report').innerHTML = FTHive.report(rows); $('#heat').innerHTML = FTHive.heat(rows); $('#v-wall').innerHTML = FTHive.wall(rows); FTHive.renderPouch(); }
+  const part = (f) => { try { f(); } catch(e){ console.error('render part failed', e); } };
+  part(() => bisiSay(rows, need));
+  part(() => renderMisfiled(D.rows || []));
+  part(() => { if (window.FTEvents){ const ec = $('#evcards'); if (ec) ec.innerHTML = FTEvents.todayCards(rows); } });
+  if (window.FTHive) part(() => { $('#plan').innerHTML = FTHive.plan(rows); $('#report').innerHTML = FTHive.report(rows); $('#heat').innerHTML = FTHive.heat(rows); $('#v-wall').innerHTML = FTHive.wall(rows); FTHive.renderPouch(); });
   const nick = window.FTWelcome ? (FTWelcome.profile().nickname || '') : '';
   $('#hello').innerHTML = (nick ? `Hi ${esc(nick)}! ` : '') + (need.length ? `<em>${need.length} ${need.length===1?'thing needs':'things need'} you</em> today.` :
     rows.length ? 'You\'re on top of it. <em>Nothing urgent today.</em>' : 'Nothing saved yet. <em>Tap the bubble on your next find.</em>');
@@ -881,13 +882,13 @@ function render(){
       (need.length > 5 ? `<button class="btn small see-all" data-go="tracker">See all ${need.length} in Tracker →</button>` : '') :
     `<div class="empty">${rows.length ? 'All clear. Reminders and close deadlines show up here.' : 'Your follow-ups will show up here.'}</div>`;
 
-  charts(rows, tips);
-  calendar(rows);
-  searchAll(rows, tips);
-  forYou(rows);
-  badges(rows, tips);
-  listing(rows, tips);
-  history(rows);
+  part(() => charts(rows, tips));
+  part(() => calendar(rows));
+  part(() => searchAll(rows, tips));
+  part(() => forYou(rows));
+  part(() => badges(rows, tips));
+  part(() => listing(rows, tips));
+  part(() => history(rows));
 }
 function itemRow(r, tone, why){
   const cat = r.Category === 'Event' ? 'c-plum' : '';
@@ -2047,16 +2048,15 @@ function demo(req){
     tips:[{ID:'t',Title:'Example: Write CV bullets as results',Topic:'CV & resume','Key points':'• Start with a verb\n• Add a number',Saved:d(-2)}]};
 }
 
-render();
-load();
 if (window.FTEvents) FTEvents.init({ days, fmt, iso, parse, today: () => TODAY, render, call, toast, active: active_, askWhy, logWhy,
   openSheet, closeSheet, openItem, current: () => current, rows: () => (D && D.rows) || [], load: () => load(true), open });
 if (window.FTHive){
   FTHive.init({ days, fmt, iso, parse, today: () => TODAY, render, call, toast, openSheet, closeSheet, openItem, current: () => current,
     rows: () => (D && D.rows || []).filter(r => r.Outcome !== 'Deleted'), reqs, reqString, reqDays, effort, startBy, urgency, active, applied, appliedDate });
   $('#me-hive').innerHTML = FTHive.meCards();
-  render();
 }
+try { render(); } catch(e){ console.error(e); }
+load();
 if (window.FTWelcome){
   FTWelcome.init({ call, toast, onDone: () => { renderProfileCard(); render(); } });
   // after the page (and any invitation) is ready; an open invitation starts the tour itself

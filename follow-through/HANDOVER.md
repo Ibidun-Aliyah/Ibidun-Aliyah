@@ -74,7 +74,7 @@ iPhone/web: docs/ on GitHub Pages ──▶ same kind of script (each person has
 
 ## 3. Current state (26 Nov 2026)
 
-- **App version 6.6** (versionCode 36) built and pushed. The next build should be 6.7 / 37.
+- **App version 6.7** (versionCode 37) built and pushed. The next build should be 6.8 / 38.
 - **v6.5 module `assets/hive.js`** (FTHive): bee-path timeline in each opportunity sheet, Bee Pouch pane (`p-pouch`:
   documents in app storage via `Android.pouchPut/Get/Del/Open` or IndexedDB on web, metadata `ft-pouch`; essays in
   `ft-essays`), Today's plan (`ft-plan`, ticks requirements), heatmap + report card (Progress), Wall of wins (History),
@@ -219,3 +219,10 @@ if the conversation is summarised or a new session starts. Rule: after finishing
   only AI actions keep 330 s (`AI_SLOW`); dashboard 40 s, others 25 s; queue flush stops at the first failure.
   Released as **6.6/36**. The emulator never finished booting (30+ min, no KVM), so the fix wasn't run on a device;
   **Pending:** her confirmation it's responsive on a weak connection.
+- **26 Nov · 6.6 showed blank Tracker/Progress/Pouch** (screenshots). Real cause of the "not responding" too: on startup
+  with a cached dashboard, the first `render()` ran **before** `FTEvents.init`, `FTEvents.todayCards` threw (H null), which
+  aborted the script before `load()` and the FTHive/FTWelcome inits (bug since v6.4; my tests missed it because they
+  started without `ft-dash` cached). Fix (6.7/37): inits first, then `try{render()}` and `load()`; every render section
+  wrapped in `part()` so one failure can't blank the app; FTEvents exports guarded until init. **Bee Pouch got its own
+  tab** (7 tabs, label font .8rem; Today entry card removed, Me card kept). Testing lesson: always also test with
+  `localStorage['ft-dash']` pre-filled and a hung network (scratchpad `t/cached.js`). Her data was never lost.
