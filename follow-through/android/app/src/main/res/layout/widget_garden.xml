@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/g_root"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"
+    android:gravity="center" android:padding="10dp" android:background="@drawable/wcard_honey">
+    <ImageView android:id="@+id/g_img" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:scaleType="fitCenter" android:contentDescription="Bee garden" />
+    <TextView android:id="@+id/g_days" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:fontFamily="@font/patrick_hand" android:textColor="#1E1606" android:textSize="28sp" android:text="Bare soil" />
+    <TextView android:id="@+id/g_line" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textColor="#1E1606" android:textSize="12sp" android:textStyle="bold" android:gravity="center" android:maxLines="2" android:text="Water it today" />
+</LinearLayout>

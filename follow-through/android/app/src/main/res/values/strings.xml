@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Follow-Through</string>
+    <string name="share_label">Save to Follow-Through</string>
+    <string name="service_label">Follow-Through bubble</string>
+    <string name="service_summary">Floating bubble that saves opportunities to your tracker</string>
+    <string name="service_desc">Shows a small floating bubble. When you tap it, Follow-Through reads the text on your screen, the page link and a screenshot, and sends them to your own Google Sheet so the opportunity can be tracked. Nothing on your screen is read until you tap the bubble, and password fields are always skipped. If Scroll guard is on, it also notes which app is open (only the app\'s name) to nudge you when you\'ve been scrolling too long.</string>
+    <string name="widget_desc">Your deadlines, streak and nudges</string>
+    <string name="wdesc_jar">Nectar jar: your streak as a honey jar</string>
+    <string name="wdesc_snack">Brain snack: a word, maths or circuits question a day</string>
+    <string name="wdesc_note">Sticky note: your pinned note</string>
+    <string name="wdesc_quick">Quick save: voice, paste a link, or a note</string>
+    <string name="wl_jar">Nectar jar</string>
+    <string name="wl_garden">Bee garden</string>
+    <string name="wdesc_garden">Bee garden: a flower for every day you keep going</string>
+    <string name="wl_snack">Brain snack</string>
+    <string name="wl_note">Sticky note</string>
+    <string name="wl_quick">Quick save</string>
+</resources>
