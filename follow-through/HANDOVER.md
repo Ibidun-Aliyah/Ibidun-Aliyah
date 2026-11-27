@@ -279,3 +279,9 @@ if the conversation is summarised or a new session starts. Rule: after finishing
   phone; optional free Gemini key) + the in-app guided Google-sheet wizard with migration. Tested on web with a mocked
   Gemini (capture → sorted → essay doc → backup → wizard; `?add=` capture). **Not tested on a real phone/iPhone yet.**
   **Pending:** her friends' feedback; maybe a shareable iCloud shortcut link if an iPhone user builds it once.
+- **27 Nov · Asked how Follow-Through helps people with ADHD + improvements.** Mapped existing features (nags/bubble,
+  start-by dates/heatmap, step checklists/plan/AI drafts, top-3/plan budget, Quick copy/Pouch, voice notes, Scroll guard,
+  rewards). Proposed: 1 kinder streaks + pause days, 2 "Just one thing" mode, 3 focus timer with Bisi (+Scroll guard),
+  4 "come back to it" inbox (resume where you stopped), 5 minute estimates + buffer, 6 rejection support, 7 rotating novelty,
+  8 smart-timing / context nudges, 9 calm low-stimulation mode, 10 friend body-doubling (later). Recommended 1–3 first.
+  **Pending:** her picks.
