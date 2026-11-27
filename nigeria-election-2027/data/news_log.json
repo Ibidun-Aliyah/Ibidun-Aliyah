@@ -110,5 +110,13 @@
   "url": "https://www.legit.ng/politics/1743289-inec-request-security-agencies-csos-2027-election/",
   "impact": "medium",
   "model_change": "No model change. The violence is spread across the country, not concentrated in one zone, so the playbook's turnout-uncertainty rule does not apply yet. INEC security conference on 26 Nov."
+ },
+ {
+  "date": "2026-11-26",
+  "headline": "INEC and the National Security Adviser hold an election security conference; INEC warns violence threatens polls in 9 states",
+  "source": "The Sun / Tribune",
+  "url": "https://thesun.ng/political-violence-threatens-polls-in-9-states-inec-raises-alarm/",
+  "impact": "medium",
+  "model_change": "No model change. Reported incidents are spread across zones (Enugu, Katsina, Ekiti, Sokoto, Kebbi; Lagos, Kano and Rivers flagged), so no single zone's uncertainty is widened. INEC runs a nationwide mock accreditation on 28 Nov."
  }
 ]

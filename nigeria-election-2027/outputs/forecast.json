@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-26",
+ "generated": "2026-11-27",
  "election_date": "2027-01-16",
  "n_simulations": 20000,
  "candidates_meta": {
@@ -2545,9 +2545,32 @@
    },
    "runoff": 0.1754,
    "atiku_off_prob": 0.25
+  },
+  {
+   "date": "2026-11-27",
+   "win": {
+    "tinubu": 0.7457,
+    "atiku": 0.1287,
+    "obi": 0.1257
+   },
+   "share": {
+    "tinubu": 0.39,
+    "atiku": 0.2185,
+    "obi": 0.329
+   },
+   "runoff": 0.1754,
+   "atiku_off_prob": 0.25
   }
  ],
  "news": [
+  {
+   "date": "2026-11-26",
+   "headline": "INEC and the National Security Adviser hold an election security conference; INEC warns violence threatens polls in 9 states",
+   "source": "The Sun / Tribune",
+   "url": "https://thesun.ng/political-violence-threatens-polls-in-9-states-inec-raises-alarm/",
+   "impact": "medium",
+   "model_change": "No model change. Reported incidents are spread across zones (Enugu, Katsina, Ekiti, Sokoto, Kebbi; Lagos, Kano and Rivers flagged), so no single zone's uncertainty is widened. INEC runs a nationwide mock accreditation on 28 Nov."
+  },
   {
    "date": "2026-11-24",
    "headline": "A coalition of Atiku support groups switches to backing Obi and Kwankwaso",
