@@ -3,7 +3,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Figtree:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Figtree:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap">
 <style>
 /* Layout: one full-screen "phone" column. Scene art fills it; actors stand on it; a dialogue box sits at the bottom. Lagos at night: lagoon blue, danfo yellow. */
 :root {
@@ -219,123 +219,6 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
 .muted { color: var(--muted); font-size: .9rem; margin: 0; }
 .real { border-left: 3px solid var(--danfo); }
 
-
-/* ───── Cartoon skin ───── */
-:root { --toon: "Lilita One", "Bricolage Grotesque", "Arial Black", sans-serif; --edge: #141414; --paper: #fff8ea; }
-.actor svg { filter: drop-shadow(2.5px 0 0 var(--edge)) drop-shadow(-2.5px 0 0 var(--edge)) drop-shadow(0 2.5px 0 var(--edge)) drop-shadow(0 -2.5px 0 var(--edge)); }
-.box { background: var(--paper); color: #1d1a14; border: 3px solid var(--edge); border-radius: 20px; box-shadow: 0 6px 0 var(--edge); backdrop-filter: none; }
-.box .txt, .box.narr .txt { color: #1d1a14; font-size: 1.06rem; }
-.box.think .txt { color: #5a4316; }
-.box .who { font-family: var(--toon); font-weight: 400; font-size: 1rem; letter-spacing: .02em; border: 3px solid var(--edge); top: -18px; padding: 3px 14px; box-shadow: 0 3px 0 var(--edge); }
-.box .hint { color: #7a7060; }
-.choices .q { color: #b07a00; font-family: var(--toon); font-weight: 400; font-size: .85rem; letter-spacing: .06em; }
-.choice { background: var(--danfo); color: #1a1405; border: 3px solid var(--edge); box-shadow: 0 4px 0 var(--edge); font-weight: 700; backdrop-filter: none; transition: transform .08s, box-shadow .08s; }
-.choice:hover { border-color: var(--edge); filter: brightness(1.06); }
-.choice:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--edge); }
-.choice small { color: #8a1d1d; }
-.ib { background: var(--paper); color: #1d1a14; border: 2.5px solid var(--edge); box-shadow: 0 3px 0 var(--edge); font-family: var(--toon); font-weight: 400; font-size: .78rem; letter-spacing: .02em; }
-.pill { background: var(--paper); color: #5a5040; border: 2px solid var(--edge); }
-.pill b { color: #1d1a14; }
-.chap { font-family: var(--toon); font-weight: 400; font-size: 1.05rem; letter-spacing: .02em; }
-.btn { border: 3px solid var(--edge); box-shadow: 0 4px 0 var(--edge); font-family: var(--toon); font-weight: 400; letter-spacing: .03em; background: var(--paper); color: #1d1a14; }
-.btn.primary { background: var(--danfo); }
-.btn.ghost { background: transparent; color: var(--ink); border-color: rgba(255,255,255,.5); box-shadow: none; }
-.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--edge); }
-.card h2, .logo, .mini-logo, .hero-card .nm, .end-hero h1 { font-family: var(--toon); font-weight: 400; letter-spacing: .01em; }
-.hero-card { border: 3px solid var(--edge); box-shadow: 0 6px 0 var(--edge); }
-.locked { border: 3px solid var(--edge); }
-
-/* ───── Phase layer (map, explore, report) ───── */
-.phase { position: absolute; inset: 0; z-index: 25; background: #1b4a5e; overflow: hidden; }
-.ph-top { position: absolute; top: 0; left: 0; right: 0; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: max(10px, env(safe-area-inset-top, 0px)); padding-bottom: 8px; }
-.ph-title { font-family: var(--toon); font-size: 1.15rem; line-height: 1; text-shadow: 0 2px 0 var(--edge), 0 0 12px rgba(0,0,0,.4); min-width: 0; }
-.ph-title small { display: block; font-family: var(--body); font-weight: 700; font-size: .64rem; letter-spacing: .14em; text-transform: uppercase; color: var(--danfo); text-shadow: none; margin-bottom: 3px; }
-.starpill { display: inline-flex; align-items: center; gap: 5px; background: var(--paper); color: #1d1a14; border: 2.5px solid var(--edge); border-radius: 999px; padding: 3px 11px; font-family: var(--toon); box-shadow: 0 3px 0 var(--edge); white-space: nowrap; }
-.starpill i { color: #f4b81c; font-style: normal; -webkit-text-stroke: 1px var(--edge); }
-
-/* map */
-.phase.hub { background: #5ab0d8; }
-.map-wrap { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-46%); aspect-ratio: 400 / 560; max-height: 100%; margin: 0 auto; }
-.map-wrap svg { width: 100%; height: 100%; display: block; }
-.pin { position: absolute; transform: translate(-50%, -100%); display: flex; flex-direction: column; align-items: center; gap: 2px; border: 0; background: none; padding: 0; }
-.pin .head { width: 46px; height: 46px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: #8a8f96; border: 3px solid var(--edge); display: grid; place-items: center; box-shadow: 0 4px 0 var(--edge); }
-.pin .head span { transform: rotate(45deg); font-family: var(--toon); font-size: 1.2rem; color: #fff; text-shadow: 0 2px 0 var(--edge); }
-.pin .lbl { font-family: var(--toon); font-size: .72rem; background: var(--paper); color: #1d1a14; border: 2px solid var(--edge); border-radius: 8px; padding: 1px 6px; white-space: nowrap; margin-top: 4px; }
-.pin .stars { font-size: .7rem; letter-spacing: -1px; color: #f4b81c; -webkit-text-stroke: .6px var(--edge); }
-.pin.done .head { background: #3fae6a; }
-.pin.now .head { background: #e8462a; animation: bob 1.1s ease-in-out infinite; }
-.pin.locked { opacity: .75; }
-@keyframes bob { 50% { transform: rotate(-45deg) translate(3px, -3px); } }
-.hub-sheet { position: absolute; left: 10px; right: 10px; bottom: max(10px, env(safe-area-inset-bottom, 0px)); z-index: 3; background: var(--paper); color: #1d1a14; border: 3px solid var(--edge); border-radius: 22px; box-shadow: 0 6px 0 var(--edge); padding: 14px; display: grid; grid-template-columns: 84px 1fr; gap: 12px; align-items: center; }
-.hub-sheet .thumb { width: 84px; height: 84px; border-radius: 14px; overflow: hidden; border: 3px solid var(--edge); }
-.hub-sheet .thumb svg { width: 100%; height: 100%; display: block; }
-.hub-sheet .n { font-size: .68rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #b07a00; }
-.hub-sheet h3 { font-family: var(--toon); font-weight: 400; font-size: 1.5rem; margin: 0; line-height: 1; }
-.hub-sheet p { margin: 4px 0 0; font-size: .82rem; color: #6a604c; }
-.hub-sheet .acts { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; }
-.hub-sheet .acts .btn { flex: 1; min-width: 120px; padding: 12px; }
-.hub-sheet .acts .btn.ghost { color: #1d1a14; border-color: var(--edge); box-shadow: 0 4px 0 var(--edge); background: #fff; }
-
-/* explore */
-.ex-bg { position: absolute; inset: 0; }
-.ex-bg svg { width: 100%; height: 100%; display: block; filter: saturate(.9) brightness(.85); }
-.ex-field { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
-.obj { position: absolute; width: 54px; height: 54px; border: 0; background: none; padding: 0; transform: translate(-50%, -50%) rotate(var(--r, 0deg)); transition: transform .15s; }
-.obj svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 3px 2px rgba(0,0,0,.35)); }
-.obj.found { animation: grab .6s ease forwards; pointer-events: none; }
-@keyframes grab { 40% { transform: translate(-50%, -50%) scale(1.5); } 100% { transform: translate(-50%, 200%) scale(.2); opacity: 0; } }
-.obj.nope { animation: nope .35s ease; }
-@keyframes nope { 25% { transform: translate(-58%, -50%) rotate(var(--r)); } 75% { transform: translate(-42%, -50%) rotate(var(--r)); } }
-.obj.hinted::after { content: ""; position: absolute; inset: -14px; border: 4px solid #ffd84a; border-radius: 50%; animation: ping 1s ease-out 2; }
-@keyframes ping { from { transform: scale(.6); opacity: 1; } to { transform: scale(1.4); opacity: 0; } }
-.tray { position: absolute; left: 8px; right: 8px; bottom: max(8px, env(safe-area-inset-bottom, 0px)); z-index: 3; background: var(--paper); border: 3px solid var(--edge); border-radius: 18px; box-shadow: 0 5px 0 var(--edge); padding: 8px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; color: #1d1a14; }
-.slot { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; font-size: .66rem; font-weight: 700; line-height: 1.15; min-width: 0; padding: 4px 2px; border-radius: 10px; }
-.slot .ic { width: 30px; height: 30px; opacity: .15; filter: grayscale(1); }
-.slot .ic svg { width: 100%; height: 100%; }
-.slot.got { background: #d9f2dc; }
-.slot.got .ic { opacity: 1; filter: none; }
-.slot.got span { text-decoration: line-through; color: #3a7a4a; }
-.ex-tools { display: flex; gap: 6px; align-items: center; }
-.timer { font-family: var(--mono); background: var(--paper); color: #1d1a14; border: 2.5px solid var(--edge); border-radius: 999px; padding: 3px 10px; box-shadow: 0 3px 0 var(--edge); font-size: .85rem; }
-.penalty { position: absolute; z-index: 6; font-family: var(--toon); color: #ff5a3a; font-size: 1.3rem; text-shadow: 0 2px 0 var(--edge); pointer-events: none; animation: rise2 .9s ease forwards; transform: translate(-50%, -50%); }
-@keyframes rise2 { to { transform: translate(-50%, -160%); opacity: 0; } }
-.clue { position: absolute; left: 50%; top: 40%; z-index: 7; transform: translate(-50%, -50%); width: min(84%, 340px); background: var(--paper); color: #1d1a14; border: 3px solid var(--edge); border-radius: 20px; box-shadow: 0 6px 0 var(--edge); padding: 14px 16px; display: grid; grid-template-columns: 52px 1fr; gap: 12px; align-items: center; animation: pop .3s cubic-bezier(.3,1.5,.5,1) both; pointer-events: none; }
-.clue .ic svg { width: 52px; height: 52px; }
-.clue b { font-family: var(--toon); font-weight: 400; font-size: 1.1rem; display: block; }
-.clue p { margin: 2px 0 0; font-size: .88rem; }
-@keyframes pop { from { transform: translate(-50%, -50%) scale(.6); opacity: 0; } }
-.modal-bg { position: absolute; inset: 0; z-index: 8; background: rgba(0,0,0,.55); display: grid; place-items: center; padding: 16px; }
-.modal { width: min(100%, 380px); background: var(--paper); color: #1d1a14; border: 3px solid var(--edge); border-radius: 24px; box-shadow: 0 8px 0 var(--edge); padding: 20px 18px; text-align: center; animation: pop2 .35s cubic-bezier(.3,1.5,.5,1) both; max-height: 86vh; overflow-y: auto; }
-@keyframes pop2 { from { transform: scale(.7); opacity: 0; } }
-.modal h2 { font-family: var(--toon); font-weight: 400; font-size: 2rem; margin: 0; line-height: 1; }
-.modal .sub { color: #6a604c; margin: 6px 0 0; font-size: .9rem; }
-.bigstars { font-size: 2.8rem; letter-spacing: 4px; margin: 10px 0 4px; }
-.bigstars i { font-style: normal; color: #d9d2c0; -webkit-text-stroke: 2px var(--edge); display: inline-block; }
-.bigstars i.on { color: #f4b81c; animation: starIn .5s cubic-bezier(.3,1.6,.5,1) both; }
-.bigstars i.on:nth-child(2) { animation-delay: .25s; } .bigstars i.on:nth-child(3) { animation-delay: .5s; }
-@keyframes starIn { from { transform: scale(0) rotate(-60deg); } }
-.modal .btn { margin-top: 14px; width: 100%; }
-.rep-sec { text-align: left; margin-top: 14px; }
-.rep-sec h4 { font-family: var(--toon); font-weight: 400; font-size: 1rem; margin: 0 0 6px; }
-.rep-sec ul { margin: 0; padding-left: 18px; font-size: .88rem; display: flex; flex-direction: column; gap: 4px; }
-.faces { display: flex; gap: 6px; flex-wrap: wrap; }
-.face { width: 48px; height: 48px; border-radius: 50%; overflow: hidden; border: 2.5px solid var(--edge); background: #cfe3dc; }
-.face svg { width: 160%; margin: -8% 0 0 -30%; display: block; }
-.cluebar { display: flex; gap: 6px; flex-wrap: wrap; }
-.cluebar span { width: 40px; height: 40px; background: #fff; border: 2px solid var(--edge); border-radius: 10px; padding: 3px; }
-.cluebar svg { width: 100%; height: 100%; }
-
-/* people cards */
-.people { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 14px; }
-.pcard { background: var(--paper); color: #1d1a14; border: 3px solid var(--edge); border-radius: 16px; box-shadow: 0 4px 0 var(--edge); overflow: hidden; min-width: 0; }
-.pcard .pic { height: 120px; background: linear-gradient(#7fc8ff, #cfe8f4); border-bottom: 3px solid var(--edge); display: flex; justify-content: center; align-items: flex-end; overflow: hidden; }
-.pcard .pic svg { width: 88%; display: block; }
-.pcard .body { padding: 8px 10px 10px; }
-.pcard b { font-family: var(--toon); font-weight: 400; font-size: 1.05rem; display: block; }
-.pcard .role { font-size: .7rem; color: #8a7a5a; font-weight: 700; }
-.pcard ul { margin: 6px 0 0; padding-left: 16px; font-size: .76rem; display: flex; flex-direction: column; gap: 3px; }
-.pcard li.q { color: #b0a890; list-style: "?  "; }
-
 @media (prefers-reduced-motion: reduce) {
   .bg svg, .actor svg, .win, .bulb, .star, .smoke, .enter.on, .box .hint.on { animation: none !important; }
   .fx-siren { animation: none; background: rgba(255,30,30,.2); }
@@ -363,8 +246,6 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
 <script src="world/stage/femi.stage.js" charset="utf-8"></script>
 <script src="stories/dami.js" charset="utf-8"></script>
 <script src="world/stage/dami.stage.js" charset="utf-8"></script>
-<script src="world/art/items.js" charset="utf-8"></script>
-<script src="world/stage/journeys.js" charset="utf-8"></script>
 <script>
 (function () {
   "use strict";
@@ -583,9 +464,8 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
 
   function newRun(id) {
     const s = STORIES[id];
-    run = { story: id, stats: Object.assign({}, s.stats), flags: {}, log: [], logCh: [], feed: [], scene: null, lines: [], li: 0, ch: null, card: null, visited: {}, chStars: {}, clues: {}, phase: "hub" };
+    run = { story: id, stats: Object.assign({}, s.stats), flags: {}, log: [], feed: [], scene: null, lines: [], li: 0, ch: null, card: null };
     enter(s.start);
-    run.phase = "hub";
     save(); openGame();
   }
 
@@ -593,8 +473,7 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
     for (let guard = 0; guard < 20; guard++) {
       const sc = sceneOf(id);
       if (!sc) { console.error("Missing scene", id); return; }
-      if (sc.ch && sc.ch !== run.ch) { if (run.ch) { run.reportCh = run.ch; run.phase = "report"; } run.ch = sc.ch; run.card = sc.ch; }
-      (run.visited = run.visited || {})[id] = 1;
+      if (sc.ch && sc.ch !== run.ch) { run.ch = sc.ch; run.card = sc.ch; }
       const ch = applyFx(sc.on);
       if (ch.length) pendingToasts.push(...ch);
       run.scene = id; run.li = 0;
@@ -611,19 +490,17 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
     if (sc.choices) return;
     if (sc.id) { finish(sc.id); return; }
     const nx = sc.route ? sc.route(run) : sc.next;
-    if (nx) { enter(nx); save(); if (inPhase()) return renderPhase(); if (run.card) showLine(false); else advance(); }
+    if (nx) { enter(nx); save(); if (run.card) showLine(false); else advance(); }
   }
-  const inPhase = () => run.phase && run.phase !== "story";
 
   function choose(i) {
     const sc = sceneOf(run.scene), c = sc.choices[i];
     Sound.tick();
     run.feed.push({ s: run.scene, c: i });
     pendingToasts.push(...applyFx(c.fx));
-    run.log.push(c.log || c.en); (run.logCh = run.logCh || []).push(run.ch);
+    run.log.push(c.log || c.en);
     enter(c.to);
     save();
-    if (inPhase()) return renderPhase();
     if (run.card) showLine(false); else advance();
   }
 
@@ -692,174 +569,16 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
         <button class="ib" data-a="menu" type="button">Menu</button></div></div>
         <div class="stats"></div></header>
       <div class="toasts"></div><div class="overlay"></div>
-      <div class="box narr" role="button" tabindex="0" aria-live="polite"><span class="who" hidden></span><div class="txt"></div><div class="choices" hidden></div><span class="hint">Tap ▸</span></div>
-      <div class="phase" hidden></div>`;
-    G = { phase: $(".phase", root), root, bgs: $(".bgs", root), actors: $(".actors", root), fxl: $(".fxl", root), chap: $(".chap", root), stats: $(".stats", root), toasts: $(".toasts", root), overlay: $(".overlay", root), box: $(".box", root), choices: $(".choices", root), bgName: null, actorEls: {} };
+      <div class="box narr" role="button" tabindex="0" aria-live="polite"><span class="who" hidden></span><div class="txt"></div><div class="choices" hidden></div><span class="hint">Tap ▸</span></div>`;
+    G = { root, bgs: $(".bgs", root), actors: $(".actors", root), fxl: $(".fxl", root), chap: $(".chap", root), stats: $(".stats", root), toasts: $(".toasts", root), overlay: $(".overlay", root), box: $(".box", root), choices: $(".choices", root), bgName: null, actorEls: {} };
     root.onclick = (e) => {
       const a = e.target.closest("[data-a]");
       if (a) { e.stopPropagation(); tool(a.dataset.a); return; }
-      if (e.target.closest(".choices") || e.target.closest(".sheet") || e.target.closest(".box.asking") || e.target.closest(".phase")) return;
+      if (e.target.closest(".choices") || e.target.closest(".sheet") || e.target.closest(".box.asking")) return;
       tap();
     };
-    if (inPhase()) { renderPhase(); return; }
     showLine(false);
     if (!run.card && run.li === 0) advance();
-  }
-
-  /* ───────────── MAP · EXPLORE · REPORT ───────────── */
-  const W = () => STAGES[run.story] || {};
-  const chOrder = () => Object.keys(story().chapters);
-  const starsTotal = () => Object.values(run.chStars || {}).reduce((a, b) => a + b, 0);
-  const exploreCfg = (ch) => { const e = (W().explore || {})[ch]; return typeof e === "function" ? e(run) : e; };
-  const starStr = (n) => "★★★".slice(0, n) + "☆☆☆".slice(0, 3 - n);
-
-  function renderPhase() {
-    stopTyping();
-    G.phase.hidden = false;
-    G.phase.innerHTML = ""; G.phase.classList.remove("hub");
-    if (run.phase === "hub") renderHub();
-    else if (run.phase === "explore") renderExplore();
-    else if (run.phase === "report") renderReport();
-  }
-  function toStory() {
-    run.phase = "story"; save();
-    G.phase.hidden = true; G.phase.innerHTML = "";
-    showLine(false);
-  }
-
-  function renderHub() {
-    const S = story(), order = chOrder(), cur = order.indexOf(run.ch);
-    Sound.setMood("night");
-    const ph = G.phase;
-    ph.classList.add("hub");
-    ph.innerHTML = `<div class="map-wrap">${ART.lagosMap ? ART.lagosMap() : ""}</div>
-      <div class="ph-top gut"><div class="ph-title"><small>${esc(S.hero)} · ${esc(S.title)}</small>Lagos</div>
-        <div class="ex-tools"><span class="starpill"><i>★</i>${starsTotal()} / ${order.length * 3}</span><button class="ib" type="button" data-h="menu">Menu</button></div></div>`;
-    const map = W().map || {};
-    order.forEach((ch, i) => {
-      const m = map[ch]; if (!m) return;
-      const state = i < cur ? "done" : i === cur ? "now" : "locked";
-      const b = el("button", "pin " + state, `<span class="head"><span>${state === "locked" ? "🔒" : i === 0 ? "P" : i}</span></span><span class="lbl">${esc(m.label)}</span>${state === "done" ? `<span class="stars">${starStr(run.chStars[ch] || 0)}</span>` : ""}`);
-      b.type = "button"; b.style.left = (m.x / 400) * 100 + "%"; b.style.top = (m.y / 560) * 100 + "%";
-      b.setAttribute("aria-label", `${S.chapters[ch].num}: ${S.chapters[ch].title}, ${state}`);
-      if (state === "now") b.onclick = startChapter;
-      $(".map-wrap", ph).appendChild(b);
-    });
-    const c = S.chapters[run.ch], ex = exploreCfg(run.ch);
-    const sheet = el("div", "hub-sheet", `<div class="thumb">${ART.place(ex ? ex.place : (stageOf(run.scene).bg || "black"))}</div>
-      <div><div class="n">${esc(c.num)}${run.chStars[run.ch] ? "" : " · New"}</div><h3>${esc(c.title)}</h3><p>${ex ? "Explore " + esc(ex.title.toLowerCase()) + ", then live the chapter." : "Live the chapter."}</p></div>
-      <div class="acts"><button class="btn primary" type="button" data-h="play">Play ▸</button><button class="btn ghost" type="button" data-h="people">People</button></div>`);
-    ph.appendChild(sheet);
-    ph.querySelector('[data-h="play"]').onclick = startChapter;
-    ph.querySelector('[data-h="people"]').onclick = openPeople;
-    ph.querySelector('[data-h="menu"]').onclick = () => renderSelect();
-  }
-  function startChapter() {
-    Sound.init(); Sound.resume(); Sound.whoosh();
-    const ex = exploreCfg(run.ch);
-    if (ex && !(run.clues || {})[run.ch]) { run.phase = "explore"; save(); renderPhase(); }
-    else toStory();
-  }
-
-  let exTimer = null;
-  function renderExplore() {
-    const ex = exploreCfg(run.ch), ph = G.phase;
-    Sound.setMood((ART.placeMood || {})[ex.place] || "indoor");
-    const found = new Set();
-    let t0 = performance.now(), penalty = 0, hints = 0;
-    ph.innerHTML = `<div class="ex-bg">${ART.place(ex.place)}</div><div class="ex-field"></div>
-      <div class="ph-top gut"><div class="ph-title"><small>Explore · find 5 things</small>${esc(ex.title)}</div>
-      <div class="ex-tools"><span class="timer">0:00</span><button class="ib" type="button" data-x="hint">Hint</button></div></div>
-      <div class="tray">${ex.items.map((it, i) => `<div class="slot" data-i="${i}"><div class="ic">${ART.item(it.icon)}</div><span>${esc(it.name)}</span></div>`).join("")}</div>`;
-    const field = $(".ex-field", ph), timer = $(".timer", ph);
-    // scatter targets + clutter without overlaps, inside the safe area (clear of title and tray)
-    const spots = [];
-    const place = () => { for (let k = 0; k < 60; k++) { const x = 8 + Math.random() * 84, y = 18 + Math.random() * 52; if (spots.every(([a, b]) => Math.hypot(a - x, (b - y) * 0.75) > 12)) { spots.push([x, y]); return [x, y]; } } const r = [8 + Math.random() * 84, 18 + Math.random() * 52]; spots.push(r); return r; };
-    const clutter = ART.clutter.filter((c) => !ex.items.some((it) => it.icon === c)).sort(() => Math.random() - 0.5).slice(0, 12);
-    const all = ex.items.map((it, i) => ({ icon: it.icon, i })).concat(clutter.map((c) => ({ icon: c, i: -1 }))).sort(() => Math.random() - 0.5);
-    all.forEach((o) => {
-      const [x, y] = place();
-      const b = el("button", "obj", ART.item(o.icon));
-      b.type = "button"; b.style.left = x + "%"; b.style.top = y + "%";
-      b.style.setProperty("--r", (Math.random() * 50 - 25).toFixed(0) + "deg");
-      const sz = 44 + Math.random() * 18; b.style.width = b.style.height = sz + "px";
-      b.style.zIndex = Math.floor(Math.random() * 5);
-      b.setAttribute("aria-label", o.i >= 0 ? ex.items[o.i].name : "clutter");
-      if (o.i >= 0) b.dataset.t = o.i;
-      b.onclick = (e) => {
-        e.stopPropagation();
-        if (o.i >= 0 && !found.has(o.i)) {
-          found.add(o.i); b.classList.add("found"); Sound.pop();
-          const slot = ph.querySelector(`.slot[data-i="${o.i}"]`); slot.classList.add("got");
-          const it = ex.items[o.i];
-          const prev = $(".clue", ph); if (prev) prev.remove();
-          const c = el("div", "clue", `<div class="ic">${ART.item(it.icon)}</div><div><b>${esc(it.name)}</b><p>${esc(it.note)}</p></div>`);
-          ph.appendChild(c); setTimeout(() => c.remove(), 2600);
-          if (found.size === ex.items.length) setTimeout(done, 900);
-        } else if (o.i < 0) {
-          penalty += 5; Sound.tick(); b.classList.remove("nope"); void b.offsetWidth; b.classList.add("nope");
-          const pn = el("div", "penalty", "−5s"); pn.style.left = x + "%"; pn.style.top = y + "%"; field.appendChild(pn); setTimeout(() => pn.remove(), 900);
-        }
-      };
-      field.appendChild(b);
-    });
-    const secs = () => Math.floor((performance.now() - t0) / 1000) + penalty;
-    clearInterval(exTimer);
-    exTimer = setInterval(() => { const n = secs(); timer.textContent = Math.floor(n / 60) + ":" + String(n % 60).padStart(2, "0"); }, 250);
-    ph.querySelector('[data-x="hint"]').onclick = (e) => {
-      e.stopPropagation();
-      const left = [...field.querySelectorAll(".obj[data-t]")].filter((b) => !found.has(+b.dataset.t));
-      if (!left.length) return;
-      const b = left[Math.floor(Math.random() * left.length)];
-      b.classList.remove("hinted"); void b.offsetWidth; b.classList.add("hinted"); setTimeout(() => b.classList.remove("hinted"), 2100);
-      penalty += 15; hints++;
-      const pn = el("div", "penalty", "+15s"); pn.style.left = "85%"; pn.style.top = "9%"; ph.appendChild(pn); setTimeout(() => pn.remove(), 900);
-    };
-    function done() {
-      clearInterval(exTimer);
-      const n = secs(), stars = n <= 40 ? 3 : n <= 80 ? 2 : 1;
-      run.chStars = run.chStars || {}; run.chStars[run.ch] = stars;
-      (run.clues = run.clues || {})[run.ch] = ex.items.map((it) => it.icon);
-      save(); Sound.ding();
-      const m = el("div", "modal-bg", `<div class="modal"><h2>${stars === 3 ? "Sharp eyes!" : stars === 2 ? "Well done!" : "Found them all"}</h2>
-        <div class="bigstars">${[1, 2, 3].map((k) => `<i class="${k <= stars ? "on" : ""}">★</i>`).join("")}</div>
-        <p class="sub">${Math.floor(n / 60)}:${String(n % 60).padStart(2, "0")}${penalty ? ` · includes ${penalty}s of penalties` : ""}</p>
-        <button class="btn primary" type="button">Start ${esc(story().chapters[run.ch].title)} ▸</button></div>`);
-      ph.appendChild(m);
-      $(".btn", m).onclick = (e) => { e.stopPropagation(); toStory(); };
-    }
-  }
-
-  function metIn(ch) {
-    const who = new Set();
-    run.feed.forEach((f) => { const sc = sceneOf(f.s); if (!sc || sc.ch !== ch || f.c != null) return; const l = sc.lines[f.i]; if (l && (l.k === "s" || l.k === "c") && l.who !== player() && ART.characters[l.who]) who.add(l.who); });
-    return [...who];
-  }
-  function renderReport() {
-    const S = story(), ch = run.reportCh, c = S.chapters[ch];
-    const picks = (run.log || []).filter((_, i) => (run.logCh || [])[i] === ch);
-    const stars = (run.chStars || {})[ch] || 0, clues = (run.clues || {})[ch] || [];
-    Sound.ding();
-    G.phase.innerHTML = `<div class="ex-bg">${ART.place(stageOf(run.scene).bg || "black")}</div><div class="modal-bg"><div class="modal">
-      <p class="sub" style="margin:0;font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:.7rem">${esc(c.num)} complete</p>
-      <h2>${esc(c.title)}</h2>
-      <div class="bigstars">${[1, 2, 3].map((k) => `<i class="${k <= stars ? "on" : ""}">★</i>`).join("")}</div>
-      ${picks.length ? `<div class="rep-sec"><h4>Your choices</h4><ul>${picks.map((p) => `<li>${esc(p)}</li>`).join("")}</ul></div>` : ""}
-      ${metIn(ch).length ? `<div class="rep-sec"><h4>People</h4><div class="faces">${metIn(ch).map((w) => `<span class="face" title="${esc((S.cast[w] || {}).name || w)}">${ART.portrait(w)}</span>`).join("")}</div></div>` : ""}
-      ${clues.length ? `<div class="rep-sec"><h4>What you found</h4><div class="cluebar">${clues.map((ic) => `<span>${ART.item(ic)}</span>`).join("")}</div></div>` : ""}
-      <button class="btn primary" type="button">Back to the map ▸</button></div></div>`;
-    $(".btn", G.phase).onclick = (e) => { e.stopPropagation(); run.phase = "hub"; save(); renderPhase(); };
-  }
-
-  function openPeople() {
-    const S = story(), prof = W().profiles || {}, seen = new Set([player()]);
-    run.feed.forEach((f) => { const sc = sceneOf(f.s); const l = sc && f.i != null ? sc.lines[f.i] : null; if (l && (l.k === "s" || l.k === "c")) seen.add(l.who); });
-    const ids = Object.keys(prof).filter((id) => seen.has(id));
-    const sheet = el("div", "sheet gut");
-    sheet.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3 style="font-family:var(--toon);font-weight:400;font-size:1.5rem">People · ${ids.length} met</h3><button class="btn" type="button">Close</button></div>
-      <div class="people">${ids.map((id) => { const p = prof[id]; return `<div class="pcard"><div class="pic">${ART.portrait(id, { mood: id === player() ? "neutral" : undefined })}</div><div class="body"><b>${esc(id === player() ? S.hero : (S.cast[id] || {}).name || id)}</b><div class="role">${esc(p.role)}</div><ul>${p.facts.map(([sc, f]) => !sc || (run.visited || {})[sc] ? `<li>${esc(f)}</li>` : `<li class="q">Keep playing to find out</li>`).join("")}</ul></div></div>`; }).join("")}</div>`;
-    $(".btn", sheet).onclick = (e) => { e.stopPropagation(); sheet.remove(); };
-    G.phase.appendChild(sheet);
   }
 
   function tool(a) {
@@ -871,7 +590,6 @@ button:focus-visible { outline: 2px solid var(--danfo); outline-offset: 2px; }
 
   function tap() {
     Sound.resume();
-    if (inPhase()) return;
     if (run.card) { run.card = null; save(); G.overlay.innerHTML = ""; if (run.li === 0) advance(); else showLine(false); return; }
     if (typing) { finishTyping(); return; }
     const sc = sceneOf(run.scene);
