@@ -75,3 +75,18 @@ export const QUICK_PROMPTS = {
   visual: `Show me that visually with an interactive simulation I can play with.`,
   cards: `Make flashcards from everything we've covered in this session. Reply with a one-line confirmation and the json memory block (6–12 flashcards, plus any glossary terms).`,
 };
+
+export const QUIZ_PROMPT = ({ topic, course, hasMaterials }) => `Make a 5-question class test on: ${topic || 'the main topics in the attached materials'} (course: ${course}).
+${hasMaterials ? 'Base it on what the attached materials actually teach (that is what was taught in class).' : 'No materials attached: use standard undergraduate content for this topic.'}
+Mix: 2 concept questions, 2 application or calculation questions (if the topic has maths, use real numbers with units), and 1 "what happens if…" or "spot the mistake" question. Match the style of a Nigerian university class test. Wrong options should be tempting, based on common misconceptions.
+Reply with ONLY one json code block, nothing else, shaped exactly like:
+{"title":"short fun title","questions":[{"q":"question text (LaTeX in $...$ allowed)","options":["...","...","...","..."],"answer":0,"explain":"1–3 sentences: why the answer is right and why the tempting wrong option is wrong"}]}
+"answer" is the index (0–3) of the correct option. Vary which index is correct.`;
+
+export const GCODE_HELP_PROMPT = (code, problems) => `Here is my CNC G-code program from the simulator:
+
+\`\`\`gcode
+${code}
+\`\`\`
+
+${problems.length ? 'The simulator reported:\n' + problems.map((m) => `- Line ${m.line} (${m.level}): ${m.text}`).join('\n') + '\n\n' : ''}Go through it line by line in a table (line | code | what it does in plain English). Then explain any mistakes, why they'd be a problem on a real machine, and give me the corrected program in a code block. End with one small challenge for me to try in the simulator.`;

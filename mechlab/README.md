@@ -4,8 +4,29 @@ A personal AI study lab for my mechatronics courses. Upload lecture notes, slide
 
 ## What it does
 
+**🏠 Home**
+- **Night and morning check-ins.** At night it asks which classes are confirmed for tomorrow; in the morning, which are confirmed for today. It learns each weekday's real pattern from your answers and shows its guess as a %.
+- **Tonight's plan.** A timeline built around your sleep: nap at 7:30 PM → wake at 11 PM → flashcards → revise tomorrow's courses → quiz on today's → sleep by 2:30 AM.
+- **Rewards.** Sparkles ✨, levels (Curious Cadet → Mechatronics Mastermind), badges, a streak and confetti, with Gigi the gear cheering you on.
+
+**📘 Learn**: modes that teach your uploaded notes until they click:
+
 | Mode | What you get |
 |---|---|
+| 📘 Teach me | Full lesson from zero: big picture → prerequisites → jargon → intuition → maths → worked example → exam traps |
+| 🧱 Prerequisites | Maps the chain of earlier knowledge a topic needs, quizzes you up the chain and re-teaches what you've forgotten |
+| 🎛 Visualise | Generates a live interactive simulation for the concept |
+| 💡 Analogy · 🔤 Jargon · ✍️ Worked example · ❓ Quiz me · 🗣 Explain back · 📜 Past questions · ⏰ Test prep | |
+
+**🎀 Quiz**: 5-question multiple-choice tests on what was taught today, with instant explanations. Missed questions turn into flashcards automatically.
+
+**🧪 Labs**: practise for real, in the browser:
+- **⚙️ CNC G-code Studio** (Industrial Automation): write G and M codes and watch a simulated mill cut your part, with a top view, side view and position readout. It explains every line in plain English and catches mistakes the way a real machine would (no feed rate, spindle off, rapid move into the material, bad arc centre…). It includes examples, a searchable cheat sheet and 4 challenges.
+- **👁️ Vision Lab** (Computer Vision): grayscale, threshold, blur, sharpen, Sobel edges and custom kernels, with a pixel inspector that shows the convolution maths for any pixel you tap. Plus **train your own image classifier** with your camera (k-nearest neighbours) and watch it predict live.
+
+**💌 Cards**: spaced-repetition flashcards and a glossary that fill themselves in.
+
+---|---|
 | 📘 Teach me | Full lesson from zero: big picture → prerequisites → jargon → intuition → maths → worked example → exam traps |
 | 🧱 Prerequisites | Maps the chain of earlier knowledge a topic needs, then quizzes you up the chain and re-teaches what you've forgotten |
 | 🎛 Visualise | Generates a live interactive simulation (sliders, plots, animation) for the concept |
@@ -32,14 +53,23 @@ Plus: **😵 Still confused** (tries a completely different approach), a **gloss
 2. On GitHub: repo **Settings → Pages → Build and deployment → Source: Deploy from a branch → Branch: `main`, folder `/ (root)` → Save**.
 3. After a minute, MechLab is at `https://<your-username>.github.io/<repo-name>/mechlab/`
 4. Open it, go to **Settings**, paste your Gemini key, press **Load my models**, then **Test connection**.
-5. On your phone, open the link and choose **Add to Home Screen** so it opens like an app.
+5. **Install it as an app.** Phone (Chrome): open the link → ⋮ menu → **Add to Home screen / Install app**. iPhone (Safari): Share → **Add to Home Screen**. Laptop (Chrome/Edge): click the install icon in the address bar. It then opens in its own window, like a real app.
 
 > GitHub Pages is free for public repositories. Your notes and keys are **not** uploaded to GitHub. They stay in your browser.
 
 ### 3. Phone + email reminders (8 min)
-Reminders run on GitHub's servers, so they arrive even when MechLab is closed:
-- **07:00 on class days**: which classes are today
-- **19:00 every evening**: what to read tonight for tomorrow's tests (or a 10-minute flashcard nudge)
+Reminders run on GitHub's servers, so they arrive even when MechLab is closed. Tapping one opens MechLab at the right spot:
+
+| Time (Lagos) | Reminder |
+|---|---|
+| 6:33 AM | Confirm today's classes (class days only) |
+| 7:13 PM | Confirm tomorrow's classes, set your 11 PM alarm, nap |
+| 10:52 PM | ⏰ **Wake up, study time** (urgent priority, rings louder) |
+| 1:31 AM | Do today's quiz, then sleep |
+
+Only the 7 PM one is also emailed (change it with a repository **variable** `EMAIL_SLOTS`, e.g. `evening,wake`).
+
+> **Use a real phone alarm for 11 PM too.** GitHub sometimes runs scheduled jobs 5–30 minutes late, so the notification is a backup, not your alarm clock. **Settings → Download alarms (.ics)** adds all of these as calendar events with alerts.
 
 **Phone (free ntfy app):**
 1. Install **ntfy** from the Play Store / App Store.
@@ -88,6 +118,9 @@ Ticked materials are cached, so follow-up questions in the same session cost muc
 mechlab/
   index.html, style.css, app.js   the app (no build step)
   prompts.js                      all the teaching instructions; tweak these to change how it teaches
+  labs/gcode.js                   G-code interpreter + CNC simulator
+  labs/vision.js                  image filters + camera classifier
+  manifest.webmanifest, sw.js     makes it installable and work offline
   vendor/                         bundled libraries (marked, DOMPurify, KaTeX, Anthropic SDK)
   reminders/timetable.json        timetable used by the reminder job
   reminders/send_reminders.py     sends ntfy + email reminders

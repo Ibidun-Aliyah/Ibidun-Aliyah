@@ -8,6 +8,7 @@ Environment variables (set as GitHub Actions secrets; any channel left unset is 
   GMAIL_APP_PASSWORD  a Gmail "app password" (not your normal password)
   REMINDER_EMAIL_TO   where to send (defaults to GMAIL_ADDRESS)
   APP_URL             optional link to your MechLab page
+  EMAIL_SLOTS         which reminders also go by email, comma-separated (default: evening)
 """
 import argparse
 import datetime as dt
@@ -33,44 +34,60 @@ def on_day(courses, weekday):
 
 
 def build(slot, now=None):
+    """Return (title, body, click_query) for a slot, or None if there's nothing worth sending."""
     now = now or dt.datetime.now(LAGOS)
     courses = load_courses()
-    today = on_day(courses, now.weekday())
-    tomorrow_wd = (now.weekday() + 1) % 7
+    # Night-owl logic: before 5 AM still counts as the previous day.
+    day = now - dt.timedelta(days=1) if now.hour < 5 else now
+    today = on_day(courses, day.weekday())
+    tomorrow_wd = (day.weekday() + 1) % 7
     tomorrow = on_day(courses, tomorrow_wd)
 
     if slot == "morning":
         if not today:
             return None
-        title = "Classes today: " + ", ".join(today)
-        body = (
-            "Each class may open with a test on the last lecture.\n"
-            "Before each one, spend 10 minutes on MechLab > Today > Quick prep.\n\n"
-            + "\n".join(f"- {c}" for c in today)
+        return (
+            "Good morning! Which classes are confirmed today?",
+            "Usually today: " + ", ".join(today) + ".\nTap to confirm in MechLab, and do a 10-minute recap before each class (tests are on the last lecture).",
+            "?checkin=morning",
         )
-        return title, body
 
-    # evening
-    if tomorrow:
-        title = "Read tonight for tomorrow's tests"
-        body = (
-            f"Tomorrow ({DAYS[tomorrow_wd]}): " + ", ".join(tomorrow) + ".\n\n"
-            "Plan (about 45 minutes):\n"
-            "1. Open MechLab > Today > 'Revise last lecture' for each course.\n"
-            "2. Do the Test prep questions out loud.\n"
-            "3. Clear your due flashcards.\n"
+    if slot == "evening":
+        if tomorrow:
+            body = (
+                f"Usually tomorrow ({DAYS[tomorrow_wd]}): " + ", ".join(tomorrow) + ".\n"
+                "1. Tap to confirm which are really holding.\n"
+                "2. Set your alarm for 11:00 PM.\n"
+                "3. Then nap. Future you says thank you."
+            )
+            return "Night check-in: what's confirmed for tomorrow?", body, "?checkin=night"
+        if now.weekday() == 5:  # Saturday
+            return "Weekly catch-up", "Clear your flashcards, then re-learn the topic that felt shakiest this week.", "?plan=1"
+        return "10-minute study habit", "No classes tomorrow, but keep the streak going: clear your due flashcards in MechLab.", "?plan=1"
+
+    if slot == "wake":
+        if not tomorrow and not today:
+            return None
+        parts = []
+        if tomorrow:
+            parts.append("Revise the last lecture for: " + ", ".join(tomorrow) + " (tests tomorrow!)")
+        if today:
+            parts.append("5-question quiz on what was taught today: " + ", ".join(today))
+        return "WAKE UP, it's study time", "Water first. Then:\n- 10 min flashcards\n- " + "\n- ".join(parts), "?plan=1"
+
+    if slot == "late":
+        if not today:
+            return None
+        return (
+            "Quiz, then sleep",
+            "Lock in today's classes with a 5-question quiz (" + ", ".join(today) + "), then lights out by 2:30. You did amazing.",
+            "?plan=1",
         )
-    elif now.weekday() == 5:  # Saturday
-        title = "Weekly catch-up"
-        body = "Clear your flashcards, then re-learn the topic that felt shakiest this week. Add any new notes to the Library."
-    else:
-        title = "10-minute study habit"
-        body = "No classes tomorrow, but keep the streak going: clear your due flashcards in MechLab."
-    return title, body
+    raise ValueError(slot)
 
 
-def send_ntfy(topic, title, body, url):
-    headers = {"Title": title.encode("ascii", "ignore").decode(), "Tags": "books", "Priority": "high"}
+def send_ntfy(topic, title, body, url, urgent=False):
+    headers = {"Title": title.encode("ascii", "ignore").decode(), "Tags": "alarm_clock" if urgent else "books", "Priority": "urgent" if urgent else "high"}
     if url:
         headers["Click"] = url
     req = urllib.request.Request(f"https://ntfy.sh/{topic}", data=body.encode("utf-8"), headers=headers, method="POST")
@@ -91,7 +108,7 @@ def send_email(sender, password, to, title, body, url):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--slot", choices=["morning", "evening"], required=True)
+    ap.add_argument("--slot", choices=["morning", "evening", "wake", "late"], required=True)
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -99,23 +116,25 @@ def main():
     if not msg:
         print("Nothing to send for this slot today.")
         return 0
-    title, body = msg
+    title, body, query = msg
     print(f"{title}\n\n{body}")
     if args.dry_run:
         return 0
 
-    url = os.environ.get("APP_URL", "").strip()
+    base = os.environ.get("APP_URL", "").strip()
+    url = base + query if base else ""
+    email_slots = os.environ.get("EMAIL_SLOTS", "").strip() or "evening"
     sent, failed = 0, 0
     topic = os.environ.get("NTFY_TOPIC", "").strip()
     if topic:
         try:
-            send_ntfy(topic, title, body, url)
+            send_ntfy(topic, title, body, url, urgent=args.slot == "wake")
             sent += 1
         except Exception as e:  # keep going so email still gets a chance
             print(f"ntfy failed: {e}", file=sys.stderr)
             failed += 1
     sender, pw = os.environ.get("GMAIL_ADDRESS", "").strip(), os.environ.get("GMAIL_APP_PASSWORD", "").strip()
-    if sender and pw:
+    if sender and pw and args.slot in email_slots.split(","):
         try:
             send_email(sender, pw, os.environ.get("REMINDER_EMAIL_TO", "").strip() or sender, title, body, url)
             sent += 1

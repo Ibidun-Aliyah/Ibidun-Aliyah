@@ -4,62 +4,185 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>MechLab</title>
-  <meta name="description" content="Personal AI study lab for mechatronics courses">
-  <meta name="theme-color" content="#0f766e">
+  <meta name="description" content="A cute, serious AI study lab for mechatronics">
+  <meta name="theme-color" content="#ffd9ea" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1d1424" media="(prefers-color-scheme: dark)">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="MechLab">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
   <link rel="stylesheet" href="vendor/katex.min.css">
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f766e'/%3E%3Ccircle cx='32' cy='32' r='14' fill='none' stroke='white' stroke-width='5'/%3E%3Cpath d='M32 6v10M32 48v10M6 32h10M48 32h10' stroke='white' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><span class="logo">⚙</span> MechLab</div>
-    <nav class="tabs" id="tabs">
-      <button data-tab="today" class="active">Today</button>
-      <button data-tab="library">Library</button>
-      <button data-tab="learn">Learn</button>
-      <button data-tab="review">Review</button>
-      <button data-tab="glossary">Glossary</button>
-      <button data-tab="settings">Settings</button>
-    </nav>
+    <div class="brand"><span id="brandMascot" class="brand-mascot"></span><span>MechLab</span><span class="sparkle">✦</span></div>
+    <button class="lvl-pill" id="lvlPill" data-goto="home" type="button"></button>
   </header>
 
+  <nav class="tabs" id="tabs" aria-label="Sections">
+    <button data-tab="home" class="active"><span>🏠</span><small>Home</small></button>
+    <button data-tab="learn"><span>📘</span><small>Learn</small></button>
+    <button data-tab="labs"><span>🧪</span><small>Labs</small></button>
+    <button data-tab="quiz"><span>🎀</span><small>Quiz</small></button>
+    <button data-tab="cards"><span>💌</span><small>Cards</small></button>
+    <button data-tab="library"><span>📚</span><small>Library</small></button>
+    <button data-tab="settings"><span>⚙️</span><small>Settings</small></button>
+  </nav>
+
   <main>
-    <!-- TODAY -->
-    <section id="tab-today" class="tab active">
+    <!-- HOME -->
+    <section id="tab-home" class="tab active">
       <div id="setupBanner" class="banner hidden">
-        👋 First time? Go to <a href="#" data-goto="settings">Settings</a> and paste your free Gemini API key. That's all you need to start.
+        👋 Welcome! First, go to <a href="#" data-goto="settings">Settings</a> and paste your free Gemini key. Then we're off ✨
       </div>
+      <div class="hero card">
+        <div class="hero-mascot" id="heroMascot"></div>
+        <div class="hero-text">
+          <h1 id="greeting">Hi bestie</h1>
+          <div class="bubble" id="mascotSays"></div>
+          <div class="xp">
+            <div class="xp-top"><b id="lvlName"></b><span id="xpText" class="small muted"></span></div>
+            <div class="xp-bar"><i id="xpFill"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="checkin"></div>
+
       <div class="grid2">
-        <div class="card">
-          <h2 id="todayTitle">Today</h2>
-          <div id="todayClasses"></div>
+        <div class="card" id="planCard">
+          <h2>🌙 Tonight's plan</h2>
+          <div id="plan"></div>
         </div>
         <div class="card">
-          <h2>Tonight's revision</h2>
-          <div id="tonight"></div>
+          <h2>🎀 Today's 5-question quizzes</h2>
+          <p class="small muted">Lock in what was taught today, while it's fresh.</p>
+          <div id="todayQuizzes"></div>
         </div>
-        <div class="card">
-          <h2>Flashcards due</h2>
-          <div class="bignum" id="dueCount">0</div>
-          <button class="btn primary" data-goto="review">Review now</button>
-        </div>
-        <div class="card">
-          <h2>Study streak</h2>
-          <div class="bignum" id="streak">0 🔥</div>
-          <div class="muted" id="streakNote"></div>
-        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><span>🔥</span><b id="streak">0</b><small>day streak</small></div>
+        <div class="stat"><span>💌</span><b id="dueCount">0</b><small>cards due</small></div>
+        <div class="stat"><span>✨</span><b id="xpCount">0</b><small>sparkles</small></div>
+        <div class="stat"><span>🏅</span><b id="badgeCount">0</b><small>badges</small></div>
+      </div>
+
+      <div class="card">
+        <h2>🗓️ My week <span class="small muted">(learns from your check-ins)</span></h2>
+        <div id="weekGrid" class="week"></div>
       </div>
       <div class="card">
-        <h2>This week</h2>
-        <div id="weekGrid" class="week"></div>
+        <h2>🏅 Badges</h2>
+        <div id="badges" class="badges"></div>
+      </div>
+    </section>
+
+    <!-- LEARN -->
+    <section id="tab-learn" class="tab">
+      <div class="learn">
+        <aside class="card learn-side">
+          <label>Course <select id="lnCourse"></select></label>
+          <div class="side-h">Materials to use <span class="muted small">(tick what's relevant)</span></div>
+          <div id="lnFiles" class="filepick"></div>
+          <div class="side-h">Past sessions</div>
+          <div id="lnSessions" class="sessions"></div>
+          <button class="btn small" id="newSession" type="button">+ New session</button>
+        </aside>
+        <div class="card learn-main">
+          <input id="topic" type="text" placeholder="Topic, e.g. 'PID controllers' or 'what was taught in Week 5'">
+          <div class="modes" id="modes">
+            <button data-mode="teach">📘 Teach me</button>
+            <button data-mode="prereq">🧱 Prerequisites</button>
+            <button data-mode="visual">🎛 Visualise</button>
+            <button data-mode="analogy">💡 Analogy</button>
+            <button data-mode="jargon">🔤 Jargon</button>
+            <button data-mode="worked">✍️ Worked example</button>
+            <button data-mode="quiz">❓ Quiz me</button>
+            <button data-mode="explainback">🗣 Explain back</button>
+            <button data-mode="pastq">📜 Past questions</button>
+            <button data-mode="lastlecture">⏰ Test prep</button>
+            <button data-mode="quiz5" class="special">🎀 5-question test</button>
+          </div>
+          <div id="chat" class="chat"></div>
+          <div class="quick" id="quick">
+            <button data-quick="confused">😵 Still confused, try another way</button>
+            <button data-quick="simpler">🍼 Simpler</button>
+            <button data-quick="deeper">🔬 Go deeper</button>
+            <button data-quick="visual">🎛 Show me visually</button>
+            <button data-quick="cards">💌 Make flashcards</button>
+          </div>
+          <form id="askForm" class="ask">
+            <textarea id="ask" rows="2" placeholder="Ask anything, or answer the question…"></textarea>
+            <button class="btn primary" id="sendBtn">Send</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- LABS -->
+    <section id="tab-labs" class="tab">
+      <div class="lab-picker" id="labPicker">
+        <button class="lab-card" data-lab="gcode" type="button"><span class="lab-emoji">⚙️</span><b>CNC G-code Studio</b><small>Industrial Automation · write G &amp; M codes, watch the machine cut</small></button>
+        <button class="lab-card" data-lab="vision" type="button"><span class="lab-emoji">👁️</span><b>Vision Lab</b><small>Computer Vision · filters, edges, kernels &amp; train a classifier</small></button>
+        <div class="lab-card soon"><span class="lab-emoji">🎛️</span><b>PID Tuner</b><small>Control Engineering · coming soon</small></div>
+        <div class="lab-card soon"><span class="lab-emoji">🪜</span><b>PLC Ladder Logic</b><small>Industrial Automation · coming soon</small></div>
+        <div class="lab-card soon"><span class="lab-emoji">🔌</span><b>Motor &amp; Drives</b><small>Machine Power &amp; Drives · coming soon</small></div>
+      </div>
+      <div class="card" id="labRoot"><p class="muted">Pick a lab above ✨</p></div>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="tab-quiz" class="tab">
+      <div class="card" id="quizMaker">
+        <h2>🎀 Make a 5-question test</h2>
+        <div class="row wrap">
+          <label>Course <select id="qzCourse"></select></label>
+          <label class="grow">What was taught? <input id="qzTopic" type="text" placeholder="e.g. G-code: G00, G01, G02 arcs"></label>
+        </div>
+        <label class="check"><input type="checkbox" id="qzUseFiles" checked> <span id="qzFilesNote">Use my ticked materials for this course</span></label>
+        <button class="btn primary" id="qzGo" type="button">✨ Make my quiz</button>
+      </div>
+      <div class="card hidden" id="quizPlayer"></div>
+      <div class="card">
+        <h2>📈 Quiz history</h2>
+        <div id="quizHistory"></div>
+      </div>
+    </section>
+
+    <!-- CARDS -->
+    <section id="tab-cards" class="tab">
+      <div class="card">
+        <div class="row between wrap">
+          <h2>💌 Flashcards</h2>
+          <label>Course <select id="rvCourse"><option value="">All courses</option></select></label>
+        </div>
+        <p class="muted small">Cards come from your lessons and quiz mistakes automatically. Each one comes back just before you'd forget it.</p>
+        <div id="reviewBox"></div>
+        <details class="small"><summary>All cards</summary><div id="cardList"></div></details>
+      </div>
+      <div class="card">
+        <div class="row between wrap">
+          <h2>🔤 My glossary</h2>
+          <div class="row wrap">
+            <select id="glCourse" aria-label="Glossary course"><option value="">All courses</option></select>
+            <input id="glSearch" type="search" placeholder="Search terms">
+          </div>
+        </div>
+        <div id="glList"></div>
       </div>
     </section>
 
     <!-- LIBRARY -->
     <section id="tab-library" class="tab">
       <div class="card">
-        <h2>Add materials</h2>
-        <p class="muted">PDFs, slides exported as PDF, photos of handwritten notes, screenshots, past questions, plain text. Word/PowerPoint files: save as PDF first.</p>
+        <h2>📚 Add materials</h2>
+        <p class="muted small">PDFs, slides (save as PDF), photos of handwritten notes, screenshots, past questions, text.</p>
         <div class="row wrap">
           <label>Course <select id="upCourse"></select></label>
           <label>Type
@@ -75,105 +198,35 @@
         </div>
         <div id="drop" class="drop">
           <input id="fileInput" type="file" multiple accept=".pdf,image/*,.txt,.md,.csv">
-          <p><strong>Tap to choose files</strong> or drop them here</p>
+          <p>🌸 <strong>Tap to choose files</strong> or drop them here</p>
         </div>
       </div>
       <div class="card">
         <div class="row between wrap">
-          <h2>Your library</h2>
+          <h2>My library</h2>
           <label>Show <select id="libFilter"><option value="">All courses</option></select></label>
         </div>
         <div id="libList"></div>
       </div>
     </section>
 
-    <!-- LEARN -->
-    <section id="tab-learn" class="tab">
-      <div class="learn">
-        <aside class="card learn-side">
-          <label>Course <select id="lnCourse"></select></label>
-          <div class="side-h">Materials to use <span class="muted small">(tick what's relevant)</span></div>
-          <div id="lnFiles" class="filepick"></div>
-          <div class="side-h">Past sessions</div>
-          <div id="lnSessions" class="sessions"></div>
-          <button class="btn small" id="newSession">+ New session</button>
-        </aside>
-        <div class="card learn-main">
-          <div class="row wrap">
-            <input id="topic" type="text" class="grow" placeholder="Topic, e.g. 'PID controllers' or 'what was taught in Week 5'">
-          </div>
-          <div class="modes" id="modes">
-            <button data-mode="teach" title="Full lesson from zero">📘 Teach me</button>
-            <button data-mode="prereq" title="Find & fix forgotten basics">🧱 Prerequisites</button>
-            <button data-mode="visual" title="Interactive simulation">🎛 Visualise</button>
-            <button data-mode="analogy" title="Everyday analogy">💡 Analogy</button>
-            <button data-mode="jargon" title="Decode the lingo">🔤 Jargon</button>
-            <button data-mode="worked" title="Step-by-step example">✍️ Worked example</button>
-            <button data-mode="quiz" title="One question at a time">❓ Quiz me</button>
-            <button data-mode="explainback" title="You explain, it finds gaps">🗣 Explain back</button>
-            <button data-mode="pastq" title="Patterns in past questions">📜 Past questions</button>
-            <button data-mode="lastlecture" title="Prep for tomorrow's test">⏰ Test prep</button>
-          </div>
-          <div id="chat" class="chat">
-            <div class="empty">
-              <p><strong>How to use this:</strong></p>
-              <ol>
-                <li>Pick a course and tick the materials on the left.</li>
-                <li>Type a topic (or leave it blank to cover all the ticked materials).</li>
-                <li>Hit a mode. If it still doesn't click, hit <em>“Still confused”</em> and it'll try a totally different approach.</li>
-              </ol>
-            </div>
-          </div>
-          <div class="quick" id="quick">
-            <button data-quick="confused">😵 Still confused, try another way</button>
-            <button data-quick="simpler">Simpler</button>
-            <button data-quick="deeper">Go deeper</button>
-            <button data-quick="visual">Show me visually</button>
-            <button data-quick="cards">Make flashcards</button>
-          </div>
-          <form id="askForm" class="ask">
-            <textarea id="ask" rows="2" placeholder="Ask anything, or answer the question…"></textarea>
-            <button class="btn primary" id="sendBtn">Send</button>
-          </form>
-        </div>
-      </div>
-    </section>
-
-    <!-- REVIEW -->
-    <section id="tab-review" class="tab">
-      <div class="card">
-        <div class="row between wrap">
-          <h2>Spaced repetition</h2>
-          <label>Course <select id="rvCourse"><option value="">All courses</option></select></label>
-        </div>
-        <p class="muted">Cards come from your lessons automatically. Each one comes back just before you'd forget it.</p>
-        <div id="reviewBox"></div>
-      </div>
-      <div class="card">
-        <h2>All cards</h2>
-        <div id="cardList" class="small"></div>
-      </div>
-    </section>
-
-    <!-- GLOSSARY -->
-    <section id="tab-glossary" class="tab">
-      <div class="card">
-        <div class="row between wrap">
-          <h2>Glossary</h2>
-          <div class="row wrap">
-            <select id="glCourse"><option value="">All courses</option></select>
-            <input id="glSearch" type="search" placeholder="Search terms">
-          </div>
-        </div>
-        <p class="muted">Every bit of jargon the tutor explains is saved here in plain English.</p>
-        <div id="glList"></div>
-      </div>
-    </section>
-
     <!-- SETTINGS -->
     <section id="tab-settings" class="tab">
       <div class="card">
-        <h2>AI engine</h2>
+        <h2>💗 About you</h2>
+        <label>Your name <input id="myName" type="text" placeholder="Aliyah"></label>
+        <label>Level / year <input id="myLevel" type="text" placeholder="e.g. 400 level, Mechatronics Engineering, LASUSTECH"></label>
+        <label>Theme
+          <select id="theme">
+            <option value="auto">Auto (follows your phone)</option>
+            <option value="light">🌸 Pastel day</option>
+            <option value="dark">🌙 Plum night</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="card">
+        <h2>🤖 AI engine</h2>
         <label>Provider
           <select id="provider">
             <option value="gemini">Google Gemini (free tier)</option>
@@ -182,7 +235,7 @@
         </label>
         <div id="geminiBox">
           <label>Gemini API key <input id="geminiKey" type="password" autocomplete="off" placeholder="AIza…"></label>
-          <p class="muted small">Get a free key at aistudio.google.com → “Get API key”. It's saved only in this browser.</p>
+          <p class="muted small">Free key: aistudio.google.com → “Get API key”. Saved only in this browser.</p>
           <div class="row wrap">
             <label class="grow">Model <select id="geminiModel"></select></label>
             <button class="btn small" id="loadModels" type="button">Load my models</button>
@@ -190,7 +243,7 @@
         </div>
         <div id="claudeBox" class="hidden">
           <label>Claude API key <input id="claudeKey" type="password" autocomplete="off" placeholder="sk-ant-…"></label>
-          <p class="muted small">From platform.claude.com → API keys. This is separate from your Claude Pro subscription. Saved only in this browser.</p>
+          <p class="muted small">From platform.claude.com → API keys. Separate from Claude Pro. Saved only in this browser.</p>
           <label>Model
             <select id="claudeModel">
               <option value="claude-opus-5-5">Claude Opus 5.5 (best, ~$4 / $20 per million tokens)</option>
@@ -204,29 +257,30 @@
       </div>
 
       <div class="card">
-        <h2>About you</h2>
-        <label>Your name <input id="myName" type="text" placeholder="Aliyah"></label>
-        <label>Level / year <input id="myLevel" type="text" placeholder="e.g. 400 level, Mechatronics Engineering, LASUSTECH"></label>
-      </div>
-
-      <div class="card">
-        <h2>Courses & timetable</h2>
-        <p class="muted small">Tick the days each course holds. The timetable decides your reminders.</p>
+        <h2>🗓️ Courses & usual timetable</h2>
+        <p class="muted small">Your best guess of the usual days. Daily check-ins teach MechLab what actually happens.</p>
         <div id="courseEditor"></div>
         <button class="btn small" id="addCourse" type="button">+ Add course</button>
       </div>
 
       <div class="card">
-        <h2>Reminders</h2>
-        <p class="muted small">Phone and email reminders run from GitHub, even when this app is closed. See <code>mechlab/README.md</code> for the 5-minute setup. Copy this into <code>mechlab/reminders/timetable.json</code> whenever your timetable changes:</p>
-        <button class="btn small" id="copyTimetable" type="button">Copy timetable.json</button>
-        <button class="btn small" id="downloadIcs" type="button">Download calendar (.ics)</button>
-        <button class="btn small" id="notifyBtn" type="button">Allow in-app notifications</button>
-        <label>Evening reminder time <input id="eveTime" type="time" value="19:00"></label>
+        <h2>⏰ Reminders</h2>
+        <p class="muted small">Phone + email reminders come from GitHub, even when MechLab is closed (setup steps in <code>mechlab/README.md</code>). Your schedule:</p>
+        <ul class="small sched">
+          <li>🌅 <b>6:30 AM</b> confirm today's classes</li>
+          <li>🌆 <b>7:15 PM</b> confirm tomorrow's classes, set your 11 PM alarm, nap</li>
+          <li>⏰ <b>10:55 PM</b> wake up, it's study time</li>
+          <li>🌙 <b>1:30 AM</b> do today's quiz, then sleep by 2:30</li>
+        </ul>
+        <div class="row wrap">
+          <button class="btn small" id="copyTimetable" type="button">Copy timetable.json</button>
+          <button class="btn small" id="downloadIcs" type="button">Download alarms (.ics)</button>
+          <button class="btn small" id="notifyBtn" type="button">Allow in-app notifications</button>
+        </div>
       </div>
 
       <div class="card">
-        <h2>Backup</h2>
+        <h2>💾 Backup</h2>
         <p class="muted small">Everything lives in this browser. Back up before clearing browser data or switching phones.</p>
         <button class="btn small" id="exportBtn" type="button">Export backup</button>
         <label class="btn small filebtn">Import backup<input id="importInput" type="file" accept=".json"></label>
@@ -234,7 +288,7 @@
     </section>
   </main>
 
-  <div id="toast" class="toast hidden"></div>
+  <div id="toast" class="toast hidden" role="status"></div>
   <script type="module" src="app.js"></script>
 </body>
 </html>
