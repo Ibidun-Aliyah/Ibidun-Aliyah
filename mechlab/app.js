@@ -1040,8 +1040,8 @@ async function openLab(name) {
   const store = { get: (k, d) => ls.get(k, d), set: (k, v) => ls.set(k, v) };
   try {
     if (name === 'gcode') {
-      const { mountGcodeLab } = await import('./labs/gcode.js');
-      labInstance = mountGcodeLab(root, { award, badge, store, tutor: makeTutor });
+      const { mountCncLab } = await import('./labs/cnc-ui.js');
+      labInstance = mountCncLab(root, { award, badge, store, tutor: makeTutor });
     } else if (name === 'vision') {
       const { mountVisionLab } = await import('./labs/vision.js');
       labInstance = mountVisionLab(root, { award, badge, tutor: makeTutor });

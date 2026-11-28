@@ -427,3 +427,99 @@ table.mini td { border: 1px solid var(--border); padding: .1rem .3rem; text-alig
 .tutor-log .msg pre + .btn { margin: -.2rem 0 .5rem; }
 .tutor-starters { display: flex; flex-wrap: wrap; gap: .4rem; margin: .5rem 0 0; }
 .tutor-starters .chip { font-size: .8rem; }
+
+/* ===== CNC milling workshop ===== */
+.cnc-top { display: flex; flex-wrap: wrap; gap: .6rem 1.5rem; align-items: end; justify-content: space-between; margin-bottom: .9rem; }
+.cnc-title { font-size: clamp(1.5rem, 3vw, 2.1rem); line-height: 1.08; margin: 0 0 .3rem; letter-spacing: -.01em; }
+.cnc-lede { margin: 0; max-width: 62ch; }
+.cnc-prog { display: flex; flex-wrap: wrap; gap: .3rem; }
+.cnc-prog button { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border); background: var(--surface); color: var(--muted); font: 800 .85rem "Fredoka", system-ui; cursor: pointer; }
+.cnc-prog button.done { background: var(--mint); border-color: var(--mint); color: #fff; }
+.cnc-prog button.cur { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.cnc-grid { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1.55fr) minmax(300px, 1fr); grid-template-areas: "machine card" "pendant card"; align-items: start; }
+.cnc-machine { grid-area: machine; }
+.cnc-card { grid-area: card; position: sticky; top: 118px; background: var(--surface); border: 2px solid var(--border); border-radius: 22px; padding: 1rem 1.1rem; box-shadow: var(--shadow); }
+.pendant { grid-area: pendant; }
+.mframe { background: linear-gradient(160deg, #ffc2dc, #d9c6ff); border-radius: 26px; padding: 10px 10px 0; box-shadow: inset 0 -4px 0 rgba(0,0,0,.08), var(--shadow); position: relative; }
+.mhead { display: flex; align-items: center; gap: .5rem; padding: .1rem .4rem .55rem; color: #4a2148; font-family: "Fredoka", system-ui; letter-spacing: .04em; font-size: .9rem; }
+.mhead-sub { font-family: "Nunito", system-ui; letter-spacing: 0; font-size: .78rem; opacity: .75; flex: 1; }
+.chip.tiny { font-size: .72rem; padding: .15rem .55rem; border-width: 1.5px; }
+.lamp { width: 13px; height: 13px; border-radius: 50%; background: #8c8391; box-shadow: inset 0 -2px 0 rgba(0,0,0,.25); }
+.lamp.green { background: #3ce38a; box-shadow: 0 0 10px #3ce38a; }
+.lamp.amber { background: #ffc24d; box-shadow: 0 0 10px #ffc24d; }
+.lamp.red { background: #ff4d6a; box-shadow: 0 0 12px #ff4d6a; animation: twinkle .5s infinite; }
+.mwin { position: relative; border-radius: 16px; overflow: hidden; border: 6px solid #6d5a78; box-shadow: inset 0 0 0 2px rgba(255,255,255,.25); }
+.mwin canvas { display: block; width: 100%; cursor: pointer; }
+.mwin::after { content: ""; position: absolute; inset: 0; background: linear-gradient(120deg, rgba(255,255,255,.14), transparent 35%); pointer-events: none; }
+#cnSide { display: block; width: 100%; border-radius: 12px; margin-top: 8px; cursor: pointer; }
+.hazard { height: 16px; margin: 10px -10px 0; border-radius: 0 0 26px 26px; background: repeating-linear-gradient(-45deg, #4a2148 0 12px, #ff9cc7 12px 24px); }
+.crash { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; background: rgba(255, 60, 100, .28); color: #fff; font: 700 2.2rem "Fredoka", system-ui; text-shadow: 0 2px 0 #b3123b, 0 0 18px #ff4d6a; z-index: 2; }
+.crash small { display: block; font: 800 .9rem "Nunito", system-ui; text-shadow: 0 1px 2px #000; }
+.shake { animation: shake .45s; }
+@keyframes shake { 20% { transform: translate(-6px, 2px) rotate(-.6deg); } 40% { transform: translate(6px, -2px) rotate(.6deg); } 60% { transform: translate(-4px, 1px); } 80% { transform: translate(3px, 0); } }
+.stepno { font: 800 .82rem "Nunito", system-ui; color: var(--accent2); }
+.step-h { font-size: 1.3rem; margin: .1rem 0 .4rem; }
+.ctasks { list-style: none; margin: .7rem 0; padding: 0; }
+.ctasks li { display: flex; gap: .55rem; align-items: flex-start; padding: .4rem 0; border-top: 1.5px dashed var(--border); font-weight: 600; font-size: .93rem; }
+.ctasks li:first-child { border-top: 0; }
+.ctick { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); display: grid; place-items: center; font-size: .75rem; color: #fff; font-weight: 800; margin-top: 1px; }
+.ctasks li.ok .ctick { background: var(--mint); border-color: var(--mint); }
+.ctasks li.ok > span:last-child { color: var(--muted); text-decoration: line-through; }
+.cwhy { background: var(--lav-soft); border-radius: 14px; padding: .5rem .8rem; margin: .5rem 0; font-size: .92rem; }
+.cwhy summary { cursor: pointer; font-weight: 800; color: var(--accent2); }
+.csay { border-radius: 14px; padding: .6rem .8rem; margin: .6rem 0; font-size: .92rem; border-left: 5px solid var(--border); background: var(--surface2); min-height: 3rem; }
+.csay b { display: block; }
+.csay.ok { border-color: var(--mint); background: var(--mint-soft); }
+.csay.warn { border-color: var(--warn); background: var(--warn-soft); }
+.csay.bad { border-color: var(--danger); background: var(--danger-soft); }
+.cbtns { display: flex; flex-wrap: wrap; gap: .4rem; }
+.cbtns .primary { margin-left: auto; }
+.dro { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: .9rem; background: #2a1d33; border-radius: 16px; padding: 8px; cursor: pointer; }
+.dro div { background: #1d1424; border-radius: 10px; padding: 5px 8px; }
+.dro small { display: block; color: #c6a8c3; font-size: .7rem; font-weight: 800; }
+.dro strong { color: #8ff5cf; font: 700 1rem ui-monospace, Menlo, Consolas, monospace; white-space: nowrap; }
+.pendant { background: #2a1d33; color: #f8eaf3; border-radius: 22px; padding: .8rem; box-shadow: var(--shadow); }
+.pendant-head { display: flex; gap: .6rem; align-items: center; margin-bottom: .5rem; }
+.pendant-name { font: 700 .8rem "Fredoka", system-ui; letter-spacing: .12em; color: #ffb3d4; flex: 1; }
+.pendant select { width: auto; background: #3a2847; color: #f8eaf3; border-color: #57406a; font-size: .85rem; padding: .3rem .5rem; }
+.screen { display: flex; background: #120c17; border-radius: 14px; border: 2px solid #57406a; overflow: hidden; height: 300px; }
+.gutter { flex: 0 0 auto; width: 2.6rem; overflow: hidden; padding: .55rem 0; background: #1d1424; text-align: right; font: 13px/22px ui-monospace, Menlo, Consolas, monospace; color: #6f5a7d; user-select: none; }
+.gutter div { padding-right: .45rem; height: 22px; }
+.gutter .cur { background: #ff7eb6; color: #2a0d1d; font-weight: 800; }
+.gutter .error { color: #ff6b81; font-weight: 800; }
+.gutter .warn { color: #ffc65c; font-weight: 800; }
+.screen textarea { flex: 1; border: 0; border-radius: 0; background: transparent; color: #8ff5cf; font: 14px/22px ui-monospace, Menlo, Consolas, monospace; padding: .55rem .6rem; resize: none; white-space: pre; overflow: auto; text-transform: uppercase; height: 100%; }
+.screen textarea:focus-visible { outline: none; }
+.nowline { background: #1d1424; border-radius: 12px; padding: .45rem .7rem; margin: .5rem 0; font-size: .85rem; min-height: 2.6rem; }
+.nowline b { color: #ff7eb6; margin-right: .3rem; }
+.nowline code { color: #8ff5cf; }
+.nowline span { display: block; color: #e9d6e6; }
+.pbtns { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .45rem; }
+.pb { font: 700 1.2rem "Fredoka", system-ui; border: 0; border-radius: 16px; padding: .5rem .2rem .4rem; cursor: pointer; color: #fff; background: #4b3a5a; box-shadow: inset 0 -4px 0 rgba(0,0,0,.3); display: flex; flex-direction: column; align-items: center; gap: .1rem; min-height: 58px; }
+.pb small { font: 800 .62rem "Nunito", system-ui; letter-spacing: .04em; }
+.pb:active { transform: translateY(2px); box-shadow: inset 0 -2px 0 rgba(0,0,0,.3); }
+.pb.start { background: #1fae72; }
+.pb.hold { background: #e8a21b; }
+.pb.reset { background: #e2456a; }
+.override { display: flex; align-items: center; gap: .5rem; color: #e9d6e6; margin: .6rem 0 .3rem; font-size: .85rem; }
+.override input { flex: 1; }
+.pmsgs { display: grid; gap: .3rem; max-height: 170px; overflow-y: auto; margin-top: .3rem; }
+.pm { font-size: .82rem; padding: .35rem .6rem; border-radius: 10px; background: #3a2847; cursor: pointer; }
+.pm.error { background: #5a1d2c; color: #ffc2cc; }
+.pm.warn { background: #4d3a12; color: #ffe0a3; }
+.pm.ok { background: #173d33; color: #8ff5cf; cursor: default; font-weight: 800; }
+.setup { margin-top: .5rem; font-size: .85rem; color: #e9d6e6; }
+.setup summary { cursor: pointer; font-weight: 700; }
+.setup label { color: #e9d6e6; }
+.setup input { background: #3a2847; color: #f8eaf3; border-color: #57406a; }
+@media (max-width: 1000px) {
+  .cnc-grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "machine" "card" "pendant"; }
+  .cnc-card { position: static; }
+}
+@media (max-width: 640px) {
+  .screen { height: 240px; }
+  .pb { font-size: 1rem; min-height: 52px; }
+  .pb small { font-size: .55rem; }
+  .crash { font-size: 1.6rem; }
+}
+@media (max-width: 640px) { .mhead-sub { display: none; } .mhead b { flex: 1; } }
