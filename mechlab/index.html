@@ -229,10 +229,12 @@
         <h2>🤖 AI engine</h2>
         <label>Provider
           <select id="provider">
+            <option value="here" id="hereOpt" hidden>✨ Claude built in (no key needed)</option>
             <option value="gemini">Google Gemini (free tier)</option>
             <option value="claude">Anthropic Claude (uses your API credits)</option>
           </select>
         </label>
+        <p id="hereBox" class="muted small hidden">Uses your own Claude account, right inside this preview. The first time, Claude asks you to allow it. PDFs are read as text; scanned pages and photos are sent as pictures.</p>
         <div id="geminiBox">
           <label>Gemini API key <input id="geminiKey" type="password" autocomplete="off" placeholder="AIza…"></label>
           <p class="muted small">Free key: aistudio.google.com → “Get API key”. Saved only in this browser.</p>

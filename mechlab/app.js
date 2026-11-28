@@ -24,6 +24,33 @@ function toast(msg, ms = 2600) {
   clearTimeout(toast._t);
   toast._t = setTimeout(() => t.classList.add('hidden'), ms);
 }
+// In-page dialog: works everywhere, including sandboxed previews that ignore confirm()/prompt().
+function ask(message, { input = null, okText = 'OK', cancelText = 'Cancel' } = {}) {
+  return new Promise((resolve) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'modal';
+    wrap.innerHTML = `<div class="modal-box card" role="dialog" aria-modal="true"><p></p>${input !== null ? '<textarea rows="3"></textarea>' : ''}<div class="row wrap" style="justify-content:flex-end">${cancelText ? `<button class="btn" data-no type="button">${cancelText}</button>` : ''}<button class="btn primary" data-yes type="button">${okText}</button></div></div>`;
+    wrap.querySelector('p').textContent = message;
+    const ta = wrap.querySelector('textarea');
+    if (ta) ta.value = input;
+    const done = (v) => { wrap.remove(); resolve(v); };
+    wrap.querySelector('[data-yes]').onclick = () => done(ta ? ta.value : true);
+    wrap.querySelector('[data-no]')?.addEventListener('click', () => done(ta ? null : false));
+    wrap.addEventListener('click', (e) => { if (e.target === wrap) done(ta ? null : false); });
+    document.body.appendChild(wrap);
+    (ta || wrap.querySelector('[data-yes]')).focus();
+  });
+}
+const downloadsP = window.claude?.use ? window.claude.use('downloads').catch(() => null) : Promise.resolve(null);
+async function saveFile(filename, blob) {
+  const dl = await downloadsP;
+  if (dl) {
+    try { await dl.save({ filename, data: blob }); } catch (e) { if (e?.code !== 'declined') toast('Could not save the file here: ' + (e?.message || e?.code)); }
+    return;
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+}
 const ls = {
   get(k, d) { try { const v = localStorage.getItem('mechlab.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem('mechlab.' + k, JSON.stringify(v)); } catch { /* storage unavailable */ } },
@@ -33,10 +60,12 @@ const ls = {
 function studyDay(now = new Date()) { const d = new Date(now); if (d.getHours() < 5) d.setDate(d.getDate() - 1); d.setHours(12, 0, 0, 0); return d; }
 
 /* ================= theme ================= */
+const HOST_THEME = document.documentElement.getAttribute('data-theme');
 function applyTheme() {
-  const t = ls.get('theme', 'auto');
-  if (t === 'auto') document.documentElement.removeAttribute('data-theme');
-  else document.documentElement.setAttribute('data-theme', t);
+  const t = ls.get('theme', 'auto'), el = document.documentElement;
+  if (t !== 'auto') el.setAttribute('data-theme', t);
+  else if (HOST_THEME) el.setAttribute('data-theme', HOST_THEME);
+  else el.removeAttribute('data-theme');
 }
 applyTheme();
 
@@ -240,9 +269,75 @@ async function tickedFiles(cid) {
 }
 
 /* ================= AI providers ================= */
+// "here" = Claude built into the page (claude.ai artifact preview): no key needed, uses the viewer's Claude account.
+const samplePromise = window.claude?.use ? window.claude.use('sample').catch(() => null) : Promise.resolve(null);
+const providerNow = () => ls.get('provider', window.claude?.use ? 'here' : 'gemini');
+let pdfjsP;
+const pdfText = new Map();
+async function readPdf(f, maxImages) {
+  if (pdfText.has(f.id)) return pdfText.get(f.id);
+  pdfjsP ??= import('./vendor/pdf.min.mjs').then((m) => { m.GlobalWorkerOptions.workerSrc = new URL('./vendor/pdf.worker.min.mjs', import.meta.url).href; return m; });
+  const pdfjs = await pdfjsP;
+  const doc = await pdfjs.getDocument({ data: new Uint8Array(await f.blob.arrayBuffer()) }).promise;
+  let text = '';
+  for (let i = 1; i <= doc.numPages; i++) {
+    const tc = await (await doc.getPage(i)).getTextContent();
+    text += `\n[page ${i}] ` + tc.items.map((it) => it.str).join(' ');
+  }
+  const images = [];
+  if (text.replace(/\[page \d+\]|\s/g, '').length < 20 * doc.numPages && maxImages) {
+    // Scanned/handwritten PDF: send page pictures instead of (missing) text.
+    for (let i = 1; i <= Math.min(doc.numPages, maxImages); i++) {
+      const page = await doc.getPage(i), vp = page.getViewport({ scale: 1.6 });
+      const c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height;
+      await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+      images.push(await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.85)));
+    }
+  }
+  const out = { text, images, pages: doc.numPages };
+  pdfText.set(f.id, out);
+  return out;
+}
+const SAMPLE_ERRORS = {
+  not_granted: 'You didn\'t allow this page to use Claude. Reload and press Allow, or add a Gemini key in Settings.',
+  sampling_disabled: 'Claude isn\'t available for this account here.',
+  rate_limited: 'Claude usage limit reached for now. Try again a bit later 🌙',
+  prompt_too_large: 'Too much material at once. Untick some files and try again.',
+  refused: 'Claude declined that one. Try rephrasing.',
+  session_expired: 'Please sign in to Claude again.',
+};
+async function hereStream({ system, history, files, onText }) {
+  const sample = await samplePromise;
+  if (!sample) throw new Error('Built-in Claude isn\'t available in this view. Add a Gemini key in Settings.');
+  const limits = await sample.limits().catch(() => ({}));
+  const maxImg = limits.images?.maxCount || 0;
+  let materials = '', images = [], skipped = 0;
+  for (const f of files) {
+    const k = fileKind(f);
+    if (k === 'text') materials += `\n--- Material: ${f.name} ---\n${await f.blob.text()}\n`;
+    else if (k === 'image') { if (images.length < maxImg) { images.push(f.blob); materials += `\n--- Material: ${f.name} (attached as image ${images.length}) ---\n`; } else skipped++; }
+    else {
+      const r = await readPdf(f, Math.max(0, maxImg - images.length));
+      if (r.images.length) { materials += `\n--- Material: ${f.name} (scanned PDF, ${r.images.length} page images attached) ---\n${r.text}\n`; images.push(...r.images); if (r.images.length < r.pages) skipped++; }
+      else materials += `\n--- Material: ${f.name} (text extracted from PDF) ---\n${r.text}\n`;
+    }
+  }
+  const budget = 200000 - system.length - history.reduce((n, m) => n + m.text.length, 0);
+  if (materials.length > budget) { materials = materials.slice(0, Math.max(0, budget)) + '\n[...materials cut to fit]'; }
+  if (skipped) materials += `\n(Note: ${skipped} material(s) were too many pictures to attach this time.)`;
+  const head = `${system}\n\n=== COURSE MATERIALS ===${materials || '\n(none)'}\n=== END OF MATERIALS ===\n\n`;
+  const msgs = history.map((m, i) => ({ role: m.role, content: i === 0 ? head + m.text : m.text }));
+  try {
+    const r = await sample(msgs, { cache: false, onText: ({ text }) => onText(text), ...(images.length ? { images } : {}) });
+    return r.truncated ? r.text + '\n\n_(Answer was cut off for length. Say "continue".)_' : r.text;
+  } catch (e) {
+    throw new Error(SAMPLE_ERRORS[e?.code] || e?.message || 'Claude had a hiccup. Try again.');
+  }
+}
 const AI = {
   async stream({ system, history, files, onText }) {
-    const p = ls.get('provider', 'gemini');
+    const p = providerNow();
+    if (p === 'here') return hereStream({ system, history, files, onText });
     const { parts, bytes } = await filesToParts(files);
     const limit = p === 'gemini' ? 18e6 : 30e6;
     if (bytes > limit) throw new Error(`The ticked materials are too big to send at once (${(bytes / 1e6).toFixed(1)} MB). Untick some files and try again.`);
@@ -459,7 +554,8 @@ function greeting() {
   return [`Night study time, ${name} 🌙`, 'wow'];
 }
 function renderHome() {
-  const hasKey = ls.get('provider', 'gemini') === 'claude' ? ls.get('claudeKey', '') : ls.get('geminiKey', '');
+  const prov = providerNow();
+  const hasKey = prov === 'here' || (prov === 'claude' ? ls.get('claudeKey', '') : ls.get('geminiKey', ''));
   $('#setupBanner').classList.toggle('hidden', !!hasKey);
   const [g, mood] = greeting();
   $('#greeting').textContent = g;
@@ -607,7 +703,7 @@ $('#libFilter').addEventListener('change', renderLibrary);
 $('#libList').addEventListener('click', async (e) => {
   const o = e.target.closest('[data-open]'), d = e.target.closest('[data-delfile]');
   if (o) { const f = await DB.get('files', o.dataset.open); window.open(URL.createObjectURL(f.blob), '_blank'); }
-  if (d && confirm('Delete this file from your library?')) { await DB.del('files', d.dataset.delfile); renderLibrary(); }
+  if (d && await ask('Delete this file from your library?', { okText: 'Delete' })) { await DB.del('files', d.dataset.delfile); renderLibrary(); }
 });
 
 /* ================= LEARN ================= */
@@ -965,9 +1061,11 @@ function bindSetting(id, key, def = '', after) {
   el.addEventListener('change', () => { ls.set(key, el.value.trim()); after?.(); });
 }
 function renderSettings() {
-  const prov = ls.get('provider', 'gemini');
+  const prov = providerNow();
+  $('#hereOpt').hidden = !window.claude?.use;
   $('#provider').value = prov;
   $('#geminiBox').classList.toggle('hidden', prov !== 'gemini');
+  $('#hereBox').classList.toggle('hidden', prov !== 'here');
   $('#claudeBox').classList.toggle('hidden', prov !== 'claude');
   renderGeminiModels();
   renderCourseEditor();
@@ -1006,22 +1104,22 @@ $('#courseEditor').addEventListener('change', (e) => {
   if (e.target.dataset.day) c.days = $$('[data-day]', row).filter((x) => x.checked).map((x) => x.dataset.day);
   S.courses = cs;
 });
-$('#courseEditor').addEventListener('click', (e) => {
+$('#courseEditor').addEventListener('click', async (e) => {
   const d = e.target.closest('[data-delcourse]');
   if (!d) return;
   const cs = S.courses;
-  if (!confirm(`Remove "${cs[+d.dataset.delcourse].name}"? Its files, cards and sessions stay saved.`)) return;
+  if (!await ask(`Remove "${cs[+d.dataset.delcourse].name}"? Its files, cards and sessions stay saved.`, { okText: 'Remove' })) return;
   cs.splice(+d.dataset.delcourse, 1);
   S.courses = cs;
   renderCourseEditor();
 });
-$('#addCourse').addEventListener('click', () => {
-  const name = prompt('Course name?');
+$('#addCourse').addEventListener('click', async () => {
+  const name = (await ask('Course name?', { input: '', okText: 'Add' }))?.trim();
   if (!name) return;
   S.courses = [...S.courses, { id: uid(), name: name.trim(), days: [] }];
   renderCourseEditor();
 });
-bindSetting('provider', 'provider', 'gemini', renderSettings);
+bindSetting('provider', 'provider', providerNow(), renderSettings);
 bindSetting('geminiKey', 'geminiKey', '', () => { if (ls.get('geminiKey', '')) loadGeminiModels(); });
 bindSetting('claudeKey', 'claudeKey');
 bindSetting('claudeModel', 'claudeModel', 'claude-opus-5-5');
@@ -1045,7 +1143,7 @@ function timetableJson() {
 }
 $('#copyTimetable').addEventListener('click', async () => {
   try { await navigator.clipboard.writeText(timetableJson()); toast('Copied! Paste it into mechlab/reminders/timetable.json on GitHub.'); }
-  catch { prompt('Copy this:', timetableJson()); }
+  catch { ask('Copy this:', { input: timetableJson(), cancelText: '' }); }
 });
 $('#downloadIcs').addEventListener('click', () => {
   // Lagos is UTC+1 all year (no daylight saving), so times are written in UTC.
@@ -1071,10 +1169,7 @@ $('#downloadIcs').addEventListener('click', () => {
       'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${e.title}`, 'TRIGGER:PT0M', 'END:VALARM', 'END:VEVENT');
   });
   lines.push('END:VCALENDAR');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([lines.join('\r\n')], { type: 'text/calendar' }));
-  a.download = 'mechlab-alarms.ics';
-  a.click();
+  saveFile('mechlab-alarms.ics', new Blob([lines.join('\r\n')], { type: 'text/calendar' }));
 });
 $('#notifyBtn').addEventListener('click', async () => {
   if (!('Notification' in window)) { toast('This browser does not support notifications'); return; }
@@ -1088,14 +1183,11 @@ $('#exportBtn').addEventListener('click', async () => {
   const out = { version: 2, exported: new Date().toISOString(), settings: {}, stores: {} };
   for (const k of Object.keys(localStorage)) if (k.startsWith('mechlab.') && !/Key$/.test(k)) out.settings[k] = localStorage.getItem(k);
   for (const s of STORES) out.stores[s] = await Promise.all((await DB.all(s)).map(async (r) => (r.blob ? { ...r, blob: undefined, blob64: await blobToBase64(r.blob) } : r)));
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: 'application/json' }));
-  a.download = `mechlab-backup-${ymd()}.json`;
-  a.click();
+  saveFile(`mechlab-backup-${ymd()}.json`, new Blob([JSON.stringify(out)], { type: 'application/json' }));
 });
 $('#importInput').addEventListener('change', async (e) => {
   const f = e.target.files[0];
-  if (!f || !confirm('Import this backup? Items with the same ID will be overwritten.')) return;
+  if (!f || !await ask('Import this backup? Items with the same ID will be overwritten.', { okText: 'Import' })) return;
   try {
     const j = JSON.parse(await f.text());
     for (const [k, v] of Object.entries(j.settings || {})) localStorage.setItem(k, v);
@@ -1117,4 +1209,4 @@ if (params.has('checkin') || params.has('plan')) {
   history.replaceState(null, '', location.pathname);
   setTimeout(() => $(params.has('plan') ? '#planCard' : '#checkin')?.scrollIntoView({ behavior: 'smooth' }), 200);
 } else goto(ls.get('tab', 'home'));
-if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator && location.protocol === 'https:' && !window.claude) navigator.serviceWorker.register('sw.js').catch(() => {});

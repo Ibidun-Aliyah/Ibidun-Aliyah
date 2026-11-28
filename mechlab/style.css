@@ -413,3 +413,7 @@ table.mini td { border: 1px solid var(--border); padding: .1rem .3rem; text-alig
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 .qz-opt { align-items: center; }
 .qz-opt span > p:only-child, .qz-q > p:only-child, .qz-explain p:only-child { margin: 0; }
+.modal { position: fixed; inset: 0; z-index: 80; background: rgba(40, 15, 40, .35); display: grid; place-items: center; padding: 16px; }
+.modal-box { width: min(440px, 100%); margin: 0; }
+.modal-box p { font-weight: 700; white-space: pre-wrap; }
+.modal-box textarea { font: 13px/1.4 ui-monospace, Menlo, monospace; margin-bottom: .7rem; }

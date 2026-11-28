@@ -60,6 +60,7 @@ export function mountVisionLab(root, { award, badge }) {
       <button class="btn small hidden" id="cvSnap" type="button">📸 Snap</button>
       <label class="btn small filebtn">🖼 Upload<input type="file" id="cvUpload" accept="image/*"></label>
     </div>
+    <p class="cam-note small muted" hidden></p>
     <div class="row wrap cv-ops">
       <label>Filter <select id="cvOp">${Object.entries(OPS).map(([k, o]) => `<option value="${k}">${o.name}</option>`).join('')}</select></label>
       <label id="cvP1w" class="row hidden"><span id="cvP1l"></span> <input type="range" id="cvP1"><b id="cvP1v"></b></label>
@@ -86,7 +87,7 @@ export function mountVisionLab(root, { award, badge }) {
       <div class="row wrap"><button class="btn small" id="clCam" type="button">📷 Start camera</button><button class="btn small" id="clAdd" type="button">+ Add class</button><label class="row small"><input type="checkbox" id="clLive"> Live predict</label><label class="btn small filebtn">🖼 Test a photo<input type="file" id="clTest" accept="image/*"></label></div>
     </div>
     <div class="cl-grid">
-      <div class="cl-view"><div class="cl-video-wrap"><canvas id="clPreview"></canvas></div><div class="small muted" id="clCamNote">Camera off. You can still upload photos.</div></div>
+      <div class="cl-view"><div class="cl-video-wrap"><canvas id="clPreview"></canvas></div><div class="small muted" id="clCamNote">Camera off. You can still upload photos.</div><p class="cam-note small muted" hidden></p></div>
       <div><div id="clClasses"></div></div>
     </div>
     <div class="card inner">
@@ -105,10 +106,18 @@ export function mountVisionLab(root, { award, badge }) {
   async function startCam() {
     if (stream) return true;
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 640 } }, audio: false });
+      stream = await Promise.race([
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 640 } }, audio: false }),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('no answer from the camera')), 8000)),
+      ]);
       video.srcObject = stream; await video.play();
       return true;
-    } catch (e) { alert('Could not open the camera: ' + e.message + '\nYou can upload photos instead.'); return false; }
+    } catch (e) {
+      stream = null;
+      const msg = '📷 Camera unavailable here (' + e.message + '). Use 🖼 Upload / Photos instead: they work everywhere.';
+      root.querySelectorAll('.cam-note').forEach((n) => { n.textContent = msg; n.hidden = false; });
+      return false;
+    }
   }
   function stopCam() { stream?.getTracks().forEach((t) => t.stop()); stream = null; }
 
