@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MechLab</title>
+  <meta name="description" content="Personal AI study lab for mechatronics courses">
+  <meta name="theme-color" content="#0f766e">
+  <link rel="stylesheet" href="vendor/katex.min.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f766e'/%3E%3Ccircle cx='32' cy='32' r='14' fill='none' stroke='white' stroke-width='5'/%3E%3Cpath d='M32 6v10M32 48v10M6 32h10M48 32h10' stroke='white' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="logo">⚙</span> MechLab</div>
+    <nav class="tabs" id="tabs">
+      <button data-tab="today" class="active">Today</button>
+      <button data-tab="library">Library</button>
+      <button data-tab="learn">Learn</button>
+      <button data-tab="review">Review</button>
+      <button data-tab="glossary">Glossary</button>
+      <button data-tab="settings">Settings</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- TODAY -->
+    <section id="tab-today" class="tab active">
+      <div id="setupBanner" class="banner hidden">
+        👋 First time? Go to <a href="#" data-goto="settings">Settings</a> and paste your free Gemini API key. That's all you need to start.
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <h2 id="todayTitle">Today</h2>
+          <div id="todayClasses"></div>
+        </div>
+        <div class="card">
+          <h2>Tonight's revision</h2>
+          <div id="tonight"></div>
+        </div>
+        <div class="card">
+          <h2>Flashcards due</h2>
+          <div class="bignum" id="dueCount">0</div>
+          <button class="btn primary" data-goto="review">Review now</button>
+        </div>
+        <div class="card">
+          <h2>Study streak</h2>
+          <div class="bignum" id="streak">0 🔥</div>
+          <div class="muted" id="streakNote"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>This week</h2>
+        <div id="weekGrid" class="week"></div>
+      </div>
+    </section>
+
+    <!-- LIBRARY -->
+    <section id="tab-library" class="tab">
+      <div class="card">
+        <h2>Add materials</h2>
+        <p class="muted">PDFs, slides exported as PDF, photos of handwritten notes, screenshots, past questions, plain text. Word/PowerPoint files: save as PDF first.</p>
+        <div class="row wrap">
+          <label>Course <select id="upCourse"></select></label>
+          <label>Type
+            <select id="upKind">
+              <option value="notes">Lecture notes</option>
+              <option value="slides">Slides</option>
+              <option value="pastq">Past questions</option>
+              <option value="handout">Handout / textbook</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+          <label>Week / lecture <input id="upWeek" type="text" placeholder="e.g. Week 5"></label>
+        </div>
+        <div id="drop" class="drop">
+          <input id="fileInput" type="file" multiple accept=".pdf,image/*,.txt,.md,.csv">
+          <p><strong>Tap to choose files</strong> or drop them here</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row between wrap">
+          <h2>Your library</h2>
+          <label>Show <select id="libFilter"><option value="">All courses</option></select></label>
+        </div>
+        <div id="libList"></div>
+      </div>
+    </section>
+
+    <!-- LEARN -->
+    <section id="tab-learn" class="tab">
+      <div class="learn">
+        <aside class="card learn-side">
+          <label>Course <select id="lnCourse"></select></label>
+          <div class="side-h">Materials to use <span class="muted small">(tick what's relevant)</span></div>
+          <div id="lnFiles" class="filepick"></div>
+          <div class="side-h">Past sessions</div>
+          <div id="lnSessions" class="sessions"></div>
+          <button class="btn small" id="newSession">+ New session</button>
+        </aside>
+        <div class="card learn-main">
+          <div class="row wrap">
+            <input id="topic" type="text" class="grow" placeholder="Topic, e.g. 'PID controllers' or 'what was taught in Week 5'">
+          </div>
+          <div class="modes" id="modes">
+            <button data-mode="teach" title="Full lesson from zero">📘 Teach me</button>
+            <button data-mode="prereq" title="Find & fix forgotten basics">🧱 Prerequisites</button>
+            <button data-mode="visual" title="Interactive simulation">🎛 Visualise</button>
+            <button data-mode="analogy" title="Everyday analogy">💡 Analogy</button>
+            <button data-mode="jargon" title="Decode the lingo">🔤 Jargon</button>
+            <button data-mode="worked" title="Step-by-step example">✍️ Worked example</button>
+            <button data-mode="quiz" title="One question at a time">❓ Quiz me</button>
+            <button data-mode="explainback" title="You explain, it finds gaps">🗣 Explain back</button>
+            <button data-mode="pastq" title="Patterns in past questions">📜 Past questions</button>
+            <button data-mode="lastlecture" title="Prep for tomorrow's test">⏰ Test prep</button>
+          </div>
+          <div id="chat" class="chat">
+            <div class="empty">
+              <p><strong>How to use this:</strong></p>
+              <ol>
+                <li>Pick a course and tick the materials on the left.</li>
+                <li>Type a topic (or leave it blank to cover all the ticked materials).</li>
+                <li>Hit a mode. If it still doesn't click, hit <em>“Still confused”</em> and it'll try a totally different approach.</li>
+              </ol>
+            </div>
+          </div>
+          <div class="quick" id="quick">
+            <button data-quick="confused">😵 Still confused, try another way</button>
+            <button data-quick="simpler">Simpler</button>
+            <button data-quick="deeper">Go deeper</button>
+            <button data-quick="visual">Show me visually</button>
+            <button data-quick="cards">Make flashcards</button>
+          </div>
+          <form id="askForm" class="ask">
+            <textarea id="ask" rows="2" placeholder="Ask anything, or answer the question…"></textarea>
+            <button class="btn primary" id="sendBtn">Send</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- REVIEW -->
+    <section id="tab-review" class="tab">
+      <div class="card">
+        <div class="row between wrap">
+          <h2>Spaced repetition</h2>
+          <label>Course <select id="rvCourse"><option value="">All courses</option></select></label>
+        </div>
+        <p class="muted">Cards come from your lessons automatically. Each one comes back just before you'd forget it.</p>
+        <div id="reviewBox"></div>
+      </div>
+      <div class="card">
+        <h2>All cards</h2>
+        <div id="cardList" class="small"></div>
+      </div>
+    </section>
+
+    <!-- GLOSSARY -->
+    <section id="tab-glossary" class="tab">
+      <div class="card">
+        <div class="row between wrap">
+          <h2>Glossary</h2>
+          <div class="row wrap">
+            <select id="glCourse"><option value="">All courses</option></select>
+            <input id="glSearch" type="search" placeholder="Search terms">
+          </div>
+        </div>
+        <p class="muted">Every bit of jargon the tutor explains is saved here in plain English.</p>
+        <div id="glList"></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="tab-settings" class="tab">
+      <div class="card">
+        <h2>AI engine</h2>
+        <label>Provider
+          <select id="provider">
+            <option value="gemini">Google Gemini (free tier)</option>
+            <option value="claude">Anthropic Claude (uses your API credits)</option>
+          </select>
+        </label>
+        <div id="geminiBox">
+          <label>Gemini API key <input id="geminiKey" type="password" autocomplete="off" placeholder="AIza…"></label>
+          <p class="muted small">Get a free key at aistudio.google.com → “Get API key”. It's saved only in this browser.</p>
+          <div class="row wrap">
+            <label class="grow">Model <select id="geminiModel"></select></label>
+            <button class="btn small" id="loadModels" type="button">Load my models</button>
+          </div>
+        </div>
+        <div id="claudeBox" class="hidden">
+          <label>Claude API key <input id="claudeKey" type="password" autocomplete="off" placeholder="sk-ant-…"></label>
+          <p class="muted small">From platform.claude.com → API keys. This is separate from your Claude Pro subscription. Saved only in this browser.</p>
+          <label>Model
+            <select id="claudeModel">
+              <option value="claude-opus-5-5">Claude Opus 5.5 (best, ~$4 / $20 per million tokens)</option>
+              <option value="claude-sonnet-5-5">Claude Sonnet 5.5 (~$2 / $10)</option>
+              <option value="claude-haiku-5-5">Claude Haiku 5.5 (cheapest, ~$0.10 / $0.50)</option>
+            </select>
+          </label>
+        </div>
+        <button class="btn" id="testAI" type="button">Test connection</button>
+        <span id="testResult" class="muted small"></span>
+      </div>
+
+      <div class="card">
+        <h2>About you</h2>
+        <label>Your name <input id="myName" type="text" placeholder="Aliyah"></label>
+        <label>Level / year <input id="myLevel" type="text" placeholder="e.g. 400 level, Mechatronics Engineering, LASUSTECH"></label>
+      </div>
+
+      <div class="card">
+        <h2>Courses & timetable</h2>
+        <p class="muted small">Tick the days each course holds. The timetable decides your reminders.</p>
+        <div id="courseEditor"></div>
+        <button class="btn small" id="addCourse" type="button">+ Add course</button>
+      </div>
+
+      <div class="card">
+        <h2>Reminders</h2>
+        <p class="muted small">Phone and email reminders run from GitHub, even when this app is closed. See <code>mechlab/README.md</code> for the 5-minute setup. Copy this into <code>mechlab/reminders/timetable.json</code> whenever your timetable changes:</p>
+        <button class="btn small" id="copyTimetable" type="button">Copy timetable.json</button>
+        <button class="btn small" id="downloadIcs" type="button">Download calendar (.ics)</button>
+        <button class="btn small" id="notifyBtn" type="button">Allow in-app notifications</button>
+        <label>Evening reminder time <input id="eveTime" type="time" value="19:00"></label>
+      </div>
+
+      <div class="card">
+        <h2>Backup</h2>
+        <p class="muted small">Everything lives in this browser. Back up before clearing browser data or switching phones.</p>
+        <button class="btn small" id="exportBtn" type="button">Export backup</button>
+        <label class="btn small filebtn">Import backup<input id="importInput" type="file" accept=".json"></label>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

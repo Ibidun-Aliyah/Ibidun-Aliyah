@@ -1,0 +1,39 @@
+name: Study reminders
+
+on:
+  schedule:
+    # GitHub cron is in UTC. Lagos (WAT) is UTC+1.
+    - cron: "0 6 * * *"   # 07:00 Lagos: classes today
+    - cron: "0 18 * * *"  # 19:00 Lagos: read tonight for tomorrow
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: "Which reminder to send now (for testing)"
+        type: choice
+        options: [evening, morning]
+        default: evening
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Send reminder
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          REMINDER_EMAIL_TO: ${{ secrets.REMINDER_EMAIL_TO }}
+          APP_URL: ${{ vars.APP_URL }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            SLOT="${{ inputs.slot }}"
+          elif [ "${{ github.event.schedule }}" = "0 6 * * *" ]; then
+            SLOT=morning
+          else
+            SLOT=evening
+          fi
+          python mechlab/reminders/send_reminders.py --slot "$SLOT"

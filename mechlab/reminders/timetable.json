@@ -1,0 +1,15 @@
+{
+  "timezone": "Africa/Lagos",
+  "evening_reminder": "19:00",
+  "courses": [
+    { "name": "Control Engineering", "days": ["Mon"] },
+    { "name": "Microcontrollers & Embedded Systems", "days": ["Tue"] },
+    { "name": "Industrial Automation", "days": ["Tue", "Thu"] },
+    { "name": "Sensors & Actuators", "days": ["Tue", "Thu"] },
+    { "name": "Computer Vision", "days": ["Tue"] },
+    { "name": "Machine Power & Drives", "days": ["Thu"] },
+    { "name": "Eco-Mechatronics", "days": ["Thu"] },
+    { "name": "Engineering Valuation & Costing", "days": ["Thu"] },
+    { "name": "Practicals", "days": ["Fri"] }
+  ]
+}
