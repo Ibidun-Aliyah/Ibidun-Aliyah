@@ -3,7 +3,7 @@
 import { marked } from './vendor/marked.mjs';
 import DOMPurify from './vendor/purify.mjs';
 import katex from './vendor/katex.mjs';
-import { SYSTEM_PROMPT, MODE_PROMPTS, MODE_LABELS, QUICK_PROMPTS, QUIZ_PROMPT, GCODE_HELP_PROMPT } from './prompts.js';
+import { SYSTEM_PROMPT, MODE_PROMPTS, MODE_LABELS, QUICK_PROMPTS, QUIZ_PROMPT } from './prompts.js';
 
 /* ================= utils ================= */
 const $ = (s, el = document) => el.querySelector(s);
@@ -957,6 +957,79 @@ function playQuiz(quiz, courseId, topic) {
 }
 
 /* ================= LABS ================= */
+/* ---------- in-lab tutor: Gigi sees what you're doing in the lab ---------- */
+function makeTutor(el, { key, title, courseMatch, intro, starters, getContext, onCode }) {
+  const course = S.courses.find((c) => courseMatch.test(c.name)) || S.courses[0];
+  let turns = ls.get('tutor.' + key, []);   // [{role, text, display}]
+  let busyT = false;
+  el.innerHTML = `
+    <div class="tutor-head">${mascot('happy')}<div><h3>${esc(title)}</h3><div class="small muted">I can see your work in this lab. Ask me anything, any time.</div></div>
+      <button class="btn small" data-reset type="button">↺ New chat</button></div>
+    <div class="tutor-log" aria-live="polite"></div>
+    <div class="tutor-starters">${starters.map((st, i) => `<button class="chip" data-st="${i}" type="button">${esc(st[0])}</button>`).join('')}</div>
+    <form class="ask tutor-ask"><textarea rows="2" placeholder="Ask Gigi… e.g. why do I need F?"></textarea><button class="btn primary" type="submit">Ask</button></form>`;
+  const log = el.querySelector('.tutor-log');
+  const bubble = (m) => {
+    const d = document.createElement('div');
+    d.className = 'msg ' + m.role;
+    if (m.role === 'user') d.innerHTML = `<div class="who">You 💗</div>${esc(m.display || m.text).replace(/\n/g, '<br>')}`;
+    else { const r = renderMessage(m.text); d.innerHTML = `<div class="who">Gigi ⚙️</div>${r.html}${m.saved ? `<div class="saved-note">✓ Saved ${esc(m.saved)}</div>` : ''}`; mountSims(d, r.sims); addCodeButtons(d); }
+    return d;
+  };
+  function addCodeButtons(d) {
+    if (!onCode) return;
+    $$('pre > code', d).forEach((c) => {
+      if (!/language-(gcode|nc|g-code|cnc)/i.test(c.className) && !/^\s*(%|O\d|G\d|N\d|\()/m.test(c.textContent)) return;
+      const b = document.createElement('button');
+      b.className = 'btn small'; b.type = 'button'; b.textContent = '⬆️ Put this in my editor';
+      b.onclick = () => { onCode(c.textContent.trim()); toast('Loaded! Now press ▶ Run'); };
+      c.parentElement.after(b);
+    });
+  }
+  function draw() {
+    log.innerHTML = '';
+    if (!turns.length) log.innerHTML = `<div class="msg assistant"><div class="who">Gigi ⚙️</div>${md(intro)}</div>`;
+    turns.forEach((m) => log.appendChild(bubble(m)));
+    log.scrollTop = log.scrollHeight;
+  }
+  async function ask(text, display) {
+    if (busyT || !text.trim()) return;
+    busyT = true;
+    const userTurn = { role: 'user', text, display };
+    turns.push(userTurn);
+    log.appendChild(bubble(userTurn));
+    const out = document.createElement('div');
+    out.className = 'msg assistant';
+    out.innerHTML = '<div class="who">Gigi ⚙️</div><div class="body typing">Thinking…</div>';
+    log.appendChild(out); log.scrollTop = log.scrollHeight;
+    const body = out.querySelector('.body');
+    // Fresh lab state goes with the newest message only; older turns stay as plain text.
+    const history = turns.slice(-16).map((m, i, arr) => ({ role: m.role, text: i === arr.length - 1 ? `[What I'm looking at in the ${title} right now]\n${getContext()}\n\n[My message]\n${m.text}` : m.text }));
+    if (history[0].role !== 'user') history.shift();
+    try {
+      const sys = buildSystem(course, []) + `\n\nYou are now the built-in tutor inside MechLab's ${title}. You can see the student's current lab state (sent with each message). Keep replies short and conversational (under ~250 words unless asked for more), refer to what is on their screen, and push them to try things in the lab ("change X, press Run, tell me what happened"). When you give code for them to try, put it in a \`\`\`gcode block so the app can load it into their editor. When teaching step by step, teach ONE small idea per message, end with a tiny task to do in the lab, and wait for them.`;
+      let last = 0;
+      const full = await AI.stream({ system: sys, history, files: [], onText: (t) => { const now = performance.now(); if (now - last > 120) { last = now; body.classList.remove('typing'); body.innerHTML = renderMessage(t, true).html; log.scrollTop = log.scrollHeight; } } });
+      const reply = { role: 'assistant', text: full };
+      reply.saved = await saveMemory(renderMessage(full).memory, course.id);
+      turns.push(reply);
+      ls.set('tutor.' + key, turns.slice(-30));
+      out.replaceWith(bubble(reply));
+      award(2, 'asked your lab tutor'); markStudied();
+    } catch (err) {
+      turns.pop();
+      out.classList.add('error');
+      out.innerHTML = `<div class="who">Oops 🥺</div>${esc(err.message || String(err))}`;
+    } finally { busyT = false; }
+  }
+  el.querySelector('.tutor-starters').onclick = (e) => { const b = e.target.closest('[data-st]'); if (b) { const st = starters[+b.dataset.st]; ask(st[1], st[0]); } };
+  el.querySelector('.tutor-ask').onsubmit = (e) => { e.preventDefault(); const ta = e.target.querySelector('textarea'); const t = ta.value; ta.value = ''; ask(t); };
+  el.querySelector('.tutor-ask textarea').onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey && matchMedia('(min-width: 800px)').matches) { e.preventDefault(); e.target.form.requestSubmit(); } };
+  el.querySelector('[data-reset]').onclick = () => { turns = []; ls.set('tutor.' + key, []); draw(); };
+  draw();
+  return { ask, focus: () => el.scrollIntoView({ behavior: 'smooth', block: 'start' }) };
+}
+
 async function openLab(name) {
   if (labInstance?.destroy) labInstance.destroy();
   labInstance = null;
@@ -965,21 +1038,16 @@ async function openLab(name) {
   const root = $('#labRoot');
   root.innerHTML = '<p class="muted">Loading lab… ⚙️</p>';
   const store = { get: (k, d) => ls.get(k, d), set: (k, v) => ls.set(k, v) };
-  if (name === 'gcode') {
-    const { mountGcodeLab } = await import('./labs/gcode.js');
-    labInstance = mountGcodeLab(root, {
-      award, badge, store,
-      onAskTutor: (code, msgs) => {
-        goto('learn');
-        const ia = S.courses.find((c) => /automation/i.test(c.name));
-        if (ia) { $('#lnCourse').value = ia.id; onCourseChange(); }
-        newSession();
-        send(GCODE_HELP_PROMPT(code, msgs), '🤖 Explain my G-code program', 'worked');
-      },
-    });
-  } else if (name === 'vision') {
-    const { mountVisionLab } = await import('./labs/vision.js');
-    labInstance = mountVisionLab(root, { award, badge });
+  try {
+    if (name === 'gcode') {
+      const { mountGcodeLab } = await import('./labs/gcode.js');
+      labInstance = mountGcodeLab(root, { award, badge, store, tutor: makeTutor });
+    } else if (name === 'vision') {
+      const { mountVisionLab } = await import('./labs/vision.js');
+      labInstance = mountVisionLab(root, { award, badge, tutor: makeTutor });
+    }
+  } catch (err) {
+    root.innerHTML = `<div class="msg error"><b>This lab couldn't start 🥺</b><br>${esc(err?.message || String(err))}<br><span class="small">Screenshot this and send it to Claude so it can be fixed.</span></div>`;
   }
   markStudied();
 }
@@ -1201,6 +1269,9 @@ $('#importInput').addEventListener('change', async (e) => {
 });
 
 /* ================= boot ================= */
+// Show unexpected errors on screen instead of failing silently.
+window.addEventListener('error', (e) => toast('⚠️ Something broke: ' + (e.message || 'unknown error'), 6000));
+window.addEventListener('unhandledrejection', (e) => toast('⚠️ Something broke: ' + (e.reason?.message || e.reason || 'unknown error'), 6000));
 $('#brandMascot').innerHTML = mascot('happy');
 renderXP();
 const params = new URLSearchParams(location.search);

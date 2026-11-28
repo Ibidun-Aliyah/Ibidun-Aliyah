@@ -47,7 +47,7 @@ function grayToImage(g, w, h, abs = false) {
   return img;
 }
 
-export function mountVisionLab(root, { award, badge }) {
+export function mountVisionLab(root, { award, badge, tutor }) {
   root.innerHTML = `
   <div class="lab-head"><div><h2>👁️ Vision Lab</h2><p class="muted small">See what a computer "sees": numbers. Filter images pixel by pixel, then train your own image classifier with your camera.</p></div></div>
   <div class="seg" role="tablist"><button class="on" data-pane="filters" type="button">🎨 Filter playground</button><button data-pane="classify" type="button">🧠 Teach a classifier</button></div>
@@ -98,7 +98,8 @@ export function mountVisionLab(root, { award, badge }) {
         <p class="small"><b>How it works:</b> every photo is shrunk to 24×24 pixels × 3 colours = <b>1,728 numbers</b> (its <i>feature vector</i>). For a new image, we find the 5 training photos whose numbers are closest (<b>k-Nearest Neighbours</b>) and let them vote. Real systems use a CNN, which learns better features (edges → shapes → objects) instead of raw pixels. That's why ours gets confused by lighting and background. Try it and see!</p>
       </div>
     </div>
-  </div>`;
+  </div>
+  <div class="card inner lab-tutor" id="cvTutor"></div>`;
 
   const $ = (s) => root.querySelector(s);
   const video = $('#cvVideo');
@@ -238,6 +239,7 @@ export function mountVisionLab(root, { award, badge }) {
       if (op === 'box' || op === 'gauss') html += `<div class="muted">(Shown for one pass. More passes = blur the blur.)</div>`;
     }
     $('#cvInspect').innerHTML = html;
+    lastInspect = $('#cvInspect').textContent;
     $('#cvInspect').classList.remove('muted');
   });
   $('#cvOp').addEventListener('change', () => { setupParams(); drawFilter(); });
@@ -310,13 +312,14 @@ export function mountVisionLab(root, { award, badge }) {
     const tot = votes.reduce((a, b) => a + b, 0) || 1;
     return votes.map((v) => v / tot);
   }
-  let predicted = false;
+  let predicted = false, lastProbs = '';
   function showPrediction(source, w, h) {
     const ready = classes.filter((c) => c.ex.length >= 5).length >= 2;
     const f = features(source, w, h);
     const seen = $('#clSeen').getContext('2d'); seen.drawImage(fcan, 0, 0);
     if (!ready) { $('#clBars').innerHTML = 'Add at least 2 classes with 5+ examples each.'; return; }
     const probs = classify(f), best = probs.indexOf(Math.max(...probs));
+    lastProbs = classes.map((c, i) => `${c.name} ${(probs[i] * 100).toFixed(0)}%`).join(', ');
     $('#clBars').innerHTML = classes.map((c, i) => `<div class="bar ${i === best ? 'best' : ''}"><span>${esc(c.name)}</span><div><i style="width:${(probs[i] * 100).toFixed(0)}%"></i></div><b>${(probs[i] * 100).toFixed(0)}%</b></div>`).join('');
     $('#clBars').classList.remove('muted');
     if (!predicted) { predicted = true; award?.(10, 'trained an image classifier'); badge?.('vision'); }
@@ -338,6 +341,22 @@ export function mountVisionLab(root, { award, badge }) {
   }
   raf = requestAnimationFrame(tick);
 
+  let lastInspect = '';
+  tutor?.($('#cvTutor'), {
+    key: 'vision', title: 'Vision Lab', courseMatch: /vision/i,
+    intro: "Hi! I'm **Gigi**, your computer vision tutor 👁️💗 I can see which filter you're using, your kernel, the pixel you tapped and your classifier. Ask me anything, or tap a button to start.",
+    starters: [
+      ['🐣 What am I looking at?', 'Explain what this filter is doing to the image on my screen, in plain English first, then the maths. Then tell me one thing to change and what I should notice.'],
+      ['🧮 Explain that pixel', 'Walk me through the pixel inspector numbers on my screen step by step, like a worked exam answer.'],
+      ['🧱 Convolution from zero', 'Teach me convolution from zero, one small idea at a time, using this lab. Give me a tiny task after each idea.'],
+      ['🏭 Real-life use', 'How is the filter I am using applied in real factories, robots or phones? Give 3 concrete examples, Nigerian ones if possible.'],
+      ['🧠 Explain my classifier', 'Explain what my classifier is doing with my classes and its last prediction, why it might be wrong, and how a real CNN would do better.'],
+      ['📝 Quiz me', 'Ask me one exam-style computer vision question about what is on my screen, wait for my answer, then mark it.'],
+    ],
+    getContext: () => `Filter: ${OPS[$('#cvOp').value].name}. ${!$('#cvP1w').classList.contains('hidden') ? $('#cvP1l').textContent + ' = ' + pv(1) + '. ' : ''}${!$('#cvP2w').classList.contains('hidden') ? $('#cvP2l').textContent + ' = ' + pv(2) + '. ' : ''}${$('#cvOp').value === 'custom' ? 'Custom kernel: [' + kernel.map((v) => +v.toFixed(3)).join(', ') + ']. ' : ''}Image: ${src ? src.width + '×' + src.height + ' px' : 'none'}.
+Pixel inspector: ${lastInspect || 'nothing tapped yet'}.
+Classifier: ${classes.map((c) => `${c.name} (${c.ex.length} examples)`).join(', ')}. Last prediction: ${lastProbs || 'none yet'}.`,
+  });
   setupParams(); sample(); renderClasses();
   return { destroy() { cancelAnimationFrame(raf); stopCam(); } };
 }

@@ -417,3 +417,13 @@ table.mini td { border: 1px solid var(--border); padding: .1rem .3rem; text-alig
 .modal-box { width: min(440px, 100%); margin: 0; }
 .modal-box p { font-weight: 700; white-space: pre-wrap; }
 .modal-box textarea { font: 13px/1.4 ui-monospace, Menlo, monospace; margin-bottom: .7rem; }
+.lab-tutor { margin-top: 1rem; border: 2px solid var(--accent2); background: linear-gradient(160deg, var(--surface), var(--lav-soft)); }
+.tutor-head { display: flex; gap: .7rem; align-items: center; margin-bottom: .4rem; }
+.tutor-head svg { width: 52px; height: 52px; flex: 0 0 auto; }
+.tutor-head > div { flex: 1; min-width: 0; }
+.tutor-head h3 { margin: 0; }
+.tutor-log { max-height: 420px; overflow-y: auto; padding-right: .2rem; }
+.tutor-log .msg { margin: .55rem 0; }
+.tutor-log .msg pre + .btn { margin: -.2rem 0 .5rem; }
+.tutor-starters { display: flex; flex-wrap: wrap; gap: .4rem; margin: .5rem 0 0; }
+.tutor-starters .chip { font-size: .8rem; }

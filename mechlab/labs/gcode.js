@@ -367,7 +367,7 @@ export function checkChallenge(ch, result) {
 /* ============ UI ============ */
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-export function mountGcodeLab(root, { onAskTutor, award, badge, store }) {
+export function mountGcodeLab(root, { tutor, award, badge, store }) {
   root.innerHTML = `
   <div class="lab-head">
     <div><h2>⚙️ CNC G-code Studio</h2><p class="muted small">Write G-code, press ▶ and watch the cutter make your part. Red = errors, yellow = things that would go wrong on a real machine.</p></div>
@@ -376,7 +376,7 @@ export function mountGcodeLab(root, { onAskTutor, award, badge, store }) {
     <div class="gc-left">
       <div class="row wrap gc-tools">
         <select id="gcExample" aria-label="Load example"><option value="">📂 Load an example…</option>${Object.keys(EXAMPLES).map((k) => `<option>${esc(k)}</option>`).join('')}</select>
-        <button class="btn small" id="gcAsk" type="button">🤖 Ask tutor about my code</button>
+        <button class="btn small" id="gcAsk" type="button">🤖 Ask Gigi about my code</button>
       </div>
       <textarea id="gcCode" class="gc-code" spellcheck="false" autocapitalize="characters" autocomplete="off"></textarea>
       <div id="gcMsgs" class="gc-msgs"></div>
@@ -400,6 +400,7 @@ export function mountGcodeLab(root, { onAskTutor, award, badge, store }) {
       </div>
     </div>
   </div>
+  <div class="card inner lab-tutor" id="gcTutor"></div>
   <div class="gc-bottom">
     <div class="card inner">
       <h3>🏆 Challenges</h3>
@@ -578,7 +579,26 @@ export function mountGcodeLab(root, { onAskTutor, award, badge, store }) {
   $('#gcExample').addEventListener('change', (e) => { if (!e.target.value) return; code.value = EXAMPLES[e.target.value]; e.target.value = ''; t = 0; reparse(); });
   ['#gcW', '#gcH', '#gcTool'].forEach((s) => $(s).addEventListener('input', draw));
   $('#gcSearch').addEventListener('input', (e) => renderRef(e.target.value));
-  $('#gcAsk').addEventListener('click', () => onAskTutor(code.value, result.msgs));
+  let ranToEnd = false;
+  const T = tutor?.($('#gcTutor'), {
+    key: 'gcode', title: 'CNC G-code Studio', courseMatch: /automation/i,
+    intro: "Hi! I'm **Gigi**, your CNC tutor ⚙️💗 I can see your program, the machine's messages and your challenge. New to G-code? Tap **🐣 Teach me from zero** and we'll go one small step at a time, practising each one right here in the simulator.",
+    starters: [
+      ['🐣 Teach me from zero', 'I am confused about G-code and M-code. Teach me from zero, one small idea at a time, using this simulator. Start with what a CNC machine is and how X, Y, Z work, then give me my first tiny task to type in the editor.'],
+      ['✅ Check my work', 'Check my current program against the last task you gave me (or the active challenge). Tell me what is right, what is wrong, and what I should change. Do not just give me the full answer unless I am really stuck.'],
+      ['🔍 Explain my code', 'Explain my current program line by line in a table (line | code | what it does in plain English), then tell me what the part will look like.'],
+      ['🐞 Why is it wrong?', 'Look at the red/yellow messages from the simulator and explain each problem simply: what it means, why it would be dangerous or wrong on a real machine, and how to fix it. Give me hints first.'],
+      ['🎯 Give me an exercise', 'Give me one small practical exercise I can do in this simulator right now, at my level. Tell me what the finished shape should look like.'],
+      ['📝 Exam question', 'Give me one exam-style question on G-codes and M-codes like a Nigerian university test would ask, wait for my answer, then mark it.'],
+    ],
+    getContext: () => {
+      const msgs = result.msgs.map((m) => `- line ${m.line} ${m.level}: ${m.text}`).join('\n') || '- none (program is valid)';
+      const ch = CHALLENGES.find((c) => c.id === activeChallenge);
+      return `Editor contents:\n\`\`\`gcode\n${code.value}\n\`\`\`\nSimulator messages:\n${msgs}\nMoves: ${result.segs.length} segments, ${result.holes.length} drilled holes. Program ended properly: ${result.endState.ended}. Has run to the end: ${ranToEnd}.\nActive challenge: ${ch ? ch.title + ' (' + ch.desc + ')' : 'none'}.\nStock ${$('#gcW').value}×${$('#gcH').value} mm, tool Ø${$('#gcTool').value} mm.`;
+    },
+    onCode: (txt) => { code.value = txt; t = 0; reparse(); top.scrollIntoView({ behavior: 'smooth', block: 'center' }); },
+  });
+  $('#gcAsk').addEventListener('click', () => { T?.focus(); T?.ask('Explain my current program line by line in a table (line | code | what it does in plain English), point out anything wrong, and tell me what the part will look like.', '🔍 Explain my code'); });
 
   let firstRun = true;
   function loop(ts) {
@@ -588,7 +608,7 @@ export function mountGcodeLab(root, { onAskTutor, award, badge, store }) {
     t = Math.min(total, t + dt * mult * 6);
     draw();
     if (t >= total) {
-      playing = false; $('#gcPlay').textContent = '▶ Run again';
+      playing = false; ranToEnd = true; $('#gcPlay').textContent = '▶ Run again';
       if (firstRun) { firstRun = false; award?.(5, 'ran a G-code program'); badge?.('gcode-first'); }
       return;
     }
