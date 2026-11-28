@@ -118,5 +118,21 @@
   "url": "https://thesun.ng/political-violence-threatens-polls-in-9-states-inec-raises-alarm/",
   "impact": "medium",
   "model_change": "No model change. Reported incidents are spread across zones (Enugu, Katsina, Ekiti, Sokoto, Kebbi; Lagos, Kano and Rivers flagged), so no single zone's uncertainty is widened. INEC runs a nationwide mock accreditation on 28 Nov."
+ },
+ {
+  "date": "2026-11-25",
+  "headline": "ADC postpones Atiku's campaign rallies in Jigawa and Kaduna; no new date yet",
+  "source": "Tribune",
+  "url": "https://tribuneonlineng.com/2027-adc-postpones-atikus-jigawa-presidential-campaign-rally/",
+  "impact": "low",
+  "model_change": "No model change. Campaign logistics are not modelled. The Court of Appeal has still not ruled or set a hearing date, so the removal chance stays at 25%."
+ },
+ {
+  "date": "2026-11-16",
+  "headline": "Inflation eases to 14.06% in October (from 14.63%); food inflation still 19%, and 77% of households call inflation high",
+  "source": "Gazette / TechEconomy",
+  "url": "https://gazettengr.com/nigerias-inflation-rate-dropped-to-14-06-in-october-nbs/",
+  "impact": "low",
+  "model_change": "No model change. A gentle continuing trend with mixed signals, not a shock, so the economic penalty on Tinubu stays at -0.15."
  }
 ]
